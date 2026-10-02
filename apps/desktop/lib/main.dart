@@ -15,6 +15,7 @@ import 'l10n/app_localizations.dart';
 import 'core/controller.dart';
 import 'core/native.dart';
 import 'ui/shell.dart';
+import 'ui/window_shell.dart';
 
 void main(List<String> arguments) async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -68,7 +69,11 @@ void main(List<String> arguments) async {
       // Source runs have no installer marker and use normal saved preferences.
     }
   }
-  await controller.bootstrap(installerLanguageMarker: installerLanguage);
+  await controller.bootstrap(
+    installerLanguageMarker: installerLanguage,
+    showWindow: !arguments.contains('--background'),
+    forcePanelMode: smokeMode,
+  );
   controller.importFiles = (paths) {
     features.importPaths(paths);
   };
@@ -180,8 +185,9 @@ void main(List<String> arguments) async {
     ], await rootBundle.loadString('assets/notices/vazirmatn-OFL.txt'));
   });
   runApp(RightPanelApp(controller: controller, features: features));
-  // A manual launch must immediately present a usable, focused capture field.
-  // Startup launches opt into the unobtrusive edge-only mode.
+  // A manual launch must immediately present a usable, focused capture
+  // surface. Startup launches opt into the unobtrusive background mode;
+  // the edge panel stays hidden and the window waits in the tray.
   if (!arguments.contains('--background')) controller.onTray('capture');
 }
 
@@ -214,7 +220,12 @@ class RightPanelApp extends StatelessWidget {
         ),
         home: NexPanelScope(
           controller: controller,
-          child: PanelShell(controller: controller),
+          child: ListenableBuilder(
+            listenable: controller,
+            builder: (context, _) => controller.isWindowMode
+                ? NexWindowShell(controller: controller, features: features)
+                : PanelShell(controller: controller),
+          ),
         ),
       ),
     );

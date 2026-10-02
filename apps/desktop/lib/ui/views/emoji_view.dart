@@ -1,3 +1,4 @@
+import '../../l10n/app_localizations.dart';
 import '../../l10n/utility_strings.dart';
 import 'package:flutter/material.dart';
 
@@ -89,7 +90,9 @@ class _EmojiViewState extends State<EmojiView> {
           height: 220,
           child: list.isEmpty
               ? Empty(
-                  _search.text.isNotEmpty ? 'No emoji found' : 'Nothing yet',
+                  _search.text.isNotEmpty
+                      ? AppLocalizations.of(context)!.noEmojiFound
+                      : AppLocalizations.of(context)!.nothingYet,
                 )
               : ScrollConfiguration(
                   behavior: ScrollConfiguration.of(
@@ -108,8 +111,7 @@ class _EmojiViewState extends State<EmojiView> {
   }
 
   void _backToMore(PanelController c) {
-    c.anchorY = c.fy.v;
-    c.setPanel('more', fromMore: true);
+    c.backToTools();
   }
 }
 

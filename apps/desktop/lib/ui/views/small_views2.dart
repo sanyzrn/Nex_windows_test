@@ -70,8 +70,7 @@ class MediaView extends StatelessWidget {
   }
 
   void _back(PanelController c) {
-    c.anchorY = c.fy.v;
-    c.setPanel('more', fromMore: true);
+    c.backToTools();
   }
 }
 
@@ -224,8 +223,7 @@ class _GenerateViewState extends State<GenerateView> {
   String _clip(String s, int n) => s.length <= n ? s : '${s.substring(0, n)}…';
 
   void _back(PanelController c) {
-    c.anchorY = c.fy.v;
-    c.setPanel('more', fromMore: true);
+    c.backToTools();
   }
 }
 
@@ -263,8 +261,7 @@ class FoldersView extends StatelessWidget {
   }
 
   void _back(PanelController c) {
-    c.anchorY = c.fy.v;
-    c.setPanel('more', fromMore: true);
+    c.backToTools();
   }
 }
 
@@ -430,8 +427,7 @@ class _SnippetsViewState extends State<SnippetsView> {
   }
 
   void _back(PanelController c) {
-    c.anchorY = c.fy.v;
-    c.setPanel('more', fromMore: true);
+    c.backToTools();
   }
 }
 
@@ -503,8 +499,7 @@ class _SearchViewState extends State<SearchView> {
   }
 
   void _back(PanelController c) {
-    c.anchorY = c.fy.v;
-    c.setPanel('more', fromMore: true);
+    c.backToTools();
   }
 }
 
@@ -611,8 +606,7 @@ class _ClockViewState extends State<ClockView> {
   }
 
   void _back(PanelController c) {
-    c.anchorY = c.fy.v;
-    c.setPanel('more', fromMore: true);
+    c.backToTools();
   }
 }
 

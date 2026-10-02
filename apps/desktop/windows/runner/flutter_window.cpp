@@ -109,7 +109,13 @@ bool FlutterWindow::OnCreate() {
   bridge_->Start();
 
   flutter_controller_->engine()->SetNextFrameCallback([&]() {
-    if (bridge_ && !bridge_->passthrough()) this->Show();
+    // Let the bridge reveal a deferred window-mode launch now that real
+    // content exists (avoids an empty first-frame flash).
+    if (bridge_) bridge_->OnFirstFrame();
+    // In panel mode the bridge owns visibility via passthrough.
+    if (bridge_ && !bridge_->passthrough() && !bridge_->window_mode()) {
+      this->Show();
+    }
   });
 
   // Flutter can complete the first frame before the "show window" callback
@@ -169,9 +175,14 @@ FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
   }
 
   // Losing focus (the user clicked another app) closes the panel, exactly
-  // like the original's WindowEvent::Focused(false) -> app.blur().
+  // like the original's WindowEvent::Focused(false) -> app.blur(). It is
+  // also the best moment to remember where a "paste into previous app"
+  // should land when the desktop window is the active surface.
   if (message == WM_ACTIVATE && LOWORD(wparam) == WA_INACTIVE) {
-    bridge_->NotifyBlur();
+    if (bridge_) {
+      bridge_->RememberForeground();
+      bridge_->NotifyBlur();
+    }
   }
 
   switch (message) {

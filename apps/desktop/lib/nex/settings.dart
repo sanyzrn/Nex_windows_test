@@ -8,7 +8,12 @@ import '../l10n/app_localizations.dart';
 import 'features.dart';
 
 class NexSettingsView extends StatefulWidget {
-  const NexSettingsView({super.key});
+  const NexSettingsView({super.key, this.windowLayout = false});
+
+  /// Wide presentation for the desktop window (no flyout-scroll container,
+  /// edge/monitor pickers hidden while the window mode is active).
+  final bool windowLayout;
+
   @override
   State<NexSettingsView> createState() => _NexSettingsViewState();
 }
@@ -20,14 +25,43 @@ class _NexSettingsViewState extends State<NexSettingsView> {
     final c = LiquidScope.panelOf(context);
     final l = AppLocalizations.of(context)!;
     final f = NexScope.maybeOf(context);
+    final scheme = Theme.of(context).colorScheme;
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.symmetric(
+        horizontal: 16,
+        vertical: widget.windowLayout ? 24 : 16,
+      ),
       child: Column(
         spacing: 12,
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(l.settings, style: Theme.of(context).textTheme.titleLarge),
+          if (!widget.windowLayout)
+            Text(l.settings, style: Theme.of(context).textTheme.titleLarge),
+          Text(l.interfaceMode, style: Theme.of(context).textTheme.titleSmall),
+          SegmentedButton<String>(
+            segments: [
+              ButtonSegment(
+                value: 'window',
+                icon: const Icon(Icons.web_asset_rounded, size: 18),
+                label: Text(l.windowMode),
+              ),
+              ButtonSegment(
+                value: 'panel',
+                icon: const Icon(Icons.view_sidebar_outlined, size: 18),
+                label: Text(l.panelMode),
+              ),
+            ],
+            selected: {c.S.windowMode},
+            onSelectionChanged: (v) => c.setWindowMode(v.first),
+          ),
+          Text(
+            l.modeDescription,
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
+          ),
+          const Divider(),
           DropdownButton<String>(
             value: c.S.language,
             items: [
@@ -69,6 +103,16 @@ class _NexSettingsViewState extends State<NexSettingsView> {
             },
           ),
           Text(l.edge),
+          if (c.isWindowMode)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Text(
+                l.edgePanelOnly,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
+              ),
+            ),
           SegmentedButton<String>(
             segments: [
               ButtonSegment(value: 'left', label: Text(l.left)),
@@ -79,7 +123,7 @@ class _NexSettingsViewState extends State<NexSettingsView> {
               await c.applyPlacement(v.first, c.S.monitor);
             },
           ),
-          if (c.screens.isNotEmpty)
+          if (c.screens.isNotEmpty && !c.isWindowMode)
             DropdownButton<int>(
               value: c.S.monitor.clamp(0, c.screens.length - 1),
               items: [
@@ -120,6 +164,9 @@ class _NexSettingsViewState extends State<NexSettingsView> {
                 c.S.hotkey = v;
                 c.save();
                 c.refresh();
+              } else {
+                // Collisions previously failed silently; say so now.
+                c.toast(l.hotkeyInUse);
               }
             },
           ),
@@ -220,7 +267,7 @@ class _NexSettingsViewState extends State<NexSettingsView> {
             onPressed: () => showLicensePage(
               context: context,
               applicationName: 'Nex',
-              applicationVersion: '0.9.0 (Windows preview)',
+              applicationVersion: '0.10.0 (Windows preview)',
             ),
             child: Text(l.about),
           ),

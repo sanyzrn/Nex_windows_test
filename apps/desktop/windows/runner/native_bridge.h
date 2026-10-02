@@ -59,6 +59,9 @@ class NativeBridge {
   /// Tells Dart the window lost activation (auto-close, like app.blur()).
   void NotifyBlur();
 
+  /// Records the currently focused foreign window as the paste-back target.
+  void RememberForeground();
+
   HWND window() const { return window_; }
   bool passthrough() const { return passthrough_; }
 
@@ -67,7 +70,6 @@ class NativeBridge {
   void DrainEvents();
 
   void SetPassthrough(bool on);
-  void RememberForeground();
   void PasteIntoPrevious(const std::string& text);
   void PressKey(const std::string& name);
   std::string PinWindow();
@@ -83,6 +85,19 @@ class NativeBridge {
   std::vector<flutter::EncodableMap> Screens();
   void StartClipboardWatch();
   void ReadClipboardImage(int request);
+
+  // Desktop window mode: restyles the host as a normal resizable window
+  // ("window") or back to the borderless edge panel ("panel").
+  void SetWindowMode(const std::string& mode, int x, int y, int w, int h,
+                     bool maximized, bool show);
+  flutter::EncodableMap WindowFrame() const;
+  void FocusWindow();
+  bool window_mode() const { return window_mode_; }
+
+  /// Called by the runner when the first Flutter frame is ready. A window
+  /// mode launch defers its first Show() until here so the user never sees
+  /// an empty frame flash.
+  void OnFirstFrame();
 
   void CreateTray();
   void RemoveTray();
@@ -102,6 +117,10 @@ class NativeBridge {
 
   HWND previous_foreground_ = nullptr;
   bool passthrough_ = false;
+  bool window_mode_ = false;
+  bool first_frame_done_ = false;
+  bool pending_show_ = false;
+  bool pending_show_maximized_ = false;
   bool tray_added_ = false;
   bool quit_requested_ = false;
   bool hotkey_registered_ = false;

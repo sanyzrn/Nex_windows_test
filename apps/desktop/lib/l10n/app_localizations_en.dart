@@ -745,4 +745,51 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pastePhoto => 'Paste image';
+
+  @override
+  String get navCapture => 'Capture';
+
+  @override
+  String get navTools => 'Tools';
+
+  @override
+  String get interfaceMode => 'Interface mode';
+
+  @override
+  String get windowMode => 'Window';
+
+  @override
+  String get panelMode => 'Edge panel';
+
+  @override
+  String get modeDescription =>
+      'The desktop window is the main experience; the edge panel stays available for quick capture. Both share the same notes, media and settings.';
+
+  @override
+  String get edgePanelOnly =>
+      'Applies to the edge panel — switch the interface mode to use it.';
+
+  @override
+  String get switchToPanel => 'Switch to edge panel';
+
+  @override
+  String get switchToWindow => 'Switch to window';
+
+  @override
+  String get backToTools => 'Back to tools';
+
+  @override
+  String get toolsHint => 'Pick a tool to open it';
+
+  @override
+  String get noEmojiFound => 'No emoji found';
+
+  @override
+  String get nothingYet => 'Nothing yet';
+
+  @override
+  String get unknownUnit => 'Unknown unit';
+
+  @override
+  String get hotkeyInUse => 'That shortcut is already used by another app';
 }

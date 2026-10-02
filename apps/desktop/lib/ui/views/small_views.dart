@@ -1,3 +1,4 @@
+import '../../l10n/app_localizations.dart';
 import '../../l10n/utility_strings.dart';
 import 'dart:convert';
 import 'dart:math' as math;
@@ -91,8 +92,7 @@ class _CalcViewState extends State<CalcView> {
   }
 
   void _backToMore(PanelController c) {
-    c.anchorY = c.fy.v;
-    c.setPanel('more', fromMore: true);
+    c.backToTools();
   }
 }
 
@@ -309,8 +309,7 @@ class TimerView extends StatelessWidget {
   }
 
   void _backToMore(PanelController c) {
-    c.anchorY = c.fy.v;
-    c.setPanel('more', fromMore: true);
+    c.backToTools();
   }
 }
 
@@ -407,8 +406,7 @@ class StopwatchView extends StatelessWidget {
   }
 
   void _backToMore(PanelController c) {
-    c.anchorY = c.fy.v;
-    c.setPanel('more', fromMore: true);
+    c.backToTools();
   }
 }
 
@@ -465,8 +463,7 @@ class TextToolsView extends StatelessWidget {
   }
 
   void _backToMore(PanelController c) {
-    c.anchorY = c.fy.v;
-    c.setPanel('more', fromMore: true);
+    c.backToTools();
   }
 }
 
@@ -754,8 +751,7 @@ class _PasswordViewState extends State<PasswordView> {
   }
 
   void _backToMore(PanelController c) {
-    c.anchorY = c.fy.v;
-    c.setPanel('more', fromMore: true);
+    c.backToTools();
   }
 }
 
@@ -885,7 +881,7 @@ class _UnitsViewState extends State<UnitsView> {
                 RegExp(
                       r'^-?[\d.]+\s*°?\s*[a-z/]+$',
                     ).hasMatch(_input.text.trim().toLowerCase())
-                    ? 'Unknown unit'
+                    ? AppLocalizations.of(context)!.unknownUnit
                     : 'in · cm · mm · m · ft · km · mi · kg · lb · g · oz · l · gal · c · f · mb · gb · kmh · mph',
               )
             : Column(
@@ -906,8 +902,7 @@ class _UnitsViewState extends State<UnitsView> {
   }
 
   void _backToMore(PanelController c) {
-    c.anchorY = c.fy.v;
-    c.setPanel('more', fromMore: true);
+    c.backToTools();
   }
 }
 

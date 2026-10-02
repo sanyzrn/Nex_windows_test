@@ -241,5 +241,20 @@
   },
   "savedLocally": "Saved automatically on this device",
   "pasteText": "Paste text",
-  "pastePhoto": "Paste image"
+  "pastePhoto": "Paste image",
+  "navCapture": "Capture",
+  "navTools": "Tools",
+  "interfaceMode": "Interface mode",
+  "windowMode": "Window",
+  "panelMode": "Edge panel",
+  "modeDescription": "The desktop window is the main experience; the edge panel stays available for quick capture. Both share the same notes, media and settings.",
+  "edgePanelOnly": "Applies to the edge panel — switch the interface mode to use it.",
+  "switchToPanel": "Switch to edge panel",
+  "switchToWindow": "Switch to window",
+  "backToTools": "Back to tools",
+  "toolsHint": "Pick a tool to open it",
+  "noEmojiFound": "No emoji found",
+  "nothingYet": "Nothing yet",
+  "unknownUnit": "Unknown unit",
+  "hotkeyInUse": "That shortcut is already used by another app"
 }

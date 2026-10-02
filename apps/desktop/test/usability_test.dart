@@ -31,7 +31,10 @@ void main() {
     t,
   ) async {
     final c = PanelController(nativeHost: FakeNative());
-    await c.bootstrap(preset: Settings(), useNative: false);
+    await c.bootstrap(
+      preset: Settings()..windowMode = 'panel',
+      useNative: false,
+    );
     c.open();
     await t.pumpWidget(
       MaterialApp(
@@ -71,7 +74,10 @@ void main() {
     'panel pin cancels a queued hide and blocks blur; explicit close works',
     (t) async {
       final c = PanelController(nativeHost: FakeNative());
-      await c.bootstrap(preset: Settings(), useNative: false);
+      await c.bootstrap(
+        preset: Settings()..windowMode = 'panel',
+        useNative: false,
+      );
       c.open();
       expect(c.maybeClose(), true);
       c.togglePanelPin();
@@ -90,7 +96,10 @@ void main() {
     'overlapping interaction leases and focus cannot prematurely unlock',
     (t) async {
       final c = PanelController(nativeHost: FakeNative());
-      await c.bootstrap(preset: Settings(), useNative: false);
+      await c.bootstrap(
+        preset: Settings()..windowMode = 'panel',
+        useNative: false,
+      );
       c.open();
       final a = c.holdOpen(), b = c.holdOpen();
       a();
@@ -125,7 +134,12 @@ void main() {
         f = NexFeatures(await DesktopStore.open(root.path, 'picker-test'));
       });
       final c = PanelController(nativeHost: FakeNative());
-      await c.bootstrap(preset: Settings()..language = 'en', useNative: false);
+      await c.bootstrap(
+        preset: Settings()
+          ..windowMode = 'panel'
+          ..language = 'en',
+        useNative: false,
+      );
       c.open();
       final selection = Completer<List<XFile>>();
       await t.pumpWidget(
@@ -196,6 +210,7 @@ void main() {
         final c = PanelController(nativeHost: FakeNative());
         await c.bootstrap(
           preset: Settings()
+            ..windowMode = 'panel'
             ..language = 'en'
             ..edge = edge,
           useNative: false,
@@ -300,6 +315,7 @@ void main() {
         final c = PanelController(nativeHost: FakeNative());
         await c.bootstrap(
           preset: Settings()
+            ..windowMode = 'panel'
             ..language = locale
             ..theme = locale == 'en' ? 'light' : 'dark',
           useNative: false,

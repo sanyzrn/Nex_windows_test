@@ -96,7 +96,10 @@ void main() {
     () async {
       final native = _FakeNative();
       final controller = PanelController(nativeHost: native);
-      await controller.bootstrap(preset: Settings(), useNative: false);
+      await controller.bootstrap(
+        preset: Settings()..windowMode = 'panel',
+        useNative: false,
+      );
       controller.open();
       controller.sticky = false;
       expect(controller.maybeClose(), true);
@@ -117,7 +120,10 @@ void main() {
     'hover switch followed by first click keeps the selected panel open',
     (tester) async {
       final controller = PanelController(nativeHost: _FakeNative());
-      await controller.bootstrap(preset: Settings(), useNative: false);
+      await controller.bootstrap(
+        preset: Settings()..windowMode = 'panel',
+        useNative: false,
+      );
       controller.open();
       controller.openWidget('note');
       await tester.pumpWidget(RightPanelApp(controller: controller));
@@ -153,7 +159,10 @@ void main() {
         );
       });
       final controller = PanelController(nativeHost: _FakeNative());
-      await controller.bootstrap(preset: Settings(), useNative: false);
+      await controller.bootstrap(
+        preset: Settings()..windowMode = 'panel',
+        useNative: false,
+      );
       controller.onCapture = () {
         features.fresh();
       };
@@ -187,7 +196,10 @@ void main() {
     tester,
   ) async {
     final controller = PanelController(nativeHost: _FakeNative());
-    await controller.bootstrap(preset: Settings(), useNative: false);
+    await controller.bootstrap(
+      preset: Settings()..windowMode = 'panel',
+      useNative: false,
+    );
     controller.onTray('capture');
     await tester.pumpWidget(RightPanelApp(controller: controller));
     await pumpSeconds(tester, 1);
@@ -204,7 +216,10 @@ void main() {
     () async {
       final native = _FakeNative();
       final controller = PanelController(nativeHost: native);
-      await controller.bootstrap(preset: Settings(), useNative: false);
+      await controller.bootstrap(
+        preset: Settings()..windowMode = 'panel',
+        useNative: false,
+      );
       controller.onTray('open');
       expect(native.passthrough, false);
       expect(controller.isOpen, true);
@@ -216,7 +231,10 @@ void main() {
   );
   test('cancelled app selection adds nothing and shows no success', () async {
     final controller = PanelController(nativeHost: _FakeNative());
-    await controller.bootstrap(preset: Settings(), useNative: false);
+    await controller.bootstrap(
+      preset: Settings()..windowMode = 'panel',
+      useNative: false,
+    );
     final before = controller.S.dock!.toList();
     controller.appAdded(path: '');
     controller.appAdded(path: '  ');
@@ -228,7 +246,7 @@ void main() {
   test(
     'installer language applies once and later in-app choice survives restart',
     () async {
-      final settings = Settings();
+      final settings = Settings()..windowMode = 'panel';
       final first = PanelController(nativeHost: _FakeNative());
       await first.bootstrap(
         preset: settings,
@@ -253,7 +271,10 @@ void main() {
     'global capture selects immediately; delayed work stops on disposal',
     (tester) async {
       final controller = PanelController(nativeHost: _FakeNative());
-      await controller.bootstrap(preset: Settings(), useNative: false);
+      await controller.bootstrap(
+        preset: Settings()..windowMode = 'panel',
+        useNative: false,
+      );
       var captured = false;
       controller.onCapture = () => captured = true;
       controller.onTray('capture');
@@ -299,6 +320,7 @@ void main() {
 
   test('Settings round-trips through the original JSON shape', () {
     final s = Settings()
+      ..windowMode = 'panel'
       ..theme = 'ocean'
       ..edge = 'left'
       ..monitor = 1
@@ -323,7 +345,9 @@ void main() {
 
     final controller = PanelController(nativeHost: _FakeNative());
     await controller.bootstrap(
-      preset: Settings()..language = 'en',
+      preset: Settings()
+        ..windowMode = 'panel'
+        ..language = 'en',
       useNative: false,
     );
 

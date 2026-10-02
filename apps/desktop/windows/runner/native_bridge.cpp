@@ -174,6 +174,47 @@ void RegistryRunSet(bool on) {
                   (DWORD)((value.size() + 1) * sizeof(wchar_t)));
 }
 
+// ---------- window composition ----------
+
+// Same recipe the runner uses to make the edge-panel host transparent: an
+// ACCENT_ENABLE_TRANSPARENTGRADIENT policy with a zero color. The desktop
+// window mode disables it so the host is a normal opaque DWM window.
+typedef enum _ACCENT_STATE_BRIDGE {
+  ACCENT_DISABLED_BRIDGE = 0,
+  ACCENT_ENABLE_GRADIENT_BRIDGE = 1,
+  ACCENT_ENABLE_TRANSPARENTGRADIENT_BRIDGE = 2,
+} ACCENT_STATE_BRIDGE;
+
+typedef struct _ACCENT_POLICY_BRIDGE {
+  int nAccentState;
+  int nFlags;
+  int nColor;
+  int nAnimationId;
+} ACCENT_POLICY_BRIDGE;
+
+typedef struct _WINCOMPATTRDATA_BRIDGE {
+  int nAttribute;
+  PVOID pData;
+  ULONG ulDataSize;
+} WINCOMPATTRDATA_BRIDGE;
+
+void SetWindowAccentTransparent(HWND hwnd, bool transparent) {
+  const HINSTANCE user32 = LoadLibrary(TEXT("user32.dll"));
+  if (user32 == nullptr) return;
+  const auto set_window_composition_attribute =
+      reinterpret_cast<BOOL(WINAPI*)(HWND, WINCOMPATTRDATA_BRIDGE*)>(
+          GetProcAddress(user32, "SetWindowCompositionAttribute"));
+  if (set_window_composition_attribute != nullptr) {
+    ACCENT_POLICY_BRIDGE policy = {transparent
+                                       ? ACCENT_ENABLE_TRANSPARENTGRADIENT_BRIDGE
+                                       : ACCENT_DISABLED_BRIDGE,
+                                   2, 0, 0};
+    WINCOMPATTRDATA_BRIDGE data = {19, &policy, sizeof(policy)};
+    set_window_composition_attribute(hwnd, &data);
+  }
+  FreeLibrary(user32);
+}
+
 // ---------- monitors ----------
 
 struct MonitorItem {
@@ -411,6 +452,17 @@ void NativeBridge::HandleMethodCall(
   } else if (name == "applyPlacement") {
     result->Success(EncodableValue(ApplyPlacement(ArgString(args, "edge"),
                                                   ArgInt(args, "monitor"))));
+  } else if (name == "setWindowMode") {
+    const auto mode = ArgString(args, "mode");
+    SetWindowMode(mode, ArgInt(args, "x"), ArgInt(args, "y"),
+                  ArgInt(args, "w"), ArgInt(args, "h"),
+                  ArgBool(args, "maximized"), ArgBool(args, "show"));
+    result->Success();
+  } else if (name == "windowFrame") {
+    result->Success(EncodableValue(WindowFrame()));
+  } else if (name == "focusWindow") {
+    FocusWindow();
+    result->Success();
   } else if (name == "screens") {
     EncodableList list;
     for (auto& m : Screens()) list.push_back(EncodableValue(m));
@@ -426,7 +478,13 @@ void NativeBridge::HandleMethodCall(
 // ================= window plumbing =================
 
 void NativeBridge::SetPassthrough(bool on) {
-  passthrough_ = on;
+  passthrough_ = !window_mode_ && on;
+  if (window_mode_) {
+    // The desktop window is never click-through or topmost; "reveal"
+    // restores and focuses it instead.
+    if (!on) FocusWindow();
+    return;
+  }
   LONG ex = GetWindowLong(window_, GWL_EXSTYLE);
   // Hide the closed host instead of putting a DirectComposition child inside
   // a layered parent. That combination produced a ghost shadow/invisible UI.
@@ -436,6 +494,156 @@ void NativeBridge::SetPassthrough(bool on) {
   SetWindowPos(window_, HWND_TOPMOST, 0, 0, 0, 0,
                SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_FRAMECHANGED);
   ShowWindow(window_, on ? SW_HIDE : SW_SHOWNOACTIVATE);
+}
+
+void NativeBridge::SetWindowMode(const std::string& mode, int x, int y, int w,
+                                  int h, bool maximized, bool show) {
+  const bool to_window = (mode == "window");
+  window_mode_ = to_window;
+  if (!to_window) {
+    // Back to the edge panel shell: borderless, topmost tool window that
+    // stays hidden until the edge/hotkey/tray reveals it.
+    passthrough_ = true;
+    SetWindowAccentTransparent(window_, true);
+    SetWindowLong(window_, GWL_STYLE, WS_POPUP);
+    LONG ex = GetWindowLong(window_, GWL_EXSTYLE);
+    ex |= WS_EX_TOOLWINDOW | WS_EX_TOPMOST;
+    ex &= ~WS_EX_APPWINDOW;
+    SetWindowLong(window_, GWL_EXSTYLE, ex);
+    SetWindowPos(window_, HWND_TOPMOST, 0, 0, 0, 0,
+                 SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_FRAMECHANGED);
+    ShowWindow(window_, SW_HIDE);
+    return;
+  }
+
+  passthrough_ = false;
+  SetWindowAccentTransparent(window_, false);
+  SetWindowLong(window_, GWL_STYLE, WS_OVERLAPPEDWINDOW);
+  LONG ex = GetWindowLong(window_, GWL_EXSTYLE);
+  ex &= ~(WS_EX_TOOLWINDOW | WS_EX_TOPMOST | WS_EX_TRANSPARENT | WS_EX_LAYERED);
+  ex |= WS_EX_APPWINDOW;
+  SetWindowLong(window_, GWL_EXSTYLE, ex);
+
+  // Validate the saved frame against current monitors: keep a frame that is
+  // at least partly visible, otherwise center a comfortable default.
+  const auto monitors = CollectMonitors();
+  const bool saved = w >= 320 && h >= 320 && x > -32000 && y > -32000;
+  bool placed = false;
+  if (saved && !monitors.empty()) {
+    const RECT frame{x, y, x + w, y + h};
+    for (const auto& m : monitors) {
+      const RECT area{m.x, m.y, m.x + m.w, m.y + m.h};
+      RECT hit{};
+      if (IntersectRect(&hit, &frame, &area) &&
+          hit.right - hit.left >= 100 && hit.bottom - hit.top >= 100) {
+        placed = true;
+        // Clamp the size to this monitor and keep the title bar reachable.
+        w = std::min(w, m.w);
+        h = std::min(h, m.h);
+        x = std::max(m.x, std::min(x, m.x + m.w - w));
+        y = std::max(m.y, std::min(y, m.y + m.h - 60));
+        break;
+      }
+    }
+  }
+  if (!placed) {
+    // Center a comfortable default on the primary monitor's work area.
+    HMONITOR primary = MonitorFromWindow(window_, MONITOR_DEFAULTTOPRIMARY);
+    MONITORINFO mi = {};
+    mi.cbSize = sizeof(mi);
+    if (GetMonitorInfo(primary, &mi)) {
+      const UINT dpi = FlutterDesktopGetDpiForMonitor(primary);
+      const double scale = dpi == 0 ? 1.0 : dpi / 96.0;
+      const RECT& work = mi.rcWork;
+      w = static_cast<int>(1180 * scale);
+      h = static_cast<int>(780 * scale);
+      w = std::min<int>(w, (work.right - work.left) * 9 / 10);
+      h = std::min<int>(h, (work.bottom - work.top) * 9 / 10);
+      x = work.left + ((work.right - work.left) - w) / 2;
+      y = work.top + ((work.bottom - work.top) - h) / 2;
+    } else {
+      w = std::max(w, 1180);
+      h = std::max(h, 780);
+      x = 60;
+      y = 60;
+    }
+  }
+
+  SetWindowPos(window_, HWND_NOTOPMOST, x, y, w, h,
+               SWP_NOACTIVATE | SWP_FRAMECHANGED);
+  if (maximized) {
+    if (first_frame_done_) {
+      ShowWindow(window_, SW_MAXIMIZE);
+      SetForegroundWindow(window_);
+    } else {
+      // Defer to the first rendered frame; no empty-window flash.
+      pending_show_ = true;
+      pending_show_maximized_ = true;
+    }
+  } else if (show) {
+    if (first_frame_done_) {
+      ShowWindow(window_, SW_SHOW);
+      SetForegroundWindow(window_);
+    } else {
+      pending_show_ = true;
+      pending_show_maximized_ = false;
+    }
+  } else {
+    ShowWindow(window_, SW_HIDE);
+  }
+}
+
+void NativeBridge::OnFirstFrame() {
+  first_frame_done_ = true;
+  if (window_mode_ && pending_show_) {
+    pending_show_ = false;
+    ShowWindow(window_, pending_show_maximized_ ? SW_MAXIMIZE : SW_SHOW);
+    SetForegroundWindow(window_);
+  }
+}
+
+flutter::EncodableMap NativeBridge::WindowFrame() const {
+  const bool zoomed = IsZoomed(window_) != FALSE;
+  RECT r{};
+  if (zoomed) {
+    // While maximized, remember the restore position instead of the
+    // monitor-filling frame. WINDOWPLACEMENT reports workspace coordinates;
+    // shift them back to screen space using the window's monitor insets.
+    WINDOWPLACEMENT wp = {};
+    wp.length = sizeof(wp);
+    GetWindowPlacement(window_, &wp);
+    HMONITOR mon = MonitorFromWindow(window_, MONITOR_DEFAULTTONEAREST);
+    MONITORINFO mi = {};
+    mi.cbSize = sizeof(mi);
+    POINT offset{0, 0};
+    if (GetMonitorInfo(mon, &mi)) {
+      offset.x = mi.rcWork.left - mi.rcMonitor.left;
+      offset.y = mi.rcWork.top - mi.rcMonitor.top;
+    }
+    r = RECT{wp.rcNormalPosition.left + offset.x,
+             wp.rcNormalPosition.top + offset.y,
+             wp.rcNormalPosition.right + offset.x,
+             wp.rcNormalPosition.bottom + offset.y};
+  } else {
+    GetWindowRect(window_, &r);
+  }
+  return EncodableMap{
+      {EncodableValue("x"), EncodableValue(static_cast<int32_t>(r.left))},
+      {EncodableValue("y"), EncodableValue(static_cast<int32_t>(r.top))},
+      {EncodableValue("w"), EncodableValue(static_cast<int32_t>(r.right - r.left))},
+      {EncodableValue("h"), EncodableValue(static_cast<int32_t>(r.bottom - r.top))},
+      {EncodableValue("maximized"), EncodableValue(zoomed)},
+  };
+}
+
+void NativeBridge::FocusWindow() {
+  if (window_ == nullptr) return;
+  if (IsIconic(window_)) {
+    ShowWindow(window_, SW_RESTORE);
+  } else if (!IsWindowVisible(window_)) {
+    ShowWindow(window_, SW_SHOW);
+  }
+  SetForegroundWindow(window_);
 }
 
 void NativeBridge::RememberForeground() {
@@ -1026,9 +1234,11 @@ bool NativeBridge::OnMessage(HWND hwnd, UINT message, WPARAM wparam, LPARAM lpar
   if (message == WM_DISPLAYCHANGE || message == WM_DPICHANGED) {
     // Let Win32 process the suggested DPI rectangle, then re-anchor using the
     // selected display's current scale rather than stale Dart placement data.
-    PostMessage(window_, WM_APP_PLACEMENT, 0, 0);
+    // The desktop window keeps its own frame; only the edge panel re-anchors.
+    if (!window_mode_) PostMessage(window_, WM_APP_PLACEMENT, 0, 0);
   }
   if (message == WM_APP_PLACEMENT) {
+    if (window_mode_) return true;
     const auto monitors = CollectMonitors();
     if (monitors.empty()) return true;
     int selected = 0;
@@ -1062,6 +1272,17 @@ bool NativeBridge::OnMessage(HWND hwnd, UINT message, WPARAM wparam, LPARAM lpar
     }
     return false;
   }
+  if (message == WM_GETMINMAXINFO && window_mode_) {
+    // Keep the desktop window comfortably resizable with a sane minimum.
+    auto* mmi = reinterpret_cast<MINMAXINFO*>(lparam);
+    const UINT dpi = FlutterDesktopGetDpiForMonitor(
+        MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST));
+    const double scale = dpi == 0 ? 1.0 : dpi / 96.0;
+    mmi->ptMinTrackSize.x = static_cast<LONG>(520 * scale);
+    mmi->ptMinTrackSize.y = static_cast<LONG>(560 * scale);
+    return false;  // let DefWindowProc apply the adjusted limits
+  }
+
   if (message == WM_APP_TRAY) {
     const UINT mouse = (UINT)lparam;
     if (mouse == WM_LBUTTONUP || mouse == WM_LBUTTONDBLCLK) {

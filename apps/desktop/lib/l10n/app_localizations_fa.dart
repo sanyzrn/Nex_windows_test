@@ -746,4 +746,51 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get pastePhoto => 'چسباندن تصویر';
+
+  @override
+  String get navCapture => 'ثبت سریع';
+
+  @override
+  String get navTools => 'ابزارها';
+
+  @override
+  String get interfaceMode => 'حالت نمایش';
+
+  @override
+  String get windowMode => 'پنجره';
+
+  @override
+  String get panelMode => 'نوار لبه';
+
+  @override
+  String get modeDescription =>
+      'پنجرهٔ دسکتاپ تجربهٔ اصلی است و نوار لبه برای ثبت سریع در دسترس می‌ماند. هر دو حالت از همان یادداشت‌ها، رسانه‌ها و تنظیمات استفاده می‌کنند.';
+
+  @override
+  String get edgePanelOnly =>
+      'این تنظیم مخصوص نوار لبه است؛ برای استفاده، حالت نمایش را عوض کنید.';
+
+  @override
+  String get switchToPanel => 'تغییر به نوار لبه';
+
+  @override
+  String get switchToWindow => 'تغییر به پنجره';
+
+  @override
+  String get backToTools => 'بازگشت به ابزارها';
+
+  @override
+  String get toolsHint => 'یک ابزار را برای باز کردن انتخاب کنید';
+
+  @override
+  String get noEmojiFound => 'ایموجی پیدا نشد';
+
+  @override
+  String get nothingYet => 'هنوز چیزی نیست';
+
+  @override
+  String get unknownUnit => 'واحد ناشناخته';
+
+  @override
+  String get hotkeyInUse => 'این کلید میان‌بر در اختیار برنامهٔ دیگری است';
 }

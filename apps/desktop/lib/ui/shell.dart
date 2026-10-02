@@ -40,12 +40,41 @@ class _PanelShellState extends State<PanelShell>
     final c = widget.controller;
     c.dockAnchorOf = _dockAnchor;
     c.moreAnchorOf = () => _dockAnchor('more') ?? 340;
+    c.addListener(_onControllerChanged);
   }
 
   @override
   void dispose() {
+    widget.controller.removeListener(_onControllerChanged);
+    // Geometry hooks belong to this shell; a later window shell must not
+    // call stale closures into a defunct element tree.
+    final c = widget.controller;
+    c.dockAnchorOf = null;
+    c.moreAnchorOf = null;
     _ticker.dispose();
     super.dispose();
+  }
+
+  /// Scrolls the dock to keep the active tool reachable when the dock
+  /// overflows its viewport.
+  String? _lastActiveTool;
+  void _onControllerChanged() {
+    final active = widget.controller.activeToolId;
+    if (active == _lastActiveTool) return;
+    _lastActiveTool = active;
+    if (active == null) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final ctx = widget.controller.toolKey(active).currentContext;
+      if (ctx != null) {
+        Scrollable.ensureVisible(
+          ctx,
+          duration: const Duration(milliseconds: 240),
+          curve: kSpring,
+          alignment: .5,
+        );
+      }
+    });
   }
 
   double _viewportTop() {

@@ -2,6 +2,15 @@
 
 This standalone test repository already contains the required Nex packages and applied shared changes. Build directly from `apps/desktop`; do not reapply the patches here. The clean-Nex-checkout patch instructions below describe the separate source handoff ZIP. See the repository root README for standalone build and downloads.
 
+## Interface modes
+
+Since 0.10.0 the product has two interface modes over one application:
+
+- **Window (main):** `lib/ui/window_shell.dart` renders a full desktop surface — navigation rail (Capture / Library / Tools / Settings), section headers, adaptive content. The native host is restyled into a normal resizable `WS_OVERLAPPEDWINDOW` window (caption, min/max, taskbar, minimum size, no topmost, opaque composition). Its frame and maximized state persist in settings and are revalidated against current monitors at every launch; a frame that is no longer visible re-centers instead of opening off-screen.
+- **Edge panel (optional):** the original liquid slide-out shell (`lib/ui/shell.dart`), unchanged in behaviour: same springs, dock, flyout, edge reveal, tray and shortcuts.
+
+Both modes share the same `PanelController`, `NexFeatures`, database isolate and shell preferences; switching (`Settings → interface mode` or the rail button) swaps the home widget and restyles the host in place. In window mode `blur()`/edge-watch/auto-hide are dormant and `SetPassthrough` degrades to restore-and-focus, so the window survives focus loss and `--background` launches wait in the tray. The `--native-smoke` probe forces panel mode because it validates edge placement and reveal.
+
 ## Plan
 
 Architecture: retain the extracted Flutter Right Panel shell and its spring model. Compose Nex core/data/ui through relative package dependencies. Run SQLite repositories in one owned isolate; persist captures on every content change. Shell preferences are separate from Nex domain data. No WebView, no second notes store. Optional AI has one removable integration point.
@@ -57,7 +66,7 @@ flutter pub get
 flutter run -d windows
 ```
 
-Install the Flutter Windows build prerequisites, including Visual Studio's Desktop development with C++ workload. Keep all four relative package dependencies. The Dart package name `right_panel` is retained for the port's test imports; the product/window/executable are Nex / `nex_desktop.exe`, version `0.9.0+5`.
+Install the Flutter Windows build prerequisites, including Visual Studio's Desktop development with C++ workload. Keep all four relative package dependencies. The Dart package name `right_panel` is retained for the port's test imports; the product/window/executable are Nex / `nex_desktop.exe`, version `0.10.0+6`.
 
 ```powershell
 dart format lib test
@@ -68,7 +77,7 @@ flutter build windows --release --no-pub
 ./tools/windows_smoke.ps1
 ```
 
-Goldens are enabled in the ordinary test suite. Ten committed images cover emoji, More, settings/light, both physical edges with Persian RTL, a differently sized calculator flyout, and capture/inline reading in English/light and Persian/dark. Capture/reader comparisons wait for the spring to settle; transient subpixel motion is not a visual baseline. The test font loader uses the supplied Nex fonts and the host's Windows Segoe UI Emoji font. Baselines were generated on Windows with Flutter 3.35.5; OS/font differences may require review. Deliberate regeneration uses `flutter test --no-pub --update-goldens`; generation alone is not a passing comparison.
+Goldens are enabled in the ordinary test suite. Ten committed images cover emoji, More, settings/light, both physical edges with Persian RTL, a differently sized calculator flyout, and capture/inline reading in English/light and Persian/dark. Capture/reader comparisons wait for the spring to settle; transient subpixel motion is not a visual baseline. The test font loader uses the supplied Nex fonts and the host's Windows Segoe UI Emoji font. Baselines were generated on Windows with Flutter 3.35.5; OS/font differences may require review — on Linux the same ten comparisons fail with small pixel diffs (1–6%) on the unmodified source as well, so a non-Windows run is not a visual verdict. Deliberate regeneration uses `flutter test --no-pub --update-goldens` (on Windows); generation alone is not a passing comparison. `test/window_shell_test.dart` covers the desktop window shell: section navigation, tool directory/back routing, durable capture, native mode-switch calls with frame persistence, settings round-trip of the new keys, and dormant auto-hide in window mode.
 
 After editing ARBs, run `python tools/generate_utility_strings.py`, `flutter gen-l10n`, and `dart format lib`. Generated localization files are supplied. Dependency resolution during validation used `PUB_HOSTED_URL=https://pub.flutter-io.cn` and `FLUTTER_STORAGE_BASE_URL=https://storage.flutter-io.cn` because the default hosts were unavailable here. The lockfile records that mirror; use the same environment for the tested resolution.
 
@@ -80,6 +89,8 @@ After editing ARBs, run `python tools/generate_utility_strings.py`, `flutter gen
 
 | Feature | Windows status | Detail |
 | --- | --- | --- |
+| Full desktop window (main mode) | Done | Normal resizable window, nav rail sections, persisted frame, tray/hotkey routing, survives blur |
+| Edge slide-out panel (optional mode) | Done | Original liquid shell preserved; switchable at runtime |
 | Local notes/schema/change tracking | Done | Nex repositories/migrations; FIFO isolate; reopen tested |
 | Immediate text/checklist capture | Done | Empty field, hotkey, per-change persistence; Esc keeps app-owned session |
 | Photo/file capture | Done, OS validation partial | Separate image/audio/file choosers, clipboard button/Ctrl+V, drop and content-addressed copy; cancellation creates no note or success status |

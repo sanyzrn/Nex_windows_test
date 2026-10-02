@@ -29,6 +29,14 @@ class Settings {
   bool paste = true;
   bool magnify = true;
   bool panelPinned = false;
+
+  /// 'window' = full desktop window (main mode); 'panel' = edge slide-out.
+  String windowMode = 'window';
+
+  /// Last normal (restored) frame of the desktop window, physical pixels,
+  /// persisted so the window reopens where the user left it.
+  Map<String, dynamic>? windowBounds;
+  bool windowMaximized = false;
   List<String> recentEmoji = [];
   List<Color> recentColors = [];
   String edge = 'right';
@@ -73,6 +81,9 @@ class Settings {
     'paste': paste,
     'magnify': magnify,
     'panelPinned': panelPinned,
+    'windowMode': windowMode,
+    'windowBounds': windowBounds,
+    'windowMaximized': windowMaximized,
     'recentEmoji': recentEmoji,
     'recentColors': recentColors.map(_hex).toList(),
     'edge': edge,
@@ -101,6 +112,20 @@ class Settings {
     s.paste = j['paste'] as bool? ?? true;
     s.magnify = j['magnify'] as bool? ?? true;
     s.panelPinned = j['panelPinned'] as bool? ?? false;
+    s.windowMode = (j['windowMode'] as String?) == 'panel' ? 'panel' : 'window';
+    final bounds = j['windowBounds'];
+    if (bounds is Map) {
+      s.windowBounds = bounds.cast<String, dynamic>();
+    } else if (bounds is List && bounds.length == 4) {
+      // Tolerate a plain [x, y, w, h] list from older JSON exports.
+      s.windowBounds = {
+        'x': (bounds[0] as num).toInt(),
+        'y': (bounds[1] as num).toInt(),
+        'w': (bounds[2] as num).toInt(),
+        'h': (bounds[3] as num).toInt(),
+      };
+    }
+    s.windowMaximized = j['windowMaximized'] as bool? ?? false;
     s.recentEmoji = ((j['recentEmoji'] as List?) ?? [])
         .map((e) => e.toString())
         .toList();
@@ -226,6 +251,20 @@ class PanelController extends ChangeNotifier {
   // ---- interaction state (module-level vars of the original) ----
   bool isOpen = false;
   String? panel;
+
+  /// The main mode: 'window' shows the full desktop window shell; 'panel'
+  /// keeps only the right/left-edge slide-out. Both share the same data,
+  /// settings and features.
+  bool get isWindowMode => S.windowMode == 'window';
+
+  /// Section shown by the desktop window shell: capture | library | tools |
+  /// settings. A ValueNotifier so the shell can listen without rebuilding
+  /// the whole app.
+  final ValueNotifier<String> windowSection = ValueNotifier('capture');
+
+  /// Utility tool opened inside the window shell's Tools section
+  /// (null = the grid). Mirrors the flyout's panel switching.
+  final ValueNotifier<String?> windowTool = ValueNotifier(null);
 
   /// The panel that was open last; the flyout keeps showing it while it
   /// shrinks away ("keep old content while it shrinks away" in the original).
@@ -643,9 +682,14 @@ class PanelController extends ChangeNotifier {
     Settings? preset,
     bool useNative = true,
     String? installerLanguageMarker,
+    bool showWindow = true,
+    bool forcePanelMode = false,
   }) async {
     _persistSettings = preset == null;
     S = preset ?? Settings.fromMap(storage.loadSettings());
+    // The native smoke probe exercises edge-panel placement/reveal; it must
+    // run in the panel mode regardless of the saved preference.
+    if (forcePanelMode) S.windowMode = 'panel';
     final installLanguage = installerLanguageMarker?.trim();
     if (installLanguage != null && installLanguage != S.installLanguageMarker) {
       final locale = installLanguage.split('|').first;
@@ -670,13 +714,27 @@ class PanelController extends ChangeNotifier {
     if (preset == null && installLanguage != null) save();
 
     ToolInfo._controllerApps = S.apps;
-    if (preset == null) clips = storage.loadPinnedImages();
+    if (preset == null) {
+      clips = _restorePinnedClips();
+    }
 
     if (useNative) {
-      try {
-        final p = await native.applyPlacement(S.edge, S.monitor);
-        if (p != null) placement = Placement.fromMap(p);
-      } catch (_) {}
+      if (isWindowMode) {
+        // Main mode: a full desktop window, restoring the saved frame.
+        try {
+          await native.setWindowMode(
+            'window',
+            bounds: S.windowBounds,
+            maximized: S.windowMaximized,
+            show: showWindow,
+          );
+        } catch (_) {}
+      } else {
+        try {
+          final p = await native.applyPlacement(S.edge, S.monitor);
+          if (p != null) placement = Placement.fromMap(p);
+        } catch (_) {}
+      }
       try {
         screens = await native.screens();
       } catch (_) {}
@@ -689,6 +747,18 @@ class PanelController extends ChangeNotifier {
         unawaited(native.appIcon(a.id, a.path).catchError((_) {}));
       }
     }
+  }
+
+  /// Rebuilds the pinned clipboard entries at boot: images come from the
+  /// pins directory, pinned text from the persisted pins list. Without this
+  /// pinned text appeared with a fake timestamp and pinned images only
+  /// reappeared after a restart.
+  List<ClipEntry> _restorePinnedClips() {
+    final out = storage.loadPinnedImages();
+    for (final text in S.pins) {
+      out.add(ClipEntry.text(text, time: DateTime.now(), pinned: true));
+    }
+    return out;
   }
 
   void normalize() {
@@ -748,7 +818,9 @@ class PanelController extends ChangeNotifier {
   // ================= the `app` object =================
   void open() {
     cancelClose();
-    unawaited(native.setPassthrough(false).catchError((_) {}));
+    if (!isWindowMode) {
+      unawaited(native.setPassthrough(false).catchError((_) {}));
+    }
     if (isOpen) return;
     isOpen = true;
     openedAt = clockSec;
@@ -764,6 +836,9 @@ class PanelController extends ChangeNotifier {
     mx = -1;
     hoverY = null;
     notifyListeners();
+    // The desktop window stays visible when it loses focus; only the edge
+    // panel hides itself away after the spring exit.
+    if (isWindowMode) return;
     // Let the original spring exit finish before hiding the native host.
     _later(const Duration(milliseconds: 450), () {
       if (!isOpen) unawaited(native.setPassthrough(true).catchError((_) {}));
@@ -773,6 +848,12 @@ class PanelController extends ChangeNotifier {
   void cursor(double dist) => mx = dist;
 
   void show(String name) {
+    if (isWindowMode) {
+      // The window is the primary surface: reveal it and route inside.
+      unawaited(native.focusWindow().catchError((_) {}));
+      if (name == 'settings') selectWindowSection('settings');
+      return;
+    }
     sticky = true;
     open();
     if (name.isNotEmpty) {
@@ -780,6 +861,78 @@ class PanelController extends ChangeNotifier {
         if (isOpen) openWidget(name);
       });
     }
+  }
+
+  /// Focuses the desktop window and shows [section].
+  void selectWindowSection(String section) {
+    windowTool.value = null;
+    windowSection.value = section;
+    notifyListeners();
+  }
+
+  /// Opens a utility tool inside the window shell's Tools section.
+  void openWindowTool(String id) {
+    windowSection.value = 'tools';
+    windowTool.value = id;
+    notifyListeners();
+  }
+
+  /// Returns from an open tool view to the tools surface: the window shell's
+  /// directory or the flyout's More grid, depending on the active mode.
+  void backToTools() {
+    if (isWindowMode) {
+      windowTool.value = null;
+      notifyListeners();
+      return;
+    }
+    anchorY = fy.v;
+    setPanel('more', fromMore: true);
+  }
+
+  /// Switches between the desktop window (main) and edge panel (optional).
+  /// Persists the desktop window's frame so nothing is lost between modes.
+  Future<void> setWindowMode(String mode) async {
+    if (mode != 'window' && mode != 'panel') return;
+    if (mode == S.windowMode) return;
+    final leavingWindow = S.windowMode == 'window';
+    if (leavingWindow) {
+      await _rememberWindowFrame();
+    }
+    S.windowMode = mode;
+    save();
+    if (mode == 'panel') {
+      // Return to the edge: borderless, topmost, hidden until revealed.
+      isOpen = false;
+      try {
+        await native.setWindowMode('panel');
+        final p = await native.applyPlacement(S.edge, S.monitor);
+        if (p != null) placement = Placement.fromMap(p);
+      } catch (_) {}
+    } else {
+      windowTool.value = null;
+      windowSection.value = 'capture';
+      try {
+        await native.setWindowMode(
+          'window',
+          bounds: S.windowBounds,
+          maximized: S.windowMaximized,
+          show: true,
+        );
+      } catch (_) {}
+    }
+    notifyListeners();
+  }
+
+  Future<void> _rememberWindowFrame() async {
+    try {
+      final frame = await native.windowFrame();
+      if (frame != null &&
+          (frame['w'] as num?) != null &&
+          (frame['h'] as num?) != null) {
+        S.windowBounds = frame;
+        S.windowMaximized = frame['maximized'] == true;
+      }
+    } catch (_) {}
   }
 
   void appAdded({required String path, String? icon}) {
@@ -816,6 +969,9 @@ class PanelController extends ChangeNotifier {
   }
 
   void blur() {
+    // A desktop window must survive losing focus; only the edge panel
+    // auto-hides (the original's WindowEvent::Focused(false) behaviour).
+    if (isWindowMode) return;
     if (isOpen && !keepOpen && !sticky && !dragging && !picking) close();
   }
 
@@ -852,9 +1008,14 @@ class PanelController extends ChangeNotifier {
     unawaited(Clipboard.setData(ClipboardData(text: hex)));
     pickedColorHex = hex;
     pushRecentColor(_parseHex(hex));
-    open();
-    openWidget('color');
-    notifyListeners();
+    if (isWindowMode) {
+      // The window's tools card showing the color view refreshes in place.
+      notifyListeners();
+    } else {
+      open();
+      openWidget('color');
+      notifyListeners();
+    }
     toast(message('Picked {value}', {'value': hex}));
   }
 
@@ -870,10 +1031,16 @@ class PanelController extends ChangeNotifier {
   }
 
   /// Moves the panel to the chosen edge / monitor (placement message).
+  /// In window mode the choice is only remembered; it applies when the user
+  /// returns to the panel mode.
   Future<void> applyPlacement(String edge, int monitor) async {
     S.edge = edge;
     S.monitor = monitor;
     save();
+    if (isWindowMode) {
+      notifyListeners();
+      return;
+    }
     try {
       final p = await native.applyPlacement(edge, monitor);
       if (p != null) placement = Placement.fromMap(p);
@@ -907,6 +1074,37 @@ class PanelController extends ChangeNotifier {
   }
 
   void onTray(String id) {
+    if (isWindowMode) {
+      // The desktop window is always the primary surface.
+      switch (id) {
+        case 'capture':
+          unawaited(native.focusWindow().catchError((_) {}));
+          selectWindowSection('capture');
+          onCapture?.call();
+          break;
+        case 'shutdown':
+          unawaited(quit());
+          break;
+        case 'open':
+        case 'settings':
+          show(id == 'settings' ? 'settings' : '');
+          break;
+        case 'addapp':
+          unawaited(native.pickApp().catchError((_) {}));
+          break;
+        case 'startup':
+          final on = !S.startup;
+          S.startup = on;
+          unawaited(native.setStartup(on).catchError((_) {}));
+          save();
+          notifyListeners();
+          break;
+        case 'quit':
+          unawaited(quit());
+          break;
+      }
+      return;
+    }
     switch (id) {
       case 'capture':
         sticky = true;
@@ -942,6 +1140,9 @@ class PanelController extends ChangeNotifier {
   Future<void> quit() async {
     if (_quitQueued) return;
     _quitQueued = true;
+    // Persist the desktop window's position/size before anything drains.
+    if (isWindowMode) await _rememberWindowFrame();
+    if (isWindowMode) save();
     try {
       await beforeShutdown?.call();
     } catch (_) {
@@ -1249,6 +1450,11 @@ class PanelController extends ChangeNotifier {
   }
 
   Future<void> _edgeTick() async {
+    // The edge reveal only belongs to the panel mode.
+    if (isWindowMode) {
+      _near = false;
+      return;
+    }
     if (isOpen || picking) {
       _near = false;
       return;
@@ -1306,6 +1512,8 @@ class PanelController extends ChangeNotifier {
     toolScroll.dispose();
     dragInfo.dispose();
     dropHintOn.dispose();
+    windowSection.dispose();
+    windowTool.dispose();
     _edgeT?.cancel();
     _toastT?.cancel();
     outT?.cancel();

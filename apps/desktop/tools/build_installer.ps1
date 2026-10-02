@@ -36,6 +36,6 @@ $manifest = @(Get-ChildItem -LiteralPath $payload -File -Recurse | Sort-Object F
 $manifest | ConvertTo-Json -Depth 3 | Set-Content -LiteralPath (Join-Path $appRoot 'build/installer/payload-manifest.json') -Encoding utf8
 & $ISCC ('/O' + $Output) (Join-Path $appRoot 'installer/nex.iss')
 if ($LASTEXITCODE -ne 0) { throw "Inno compilation failed with exit $LASTEXITCODE" }
-$setupPath = Join-Path $Output 'Nex-Windows-Setup-0.9.0-x64.exe'
+$setupPath = Join-Path $Output 'Nex-Windows-Setup-0.10.0-x64.exe'
 Get-Item -LiteralPath $setupPath | Select-Object FullName, Length
 Get-FileHash -LiteralPath $setupPath -Algorithm SHA256

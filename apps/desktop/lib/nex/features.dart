@@ -66,7 +66,13 @@ class NexFeatures extends ChangeNotifier {
   }
 
   Future<void> fresh() async {
-    await session.flushed;
+    // A failed write on the previous session must not break the next one;
+    // drain and move on with a visible error instead of an async crash.
+    try {
+      await session.flushed;
+    } catch (e) {
+      error = e.toString();
+    }
     session = CaptureSession(store);
     composer.clear();
     notifyListeners();
@@ -150,17 +156,28 @@ class NexFeatures extends ChangeNotifier {
           final duration = DateTime.now()
               .difference(recordingAt!)
               .inMilliseconds;
-          if (path != null) {
-            await store.call<Note>('media', {
-              'path': path,
-              'duration': duration,
-            });
-            importedCount = 1;
-            await File(path).delete();
-          }
           recordingAt = null;
           _recordingRelease?.call();
           _recordingRelease = null;
+          if (path != null) {
+            var saved = false;
+            try {
+              await store.call<Note>('media', {
+                'path': path,
+                'duration': duration,
+              });
+              importedCount = 1;
+              saved = true;
+            } finally {
+              if (saved) {
+                try {
+                  if (await File(path).exists()) await File(path).delete();
+                } catch (_) {}
+              }
+              // On failure the recording intentionally survives at [path]
+              // so it can be recovered; the error below includes the path.
+            }
+          }
         }
       });
     } finally {
@@ -211,8 +228,12 @@ class NexScope extends InheritedNotifier<NexFeatures> {
 }
 
 class NexCaptureView extends StatelessWidget {
-  const NexCaptureView({super.key, this.pickFiles});
+  const NexCaptureView({super.key, this.pickFiles, this.compact = true});
   final Future<List<XFile>> Function(List<XTypeGroup>)? pickFiles;
+
+  /// Compact layout fits the 360px edge flyout; the wide layout fills the
+  /// desktop window's content area with a proper editor.
+  final bool compact;
   Future<void> _choose(
     BuildContext context,
     NexFeatures features, [
@@ -242,6 +263,7 @@ class NexCaptureView extends StatelessWidget {
     final c = context
         .dependOnInheritedWidgetOfExactType<NexPanelScope>()
         ?.controller;
+    if (!compact) return _buildWide(context, f, l, c);
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -434,6 +456,220 @@ class NexCaptureView extends StatelessWidget {
       ),
     );
   }
+
+  /// Desktop window layout: a comfortable bounded editor, a checklist
+  /// switch, one action row and honest status lines.
+  Widget _buildWide(
+    BuildContext context,
+    NexFeatures f,
+    AppLocalizations l,
+    PanelController? c,
+  ) {
+    final editor = CallbackShortcuts(
+      bindings: {
+        const SingleActivator(LogicalKeyboardKey.keyV, control: true): () =>
+            _paste(f, c),
+      },
+      child: Focus(
+        onFocusChange: (focused) => focused ? c?.focusGained() : c?.focusLost(),
+        child: TextField(
+          key: const ValueKey('capture-field'),
+          controller: f.composer,
+          focusNode: f.focus,
+          autofocus: true,
+          expands: true,
+          minLines: null,
+          maxLines: null,
+          textAlignVertical: TextAlignVertical.top,
+          textDirection: nexDirectionOf(f.composer.text),
+          decoration: InputDecoration(
+            hintMaxLines: 1,
+            hintText: l.captureHint,
+            filled: true,
+          ),
+          onChanged: f.write,
+        ),
+      ),
+    );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                l.savedLocally,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ),
+            ActionChip(
+              avatar: const Icon(Icons.add, size: 18),
+              label: Text(l.newNote),
+              onPressed: () => f.fresh(),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Expanded(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 160),
+            child: editor,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Switch(
+              value: f.checklist,
+              onChanged: f.session.id == null
+                  ? (v) {
+                      f.checklist = v;
+                      f.notify();
+                    }
+                  : null,
+            ),
+            Text(l.checklist),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            _CaptureAction(
+              label: l.pasteText,
+              onPressed: () async {
+                final clip = await Clipboard.getData(Clipboard.kTextPlain);
+                if (clip?.text?.isNotEmpty == true) {
+                  await f.fresh();
+                  f.composer.text = clip!.text!;
+                  f.write(clip.text!);
+                }
+              },
+              icon: Icons.content_paste_rounded,
+            ),
+            _CaptureAction(
+              label: l.addImage,
+              onPressed: f.importing
+                  ? null
+                  : () => _choose(context, f, [
+                      XTypeGroup(
+                        label: l.photo,
+                        extensions: const [
+                          'png',
+                          'jpg',
+                          'jpeg',
+                          'webp',
+                          'gif',
+                          'bmp',
+                        ],
+                      ),
+                    ]),
+              icon: Icons.add_photo_alternate_outlined,
+            ),
+            _CaptureAction(
+              label: l.attach,
+              onPressed: f.importing ? null : () => _choose(context, f),
+              icon: Icons.attach_file_rounded,
+            ),
+            _CaptureAction(
+              label: l.addAudio,
+              onPressed: f.importing
+                  ? null
+                  : () => _choose(context, f, [
+                      XTypeGroup(
+                        label: l.voice,
+                        extensions: const [
+                          'wav',
+                          'mp3',
+                          'm4a',
+                          'aac',
+                          'ogg',
+                          'opus',
+                          'flac',
+                          'wma',
+                        ],
+                      ),
+                    ]),
+              icon: Icons.audio_file_outlined,
+            ),
+            _CaptureAction(
+              label: f.recordingAt == null ? l.record : l.stop,
+              onPressed: f.recordingBusy ? null : () => f.record(c),
+              icon: f.recordingAt == null
+                  ? Icons.mic_none_rounded
+                  : Icons.stop_circle_outlined,
+            ),
+            if (c != null)
+              _CaptureAction(
+                label: l.pastePhoto,
+                onPressed: () => f.guard(() async {
+                  final image = await c.native.currentClipboardImage();
+                  if (image == null) throw StateError(l.noClipboardImage);
+                  await f.pasteImage(image, rethrowError: true);
+                }),
+                icon: Icons.content_paste_go_rounded,
+              ),
+          ],
+        ),
+        if (f.importing || f.recordingBusy)
+          const Padding(
+            padding: EdgeInsets.only(top: 12),
+            child: LinearProgressIndicator(),
+          ),
+        if (f.recordingAt != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 12),
+            child: Text(
+              l.recording,
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            ),
+          ),
+        if (f.importedCount > 0 && !f.importing)
+          Padding(
+            padding: const EdgeInsets.only(top: 12),
+            child: Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: TextButton.icon(
+                onPressed: c == null ? null : () => c.openWidget('timeline'),
+                icon: const Icon(Icons.check_circle_outline_rounded, size: 18),
+                label: Text(l.mediaAdded(f.importedCount)),
+              ),
+            ),
+          ),
+        if (f.error != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 12),
+            child: Text(
+              '${l.failed}: ${f.error}',
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Future<void> _paste(NexFeatures f, PanelController? c) async {
+    final text = await Clipboard.getData(Clipboard.kTextPlain);
+    if (text?.text?.isNotEmpty == true) {
+      final selection = f.composer.selection;
+      final value = f.composer.text;
+      final start = selection.isValid ? selection.start : value.length;
+      final end = selection.isValid ? selection.end : value.length;
+      f.composer.value = TextEditingValue(
+        text: value.replaceRange(start, end, text!.text!),
+        selection: TextSelection.collapsed(offset: start + text.text!.length),
+      );
+      f.write(f.composer.text);
+    } else if (c != null) {
+      await f.guard(() async {
+        final image = await c.native.currentClipboardImage();
+        if (image != null) {
+          await f.pasteImage(image, rethrowError: true);
+        }
+      });
+    }
+  }
 }
 
 class _CaptureAction extends StatelessWidget {
@@ -589,178 +825,196 @@ class _NexLibraryViewState extends State<NexLibraryView> {
         },
       );
     }
-    return SizedBox(
-      height: 530,
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: Focus(
-              onFocusChange: (focused) {
-                final c = NexPanelScope.maybeOf(context);
-                if (focused) {
-                  c?.focusGained();
-                } else {
-                  c?.focusLost();
-                }
-              },
-              child: TextField(
-                controller: query,
-                textDirection: nexDirectionOf(query.text),
-                decoration: InputDecoration(
-                  hintText: l.search,
-                  prefixIcon: const Icon(Icons.search),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // The edge flyout offers an unbounded scroll column, so it keeps the
+        // historical 530px height; the desktop window fills its content area.
+        final height = constraints.maxHeight.isFinite
+            ? constraints.maxHeight
+            : 530.0;
+        return SizedBox(
+          height: height,
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(12),
+                child: Focus(
+                  onFocusChange: (focused) {
+                    final c = NexPanelScope.maybeOf(context);
+                    if (focused) {
+                      c?.focusGained();
+                    } else {
+                      c?.focusLost();
+                    }
+                  },
+                  child: TextField(
+                    controller: query,
+                    textDirection: nexDirectionOf(query.text),
+                    decoration: InputDecoration(
+                      hintText: l.search,
+                      prefixIcon: const Icon(Icons.search),
+                    ),
+                    onChanged: (_) => load(),
+                  ),
                 ),
-                onChanged: (_) => load(),
               ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: Wrap(
-              spacing: 6,
-              children: [
-                DropdownButton<NoteType>(
-                  hint: Text(l.type),
-                  value: type,
-                  items: NoteType.values
-                      .map(
-                        (v) => DropdownMenuItem(
-                          value: v,
-                          child: Text(noteTypeLabel(l, v)),
-                        ),
-                      )
-                      .toList(),
-                  onChanged: (v) {
-                    type = v;
-                    load();
-                  },
-                ),
-                DropdownButton<String>(
-                  hint: Text(l.tags),
-                  value: tag,
-                  items: tags
-                      .map(
-                        (v) =>
-                            DropdownMenuItem(value: v.id, child: Text(v.name)),
-                      )
-                      .toList(),
-                  onChanged: (v) {
-                    tag = v;
-                    load();
-                  },
-                ),
-                DropdownButton<String>(
-                  hint: Text(l.threads),
-                  value: thread,
-                  items: threads
-                      .map(
-                        (v) =>
-                            DropdownMenuItem(value: v.id, child: Text(v.name)),
-                      )
-                      .toList(),
-                  onChanged: (v) {
-                    thread = v;
-                    load();
-                  },
-                ),
-                IconButton(
-                  tooltip: l.clear,
-                  onPressed: () {
-                    query.clear();
-                    type = null;
-                    tag = thread = null;
-                    load();
-                  },
-                  icon: const Icon(Icons.filter_alt_off),
-                ),
-                IconButton(
-                  tooltip: l.trash,
-                  onPressed: () {
-                    trash = !trash;
-                    load();
-                  },
-                  icon: Icon(trash ? Icons.history : Icons.delete_outline),
-                ),
-              ],
-            ),
-          ),
-          if (failure != null) Text('${l.failed}: $failure'),
-          Expanded(
-            child: ListView.builder(
-              controller: scroll,
-              padding: const EdgeInsets.fromLTRB(12, 8, 12, 16),
-              itemCount: notes.length + (loading ? 1 : 0),
-              itemBuilder: (context, index) {
-                if (index == notes.length) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                final note = notes[index];
-                final fa = Localizations.localeOf(context).languageCode == 'fa';
-                final date = nexDisplayDate(
-                  note.createdAt,
-                  solar: fa,
-                  persian: fa,
-                );
-                final prior = index == 0
-                    ? null
-                    : nexDisplayDate(
-                        notes[index - 1].createdAt,
-                        solar: fa,
-                        persian: fa,
-                      );
-                return Column(
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Wrap(
+                  spacing: 6,
                   children: [
-                    if (date != prior)
-                      Padding(
-                        padding: const EdgeInsets.all(8),
-                        child: Text(date),
-                      ),
-                    NoteCard(
-                      note: note,
-                      showDue: false,
-                      strings: NexCardStrings(
-                        noteOfType: (type) =>
-                            '${l.note}: ${noteTypeLabel(l, NoteType.values.firstWhere((t) => t.name == type, orElse: () => NoteType.text))}',
-                        tagList: (tags) => '${l.tags}: $tags',
-                        accentColor: l.accent,
-                        durationLabel: (ms) => nexDigits(
-                          '${ms ~/ 60000}:${((ms ~/ 1000) % 60).toString().padLeft(2, '0')}',
-                          persian: fa,
-                        ),
-                        relativeTime: (time) => switch (time.unit) {
-                          NexRelativeUnit.now => l.justNow,
-                          NexRelativeUnit.minutes => l.minutesAgo(time.count),
-                          NexRelativeUnit.hours => l.hoursAgo(time.count),
-                          NexRelativeUnit.days => l.daysAgo(time.count),
-                          NexRelativeUnit.weeks => l.weeksAgo(time.count),
-                          NexRelativeUnit.months => l.monthsAgo(time.count),
-                          NexRelativeUnit.years => l.yearsAgo(time.count),
-                        },
-                      ),
-                      onTap: () {
-                        _detailRelease = NexPanelScope.maybeOf(
-                          context,
-                        )?.holdOpen();
-                        setState(() => selectedNote = note);
+                    DropdownButton<NoteType>(
+                      hint: Text(l.type),
+                      value: type,
+                      items: NoteType.values
+                          .map(
+                            (v) => DropdownMenuItem(
+                              value: v,
+                              child: Text(noteTypeLabel(l, v)),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (v) {
+                        type = v;
+                        load();
                       },
                     ),
-                    if (trash)
-                      TextButton(
-                        onPressed: () async {
-                          await store.call<void>('restore', {'id': note.id});
-                          await load();
-                        },
-                        child: Text(l.restore),
-                      ),
+                    DropdownButton<String>(
+                      hint: Text(l.tags),
+                      value: tag,
+                      items: tags
+                          .map(
+                            (v) => DropdownMenuItem(
+                              value: v.id,
+                              child: Text(v.name),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (v) {
+                        tag = v;
+                        load();
+                      },
+                    ),
+                    DropdownButton<String>(
+                      hint: Text(l.threads),
+                      value: thread,
+                      items: threads
+                          .map(
+                            (v) => DropdownMenuItem(
+                              value: v.id,
+                              child: Text(v.name),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (v) {
+                        thread = v;
+                        load();
+                      },
+                    ),
+                    IconButton(
+                      tooltip: l.clear,
+                      onPressed: () {
+                        query.clear();
+                        type = null;
+                        tag = thread = null;
+                        load();
+                      },
+                      icon: const Icon(Icons.filter_alt_off),
+                    ),
+                    IconButton(
+                      tooltip: l.trash,
+                      onPressed: () {
+                        trash = !trash;
+                        load();
+                      },
+                      icon: Icon(trash ? Icons.history : Icons.delete_outline),
+                    ),
                   ],
-                );
-              },
-            ),
+                ),
+              ),
+              if (failure != null) Text('${l.failed}: $failure'),
+              Expanded(
+                child: ListView.builder(
+                  controller: scroll,
+                  padding: const EdgeInsets.fromLTRB(12, 8, 12, 16),
+                  itemCount: notes.length + (loading ? 1 : 0),
+                  itemBuilder: (context, index) {
+                    if (index == notes.length) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    final note = notes[index];
+                    final fa =
+                        Localizations.localeOf(context).languageCode == 'fa';
+                    final date = nexDisplayDate(
+                      note.createdAt,
+                      solar: fa,
+                      persian: fa,
+                    );
+                    final prior = index == 0
+                        ? null
+                        : nexDisplayDate(
+                            notes[index - 1].createdAt,
+                            solar: fa,
+                            persian: fa,
+                          );
+                    return Column(
+                      children: [
+                        if (date != prior)
+                          Padding(
+                            padding: const EdgeInsets.all(8),
+                            child: Text(date),
+                          ),
+                        NoteCard(
+                          note: note,
+                          showDue: false,
+                          strings: NexCardStrings(
+                            noteOfType: (type) =>
+                                '${l.note}: ${noteTypeLabel(l, NoteType.values.firstWhere((t) => t.name == type, orElse: () => NoteType.text))}',
+                            tagList: (tags) => '${l.tags}: $tags',
+                            accentColor: l.accent,
+                            durationLabel: (ms) => nexDigits(
+                              '${ms ~/ 60000}:${((ms ~/ 1000) % 60).toString().padLeft(2, '0')}',
+                              persian: fa,
+                            ),
+                            relativeTime: (time) => switch (time.unit) {
+                              NexRelativeUnit.now => l.justNow,
+                              NexRelativeUnit.minutes => l.minutesAgo(
+                                time.count,
+                              ),
+                              NexRelativeUnit.hours => l.hoursAgo(time.count),
+                              NexRelativeUnit.days => l.daysAgo(time.count),
+                              NexRelativeUnit.weeks => l.weeksAgo(time.count),
+                              NexRelativeUnit.months => l.monthsAgo(time.count),
+                              NexRelativeUnit.years => l.yearsAgo(time.count),
+                            },
+                          ),
+                          onTap: () {
+                            _detailRelease = NexPanelScope.maybeOf(
+                              context,
+                            )?.holdOpen();
+                            setState(() => selectedNote = note);
+                          },
+                        ),
+                        if (trash)
+                          TextButton(
+                            onPressed: () async {
+                              await store.call<void>('restore', {
+                                'id': note.id,
+                              });
+                              await load();
+                            },
+                            child: Text(l.restore),
+                          ),
+                      ],
+                    );
+                  },
+                ),
+              ),
+              if (notes.isEmpty && !loading) Text(l.empty),
+            ],
           ),
-          if (notes.isEmpty && !loading) Text(l.empty),
-        ],
-      ),
+        );
+      },
     );
   }
 }
@@ -861,254 +1115,263 @@ class _NexNoteDetailState extends State<NexNoteDetail> {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context)!;
     final c = NexPanelScope.maybeOf(context);
-    return SizedBox(
-      width: double.infinity,
-      height: 530,
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Row(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final height = constraints.maxHeight.isFinite
+            ? constraints.maxHeight
+            : 530.0;
+        return SizedBox(
+          width: double.infinity,
+          height: height,
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  IconButton(
-                    tooltip: l.backToLibrary,
-                    onPressed: widget.onClose,
-                    icon: const BackButtonIcon(),
-                  ),
-                  Expanded(
-                    child: Text(
-                      noteTypeLabel(l, note.type),
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                  ),
-                  if (note.type == NoteType.text ||
-                      note.type == NoteType.checklist)
-                    IconButton(
-                      tooltip: editing ? l.readNote : l.editNote,
-                      onPressed: () => setState(() => editing = !editing),
-                      icon: Icon(
-                        editing ? Icons.done_rounded : Icons.edit_outlined,
+                  Row(
+                    children: [
+                      IconButton(
+                        tooltip: l.backToLibrary,
+                        onPressed: widget.onClose,
+                        icon: const BackButtonIcon(),
                       ),
-                    ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              if (editing &&
-                  (note.type == NoteType.text ||
-                      note.type == NoteType.checklist))
-                TextField(
-                  controller: editor,
-                  minLines: 3,
-                  maxLines: 10,
-                  textDirection: nexDirectionOf(editor.text),
-                  onChanged: (text) => run('capture', {'text': text}),
-                ),
-              if (note.type != NoteType.text &&
-                  note.type != NoteType.checklist) ...[
-                if (note.type == NoteType.photo && note.mediaUri != null)
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(14),
-                    child: Image.file(
-                      File(note.mediaUri!),
-                      height: 220,
-                      fit: BoxFit.contain,
-                      errorBuilder: (_, __, ___) => Padding(
-                        padding: const EdgeInsets.all(20),
-                        child: Text(l.mediaUnavailable),
+                      Expanded(
+                        child: Text(
+                          noteTypeLabel(l, note.type),
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
                       ),
-                    ),
-                  )
-                else if (note.type == NoteType.file)
-                  ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: const Icon(Icons.insert_drive_file_outlined),
-                    title: NexTextSurface(note.originalFilename ?? ''),
-                  ),
-                NexTextSurface(note.displayText ?? ''),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: caption,
-                  textDirection: nexDirectionOf(caption.text),
-                  decoration: InputDecoration(hintText: l.caption),
-                  onChanged: (text) => run('caption', {'text': text}),
-                ),
-              ],
-              if (!editing && note.type == NoteType.text)
-                NexMarkdown(note.content ?? ''),
-              if (!editing && note.type == NoteType.checklist) ...[
-                for (
-                  var i = 0;
-                  i < parseChecklist(note.content ?? '').length;
-                  i++
-                )
-                  CheckboxListTile(
-                    value: parseChecklist(note.content ?? '')[i].done,
-                    title: Text(parseChecklist(note.content ?? '')[i].text),
-                    onChanged: (_) => run('check', {'index': i}),
-                  ),
-              ],
-              if (note.type == NoteType.voice && note.mediaUri != null)
-                StreamBuilder<PlayerState>(
-                  stream: player.playerStateStream,
-                  builder: (context, state) {
-                    final playing =
-                        player.playing &&
-                        player.processingState != ProcessingState.completed;
-                    return TextButton.icon(
-                      onPressed: () async {
-                        try {
-                          if (playing) {
-                            await player.pause();
-                          } else {
-                            if (player.audioSource == null) {
-                              await player.setFilePath(note.mediaUri!);
-                            }
-                            if (player.processingState ==
-                                ProcessingState.completed) {
-                              await player.seek(Duration.zero);
-                            }
-                            unawaited(
-                              player.play().catchError((Object e) {
-                                if (mounted) {
-                                  setState(() => failure = e.toString());
-                                }
-                              }),
-                            );
-                          }
-                        } catch (e) {
-                          if (mounted) setState(() => failure = e.toString());
-                        }
-                      },
-                      icon: Icon(
-                        playing
-                            ? Icons.pause_rounded
-                            : Icons.play_arrow_rounded,
-                      ),
-                      label: Text(playing ? l.pause : l.play),
-                    );
-                  },
-                ),
-              const SizedBox(height: 12),
-              const Divider(),
-              Wrap(
-                children: [
-                  TextButton(
-                    onPressed: () => Clipboard.setData(
-                      ClipboardData(text: note.copyText ?? ''),
-                    ),
-                    child: Text(l.copy),
-                  ),
-                  if (note.mediaUri != null)
-                    TextButton(
-                      onPressed: c == null
-                          ? null
-                          : () => c.native.launch(note.mediaUri!),
-                      child: Text(l.open),
-                    ),
-                  TextButton(
-                    onPressed: () =>
-                        run(note.pinnedAt == null ? 'pin' : 'unpin', {}),
-                    child: Text(note.pinnedAt == null ? l.pin : l.unpin),
-                  ),
-                  TextButton(
-                    onPressed: () async {
-                      await run('delete', {});
-                      if (context.mounted && failure == null) {
-                        final features = NexScope.of(context);
-                        if (features.session.id == note.id) {
-                          await features.fresh();
-                        }
-                        if (!context.mounted) return;
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(l.deleted),
-                            action: SnackBarAction(
-                              label: l.undo,
-                              onPressed: () => features.guard(
-                                () => features.store.call<void>('restore', {
-                                  'id': note.id,
-                                }),
-                              ),
-                            ),
+                      if (note.type == NoteType.text ||
+                          note.type == NoteType.checklist)
+                        IconButton(
+                          tooltip: editing ? l.readNote : l.editNote,
+                          onPressed: () => setState(() => editing = !editing),
+                          icon: Icon(
+                            editing ? Icons.done_rounded : Icons.edit_outlined,
                           ),
-                        );
-                        widget.onClose();
-                      }
-                    },
-                    child: Text(l.delete),
+                        ),
+                    ],
                   ),
-                ],
-              ),
-              Wrap(
-                children: note.tags
-                    .map(
-                      (t) => InputChip(
-                        label: Text(t.name),
-                        onDeleted: () => run('untag', {'tag': t.id}),
+                  const SizedBox(height: 12),
+                  if (editing &&
+                      (note.type == NoteType.text ||
+                          note.type == NoteType.checklist))
+                    TextField(
+                      controller: editor,
+                      minLines: 3,
+                      maxLines: 10,
+                      textDirection: nexDirectionOf(editor.text),
+                      onChanged: (text) => run('capture', {'text': text}),
+                    ),
+                  if (note.type != NoteType.text &&
+                      note.type != NoteType.checklist) ...[
+                    if (note.type == NoteType.photo && note.mediaUri != null)
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(14),
+                        child: Image.file(
+                          File(note.mediaUri!),
+                          height: 220,
+                          fit: BoxFit.contain,
+                          errorBuilder: (_, __, ___) => Padding(
+                            padding: const EdgeInsets.all(20),
+                            child: Text(l.mediaUnavailable),
+                          ),
+                        ),
+                      )
+                    else if (note.type == NoteType.file)
+                      ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        leading: const Icon(Icons.insert_drive_file_outlined),
+                        title: NexTextSurface(note.originalFilename ?? ''),
                       ),
+                    NexTextSurface(note.displayText ?? ''),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: caption,
+                      textDirection: nexDirectionOf(caption.text),
+                      decoration: InputDecoration(hintText: l.caption),
+                      onChanged: (text) => run('caption', {'text': text}),
+                    ),
+                  ],
+                  if (!editing && note.type == NoteType.text)
+                    NexMarkdown(note.content ?? ''),
+                  if (!editing && note.type == NoteType.checklist) ...[
+                    for (
+                      var i = 0;
+                      i < parseChecklist(note.content ?? '').length;
+                      i++
                     )
-                    .toList(),
-              ),
-              const SizedBox(height: 12),
-              ExpansionTile(
-                title: Text(l.tagsAndThreads),
-                tilePadding: EdgeInsets.zero,
-                children: [
-                  TextField(
-                    controller: tag,
-                    textDirection: nexDirectionOf(tag.text),
-                    decoration: InputDecoration(hintText: l.addTag),
-                    onSubmitted: (name) async {
-                      await run('tag', {'name': name});
-                      tag.clear();
-                    },
-                  ),
-                  TextField(
-                    controller: thread,
-                    textDirection: nexDirectionOf(thread.text),
-                    decoration: InputDecoration(hintText: l.addThread),
-                    onSubmitted: (name) async {
-                      await run('thread', {'name': name});
-                      thread.clear();
-                    },
+                      CheckboxListTile(
+                        value: parseChecklist(note.content ?? '')[i].done,
+                        title: Text(parseChecklist(note.content ?? '')[i].text),
+                        onChanged: (_) => run('check', {'index': i}),
+                      ),
+                  ],
+                  if (note.type == NoteType.voice && note.mediaUri != null)
+                    StreamBuilder<PlayerState>(
+                      stream: player.playerStateStream,
+                      builder: (context, state) {
+                        final playing =
+                            player.playing &&
+                            player.processingState != ProcessingState.completed;
+                        return TextButton.icon(
+                          onPressed: () async {
+                            try {
+                              if (playing) {
+                                await player.pause();
+                              } else {
+                                if (player.audioSource == null) {
+                                  await player.setFilePath(note.mediaUri!);
+                                }
+                                if (player.processingState ==
+                                    ProcessingState.completed) {
+                                  await player.seek(Duration.zero);
+                                }
+                                unawaited(
+                                  player.play().catchError((Object e) {
+                                    if (mounted) {
+                                      setState(() => failure = e.toString());
+                                    }
+                                  }),
+                                );
+                              }
+                            } catch (e) {
+                              if (mounted) {
+                                setState(() => failure = e.toString());
+                              }
+                            }
+                          },
+                          icon: Icon(
+                            playing
+                                ? Icons.pause_rounded
+                                : Icons.play_arrow_rounded,
+                          ),
+                          label: Text(playing ? l.pause : l.play),
+                        );
+                      },
+                    ),
+                  const SizedBox(height: 12),
+                  const Divider(),
+                  Wrap(
+                    children: [
+                      TextButton(
+                        onPressed: () => Clipboard.setData(
+                          ClipboardData(text: note.copyText ?? ''),
+                        ),
+                        child: Text(l.copy),
+                      ),
+                      if (note.mediaUri != null)
+                        TextButton(
+                          onPressed: c == null
+                              ? null
+                              : () => c.native.launch(note.mediaUri!),
+                          child: Text(l.open),
+                        ),
+                      TextButton(
+                        onPressed: () =>
+                            run(note.pinnedAt == null ? 'pin' : 'unpin', {}),
+                        child: Text(note.pinnedAt == null ? l.pin : l.unpin),
+                      ),
+                      TextButton(
+                        onPressed: () async {
+                          await run('delete', {});
+                          if (context.mounted && failure == null) {
+                            final features = NexScope.of(context);
+                            if (features.session.id == note.id) {
+                              await features.fresh();
+                            }
+                            if (!context.mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(l.deleted),
+                                action: SnackBarAction(
+                                  label: l.undo,
+                                  onPressed: () => features.guard(
+                                    () => features.store.call<void>('restore', {
+                                      'id': note.id,
+                                    }),
+                                  ),
+                                ),
+                              ),
+                            );
+                            widget.onClose();
+                          }
+                        },
+                        child: Text(l.delete),
+                      ),
+                    ],
                   ),
                   Wrap(
-                    children: memberships
+                    children: note.tags
                         .map(
                           (t) => InputChip(
                             label: Text(t.name),
-                            onDeleted: () =>
-                                run('leaveThread', {'thread': t.id}),
+                            onDeleted: () => run('untag', {'tag': t.id}),
                           ),
                         )
                         .toList(),
                   ),
-                  DropdownButton<String>(
-                    hint: Text(l.joinThread),
-                    isExpanded: true,
-                    items: availableThreads
-                        .where((t) => !memberships.any((m) => m.id == t.id))
-                        .map(
-                          (t) => DropdownMenuItem(
-                            value: t.id,
-                            child: Text(t.name),
-                          ),
-                        )
-                        .toList(),
-                    onChanged: (id) {
-                      if (id != null) run('joinThread', {'thread': id});
-                    },
+                  const SizedBox(height: 12),
+                  ExpansionTile(
+                    title: Text(l.tagsAndThreads),
+                    tilePadding: EdgeInsets.zero,
+                    children: [
+                      TextField(
+                        controller: tag,
+                        textDirection: nexDirectionOf(tag.text),
+                        decoration: InputDecoration(hintText: l.addTag),
+                        onSubmitted: (name) async {
+                          await run('tag', {'name': name});
+                          tag.clear();
+                        },
+                      ),
+                      TextField(
+                        controller: thread,
+                        textDirection: nexDirectionOf(thread.text),
+                        decoration: InputDecoration(hintText: l.addThread),
+                        onSubmitted: (name) async {
+                          await run('thread', {'name': name});
+                          thread.clear();
+                        },
+                      ),
+                      Wrap(
+                        children: memberships
+                            .map(
+                              (t) => InputChip(
+                                label: Text(t.name),
+                                onDeleted: () =>
+                                    run('leaveThread', {'thread': t.id}),
+                              ),
+                            )
+                            .toList(),
+                      ),
+                      DropdownButton<String>(
+                        hint: Text(l.joinThread),
+                        isExpanded: true,
+                        items: availableThreads
+                            .where((t) => !memberships.any((m) => m.id == t.id))
+                            .map(
+                              (t) => DropdownMenuItem(
+                                value: t.id,
+                                child: Text(t.name),
+                              ),
+                            )
+                            .toList(),
+                        onChanged: (id) {
+                          if (id != null) run('joinThread', {'thread': id});
+                        },
+                      ),
+                    ],
                   ),
+                  if (failure != null) Text('${l.failed}: $failure'),
                 ],
               ),
-              if (failure != null) Text('${l.failed}: $failure'),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

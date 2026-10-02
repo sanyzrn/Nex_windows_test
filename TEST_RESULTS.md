@@ -1,5 +1,23 @@
 # Observed validation — 2026-10-02
 
+## Window mode, fixes and audit — 0.10.0+6 (Linux validation)
+
+This pass was developed and checked on Linux x64 with Flutter 3.35.5 / Dart 3.9.2 (the historical 0.9.0 toolchain). No Windows build, installer or native run was produced here; those steps are the owner's to re-run on Windows.
+
+| Check | Observed result |
+| --- | --- |
+| `dart format lib test` | PASS |
+| `flutter gen-l10n` after ARB edits | PASS; both locales regenerated |
+| `python tools/generate_utility_strings.py` | PASS; content identical to committed file |
+| `flutter analyze --no-pub` | PASS; No issues found |
+| `flutter test --no-pub` | **29 passed, 8 failed** — all 8 failures are golden image comparisons (`right_shell`, `left_shell`, `calculator_height`, `emoji_panel`, `more_panel`, `settings_light`, `capture_en`, `reader_fa`) |
+| Golden failures vs unmodified source on the same machine | **Identical set of failures** on the pristine 00abf70 checkout (verified via `git stash`); diffs are 0.59–6.00% pixel-level font rasterization differences between Windows and Linux, which the README already documents as requiring Windows review. This is an environment limitation, not a regression. |
+| New `test/window_shell_test.dart` | PASS; 5 tests: window shell navigation + tool directory/back, durable capture through the wide editor, mode switching with recorded native `setWindowMode`/`windowFrame` calls and frame persistence, settings round-trip of `windowMode`/`windowBounds`/`windowMaximized` (legacy JSON defaults to window mode), blur/edge-watch dormant in window mode |
+
+The C++ runner changes (`SetWindowMode`, `WindowFrame`, `FocusWindow`, `WM_GETMINMAXINFO`, window-mode gating of `SetPassthrough`/`WM_APP_PLACEMENT`, first-frame show gating) compile-validated by review only — **no MSVC build was run in this environment**. Windows re-validation must cover: Release build, installer build, window resize/min/max/restore, frame persistence across restarts, monitor unplug (frame re-validation), tray/hotkey/second-instance routing in window mode, `--background` startup, and the `--native-smoke` probe with forced panel mode.
+
+Fixed in this pass (with automated coverage where testable): clipboard Clear wipes pinned entries (now preserved; pinned text restored into the boot list), failed voice import keeps its recoverable WAV while success deletes it, `fresh()` no longer throws unhandled after a failed prior session write, hotkey collision surfaces a localized message, emoji/units empty states localized, dock auto-scrolls to the active tool, panel-shell geometry hooks cleared on dispose to prevent stale-closure calls after a mode switch.
+
 ## Standalone repository publication
 
 For `sanyzrn/Nex_windows_test`, the final desktop source was copied from the validated handoff ZIP and accompanied by the four required Nex packages at the recorded base, including the two already-applied shared changes. The original upstream repositories are unchanged. The standalone checkout passed `flutter pub get`, `flutter analyze --no-pub` (no issues), and `flutter test --no-pub --reporter expanded` (**32 passed**, including 10 golden comparisons), using Flutter 3.35.5 / Dart 3.9.2 and the lockfile's documented mirror hosts. The source ZIP is in `releases/1.92.1.4`; `SHA256SUMS` records the original validated hashes of the ZIP and the separately distributed installer. Generated files, caches, toolchains and runtime user data are excluded from Git.

@@ -17,6 +17,7 @@ Future<void> _boot(WidgetTester tester, {String theme = 'midnight'}) async {
   addTearDown(tester.view.reset);
   final controller = PanelController(nativeHost: _FakeNative());
   final settings = Settings()
+    ..windowMode = 'panel'
     ..theme = theme
     ..language = 'en';
   await controller.bootstrap(preset: settings, useNative: false);

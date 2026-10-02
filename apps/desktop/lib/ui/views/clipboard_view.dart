@@ -55,7 +55,8 @@ class _ClipboardViewState extends State<ClipboardView> {
           trailing: LinkButton(
             label: utilityLabel(context, 'utility2'),
             onTap: () {
-              c.clips = [];
+              // Pinned entries survive a clear; only unpinned history goes.
+              c.clips = c.clips.where((x) => x.pinned).toList();
               setState(() {});
             },
           ),
@@ -92,8 +93,7 @@ class _ClipboardViewState extends State<ClipboardView> {
   }
 
   void _backToMore(PanelController c) {
-    c.anchorY = c.fy.v;
-    c.setPanel('more', fromMore: true);
+    c.backToTools();
   }
 }
 

@@ -1507,6 +1507,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Paste image'**
   String get pastePhoto;
+
+  /// No description provided for @navCapture.
+  ///
+  /// In en, this message translates to:
+  /// **'Capture'**
+  String get navCapture;
+
+  /// No description provided for @navTools.
+  ///
+  /// In en, this message translates to:
+  /// **'Tools'**
+  String get navTools;
+
+  /// No description provided for @interfaceMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Interface mode'**
+  String get interfaceMode;
+
+  /// No description provided for @windowMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Window'**
+  String get windowMode;
+
+  /// No description provided for @panelMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Edge panel'**
+  String get panelMode;
+
+  /// No description provided for @modeDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'The desktop window is the main experience; the edge panel stays available for quick capture. Both share the same notes, media and settings.'**
+  String get modeDescription;
+
+  /// No description provided for @edgePanelOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Applies to the edge panel — switch the interface mode to use it.'**
+  String get edgePanelOnly;
+
+  /// No description provided for @switchToPanel.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to edge panel'**
+  String get switchToPanel;
+
+  /// No description provided for @switchToWindow.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to window'**
+  String get switchToWindow;
+
+  /// No description provided for @backToTools.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to tools'**
+  String get backToTools;
+
+  /// No description provided for @toolsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a tool to open it'**
+  String get toolsHint;
+
+  /// No description provided for @noEmojiFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No emoji found'**
+  String get noEmojiFound;
+
+  /// No description provided for @nothingYet.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing yet'**
+  String get nothingYet;
+
+  /// No description provided for @unknownUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown unit'**
+  String get unknownUnit;
+
+  /// No description provided for @hotkeyInUse.
+  ///
+  /// In en, this message translates to:
+  /// **'That shortcut is already used by another app'**
+  String get hotkeyInUse;
 }
 
 class _AppLocalizationsDelegate

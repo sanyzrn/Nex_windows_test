@@ -33,9 +33,8 @@ class AppItem {
 
 /// A clipboard history entry: either plain text or an image.
 class ClipEntry {
-  ClipEntry.text(this.text, {required this.time})
-    : image = null,
-      pinned = false;
+  ClipEntry.text(this.text, {required this.time, this.pinned = false})
+    : image = null;
 
   ClipEntry.image(this.image, {required this.time, this.pinned = false})
     : text = null;

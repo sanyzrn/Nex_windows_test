@@ -25,6 +25,7 @@ Future<PanelController> boot(
   final c = PanelController();
   await c.bootstrap(
     preset: Settings()
+      ..windowMode = 'panel'
       ..edge = edge
       ..language = 'fa',
     useNative: false,

@@ -167,8 +167,7 @@ class _ColorViewState extends State<ColorView> {
   }
 
   void _backToMore(PanelController c) {
-    c.anchorY = c.fy.v;
-    c.setPanel('more', fromMore: true);
+    c.backToTools();
   }
 }
 

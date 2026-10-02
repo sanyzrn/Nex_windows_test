@@ -34,6 +34,22 @@ abstract class NativeHost {
   Future<Map<String, dynamic>?> applyPlacement(String edge, int monitor);
   Future<List<Map<String, dynamic>>> screens();
   Future<void> ready();
+
+  /// Restyles the host between the full desktop window and the edge panel.
+  /// [bounds] is the saved frame (x/y/w/h, physical px) to restore, if any.
+  /// No-op off Windows so tests and stubs work unchanged.
+  Future<void> setWindowMode(
+    String mode, {
+    Map<String, dynamic>? bounds,
+    bool maximized = false,
+    bool show = true,
+  }) async {}
+
+  /// Current desktop-window frame {x, y, w, h, maximized} for persistence.
+  Future<Map<String, dynamic>?> windowFrame() async => null;
+
+  /// Restores (if minimized) and brings the window to the foreground.
+  Future<void> focusWindow() async {}
   Future<bool> configureHotkey(String key) async => false;
   Future<ClipImage?> currentClipboardImage() async => null;
   Future<void> setLabels(Map<String, String> labels) async {}
@@ -315,6 +331,29 @@ class WinNativeHost extends NativeHost {
 
   @override
   Future<void> ready() => _channel.invokeMethod('ready');
+
+  @override
+  Future<void> setWindowMode(
+    String mode, {
+    Map<String, dynamic>? bounds,
+    bool maximized = false,
+    bool show = true,
+  }) => _channel.invokeMethod('setWindowMode', {
+    'mode': mode,
+    if (bounds != null) ...bounds,
+    'maximized': maximized,
+    'show': show,
+  });
+
+  @override
+  Future<Map<String, dynamic>?> windowFrame() async {
+    final v = await _channel.invokeMethod('windowFrame');
+    if (v is Map) return v.cast<String, dynamic>();
+    return null;
+  }
+
+  @override
+  Future<void> focusWindow() => _channel.invokeMethod('focusWindow');
 
   // ---- FFI: cursor + left button ----
   ffi.DynamicLibrary? _user32;
