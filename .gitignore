@@ -18,3 +18,5 @@ installer-toolchain/
 .env
 .env.*
 !*.example
+# Installer binaries are published as GitHub Release assets.
+/releases/1.92.1.4/*.exe

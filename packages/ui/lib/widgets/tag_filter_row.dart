@@ -1,0 +1,193 @@
+import 'package:flutter/material.dart';
+import 'package:nex_core/nex_core.dart';
+
+import '../tokens/nex_tokens.dart';
+import 'nex_tappable.dart';
+
+/// Horizontally scrolling tag filter pills (mockup `.filter-row` / FR-4).
+///
+/// "All" is active when [selectedTagIds] is empty; any number of tags can be
+/// on at once, and turning the last one off is the same as tapping "All".
+/// Each tag shows its accent dot.
+class TagFilterRow extends StatelessWidget {
+  const TagFilterRow({
+    super.key,
+    required this.tags,
+    required this.selectedTagIds,
+    required this.onSelected,
+    this.showAll = true,
+    this.hasOtherFilters = false,
+    this.onClearAll,
+    this.activeFilterLabel = '',
+    this.onOpenActiveFilter,
+    this.tagLabel,
+    this.allLabel = 'All',
+    this.leading,
+    this.trailing,
+    this.padding = const EdgeInsets.fromLTRB(
+      NexSpacing.md,
+      NexSpacing.md,
+      NexSpacing.md,
+      NexSpacing.sm,
+    ),
+  });
+
+  final List<Tag> tags;
+
+  /// Every tag the list is being narrowed to, which is a set rather than one
+  /// id: a row of pills where picking the second one silently drops the first
+  /// is a row that cannot answer "these two".
+  ///
+  /// Empty means no filter — the same thing "All" says.
+  final Set<String> selectedTagIds;
+
+  /// The whole new selection, not the pill that was tapped. Toggling is
+  /// decided here so that every caller gets the same answer to "what happens
+  /// when the last one is turned off", which is: back to All.
+  final ValueChanged<Set<String>> onSelected;
+  final bool showAll;
+  final bool hasOtherFilters;
+  final VoidCallback? onClearAll;
+  final String activeFilterLabel;
+  final VoidCallback? onOpenActiveFilter;
+  final String Function(Tag)? tagLabel;
+
+  /// Label of the "clear the filter" pill. The design system carries no
+  /// localizations of its own, so the app passes the translated string in —
+  /// otherwise this pill stayed English in a Persian UI.
+  final String allLabel;
+
+  /// Sits before the "All" pill — the mockup's icon button, which opens the
+  /// filters that are not tags.
+  final Widget? leading;
+
+  final Widget? trailing;
+  final EdgeInsetsGeometry padding;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      padding: padding,
+      child: Row(
+        children: [
+          if (leading != null)
+            Padding(
+              padding: const EdgeInsetsDirectional.only(end: NexSpacing.sm),
+              child: leading,
+            ),
+          if (showAll)
+            Padding(
+              padding: const EdgeInsetsDirectional.only(end: NexSpacing.sm),
+              child: _Pill(
+                label: allLabel,
+                selected: selectedTagIds.isEmpty && !hasOtherFilters,
+                // Clears rather than toggles. "All" is the absence of a
+                // filter, and tapping the absence of a filter cannot put one
+                // back.
+                onTap: onClearAll ?? () => onSelected(const {}),
+                theme: theme,
+              ),
+            ),
+          if (hasOtherFilters && activeFilterLabel.isNotEmpty)
+            Padding(
+              padding: const EdgeInsetsDirectional.only(end: NexSpacing.sm),
+              child: _Pill(
+                label: activeFilterLabel,
+                selected: true,
+                onTap: onOpenActiveFilter ?? onClearAll ?? () {},
+                theme: theme,
+              ),
+            ),
+          for (final tag in tags)
+            Padding(
+              padding: const EdgeInsetsDirectional.only(end: NexSpacing.sm),
+              child: _Pill(
+                label: tagLabel?.call(tag) ?? tag.name,
+                selected: selectedTagIds.contains(tag.id),
+                accent: tag.color,
+                onTap: () => onSelected(
+                  selectedTagIds.contains(tag.id)
+                      ? (selectedTagIds.toSet()..remove(tag.id))
+                      : (selectedTagIds.toSet()..add(tag.id)),
+                ),
+                theme: theme,
+              ),
+            ),
+          if (trailing != null) trailing!,
+        ],
+      ),
+    );
+  }
+}
+
+class _Pill extends StatelessWidget {
+  const _Pill({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+    required this.theme,
+    this.accent,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+  final ThemeData theme;
+  final String? accent;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = theme.colorScheme;
+    // Selection is the accent's job now. It used to invert to near-black,
+    // which reads as "disabled" or "inverted" rather than "this is the filter
+    // you are looking through" — and left the app with no way at all to say
+    // that something is active.
+    final bg = selected
+        ? scheme.primary.withValues(alpha: 0.12)
+        : scheme.surfaceContainerLowest;
+    final fg = selected ? scheme.primary : scheme.onSurface;
+    // A tag with no colour used to get a grey dot, which reads as a broken
+    // swatch rather than as an absence.
+    final dot = accent == null ? null : nexParseTagColor(accent);
+    return NexTappable(
+      onTap: onTap,
+      selected: selected,
+      semanticLabel: label,
+      shape: const StadiumBorder(),
+      child: Material(
+        color: bg,
+        shape: StadiumBorder(
+          side: BorderSide(color: selected ? scheme.primary : scheme.outline),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: NexSpacing.md,
+            vertical: NexSpacing.sm,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (dot != null) ...[
+                Container(
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(color: dot, shape: BoxShape.circle),
+                ),
+                const SizedBox(width: NexSpacing.sm),
+              ],
+              Text(
+                label,
+                // Through the theme, so the most-used control on the timeline
+                // is not the one thing typeset outside the design system — and
+                // so it follows the app's face rather than the platform's.
+                style: theme.textTheme.labelLarge?.copyWith(color: fg),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
