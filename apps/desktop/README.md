@@ -57,7 +57,7 @@ flutter pub get
 flutter run -d windows
 ```
 
-Install the Flutter Windows build prerequisites, including Visual Studio's Desktop development with C++ workload. Keep all four relative package dependencies. The Dart package name `right_panel` is retained for the port's test imports; the product/window/executable are Nex / `nex_desktop.exe`, version `1.92.1+4`.
+Install the Flutter Windows build prerequisites, including Visual Studio's Desktop development with C++ workload. Keep all four relative package dependencies. The Dart package name `right_panel` is retained for the port's test imports; the product/window/executable are Nex / `nex_desktop.exe`, version `0.9.0+5`.
 
 ```powershell
 dart format lib test
@@ -123,9 +123,9 @@ For local troubleshooting only, an adjacent `diagnostics.flag` enables a geometr
 
 Distribute the **entire** `build/windows/x64/runner/Release/` directory together: `nex_desktop.exe`, Flutter runtime, every plugin/runtime DLL, native assets, `data/app.so`, `data/icudtl.dat` and all `data/flutter_assets/`. Keep their relative paths. The raw executable alone is not a portable distribution.
 
-At the owner's follow-up request, `installer/nex.iss` and `tools/build_installer.ps1` package the full bundle and app-local Microsoft C++ runtimes as `Nex-Windows-Setup-1.92.1.4-x64.exe`. The installer is supplied separately from the source ZIP, installs per user, supports Persian/English and preserves note/media/settings data on uninstall. See `installer/README.md` for reproducible build commands and signing status. This handoff ZIP remains source-only, with no compiled bundle, installer binary or toolchain/cache files.
+At the owner's follow-up request, `installer/nex.iss` and `tools/build_installer.ps1` package the full bundle and app-local Microsoft C++ runtimes as `Nex-Windows-Setup-0.9.0-x64.exe`. The installer is supplied separately from the source ZIP, installs per user, supports Persian/English and preserves note/media/settings data on uninstall. See `installer/README.md` for reproducible build commands and signing status. This handoff ZIP remains source-only, with no compiled bundle, installer binary or toolchain/cache files.
 
-## Usability repair — 1.92.1+4
+## Usability repair — 0.9.0+5
 
 The header pin keeps the panel open, persists across launches, and is independent of a note's library pin. Explicit Close/Escape still closes it. Typing, reading a note, menus, file selection and recording hold the host open. Hovering another dock tool cannot replace a held editor/reader. Detail is inline, with a reader first and an explicit Edit action; tags/threads are collapsed. The desktop theme uses Nex colours/fonts with lighter input fills, consistent rounded controls, compact native icons and softer shadows. The active liquid pill paints below its glyph.
 

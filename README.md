@@ -1,12 +1,12 @@
 # Nex Windows test
 
-نسخهٔ نهایی **1.92.1+4** از Nex برای ویندوز، بر پایهٔ پروژهٔ Flutter Right Panel.
+نسخهٔ آزمایشی ویندوز **0.9.0** (build 5) از Nex برای ویندوز، بر پایهٔ پروژهٔ Flutter Right Panel.
 
 ## دریافت نسخهٔ آماده
 
-- [نصاب ویندوز x64 — 1.92.1.4](https://github.com/sanyzrn/Nex_windows_test/releases/download/v1.92.1.4/Nex-Windows-Setup-1.92.1.4-x64.exe)
-- [ZIP سورس و گزارش تحویل](releases/1.92.1.4/nex-desktop-2026-10-02.zip)
-- [SHA-256 فایل‌ها](releases/1.92.1.4/SHA256SUMS)
+- [نصاب ویندوز x64 — 0.9.0](https://github.com/sanyzrn/Nex_windows_test/releases/download/v0.9.0/Nex-Windows-Setup-0.9.0-x64.exe)
+- [ZIP سورس همگام با این نسخه](https://github.com/sanyzrn/Nex_windows_test/releases/download/v0.9.0/nex-windows-0.9.0-source.zip)
+- [SHA-256 فایل‌ها](https://github.com/sanyzrn/Nex_windows_test/releases/download/v0.9.0/SHA256SUMS)
 
 فایل نصبی از GitHub Release دریافت می‌شود، شامل تمام وابستگی‌های اجرایی است و برای کاربر جاری نصب می‌شود. برای دریافت ZIP از صفحهٔ فایل GitHub، گزینهٔ **Download raw file** را بزنید. پیش از به‌روزرسانی، Nex را ببندید. داده‌های یادداشت‌ها با به‌روزرسانی حفظ می‌شوند. این نصاب آزمایشی امضای دیجیتال ندارد.
 
@@ -46,8 +46,8 @@ flutter build windows --release --no-pub
 | `apps/desktop` | سورس Flutter، کد native ویندوز، تست‌ها، فونت‌ها و ابزار ساخت نصاب |
 | `packages/core`, `data`, `ui`, `ai` | پکیج‌های لازم Nex با تغییرات مشترک نهایی |
 | `patches` | دو patch برای اعمال تغییرات مشترک به checkout اصلی Nex |
-| `HANDOFF.md`, `TEST_RESULTS.md` | گزارش تحویل و اعتبارسنجی نسخهٔ 1.92.1.4 |
-| `releases/1.92.1.4` | ZIP نهایی سورس و checksum هر دو فایل تحویلی؛ نصاب در GitHub Release قرار می‌گیرد |
+| `HANDOFF.md`, `TEST_RESULTS.md` | گزارش تحویل و اعتبارسنجی نسخهٔ 0.9.0 |
+| `releases` | آرشیو تحویل‌های قبلی؛ فایل‌های نسخهٔ جاری در GitHub Release قرار می‌گیرند |
 
 Nex packages originate from [sanyzrn/DbsNex](https://github.com/sanyzrn/DbsNex), base `4861feac41530c951cb9e637ff921c6472d7de58`. Desktop shell uses the owner's extracted `right_panel_flutter.zip`; the original [raminturne/right-panel](https://github.com/raminturne/right-panel) at `90dcdbde8e33816f08b681c65cd341aa796f81e4` was a read-only reference. No changes were pushed to either upstream repository.
 

@@ -220,7 +220,7 @@ class _NexSettingsViewState extends State<NexSettingsView> {
             onPressed: () => showLicensePage(
               context: context,
               applicationName: 'Nex',
-              applicationVersion: '1.92.1 desktop base',
+              applicationVersion: '0.9.0 (Windows preview)',
             ),
             child: Text(l.about),
           ),
