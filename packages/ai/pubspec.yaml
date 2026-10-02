@@ -1,0 +1,41 @@
+name: nex_ai
+description: >-
+  Nex's AI layer: the cloud provider adapters, the record of what they sent
+  (lib/cloud.dart), and the on-device chat runtime (lib/nex_ai.dart). The
+  on-device half must stay removable (ADR-035, docs/09-ai.md).
+publish_to: "none"
+version: 0.1.0
+
+environment:
+  sdk: ">=3.9.0"
+  flutter: ">=3.35.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  # The cloud provider layer (lib/cloud.dart, ADR-035): talking to the
+  # providers, and the on-device record of every request (ADR-033).
+  http: ^1.2.2
+  meta: ^1.16.0
+  nex_core:
+    path: ../core
+  path: ^1.9.1
+  # LiteRT-LM, not llama.cpp. Phase 0 pinned llama_cpp_dart and every
+  # benchmark after it measured that runtime's CPU build — the same phone runs
+  # a larger model roughly ten times faster over OpenCL through this one. See
+  # 09-ai.md, "the benchmark measured the wrong runtime".
+  #
+  # Preserve the existing runtime dependency during the Windows SDK update.
+  # Choosing a different AI runtime is separate from SDK compatibility.
+  flutter_litert_lm: ^0.3.0
+
+dev_dependencies:
+  # flutter_test, not test: this package carries a Flutter dependency as of
+  # Phase 1, so it moved out of CI's Dart-only matrix. That matrix exists to
+  # prove packages/core and packages/data need no Flutter; nex_ai never made
+  # that claim, and on-device inference could not honour it.
+  flutter_test:
+    sdk: flutter
+  lints: ^5.0.0
+  nex_data:
+    path: ../data

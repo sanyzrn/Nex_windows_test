@@ -1,0 +1,54 @@
+name: right_panel
+description: "Nex for Windows, using the corrected Flutter Right Panel shell."
+publish_to: "none"
+version: 0.10.0+6
+
+environment:
+  sdk: ">=3.9.0"
+  flutter: ">=3.35.0"
+
+# No WebView, no wrapper: the whole UI is real Flutter/Dart.
+dependencies:
+  flutter:
+    sdk: flutter
+  # Pure-Dart time zone database for the world clock (no native code involved).
+  flutter_localizations:
+    sdk: flutter
+  intl: ^0.20.2
+  nex_core:
+    path: ../../packages/core
+  nex_data:
+    path: ../../packages/data
+  nex_ui:
+    path: ../../packages/ui
+  nex_ai:
+    path: ../../packages/ai
+  file_selector: ^1.0.3
+  path_provider: ^2.1.5
+  shared_preferences: ^2.3.3
+  sqlite3_flutter_libs: ^0.5.28
+  path: ^1.9.1
+  record: ^6.1.1
+  just_audio: ^0.10.0
+  just_audio_windows: ^0.2.2
+  timezone: ^0.10.1
+  # Official FFI helpers (malloc/free) for the tiny user32 calls.
+  ffi: ^2.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
+  generate: true
+  assets:
+    - assets/notices/
+  fonts:
+    - family: Vazirmatn
+      fonts:
+        - asset: assets/fonts/VazirmatnVariable.ttf
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter-subset.ttf
