@@ -52,7 +52,7 @@ git apply patches/01-shared-backup.patch
 git apply --check patches/02-shared-theme-presets.patch
 git apply patches/02-shared-theme-presets.patch
 cd apps/desktop
-flutter --version # use Flutter 3.35.x / Dart 3.9; validation used 3.35.5 / 3.9.2
+flutter --version # minimum Flutter 3.35.0 / Dart 3.9.0; use installed SDK, no upper bound
 flutter pub get
 flutter run -d windows
 ```

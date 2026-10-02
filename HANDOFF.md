@@ -6,6 +6,10 @@ This repository is the working project for **Nex for Windows**. The intended pro
 
 **Windows version: 0.9.0+5, public release v0.9.0.** Windows has its own pre-1.0 version sequence. Android's 1.92.1 identifies the upstream reference only; never reuse it as the Windows product version. Windows is still a preview and is not ready for a 1.0 claim. Preserve an independent Windows version until the owner explicitly approves readiness.
 
+## Current SDK policy
+
+The owner has Flutter **3.44.8 / Dart 3.12.2** installed on Windows. Use that system SDK; project requirements remain: minimum Flutter **3.35.0**, minimum Dart **3.9.0**, with no upper SDK bounds. The exact `.fvmrc` pin was removed. Do not download an older SDK or downgrade system Flutter to reproduce the historical toolchain. Existing 0.9.0 installer/test evidence below was produced with Flutter 3.35.5 / Dart 3.9.2; it does not certify a new build on the current SDK. Keep that history distinct from current validation. SDK-policy update check: `flutter pub get` succeeded and `flutter analyze --no-pub` reported no issues on the installed Flutter 3.44.8 / Dart 3.12.2. No new installer or runtime validation was produced by this configuration-only change.
+
 ## Where the implementation lives
 
 - `apps/desktop`: the actual Windows Flutter application, native runner/bridge, translations, assets, tests and installer sources.
@@ -29,7 +33,7 @@ The source on `main`, Windows version strings, About screen, executable version 
 
 # Nex Windows — 2026-10-02
 
-Nex base: **4861feac41530c951cb9e637ff921c6472d7de58**, Android **1.92.1**. Toolchain: Flutter **3.35.5 / Dart 3.9.2**, Windows x64. The owner confirmed this workspace is the extracted `right_panel_flutter.zip`; it is the implementation base. Canonical Right Panel was inspected read-only at **90dcdbde8e33816f08b681c65cd341aa796f81e4** and remains unmodified. MIT attribution is included.
+Nex base: **4861feac41530c951cb9e637ff921c6472d7de58**, Android **1.92.1**. Historical 0.9.0 build toolchain: Flutter **3.35.5 / Dart 3.9.2**, Windows x64. The owner confirmed this workspace is the extracted `right_panel_flutter.zip`; it is the implementation base. Canonical Right Panel was inspected read-only at **90dcdbde8e33816f08b681c65cd341aa796f81e4** and remains unmodified. MIT attribution is included.
 
 The latest desktop is **0.9.0+5**, with separate unsigned installer **Nex-Windows-Setup-0.9.0-x64.exe**. It adds a persisted panel pin, protects typing/reading/pickers/menus/recording from auto-hide, replaces note dialogs with an inline reader/edit flow, and improves glyphs, spacing, fills and shadows. The active pill paints beneath its icon. Separate image/audio/file choosers show errors and report cancellation honestly. Unclickable lower controls were caused by Opacity bounds preceding the flyout translation; transformed hit testing now works on both physical edges. Windows audio session activation is disabled for the desktop player; a copied WAV actually played to completion.
 

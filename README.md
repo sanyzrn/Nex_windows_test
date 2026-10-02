@@ -14,7 +14,9 @@
 
 این مخزن مستقل است: `apps/desktop` و هر چهار پکیج موردنیاز Nex در `packages` قرار دارند. تغییرات مشترک backup/theme از قبل اعمال شده‌اند؛ فایل‌های `patches` صرفاً برای تحویل به مخزن اصلی Nex نگه داشته شده‌اند و **در این مخزن نباید دوباره اعمال شوند**.
 
-نیازمندی‌ها: ویندوز x64، Flutter **3.35.5 / Dart 3.9.2** و Visual Studio با workload توسعهٔ دسکتاپ C++.
+نیازمندی‌ها: ویندوز x64، Flutter **3.35.0 یا جدیدتر / Dart 3.9.0 یا جدیدتر** و Visual Studio با workload توسعهٔ دسکتاپ C++.
+
+از Flutter نصب‌شده روی سیستم استفاده کنید. قفل FVM حذف شده است؛ SDKها فقط حداقل نسخه دارند و سقف نسخه ندارند. نصب یا downgrade خودکار SDK لازم نیست. اعتبارسنجی تاریخی ریلیز 0.9.0 مربوط به toolchain قبلی است.
 
 ```powershell
 git clone https://github.com/sanyzrn/Nex_windows_test.git
