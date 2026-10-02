@@ -1,0 +1,20 @@
+# Generated Flutter/Dart and local tooling
+**/.dart_tool/
+**/build/
+**/.flutter-plugins*
+**/.packages
+**/.pub-cache/
+**/.pub/
+**/windows/flutter/ephemeral/
+**/test/failures/
+.idea/
+.vscode/
+*.iml
+*.log
+*.tmp
+__pycache__/
+toolchain/
+installer-toolchain/
+.env
+.env.*
+!*.example
