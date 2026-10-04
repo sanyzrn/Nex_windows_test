@@ -1,0 +1,30 @@
+name: nex_data
+description: >-
+  Nex local-first data layer. Pure Dart, zero Flutter dependency. Implements the
+  ports declared in nex_core: owns the schema, the SQLite repository and (from
+  v2) the sync client.
+publish_to: "none"
+version: 0.1.0
+
+environment:
+  sdk: ^3.9.0
+
+dependencies:
+  archive: ^4.0.2
+  crypto: ^3.0.6
+  http: ^1.2.2
+  # The arrow is inverted: data now depends on core, not the reverse. Core owns
+  # the models and the port interfaces; this package implements them.
+  nex_core:
+    path: ../core
+  path: ^1.9.1
+  sqlite3: ^2.7.5
+  uuid: ^4.5.1
+
+dev_dependencies:
+  lints: ^5.0.0
+  # Matches packages/core and packages/ai. A dependency bump took this to
+  # ^1.31.2, which needs Dart SDK ^3.11.0 — newer than the ^3.9.0 this
+  # package (and the repo's pinned Flutter/.fvmrc) targets, so `pub get`
+  # could not resolve it at all.
+  test: ^1.25.0
