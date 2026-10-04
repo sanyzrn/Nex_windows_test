@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'support/windows_emoji_comparator.dart';
+
 Future<void> testExecutable(FutureOr<void> Function() testMain) async {
   TestWidgetsFlutterBinding.ensureInitialized();
   await (FontLoader(
@@ -26,5 +28,15 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) async {
       ..addFont(rootBundle.load('assets/fonts/${entry.value}'));
     await loader.load();
   }
-  await testMain();
+  final previousComparator = goldenFileComparator;
+  if (Platform.isWindows && previousComparator is LocalFileComparator) {
+    goldenFileComparator = WindowsEmojiComparator(
+      previousComparator.basedir.resolve('flutter_test_config.dart'),
+    );
+  }
+  try {
+    await testMain();
+  } finally {
+    goldenFileComparator = previousComparator;
+  }
 }

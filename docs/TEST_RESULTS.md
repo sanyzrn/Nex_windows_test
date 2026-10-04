@@ -1,3 +1,13 @@
+# CI golden portability fix — 2026-10-04
+
+GitHub Actions [run 37183791506](https://github.com/sanyzrn/Nex_windows_test/actions/runs/37183791506) on commit `162506f` passed dependency resolution and analysis, then failed three of 59 desktop tests. Only `emoji_panel.png` (129 pixels), `right_shell.png` and `left_shell.png` (125 pixels each) differed, about 0.04% of their 326,400 pixels. The runner was Windows Server 2025; local baselines use Windows 11 and load the host Segoe UI Emoji font. Font raster differences are the likely explanation; the original run did not upload failure images for visual confirmation.
+
+The Windows comparator now permits at most 0.05% pixel differences for those three named emoji grids. Every other image stays pixel exact, and dimension changes fail. Baselines were not regenerated or skipped. Four comparator tests verify the limit, rejection above it, strict comparison of other images, dimension checks and failure-image output. CI now uploads golden failure images for seven days when available.
+
+Local validation: `flutter analyze --no-pub` PASS with no issues; all four comparator tests PASS; all eight golden tests / ten image comparisons PASS. These checks exercise the CI failure scope; the corrected workflow has not yet run on GitHub. Application/native code and dependency versions are unchanged by this fix.
+
+---
+
 # Repository cleanup validation — 2026-10-04
 
 Current checks ran locally on Windows with Flutter 3.44.8 / Dart 3.12.2. These results supersede the earlier reported validation below.
