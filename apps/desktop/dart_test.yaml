@@ -5,3 +5,9 @@ tags:
         skip: "Golden tests are host-specific to Windows font rendering."
       mac-os:
         skip: "Golden tests are host-specific to Windows font rendering."
+  review:
+    on_platform:
+      linux:
+        skip: "Review screenshots are host-specific to Windows font rendering."
+      mac-os:
+        skip: "Review screenshots are host-specific to Windows font rendering."
