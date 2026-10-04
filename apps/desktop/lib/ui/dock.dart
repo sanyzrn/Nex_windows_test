@@ -437,7 +437,9 @@ class ToolVisualState extends State<ToolVisual> {
                         height: 7,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: Theme.of(context).colorScheme.primary,
+                          // One accent source in the dock: the active palette
+                          // (preset-driven), not the raw theme primary.
+                          color: LiquidScope.paletteOf(context).inv,
                           border: Border.all(
                             width: 2,
                             color: controllerPalette(context),
@@ -548,7 +550,10 @@ class _Pill extends StatelessWidget {
                 child: Container(
                   decoration: BoxDecoration(
                     color: controller.palette.inv,
-                    borderRadius: BorderRadius.circular(22),
+                    // Audit defect 12: the active marker was a circle while
+                    // every inactive tile is a rounded square of the same
+                    // size — one shape language now, radius 14.
+                    borderRadius: BorderRadius.circular(14),
                   ),
                 ),
               ),

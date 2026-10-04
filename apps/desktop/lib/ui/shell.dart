@@ -230,6 +230,10 @@ class _PanelShellState extends State<PanelShell>
       c.fy.t = c.anchorY.clamp(half + 10, math.max(half + 10, h - half - 10));
     }
     c.fy.step(dt);
+    // Audit defect 6: the card's height follows the measured content through
+    // the fy spring family instead of snapping on every view switch.
+    c.flyHs.t = c.flyH;
+    c.flyHs.step(dt);
 
     // Ticker callbacks precede layout. Reading transforms here can throw on
     // the first frame and permanently stop the ticker in release builds.

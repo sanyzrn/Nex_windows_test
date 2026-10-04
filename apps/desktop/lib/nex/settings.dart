@@ -30,7 +30,6 @@ class _NexSettingsViewState extends State<NexSettingsView> {
     final l = AppLocalizations.of(context)!;
     final f = NexScope.maybeOf(context);
     final scheme = Theme.of(context).colorScheme;
-    final isFa = Localizations.localeOf(context).languageCode == 'fa';
 
     return Material(
       type: MaterialType.transparency,
@@ -44,22 +43,14 @@ class _NexSettingsViewState extends State<NexSettingsView> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            if (!widget.windowLayout)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 4),
-                child: Text(
-                  l.settings,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
-                ),
-              ),
+            // No page title here: the flyout's panel header already names the
+            // view (audit defect 5 — "Settings" used to appear twice).
 
             // Card 1: Display & Interface
             _SettingsCard(
               icon: Icons.dashboard_customize_outlined,
               iconColor: scheme.primary,
-              title: isFa ? 'نحوه اجرا و نمایش' : 'Display & Interface',
+              title: l.settingsDisplay,
               children: [
                 _SettingRow(
                   title: l.interfaceMode,
@@ -137,12 +128,10 @@ class _NexSettingsViewState extends State<NexSettingsView> {
             _SettingsCard(
               icon: Icons.palette_outlined,
               iconColor: scheme.tertiary,
-              title: isFa
-                  ? 'پوسته و ظاهر برنامه'
-                  : 'Appearance & Personalization',
+              title: l.settingsAppearance,
               children: [
                 _SettingRow(
-                  title: isFa ? 'حالت رنگی' : 'Color mode',
+                  title: l.colorMode,
                   control: SegmentedButton<String>(
                     segments: [
                       ButtonSegment(
@@ -201,7 +190,7 @@ class _NexSettingsViewState extends State<NexSettingsView> {
                 ),
                 const Divider(height: 1),
                 _SettingRow(
-                  title: isFa ? 'زبان برنامه' : 'Application language',
+                  title: l.appLanguage,
                   control: DropdownButton<String>(
                     value: c.S.language,
                     underline: const SizedBox.shrink(),
@@ -223,7 +212,7 @@ class _NexSettingsViewState extends State<NexSettingsView> {
             _SettingsCard(
               icon: Icons.keyboard_command_key_rounded,
               iconColor: scheme.secondary,
-              title: isFa ? 'کلیدهای میانبر و تعامل' : 'Shortcuts & Hotkeys',
+              title: l.settingsShortcuts,
               children: [
                 _SettingRow(
                   title: l.hotkey,
@@ -308,9 +297,7 @@ class _NexSettingsViewState extends State<NexSettingsView> {
             _SettingsCard(
               icon: Icons.security_rounded,
               iconColor: scheme.primary,
-              title: isFa
-                  ? 'پشتیبان‌گیری و امنیت داده‌ها'
-                  : 'Data Safety & Backups',
+              title: l.settingsBackup,
               children: [
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 4),
@@ -422,11 +409,7 @@ class _NexSettingsViewState extends State<NexSettingsView> {
                                     context: context,
                                     builder: (ctx) => AlertDialog(
                                       title: Text(l.restore),
-                                      content: Text(
-                                        isFa
-                                            ? 'بازیابی نسخه پشتیبان تمام یادداشت‌ها، برچسب‌ها و رسانه‌های فعلی را جایگزین خواهد کرد. آیا مطمئن هستید؟'
-                                            : 'Restoring will replace all current notes, tags, and media with this backup. Are you sure you want to proceed?',
-                                      ),
+                                      content: Text(l.restoreConfirmBody),
                                       actions: [
                                         TextButton(
                                           onPressed: () =>
@@ -550,7 +533,7 @@ class _NexSettingsViewState extends State<NexSettingsView> {
             _SettingsCard(
               icon: Icons.apps_rounded,
               iconColor: scheme.primary,
-              title: isFa ? 'ابزارهای داک و برنامه‌ها' : 'Docked Tools & Apps',
+              title: l.settingsTools,
               children: [
                 for (final tool in kTools.values.where(
                   (t) => !t.fixed && t.id != 'more',
@@ -626,7 +609,7 @@ class _NexSettingsViewState extends State<NexSettingsView> {
             _SettingsCard(
               icon: Icons.info_outline_rounded,
               iconColor: scheme.outline,
-              title: isFa ? 'درباره نکس' : 'About Nex',
+              title: l.settingsAbout,
               children: [
                 Row(
                   children: [

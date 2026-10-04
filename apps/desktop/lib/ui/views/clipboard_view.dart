@@ -50,7 +50,8 @@ class _ClipboardViewState extends State<ClipboardView> {
     return Panel(
       children: [
         Head(
-          title: utilityLabel(context, 'utility1'),
+          // The panel header above already titles this view (audit defect 5
+          // family: the flyout header is the single title bar).
           onBack: () => _backToMore(c),
           trailing: LinkButton(
             label: utilityLabel(context, 'utility2'),

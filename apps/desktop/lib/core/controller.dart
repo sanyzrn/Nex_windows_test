@@ -112,6 +112,7 @@ class PanelController extends ChangeNotifier implements PanelHoldable {
   final Spring slide = Spring(0, 320, 38);
   final Spring grow = Spring(0, 340, 24);
   late final Spring fy = Spring(340, 380, 30);
+  late final Spring flyHs = Spring(0, 380, 30); // card height spring (audit 6)
   final Spring pillY = Spring(0, 420, 26);
   final Spring pillS = Spring(0, 380, 22);
   final Map<String, ToolSprings> toolSprings = {};
@@ -990,13 +991,15 @@ class PanelController extends ChangeNotifier implements PanelHoldable {
       runAction(w.action!);
       return;
     }
+    final opening = panel == null;
     final dockAnchor = dockAnchorOf?.call(id);
     if (S.dock!.contains(id) || (dockAnchor != null && dockAnchor.isFinite)) {
-      anchorY = dockAnchor ?? anchorY;
+      // Audit defect 6: the card keeps one anchor while it is open. Re-anchoring
+      // to the next tool's dock slot made the card leap between views.
+      if (opening) anchorY = dockAnchor ?? anchorY;
       setPanel(id);
     } else {
-      final m = moreAnchorOf?.call();
-      anchorY = m ?? 340;
+      if (opening) anchorY = moreAnchorOf?.call() ?? 340;
       setPanel(id, fromMore: true);
     }
   }

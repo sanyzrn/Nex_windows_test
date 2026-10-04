@@ -10,7 +10,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:file_selector/file_selector.dart';
-import 'package:nex_core/nex_core.dart';
 import 'package:nex_ui/nex_ui.dart';
 
 import '../core/controller.dart';
@@ -344,10 +343,15 @@ class NexCaptureView extends StatelessWidget {
                       ),
                     ),
                   ),
-                  ActionChip(
-                    avatar: const Icon(Icons.add, size: 18),
-                    label: Text(l.newNote),
-                    onPressed: () => f.fresh(),
+                  // Audit defect 9: the add affordance is discoverable —
+                  // visible label plus a tooltip for the icon.
+                  Tooltip(
+                    message: l.newNote,
+                    child: ActionChip(
+                      avatar: const Icon(Icons.add, size: 18),
+                      label: Text(l.newNote),
+                      onPressed: () => f.fresh(),
+                    ),
                   ),
                 ],
               ),
@@ -384,13 +388,8 @@ class NexCaptureView extends StatelessWidget {
                           ? 0
                           : text.trim().split(RegExp(r'\s+')).length;
                       final chars = text.length;
-                      final isFa =
-                          Localizations.localeOf(context).languageCode == 'fa';
-                      final countText = isFa
-                          ? nexDigits('$words کلمه • $chars نویسه', persian: true)
-                          : '$words words • $chars chars';
                       return Text(
-                        countText,
+                        l.editorCount(words, chars),
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: scheme.onSurfaceVariant.withValues(alpha: 0.7),
                           fontSize: 11,
@@ -569,13 +568,11 @@ class _CaptureAction extends StatelessWidget {
         ),
         style: OutlinedButton.styleFrom(
           alignment: AlignmentDirectional.centerStart,
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          side: BorderSide(
-            color: scheme.outlineVariant.withValues(alpha: 0.4),
-          ),
+          // Audit defect 8: at 40% alpha the outline vanished in light mode.
+          // The outline token plus a container-high fill keeps every tile
+          // legible on both the light and the dark capture card.
+          backgroundColor: scheme.surfaceContainerHigh,
+          side: BorderSide(color: scheme.outline),
         ),
       ),
     );

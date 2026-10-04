@@ -75,7 +75,7 @@ class _ColorViewState extends State<ColorView> {
     return Panel(
       children: [
         Head(
-          title: utilityLabel(context, 'utility5'),
+          // The panel header above already titles this view.
           onBack: () => _backToMore(c),
           trailing: LinkButton(
             label: utilityLabel(context, 'utility6'),

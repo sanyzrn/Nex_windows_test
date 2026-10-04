@@ -373,7 +373,10 @@ void main() {
 
     controller.setPanel('clip');
     await pumpSeconds(tester, 1.2);
-    expect(find.text('CLIPBOARD'), findsWidgets);
+    // The panel header is the single title bar (audit defect 5 family):
+    // exactly one "Clipboard" title, no repeated inner head.
+    expect(find.text('Clipboard'), findsOneWidget);
+    expect(find.text('CLIPBOARD'), findsNothing);
 
     controller.close();
     await pumpSeconds(tester, 1.2);

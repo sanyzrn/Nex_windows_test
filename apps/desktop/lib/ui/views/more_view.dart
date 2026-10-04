@@ -18,7 +18,7 @@ class MoreView extends StatelessWidget {
     return Panel(
       children: [
         Head(
-          title: utilityLabel(context, 'utility15'),
+          // No repeated title here: the panel header already says "More".
           trailing: Hint(utilityLabel(context, 'utility13')),
         ),
         ConstrainedBox(

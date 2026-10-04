@@ -41,7 +41,6 @@ class _CalcViewState extends State<CalcView> {
     return Panel(
       children: [
         Head(
-          title: utilityLabel(context, 'utility19'),
           onBack: () => _backToMore(c),
         ),
         Field(
@@ -252,7 +251,6 @@ class TimerView extends StatelessWidget {
     return Panel(
       children: [
         Head(
-          title: utilityLabel(context, 'utility21'),
           onBack: () => _backToMore(c),
         ),
         Text(
@@ -327,7 +325,6 @@ class StopwatchView extends StatelessWidget {
     return Panel(
       children: [
         Head(
-          title: utilityLabel(context, 'utility22'),
           onBack: () => _backToMore(c),
         ),
         ValueListenableBuilder<String>(
@@ -440,7 +437,6 @@ class TextToolsView extends StatelessWidget {
     return Panel(
       children: [
         Head(
-          title: utilityLabel(context, 'utility23'),
           onBack: () => _backToMore(c),
         ),
         Wrap(
@@ -676,7 +672,6 @@ class _PasswordViewState extends State<PasswordView> {
     return Panel(
       children: [
         Head(
-          title: utilityLabel(context, 'utility24'),
           onBack: () => _backToMore(c),
         ),
         GestureDetector(
@@ -867,7 +862,6 @@ class _UnitsViewState extends State<UnitsView> {
     return Panel(
       children: [
         Head(
-          title: utilityLabel(context, 'utility25'),
           onBack: () => _backToMore(c),
         ),
         Field(

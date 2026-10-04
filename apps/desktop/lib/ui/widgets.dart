@@ -311,9 +311,13 @@ class Head extends StatelessWidget {
 }
 
 class PanelBackButton extends StatefulWidget {
-  const PanelBackButton({super.key, required this.onTap});
+  const PanelBackButton({super.key, required this.onTap, this.size = 22});
 
   final VoidCallback onTap;
+
+  /// Height of the button; the width and radius follow it. Views that place
+  /// it beside a taller field pass a matching size (audit defect 10).
+  final double size;
 
   @override
   State<PanelBackButton> createState() => _BackButtonState();
@@ -332,16 +336,19 @@ class _BackButtonState extends State<PanelBackButton> {
         onTap: widget.onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 150),
-          width: 24,
-          height: 22,
+          width: widget.size + 10,
+          height: widget.size,
           decoration: BoxDecoration(
             color: _hover ? p.soft2 : p.soft,
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(widget.size / 2.4),
           ),
           child: Center(
-            child: Text(
-              Directionality.of(context) == TextDirection.rtl ? '→' : '←',
-              style: _body(context, size: 13),
+            child: Icon(
+              Directionality.of(context) == TextDirection.rtl
+                  ? Icons.arrow_forward_rounded
+                  : Icons.arrow_back_rounded,
+              size: widget.size * .62,
+              color: p.ink,
             ),
           ),
         ),

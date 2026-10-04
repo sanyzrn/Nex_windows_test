@@ -259,10 +259,19 @@ void main() {
       ))!;
       final c = await _boot(t, spec, store);
       await _go(t, c, spec);
-      await expectLater(
-        find.byType(Scaffold),
-        matchesGoldenFile('review_goldens/${spec.name}.png'),
-      );
+      // Audit defect 14: with the default debug flag tests draw shadows as
+      // solid slabs. The review matrix must show the shadows that ship. The
+      // flag is restored inside the body so the framework's debug invariant
+      // (checked before tearDown) still holds.
+      debugDisableShadows = false;
+      try {
+        await expectLater(
+          find.byType(Scaffold),
+          matchesGoldenFile('review_goldens/${spec.name}.png'),
+        );
+      } finally {
+        debugDisableShadows = true;
+      }
       await t.pumpWidget(const SizedBox());
       c.dispose();
       await t.runAsync(() async {

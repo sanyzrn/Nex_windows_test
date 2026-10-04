@@ -60,7 +60,7 @@ class _EmojiViewState extends State<EmojiView> {
       children: [
         Row(
           children: [
-            PanelBackButton(onTap: () => _backToMore(c)),
+            PanelBackButton(onTap: () => _backToMore(c), size: 34),
             const SizedBox(width: 4),
             Expanded(
               child: Field(
@@ -94,16 +94,42 @@ class _EmojiViewState extends State<EmojiView> {
                       ? AppLocalizations.of(context)!.noEmojiFound
                       : AppLocalizations.of(context)!.nothingYet,
                 )
-              : ScrollConfiguration(
-                  behavior: ScrollConfiguration.of(
-                    context,
-                  ).copyWith(scrollbars: false),
-                  child: GridView.count(
-                    crossAxisCount: 7,
-                    childAspectRatio: 36 / 36,
-                    padding: EdgeInsets.zero,
-                    children: [for (final e in list) _EmojiButton(emoji: e)],
-                  ),
+              : Stack(
+                  children: [
+                    ScrollConfiguration(
+                      behavior: ScrollConfiguration.of(
+                        context,
+                      ).copyWith(scrollbars: false),
+                      child: GridView.count(
+                        crossAxisCount: 7,
+                        childAspectRatio: 36 / 36,
+                        padding: const EdgeInsets.only(bottom: 10),
+                        children: [for (final e in list) _EmojiButton(emoji: e)],
+                      ),
+                    ),
+                    // Audit defect 10: the last row dissolved into a hard
+                    // cut; the fade now shows the grid continues.
+                    Positioned(
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      height: 24,
+                      child: IgnorePointer(
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                p.liquid.withValues(alpha: 0),
+                                p.liquid,
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
         ),
       ],
@@ -147,17 +173,20 @@ class _CatButtonState extends State<_CatButton> {
             height: 30,
             margin: const EdgeInsets.symmetric(horizontal: 1),
             decoration: BoxDecoration(
-              color: (widget.on || _hover) ? p.soft : Colors.transparent,
+              color: (widget.on || _hover)
+                  ? (widget.on ? p.soft2 : p.soft)
+                  : Colors.transparent,
               borderRadius: BorderRadius.circular(9),
             ),
             child: Center(
               child: Opacity(
-                opacity: (widget.on || _hover) ? 1 : .5,
+                // Audit defect 10: half-strength icons failed contrast.
+                opacity: (widget.on || _hover) ? 1 : .72,
                 child: Text(
                   widget.emoji,
                   style: const TextStyle(
                     fontFamily: 'Segoe UI Emoji',
-                    fontSize: 16,
+                    fontSize: 18,
                   ),
                 ),
               ),

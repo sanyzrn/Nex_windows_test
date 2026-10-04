@@ -361,7 +361,6 @@ class _SnippetsViewState extends State<SnippetsView> {
     return Panel(
       children: [
         Head(
-          title: utilityLabel(context, 'utility34'),
           onBack: () => _back(c),
           trailing: Hint(utilityLabel(context, 'utility27')),
         ),

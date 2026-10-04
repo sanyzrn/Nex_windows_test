@@ -55,7 +55,9 @@ class Flyout extends StatelessWidget {
         final gv = controller.grow.vel;
         final gs = g < 0 ? 0.0 : g;
         final Y = controller.fy.v;
-        final flyH = controller.flyH;
+        // Audit defect 6: the card animates its height (spring), so view
+        // switches resize the card in place instead of snapping.
+        final flyH = controller.flyHs.v;
         final dir = controller.dir;
         double clamp01(double x) => x.clamp(0.0, 1.0);
         final stX = 1 + (gv * .04).clamp(-.15, .15);
@@ -110,7 +112,10 @@ class Flyout extends StatelessWidget {
                         maxHeight: (MediaQuery.sizeOf(context).height - 20)
                             .clamp(0, double.infinity),
                       ),
-                      child: SingleChildScrollView(child: child),
+                      child: _FlyScrollArea(
+                        controller: controller,
+                        child: child,
+                      ),
                     ),
                   ),
                 ),
@@ -308,6 +313,64 @@ class _RiseState extends State<_Rise> {
         }
         return c;
       },
+    );
+  }
+}
+
+/// The flyout's scrollable body: a slim scrollbar appears when the content
+/// overflows, and a bottom fade lets cut-off content dissolve into the card
+/// instead of ending in a hard clip (audit defect 5).
+class _FlyScrollArea extends StatefulWidget {
+  const _FlyScrollArea({required this.controller, this.child});
+
+  final PanelController controller;
+  final Widget? child;
+
+  @override
+  State<_FlyScrollArea> createState() => _FlyScrollAreaState();
+}
+
+class _FlyScrollAreaState extends State<_FlyScrollArea> {
+  final ScrollController _scroll = ScrollController();
+
+  @override
+  void dispose() {
+    _scroll.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = widget.controller.palette;
+    return Scrollbar(
+      controller: _scroll,
+      thickness: 3,
+      radius: const Radius.circular(3),
+      child: Stack(
+        children: [
+          SingleChildScrollView(controller: _scroll, child: widget.child),
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            height: 28,
+            child: IgnorePointer(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      palette.liquid.withValues(alpha: 0),
+                      palette.liquid,
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
