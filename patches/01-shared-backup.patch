@@ -1,3 +1,5 @@
+diff --git a/apps/client/lib/platform/full_backup.dart b/apps/client/lib/platform/full_backup.dart
+index 4b52c2d..e081a3e 100644
 --- a/apps/client/lib/platform/full_backup.dart
 +++ b/apps/client/lib/platform/full_backup.dart
 @@ -1,151 +1,2 @@
@@ -154,14 +156,9 @@
 -}
 +// Shared codec; retained export preserves every Android caller.
 +export 'package:nex_data/schema/full_backup.dart';
---- a/packages/data/lib/nex_data.dart
-+++ b/packages/data/lib/nex_data.dart
-@@ -42,3 +42,5 @@
- export 'search/vector_index.dart';
- export 'sync_client/sync_client.dart';
- export 'sync_client/sync_wire.dart';
-+
-+export 'schema/full_backup.dart';
+diff --git a/packages/data/lib/schema/full_backup.dart b/packages/data/lib/schema/full_backup.dart
+new file mode 100644
+index 0000000..c99366e
 --- /dev/null
 +++ b/packages/data/lib/schema/full_backup.dart
 @@ -0,0 +1,151 @@

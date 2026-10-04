@@ -18,7 +18,7 @@ class Settings {
   String? installLanguageMarker;
   String preset = 'classic';
   String hotkey = 'N';
-  Color accent = const Color(0xFF000000);
+  Color accent = Colors.black;
   bool startup = false;
   bool paste = true;
   bool magnify = true;
@@ -61,7 +61,7 @@ class Settings {
     if (s.length == 9 && s.startsWith('#')) {
       return Color(int.parse(s.substring(1), radix: 16));
     }
-    return const Color(0xFF000000);
+    return Colors.black;
   }
 
   Map<String, dynamic> toMap() => {

@@ -890,4 +890,68 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get restored => 'Restored successfully';
+
+  @override
+  String get detailEmpty => 'This note has no content yet.';
+
+  @override
+  String wordCount(int count) {
+    return '$count words';
+  }
+
+  @override
+  String editorCount(int words, int chars) {
+    return '$words words · $chars characters';
+  }
+
+  @override
+  String get localEngineActive => 'Local library on this device';
+
+  @override
+  String get switchToDark => 'Switch to dark theme';
+
+  @override
+  String get switchToLight => 'Switch to light theme';
+
+  @override
+  String get restoreConfirmTitle => 'Restore backup';
+
+  @override
+  String get restoreConfirmBody =>
+      'Restoring replaces all current notes, tags and media with this backup. This cannot be undone.';
+
+  @override
+  String get copyKey => 'Copy key';
+
+  @override
+  String get settingsDisplay => 'Display & interface';
+
+  @override
+  String get settingsAppearance => 'Appearance';
+
+  @override
+  String get settingsShortcuts => 'Shortcuts & input';
+
+  @override
+  String get settingsBackup => 'Backup & data safety';
+
+  @override
+  String get settingsTools => 'Docked tools & apps';
+
+  @override
+  String get settingsAbout => 'About Nex';
+
+  @override
+  String get colorMode => 'Colour mode';
+
+  @override
+  String get appLanguage => 'App language';
+
+  @override
+  String get libraryUnavailable =>
+      'The note library is not available on this device yet.';
+
+  @override
+  String get libraryUnavailableHint =>
+      'Open the library view from the dock, or restart Nex to load your notes.';
 }

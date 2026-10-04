@@ -891,4 +891,68 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get restored => 'با موفقیت بازیابی شد';
+
+  @override
+  String get detailEmpty => 'این یادداشت هنوز محتوایی ندارد.';
+
+  @override
+  String wordCount(int count) {
+    return '$count واژه';
+  }
+
+  @override
+  String editorCount(int words, int chars) {
+    return '$words واژه · $chars نویسه';
+  }
+
+  @override
+  String get localEngineActive => 'کتابخانهٔ محلی روی همین دستگاه';
+
+  @override
+  String get switchToDark => 'تغییر به پوستهٔ تیره';
+
+  @override
+  String get switchToLight => 'تغییر به پوستهٔ روشن';
+
+  @override
+  String get restoreConfirmTitle => 'بازیابی نسخهٔ پشتیبان';
+
+  @override
+  String get restoreConfirmBody =>
+      'بازیابی، همهٔ یادداشت‌ها، برچسب‌ها و رسانه‌های فعلی را با این نسخهٔ پشتیبان جایگزین می‌کند. این کار قابل بازگشت نیست.';
+
+  @override
+  String get copyKey => 'کپی کلید';
+
+  @override
+  String get settingsDisplay => 'نمایش و تعامل';
+
+  @override
+  String get settingsAppearance => 'پوسته و ظاهر';
+
+  @override
+  String get settingsShortcuts => 'میان‌برها و ورودی';
+
+  @override
+  String get settingsBackup => 'پشتیبان‌گیری و امنیت داده‌ها';
+
+  @override
+  String get settingsTools => 'ابزارهای داک و برنامه‌ها';
+
+  @override
+  String get settingsAbout => 'دربارهٔ نکس';
+
+  @override
+  String get colorMode => 'حالت رنگی';
+
+  @override
+  String get appLanguage => 'زبان برنامه';
+
+  @override
+  String get libraryUnavailable =>
+      'کتابخانهٔ یادداشت‌ها هنوز روی این دستگاه در دسترس نیست.';
+
+  @override
+  String get libraryUnavailableHint =>
+      'از داک، نمای کتابخانه را باز کنید یا نکس را دوباره اجرا کنید تا یادداشت‌ها بارگذاری شوند.';
 }

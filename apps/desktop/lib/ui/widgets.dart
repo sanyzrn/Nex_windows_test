@@ -604,13 +604,15 @@ class _ToggleState extends State<Toggle> {
             margin: const EdgeInsets.all(3),
             width: 18,
             height: 18,
-            decoration: const BoxDecoration(
-              color: Colors.white,
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.onPrimary,
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: Color(0x49000000),
-                  offset: Offset(0, 1),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.shadow.withValues(alpha: 0.29),
+                  offset: const Offset(0, 1),
                   blurRadius: 3,
                 ),
               ],

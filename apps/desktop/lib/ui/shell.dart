@@ -350,10 +350,12 @@ class _DragGhost extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: p.liquid,
                   borderRadius: BorderRadius.circular(14),
-                  boxShadow: const [
+                  boxShadow: [
                     BoxShadow(
-                      color: Color(0x73000000),
-                      offset: Offset(0, 10),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.shadow.withValues(alpha: 0.45),
+                      offset: const Offset(0, 10),
                       blurRadius: 20,
                     ),
                   ],
@@ -460,10 +462,12 @@ class _ToastOverlay extends StatelessWidget {
                       color: c.palette.liquid,
                       borderRadius: BorderRadius.circular(999),
                       border: Border.all(color: c.palette.line),
-                      boxShadow: const [
+                      boxShadow: [
                         BoxShadow(
-                          color: Color(0x59000000),
-                          offset: Offset(0, 10),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.shadow.withValues(alpha: 0.35),
+                          offset: const Offset(0, 10),
                           blurRadius: 30,
                           spreadRadius: -10,
                         ),

@@ -16,7 +16,9 @@ class ColorView extends StatefulWidget {
 }
 
 class _ColorViewState extends State<ColorView> {
-  Color color = const Color(0xFF3B82F6);
+  // Transient only: didChangeDependencies replaces it from the persisted
+  // picked colour before the first build.
+  Color color = Colors.transparent;
 
   @override
   void didChangeDependencies() {

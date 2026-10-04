@@ -1789,6 +1789,120 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Restored successfully'**
   String get restored;
+
+  /// No description provided for @detailEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'This note has no content yet.'**
+  String get detailEmpty;
+
+  /// No description provided for @wordCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} words'**
+  String wordCount(int count);
+
+  /// No description provided for @editorCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{words} words · {chars} characters'**
+  String editorCount(int words, int chars);
+
+  /// No description provided for @localEngineActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Local library on this device'**
+  String get localEngineActive;
+
+  /// No description provided for @switchToDark.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to dark theme'**
+  String get switchToDark;
+
+  /// No description provided for @switchToLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to light theme'**
+  String get switchToLight;
+
+  /// No description provided for @restoreConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore backup'**
+  String get restoreConfirmTitle;
+
+  /// No description provided for @restoreConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Restoring replaces all current notes, tags and media with this backup. This cannot be undone.'**
+  String get restoreConfirmBody;
+
+  /// No description provided for @copyKey.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy key'**
+  String get copyKey;
+
+  /// No description provided for @settingsDisplay.
+  ///
+  /// In en, this message translates to:
+  /// **'Display & interface'**
+  String get settingsDisplay;
+
+  /// No description provided for @settingsAppearance.
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance'**
+  String get settingsAppearance;
+
+  /// No description provided for @settingsShortcuts.
+  ///
+  /// In en, this message translates to:
+  /// **'Shortcuts & input'**
+  String get settingsShortcuts;
+
+  /// No description provided for @settingsBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup & data safety'**
+  String get settingsBackup;
+
+  /// No description provided for @settingsTools.
+  ///
+  /// In en, this message translates to:
+  /// **'Docked tools & apps'**
+  String get settingsTools;
+
+  /// No description provided for @settingsAbout.
+  ///
+  /// In en, this message translates to:
+  /// **'About Nex'**
+  String get settingsAbout;
+
+  /// No description provided for @colorMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Colour mode'**
+  String get colorMode;
+
+  /// No description provided for @appLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'App language'**
+  String get appLanguage;
+
+  /// No description provided for @libraryUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'The note library is not available on this device yet.'**
+  String get libraryUnavailable;
+
+  /// No description provided for @libraryUnavailableHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the library view from the dock, or restart Nex to load your notes.'**
+  String get libraryUnavailableHint;
 }
 
 class _AppLocalizationsDelegate

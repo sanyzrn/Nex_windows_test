@@ -198,19 +198,17 @@ class _WindowNavRail extends StatelessWidget {
             _ModeSwitchButton(controller: controller),
             const SizedBox(height: 8),
             Tooltip(
-              message: Localizations.localeOf(context).languageCode == 'fa'
-                  ? 'دیتابیس محلی نکس: فعال و ایمن'
-                  : 'Nex Local Engine: Active & secure',
+              message: l.localEngineActive,
               child: Center(
                 child: Container(
                   width: 8,
                   height: 8,
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Color(0xFF10B981),
+                    color: scheme.primary,
                     boxShadow: [
                       BoxShadow(
-                        color: Color(0x6610B981),
+                        color: scheme.primary.withValues(alpha: .4),
                         blurRadius: 6,
                         spreadRadius: 1,
                       ),
@@ -819,9 +817,25 @@ class _MissingStoreNotice extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     final scheme = Theme.of(context).colorScheme;
     return Center(
-      child: Text('No store', style: TextStyle(color: scheme.onSurfaceVariant)),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.storage_rounded,
+            size: 40,
+            color: scheme.onSurfaceVariant,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            l.libraryUnavailable,
+            textAlign: TextAlign.center,
+            style: TextStyle(color: scheme.onSurfaceVariant),
+          ),
+        ],
+      ),
     );
   }
 }

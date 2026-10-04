@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 
 /// Minimal SVG-subset renderer for the icon set: supports <path>, <circle>,
 /// <rect> (with rx) inside a 24x24 viewBox, with path data commands
@@ -343,8 +343,9 @@ class SvgIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     final c =
         color ??
+        IconTheme.of(context).color ??
         DefaultTextStyle.of(context).style.color ??
-        const Color(0xFFFFFFFF);
+        Colors.white;
     return CustomPaint(
       size: Size.square(size),
       painter: _SvgIconPainter(parseSvgBody(body), c, strokeWidth, filled),

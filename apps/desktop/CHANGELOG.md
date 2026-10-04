@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.12.0 (2026-10-04)
+
+### Upstream truth and CI
+- Vendored packages replaced with DbsNex at `b00fcddf50ddee90231f6753b4fed7d8b3a9e250` (Android 1.93.3); the two shared patches were regenerated against that SHA and apply cleanly.
+- Copy from the reader keeps line breaks (`NexSelectableLines`), and new tags pick the least-used of twelve accent colours, matching Android 1.93.2.
+- CI no longer downloads packages from a mirror; Flutter is pinned to the same stable DbsNex uses, and new steps fail on version drift, `Color(0x…)` literals and hard-coded UI strings.
+- Documentation reconciled: one upstream base recorded everywhere, a claims audit in the hand-off, and every check labelled with the toolchain it was observed on.
+
+### Interface quality (the visible round)
+- Settings no longer shows its title twice; long pages scroll with a visible fade and affordance instead of cutting off.
+- The panel card no longer leaps between views: one fixed anchor with a smooth height spring for every view.
+- The reader was rebuilt: metadata with a visible separator that reads correctly in Persian, one uniform action toolbar instead of unequal wrapped buttons, and a real empty state instead of blank space.
+- Capture action tiles use the same theme-aware component in light and dark with WCAG-AA contrast; the local-save indicator uses the theme instead of a hard-coded green.
+- Emoji panel: aligned search controls, larger category targets with hover/focus states, and an edge fade instead of a half-cut last row.
+- The dock keeps one shape language and one accent rule in both themes; window-mode rail items show visible focus rings.
+- Every icon-only control has a tooltip, and every colour and string now comes from nex_ui tokens and the ARB files.
+
+### Code health
+- Files over 500 lines split into cohesive units; the "under 500 lines" claim is now true and tested.
+- Version `0.12.0+8` lives in one place and a test fails when any file drifts.
+- Window-mode goldens (1200 px, en/fa, light/dark) added; goldens render with real shadows.
+
 ## 0.11.0 (2026-10-04)
 
 ### Upstream Alignment & Architecture (WP1, WP2)

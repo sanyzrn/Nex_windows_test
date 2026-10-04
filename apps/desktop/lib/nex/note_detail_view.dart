@@ -17,6 +17,7 @@ import 'package:nex_ui/nex_ui.dart';
 import '../l10n/app_localizations.dart';
 import 'features_state.dart';
 import 'note_copy.dart';
+import 'note_detail_parts.dart';
 import 'reminder_picker.dart';
 
 class NexNoteDetail extends StatefulWidget {
@@ -105,7 +106,8 @@ class _NexNoteDetailState extends State<NexNoteDetail> {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context)!;
-    final c = NexPanelScope.maybeOf(context);
+    final fa = Localizations.localeOf(context).languageCode == 'fa';
+    final features = NexScope.of(context);
     return LayoutBuilder(
       builder: (context, constraints) {
         final height = constraints.maxHeight.isFinite
@@ -123,118 +125,13 @@ class _NexNoteDetailState extends State<NexNoteDetail> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Row(
-                      children: [
-                        IconButton(
-                          tooltip: l.backToLibrary,
-                          onPressed: widget.onClose,
-                          icon: const BackButtonIcon(),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .surfaceContainerHighest,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                nexNoteTypeIcon(note.type.wireName),
-                                size: 16,
-                                color: Theme.of(context).colorScheme.primary,
-                              ),
-                              const SizedBox(width: 6),
-                              Text(
-                                noteTypeLabel(l, note.type),
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 12.5,
-                                  color:
-                                      Theme.of(context).colorScheme.onSurface,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        if (note.pinnedAt != null) ...[
-                          const SizedBox(width: 8),
-                          Icon(
-                            Icons.push_pin,
-                            size: 16,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                        ],
-                        const Spacer(),
-                        if (note.type == NoteType.text ||
-                            note.type == NoteType.checklist)
-                          IconButton(
-                            tooltip: editing ? l.readNote : l.editNote,
-                            onPressed: () => setState(() => editing = !editing),
-                            icon: Icon(
-                              editing
-                                  ? Icons.done_rounded
-                                  : Icons.edit_outlined,
-                            ),
-                          ),
-                      ],
+                    NoteDetailHeader(
+                      note: note,
+                      onClose: widget.onClose,
+                      editing: editing,
+                      onToggleEdit: () => setState(() => editing = !editing),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.schedule_rounded,
-                            size: 13,
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            nexDisplayDate(
-                              note.createdAt,
-                              solar:
-                                  Localizations.localeOf(context).languageCode ==
-                                  'fa',
-                              persian:
-                                  Localizations.localeOf(context).languageCode ==
-                                  'fa',
-                              time: true,
-                            ),
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
-                              fontSize: 11.5,
-                            ),
-                          ),
-                          if (note.content?.isNotEmpty == true) ...[
-                            const SizedBox(width: 8),
-                            Text(
-                              '•',
-                              style: TextStyle(
-                                color: Theme.of(context).colorScheme.outlineVariant,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              Localizations.localeOf(context).languageCode == 'fa'
-                                  ? nexDigits(
-                                      '${note.content!.trim().split(RegExp(r'\s+')).length} کلمه',
-                                      persian: true,
-                                    )
-                                  : '${note.content!.trim().split(RegExp(r'\s+')).length} words',
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                fontSize: 11.5,
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
+                    NoteMetadataLine(note: note),
                     const SizedBox(height: 10),
                     if (editing &&
                         (note.type == NoteType.text ||
@@ -267,7 +164,17 @@ class _NexNoteDetailState extends State<NexNoteDetail> {
                           leading: const Icon(Icons.insert_drive_file_outlined),
                           title: NexTextSurface(note.originalFilename ?? ''),
                         ),
-                      NexTextSurface(note.displayText ?? ''),
+                      NexSelectableLines(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            NexTextSurface(note.displayText ?? ''),
+                            if (note.type == NoteType.text ||
+                                note.type == NoteType.checklist)
+                              const SizedBox.shrink(),
+                          ],
+                        ),
+                      ),
                       const SizedBox(height: 12),
                       TextField(
                         controller: caption,
@@ -277,18 +184,46 @@ class _NexNoteDetailState extends State<NexNoteDetail> {
                       ),
                     ],
                     if (!editing && note.type == NoteType.text)
-                      NexMarkdown(note.content ?? ''),
+                      if ((note.content ?? '').isEmpty)
+                        Text(
+                          l.detailEmpty,
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.copyWith(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant,
+                              ),
+                        )
+                      else
+                        NexSelectableLines(child: NexMarkdown(note.content!)),
                     if (!editing && note.type == NoteType.checklist) ...[
-                      for (
-                        var i = 0;
-                        i < parseChecklist(note.content ?? '').length;
-                        i++
-                      )
-                        CheckboxListTile(
-                          value: parseChecklist(note.content ?? '')[i].done,
-                          title: Text(parseChecklist(note.content ?? '')[i].text),
-                          onChanged: (_) => run('check', {'index': i}),
-                        ),
+                      if (parseChecklist(note.content ?? '').isEmpty)
+                        Text(
+                          l.detailEmpty,
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.copyWith(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant,
+                              ),
+                        )
+                      else
+                        for (var i = 0;
+                            i < parseChecklist(note.content ?? '').length;
+                            i++)
+                          CheckboxListTile(
+                            value:
+                                parseChecklist(note.content ?? '')[i].done,
+                            title: Text(
+                              parseChecklist(note.content ?? '')[i].text,
+                            ),
+                            onChanged: (_) =>
+                                run('check', {'index': i}),
+                          ),
                     ],
                     if (note.type == NoteType.voice && note.mediaUri != null)
                       StreamBuilder<PlayerState>(
@@ -334,91 +269,59 @@ class _NexNoteDetailState extends State<NexNoteDetail> {
                         },
                       ),
                     const SizedBox(height: 12),
-                    const Divider(),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 6,
-                      children: [
-                        OutlinedButton.icon(
-                          onPressed: () {
-                            Clipboard.setData(
-                              ClipboardData(text: noteCopyText(note)),
-                            );
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(l.copy)),
-                            );
-                          },
-                          icon: const Icon(Icons.copy_rounded, size: 16),
-                          label: Text(l.copy),
-                        ),
-                        if (note.mediaUri != null)
-                          OutlinedButton.icon(
-                            onPressed: c == null
-                                ? null
-                                : () => c.native.launch(note.mediaUri!),
-                            icon: const Icon(Icons.open_in_new_rounded, size: 16),
-                            label: Text(l.open),
-                          ),
-                        OutlinedButton.icon(
-                          onPressed: () =>
-                              run(note.pinnedAt == null ? 'pin' : 'unpin', {}),
-                          icon: Icon(
-                            note.pinnedAt == null
-                                ? Icons.push_pin_outlined
-                                : Icons.push_pin,
-                            size: 16,
-                            color: note.pinnedAt != null
-                                ? Theme.of(context).colorScheme.primary
-                                : null,
-                          ),
-                          label: Text(note.pinnedAt == null ? l.pin : l.unpin),
-                        ),
-                        OutlinedButton.icon(
-                          onPressed: () => showReminderPicker(
-                            context,
-                            note: note,
-                            onSave: (dueAt, repeat) => run('remind', {
-                              'at': dueAt,
-                              'repeat': repeat.wireName,
-                            }),
-                          ),
-                          icon: const Icon(Icons.alarm_add_outlined, size: 16),
-                          label: Text(l.remind),
-                        ),
-                        OutlinedButton.icon(
-                          onPressed: () async {
-                            await run('delete', {});
-                            if (context.mounted && failure == null) {
-                              final features = NexScope.of(context);
-                              if (features.session.id == note.id) {
-                                await features.fresh();
-                              }
-                              if (!context.mounted) return;
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(l.deleted),
-                                  action: SnackBarAction(
-                                    label: l.undo,
-                                    onPressed: () => features.guard(
-                                      () => features.store.call<void>('restore', {
-                                        'id': note.id,
-                                      }),
-                                    ),
-                                  ),
+                    NoteActionBar(
+                      note: note,
+                      onPin: () => run(
+                        note.pinnedAt == null ? 'pin' : 'unpin',
+                        {},
+                      ),
+                      onRemind: () => showReminderPicker(
+                        context,
+                        note: note,
+                        onSave: (dueAt, repeat) => run('remind', {
+                          'at': dueAt,
+                          'repeat': repeat.wireName,
+                        }),
+                      ),
+                      onCopy: () {
+                        Clipboard.setData(ClipboardData(text: noteCopyText(note)));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(l.copy)),
+                        );
+                      },
+                      onOpenMedia: note.mediaUri == null
+                          ? null
+                          : () => features.guard(
+                                () async {
+                                  final c = NexPanelScope.maybeOf(context);
+                                  await c?.native.launch(note.mediaUri!);
+                                },
+                                rethrowError: true,
+                              ),
+                      onDelete: () async {
+                        await run('delete', {});
+                        if (context.mounted && failure == null) {
+                          final features = NexScope.of(context);
+                          if (features.session.id == note.id) {
+                            await features.fresh();
+                          }
+                          if (!context.mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(l.deleted),
+                              action: SnackBarAction(
+                                label: l.undo,
+                                onPressed: () => features.guard(
+                                  () => features.store.call<void>('restore', {
+                                    'id': note.id,
+                                  }),
                                 ),
-                              );
-                              widget.onClose();
-                            }
-                          },
-                          icon: const Icon(Icons.delete_outline_rounded, size: 16, color: Colors.red),
-                          label: Text(l.delete, style: const TextStyle(color: Colors.red)),
-                          style: OutlinedButton.styleFrom(
-                            side: BorderSide(
-                              color: Colors.red.withValues(alpha: 0.35),
+                              ),
                             ),
-                          ),
-                        ),
-                      ],
+                          );
+                          widget.onClose();
+                        }
+                      },
                     ),
                     if (note.dueAt != null) ...[
                       const SizedBox(height: 10),
@@ -427,7 +330,9 @@ class _NexNoteDetailState extends State<NexNoteDetail> {
                         child: InputChip(
                           avatar: const Icon(Icons.alarm, size: 16),
                           label: Text(
-                            '${nexDisplayDate(note.dueAt!, solar: Localizations.localeOf(context).languageCode == 'fa', persian: Localizations.localeOf(context).languageCode == 'fa')} ${Localizations.localeOf(context).languageCode == 'fa' ? nexDigits('${note.dueAt!.hour.toString().padLeft(2, '0')}:${note.dueAt!.minute.toString().padLeft(2, '0')}', persian: true) : '${note.dueAt!.hour.toString().padLeft(2, '0')}:${note.dueAt!.minute.toString().padLeft(2, '0')}'}${note.dueRepeat != NoteRepeat.once ? ' (${note.dueRepeat == NoteRepeat.daily ? l.repeatDaily : l.repeatWeekly})' : ''}',
+                            fa
+                                ? '${nexDisplayDate(note.dueAt!, solar: true, persian: true)} ${nexDigits(_hhmm(note.dueAt!), persian: true)}${note.dueRepeat != NoteRepeat.once ? ' (${note.dueRepeat == NoteRepeat.daily ? l.repeatDaily : l.repeatWeekly})' : ''}'
+                                : '${nexDisplayDate(note.dueAt!)} ${_hhmm(note.dueAt!)}${note.dueRepeat != NoteRepeat.once ? ' (${note.dueRepeat == NoteRepeat.daily ? l.repeatDaily : l.repeatWeekly})' : ''}',
                           ),
                           onPressed: () => showReminderPicker(
                             context,
@@ -437,7 +342,8 @@ class _NexNoteDetailState extends State<NexNoteDetail> {
                               'repeat': repeat.wireName,
                             }),
                           ),
-                          onDeleted: () => run('remind', {'at': null, 'repeat': 'once'}),
+                          onDeleted: () =>
+                              run('remind', {'at': null, 'repeat': 'once'}),
                         ),
                       ),
                     ],
@@ -528,4 +434,7 @@ class _NexNoteDetailState extends State<NexNoteDetail> {
       },
     );
   }
+
+  static String _hhmm(DateTime t) =>
+      '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
 }

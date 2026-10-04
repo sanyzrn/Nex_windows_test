@@ -1,5 +1,5 @@
 diff --git a/apps/client/lib/platform/theme_presets.dart b/apps/client/lib/platform/theme_presets.dart
-index 2222c0c..2c41682 100644
+index 2222c0c..8bd777e 100644
 --- a/apps/client/lib/platform/theme_presets.dart
 +++ b/apps/client/lib/platform/theme_presets.dart
 @@ -1,261 +1,2 @@
@@ -264,19 +264,23 @@ index 2222c0c..2c41682 100644
 -    // on a coloured button — about 1:1 in dark.
 -  );
 -}
-+﻿// Shared palette implementation; Android API is unchanged.
++// Shared palette implementation; Android API is unchanged.
 +export 'package:nex_ui/tokens/nex_theme_presets.dart';
+diff --git a/packages/data/lib/nex_data.dart b/packages/data/lib/nex_data.dart
+index 59dbb46..d0cc0ee 100644
+--- a/packages/data/lib/nex_data.dart
++++ b/packages/data/lib/nex_data.dart
+@@ -42,3 +42,5 @@ export 'schema/write_lock.dart';
+ export 'search/vector_index.dart';
+ export 'sync_client/sync_client.dart';
+ export 'sync_client/sync_wire.dart';
++
++export 'schema/full_backup.dart';
 diff --git a/packages/ui/lib/nex_ui.dart b/packages/ui/lib/nex_ui.dart
-index 22d26f2..89cd330 100644
+index 9e1c2cd..07bb2e2 100644
 --- a/packages/ui/lib/nex_ui.dart
 +++ b/packages/ui/lib/nex_ui.dart
-@@ -1,4 +1,4 @@
--/// Nex shared Flutter UI package.
-+﻿/// Nex shared Flutter UI package.
- library;
- 
- export 'tokens/nex_accent_palette.dart';
-@@ -28,3 +28,5 @@ export 'widgets/nex_toast_pop.dart';
+@@ -29,3 +29,5 @@ export 'widgets/nex_toast_pop.dart';
  export 'widgets/note_card.dart';
  export 'widgets/swipeable_note_card.dart';
  export 'widgets/tag_filter_row.dart';
@@ -284,10 +288,10 @@ index 22d26f2..89cd330 100644
 +export 'tokens/nex_theme_presets.dart';
 diff --git a/packages/ui/lib/tokens/nex_theme_presets.dart b/packages/ui/lib/tokens/nex_theme_presets.dart
 new file mode 100644
-index 0000000..a30d442
+index 0000000..1954d9f
 --- /dev/null
 +++ b/packages/ui/lib/tokens/nex_theme_presets.dart
-@@ -0,0 +1,254 @@
+@@ -0,0 +1,262 @@
 +import 'package:flutter/material.dart';
 +import 'nex_tokens.dart';
 +import 'nex_appearance.dart';
@@ -529,6 +533,14 @@ index 0000000..a30d442
 +            ? colors.onPrimary
 +            : colors.outline,
 +      ),
++    ),
++    // The base theme darkens the classic accent for quiet buttons' labels
++    // (LOC-07); a palette's own primary is already a text tone, and the
++    // classic one must not leak onto it.
++    textButtonTheme: TextButtonThemeData(
++      style: TextButton.styleFrom(
++        foregroundColor: colors.primary,
++      ).merge(base.textButtonTheme.style),
 +    ),
 +    outlinedButtonTheme: OutlinedButtonThemeData(
 +      style: base.outlinedButtonTheme.style?.copyWith(

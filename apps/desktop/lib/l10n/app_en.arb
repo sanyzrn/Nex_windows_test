@@ -295,5 +295,41 @@
   "edit": "Edit",
   "discard": "Discard",
   "save": "Save",
-  "restored": "Restored successfully"
+  "restored": "Restored successfully",
+  "detailEmpty": "This note has no content yet.",
+  "wordCount": "{count} words",
+  "@wordCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "editorCount": "{words} words · {chars} characters",
+  "@editorCount": {
+    "placeholders": {
+      "words": {
+        "type": "int"
+      },
+      "chars": {
+        "type": "int"
+      }
+    }
+  },
+  "localEngineActive": "Local library on this device",
+  "switchToDark": "Switch to dark theme",
+  "switchToLight": "Switch to light theme",
+  "restoreConfirmTitle": "Restore backup",
+  "restoreConfirmBody": "Restoring replaces all current notes, tags and media with this backup. This cannot be undone.",
+  "copyKey": "Copy key",
+  "settingsDisplay": "Display & interface",
+  "settingsAppearance": "Appearance",
+  "settingsShortcuts": "Shortcuts & input",
+  "settingsBackup": "Backup & data safety",
+  "settingsTools": "Docked tools & apps",
+  "settingsAbout": "About Nex",
+  "colorMode": "Colour mode",
+  "appLanguage": "App language",
+  "libraryUnavailable": "The note library is not available on this device yet.",
+  "libraryUnavailableHint": "Open the library view from the dock, or restart Nex to load your notes."
 }

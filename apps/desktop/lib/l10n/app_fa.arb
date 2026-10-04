@@ -288,5 +288,41 @@
   "edit": "ویرایش",
   "discard": "صرف‌نظر",
   "save": "ذخیره",
-  "restored": "با موفقیت بازیابی شد"
+  "restored": "با موفقیت بازیابی شد",
+  "detailEmpty": "این یادداشت هنوز محتوایی ندارد.",
+  "wordCount": "{count} واژه",
+  "@wordCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "editorCount": "{words} واژه · {chars} نویسه",
+  "@editorCount": {
+    "placeholders": {
+      "words": {
+        "type": "int"
+      },
+      "chars": {
+        "type": "int"
+      }
+    }
+  },
+  "localEngineActive": "کتابخانهٔ محلی روی همین دستگاه",
+  "switchToDark": "تغییر به پوستهٔ تیره",
+  "switchToLight": "تغییر به پوستهٔ روشن",
+  "restoreConfirmTitle": "بازیابی نسخهٔ پشتیبان",
+  "restoreConfirmBody": "بازیابی، همهٔ یادداشت‌ها، برچسب‌ها و رسانه‌های فعلی را با این نسخهٔ پشتیبان جایگزین می‌کند. این کار قابل بازگشت نیست.",
+  "copyKey": "کپی کلید",
+  "settingsDisplay": "نمایش و تعامل",
+  "settingsAppearance": "پوسته و ظاهر",
+  "settingsShortcuts": "میان‌برها و ورودی",
+  "settingsBackup": "پشتیبان‌گیری و امنیت داده‌ها",
+  "settingsTools": "ابزارهای داک و برنامه‌ها",
+  "settingsAbout": "دربارهٔ نکس",
+  "colorMode": "حالت رنگی",
+  "appLanguage": "زبان برنامه",
+  "libraryUnavailable": "کتابخانهٔ یادداشت‌ها هنوز روی این دستگاه در دسترس نیست.",
+  "libraryUnavailableHint": "از داک، نمای کتابخانه را باز کنید یا نکس را دوباره اجرا کنید تا یادداشت‌ها بارگذاری شوند."
 }

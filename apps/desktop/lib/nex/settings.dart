@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:nex_ui/nex_ui.dart';
+import '../core/app_meta.dart';
 import '../core/panel_settings.dart';
 import '../core/registry.dart';
 import '../ui/widgets.dart';
@@ -306,7 +307,7 @@ class _NexSettingsViewState extends State<NexSettingsView> {
             // Card 4: Backup & Data Safety
             _SettingsCard(
               icon: Icons.security_rounded,
-              iconColor: const Color(0xFF10B981),
+              iconColor: scheme.primary,
               title: isFa
                   ? 'پشتیبان‌گیری و امنیت داده‌ها'
                   : 'Data Safety & Backups',
@@ -509,7 +510,7 @@ class _NexSettingsViewState extends State<NexSettingsView> {
                             ),
                             const Spacer(),
                             IconButton(
-                              tooltip: 'Copy key',
+                              tooltip: l.copyKey,
                               icon: const Icon(Icons.copy_rounded, size: 16),
                               onPressed: () {
                                 Clipboard.setData(
@@ -631,7 +632,7 @@ class _NexSettingsViewState extends State<NexSettingsView> {
                   children: [
                     Expanded(
                       child: Text(
-                        'Nex Windows v0.11.0 (Build 7)',
+                        'Nex Windows v$kAppShortVersion (Build $kAppBuild)',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: scheme.onSurfaceVariant,
                         ),
@@ -641,7 +642,7 @@ class _NexSettingsViewState extends State<NexSettingsView> {
                       onPressed: () => showLicensePage(
                         context: context,
                         applicationName: 'Nex',
-                        applicationVersion: '0.11.0+7',
+                        applicationVersion: kAppVersionString,
                       ),
                       child: Text(l.about),
                     ),

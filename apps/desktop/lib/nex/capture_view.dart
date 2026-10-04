@@ -329,9 +329,9 @@ class NexCaptureView extends StatelessWidget {
                   Container(
                     width: 7,
                     height: 7,
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Color(0xFF10B981), // Emerald green active dot
+                      color: scheme.primary,
                     ),
                   ),
                   const SizedBox(width: 8),

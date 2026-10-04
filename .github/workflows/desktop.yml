@@ -9,9 +9,6 @@ on:
 jobs:
   build-and-test:
     runs-on: windows-latest
-    env:
-      PUB_HOSTED_URL: https://pub.flutter-io.cn
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -20,8 +17,46 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
+          # Same Flutter stable the DbsNex monorepo pins in .fvmrc; keeps
+          # golden rendering aligned with upstream. Packages resolve from the
+          # default pub.dev — no mirror, no third-party package host.
           flutter-version: '3.44.8'
           cache: true
+
+      # Default pub.dev hosts; a mirror is a supply-chain risk and is never
+      # needed on GitHub-hosted runners. If this env block ever reappears,
+      # fail the build.
+      - name: Guard against package mirrors
+        shell: pwsh
+        run: |
+          $wf = Get-Content -LiteralPath .github/workflows/desktop.yml -Raw
+          if ($wf -match 'flutter-io\.cn|PUB_HOSTED_URL|FLUTTER_STORAGE_BASE_URL') {
+            Write-Error "Package mirror host or override found in the workflow. Use default pub.dev."
+            exit 1
+          }
+          $pub = Get-Content -LiteralPath apps/desktop/pubspec.yaml -Raw
+          if ($pub -match 'flutter-io\.cn') {
+            Write-Error "Mirror host recorded in pubspec.yaml."
+            exit 1
+          }
+          $readme = Get-Content -LiteralPath README.md -Raw
+          if ($readme -match 'PUB_HOSTED_URL\s*=') {
+            Write-Error "README still instructs a package mirror. Remove it."
+            exit 1
+          }
+
+      # Rule 10: one version everywhere, enforced before anything builds.
+      - name: Version consistency check
+        working-directory: apps/desktop
+        run: flutter test --no-pub test/version_consistency_test.dart
+
+      # Item 13 / WP4: no colour literals, no hard-coded user-facing strings
+      # in application code. The allowlist lives in tools/check_ui_hygiene.ps1
+      # and every entry must carry a justification comment there.
+      - name: UI hygiene check (no colour literals or hard-coded strings)
+        working-directory: apps/desktop
+        shell: pwsh
+        run: ../../tools/check_ui_hygiene.ps1 -LibDir lib
 
       - name: Install dependencies
         working-directory: apps/desktop
@@ -34,6 +69,22 @@ jobs:
       - name: Run tests (including goldens on Windows)
         working-directory: apps/desktop
         run: flutter test --no-pub
+
+      # WP2: the review screenshot matrix is regenerated on every run and
+      # uploaded for inspection. It does not gate the build; it exists so a
+      # reviewer can look at every screen in both languages and themes.
+      - name: Render review screenshot matrix
+        working-directory: apps/desktop
+        run: flutter test --no-pub test/review_screens_test.dart --reporter expanded
+
+      - name: Upload review screenshot matrix
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: review-screens
+          path: design/after/
+          if-no-files-found: ignore
+          retention-days: 14
 
       - name: Upload golden failure images
         if: failure()
