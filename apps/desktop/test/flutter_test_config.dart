@@ -34,9 +34,7 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) async {
       previousComparator.basedir.resolve('flutter_test_config.dart'),
     );
   }
-  try {
-    await testMain();
-  } finally {
-    goldenFileComparator = previousComparator;
-  }
+  // testMain only registers tests and returns before they run, so the
+  // comparator must stay installed; each test file has its own isolate.
+  await testMain();
 }
