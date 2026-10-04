@@ -115,7 +115,7 @@ class TagFilterRow extends StatelessWidget {
                 theme: theme,
               ),
             ),
-          if (trailing != null) trailing!,
+          ?trailing,
         ],
       ),
     );

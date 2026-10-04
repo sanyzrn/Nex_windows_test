@@ -792,4 +792,102 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get hotkeyInUse => 'That shortcut is already used by another app';
+
+  @override
+  String get laterToday => 'Later today';
+
+  @override
+  String get tomorrowMorning => 'Tomorrow morning';
+
+  @override
+  String get customDateTime => 'Date & time…';
+
+  @override
+  String get repeat => 'Repeat';
+
+  @override
+  String get noRepeat => 'Does not repeat';
+
+  @override
+  String get repeatDaily => 'Every day';
+
+  @override
+  String get repeatWeekly => 'Every week';
+
+  @override
+  String get repeatMonthly => 'Every month';
+
+  @override
+  String get repeatYearly => 'Every year';
+
+  @override
+  String get clearReminder => 'Clear reminder';
+
+  @override
+  String get reminderSet => 'Reminder set';
+
+  @override
+  String get overdue => 'Overdue';
+
+  @override
+  String get shortcuts => 'Shortcuts';
+
+  @override
+  String get keyboardShortcuts => 'Keyboard shortcuts';
+
+  @override
+  String get actionNewNote => 'New note';
+
+  @override
+  String get actionNewChecklist => 'New checklist';
+
+  @override
+  String get actionSearch => 'Search';
+
+  @override
+  String get actionLibrary => 'Library';
+
+  @override
+  String get actionSettings => 'Settings';
+
+  @override
+  String get actionMoveSelection => 'Move selection';
+
+  @override
+  String get actionOpenNote => 'Open note';
+
+  @override
+  String get actionCloseOrClear => 'Close reader / Clear search';
+
+  @override
+  String get actionDelete => 'Delete';
+
+  @override
+  String get actionPin => 'Pin / Unpin';
+
+  @override
+  String get actionCopy => 'Copy';
+
+  @override
+  String get noNoteSelected => 'No note selected';
+
+  @override
+  String selectedCount(int count) {
+    return '$count selected';
+  }
+
+  @override
+  String get clearSelection => 'Clear selection';
+
+  @override
+  String get edit => 'Edit';
+
+  @override
+  String get discard => 'Discard';
+
+  @override
+  String get save => 'Save';
+
+  @override
+  String get restored => 'Restored successfully';
 }

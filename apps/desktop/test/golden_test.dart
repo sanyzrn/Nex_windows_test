@@ -1,10 +1,13 @@
+@Tags(['golden'])
+library;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:right_panel/core/controller.dart';
-import 'package:right_panel/core/native.dart';
-import 'package:right_panel/main.dart';
-import 'package:right_panel/ui/shell.dart';
+import 'package:nex_desktop/core/controller.dart';
+import 'package:nex_desktop/core/native.dart';
+import 'package:nex_desktop/main.dart';
+import 'package:nex_desktop/ui/shell.dart';
 
 class _FakeNative extends NativeHost {
   @override
@@ -65,6 +68,13 @@ void main() {
     await _pumpSecs(tester, 1.0);
     controllerOf(tester).setPanel('settings');
     await _pumpSecs(tester, 1.0);
+    // A narrow panel must keep labels readable beside large desktop controls.
+    final modeLabel = find.text('Interface mode');
+    expect(tester.getSize(modeLabel).height, lessThan(30));
+    expect(
+      tester.getTopLeft(find.byType(SegmentedButton<String>).first).dy,
+      greaterThan(tester.getBottomLeft(modeLabel).dy),
+    );
     await expectLater(
       find.byType(Scaffold),
       matchesGoldenFile('goldens/settings_light.png'),

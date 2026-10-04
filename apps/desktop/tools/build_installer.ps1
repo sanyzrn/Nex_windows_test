@@ -1,6 +1,6 @@
 param(
   [string]$Release = (Join-Path $PSScriptRoot '../build/windows/x64/runner/Release'),
-  [string]$ISCC = 'ISCC.exe',
+  [string]$ISCC = $(if (Get-Command 'ISCC.exe' -ErrorAction SilentlyContinue) { 'ISCC.exe' } elseif (Test-Path "$env:LOCALAPPDATA\Programs\Inno Setup 6\ISCC.exe") { "$env:LOCALAPPDATA\Programs\Inno Setup 6\ISCC.exe" } elseif (Test-Path "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe") { "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" } else { 'ISCC.exe' }),
   [string]$VCRuntime,
   [string]$Output = (Join-Path $PSScriptRoot '../build/installer/output')
 )
@@ -36,6 +36,6 @@ $manifest = @(Get-ChildItem -LiteralPath $payload -File -Recurse | Sort-Object F
 $manifest | ConvertTo-Json -Depth 3 | Set-Content -LiteralPath (Join-Path $appRoot 'build/installer/payload-manifest.json') -Encoding utf8
 & $ISCC ('/O' + $Output) (Join-Path $appRoot 'installer/nex.iss')
 if ($LASTEXITCODE -ne 0) { throw "Inno compilation failed with exit $LASTEXITCODE" }
-$setupPath = Join-Path $Output 'Nex-Windows-Setup-0.10.0-x64.exe'
+$setupPath = Join-Path $Output 'Nex-Windows-Setup-0.11.0-x64.exe'
 Get-Item -LiteralPath $setupPath | Select-Object FullName, Length
 Get-FileHash -LiteralPath $setupPath -Algorithm SHA256

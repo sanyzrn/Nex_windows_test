@@ -5,15 +5,15 @@ import 'dart:ui' show PointerDeviceKind;
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:nex_core/nex_core.dart';
+import 'package:nex_data/nex_data.dart';
 import 'package:nex_ui/nex_ui.dart';
-import 'package:right_panel/core/controller.dart';
-import 'package:right_panel/core/native.dart';
-import 'package:right_panel/l10n/app_localizations.dart';
-import 'package:right_panel/main.dart';
-import 'package:right_panel/nex/features.dart';
-import 'package:right_panel/nex/store.dart';
-import 'package:right_panel/ui/dock.dart';
+import 'package:nex_desktop/core/controller.dart';
+import 'package:nex_desktop/core/native.dart';
+import 'package:nex_desktop/l10n/app_localizations.dart';
+import 'package:nex_desktop/main.dart';
+import 'package:nex_desktop/nex/features.dart';
+import 'package:nex_desktop/nex/store.dart';
+import 'package:nex_desktop/ui/dock.dart';
 
 class FakeNative extends NativeHost {
   @override
@@ -297,6 +297,7 @@ void main() {
   for (final locale in ['en', 'fa']) {
     testWidgets(
       '$locale capture and inline reader have no scrim, duplicated editor or accidental hover switch',
+      tags: 'golden',
       (t) async {
         t.view.physicalSize = const Size(480, 680);
         t.view.devicePixelRatio = 1;
@@ -305,12 +306,25 @@ void main() {
         late NexFeatures f;
         await t.runAsync(() async {
           root = await Directory.systemTemp.createTemp('nex-reader-test-');
-          f = NexFeatures(await DesktopStore.open(root.path, 'reader-test'));
-          await f.session.write(
-            locale == 'fa'
-                ? 'یادداشت آزمایشی برای مطالعه'
-                : 'A note to read comfortably',
+          // Seed a fixed timestamp so reader goldens do not depend on the clock.
+          final db = NexDatabase.open('${root.path}/nex.sqlite');
+          final at = DateTime(2026, 10, 4, 10, 4).toUtc();
+          SqliteNoteRepository(db).insert(
+            Note(
+              id: 'reader-golden',
+              type: NoteType.text,
+              content: locale == 'fa'
+                  ? '\u06cc\u0627\u062f\u062f\u0627\u0634\u062a \u0622\u0632\u0645\u0627\u06cc\u0634\u06cc \u0628\u0631\u0627\u06cc \u0645\u0637\u0627\u0644\u0639\u0647'
+                  : 'A note to read comfortably',
+              createdAt: at,
+              updatedAt: at,
+              deviceId: 'reader-test',
+              rev: 1,
+              syncState: SyncState.pending,
+            ),
           );
+          db.close();
+          f = NexFeatures(await DesktopStore.open(root.path, 'reader-test'));
         });
         final c = PanelController(nativeHost: FakeNative());
         await c.bootstrap(
@@ -371,7 +385,11 @@ void main() {
           matchesGoldenFile('goldens/reader_$locale.png'),
         );
         await t.tap(
-          find.byTooltip(locale == 'en' ? 'Edit note' : 'ویرایش یادداشت'),
+          find.byTooltip(
+            locale == 'en'
+                ? 'Edit note'
+                : '\u0648\u06cc\u0631\u0627\u06cc\u0634 \u06cc\u0627\u062f\u062f\u0627\u0634\u062a',
+          ),
         );
         await t.pump();
         expect(find.byType(TextField), findsOneWidget);

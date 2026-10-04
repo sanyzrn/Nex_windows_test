@@ -1,18 +1,18 @@
-import 'dart:io';
+﻿import 'dart:io';
 
 import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nex_data/nex_data.dart';
 
-import 'package:right_panel/core/controller.dart';
-import 'package:right_panel/core/native.dart';
-import 'package:right_panel/main.dart';
-import 'package:right_panel/nex/features.dart';
-import 'package:right_panel/nex/store.dart';
-import 'package:right_panel/ui/dock.dart';
-import 'package:right_panel/ui/shell.dart';
-import 'package:right_panel/ui/window_shell.dart';
+import 'package:nex_desktop/core/controller.dart';
+import 'package:nex_desktop/core/native.dart';
+import 'package:nex_desktop/main.dart';
+import 'package:nex_desktop/nex/features.dart';
+import 'package:nex_desktop/nex/store.dart';
+import 'package:nex_desktop/ui/dock.dart';
+import 'package:nex_desktop/ui/shell.dart';
+import 'package:nex_desktop/ui/window_shell.dart';
 
 class _RecordingNative extends NativeHost {
   final List<String> modes = [];

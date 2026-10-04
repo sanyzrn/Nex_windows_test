@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:timezone/data/latest.dart' as tzdata;
 import 'package:timezone/timezone.dart' as tz;
-import 'package:right_panel/core/controller.dart';
-import 'package:right_panel/core/world_clock.dart';
-import 'package:right_panel/main.dart';
-import 'package:right_panel/ui/dock.dart';
-import 'package:right_panel/ui/flyout.dart';
+import 'package:nex_desktop/core/controller.dart';
+import 'package:nex_desktop/core/world_clock.dart';
+import 'package:nex_desktop/main.dart';
+import 'package:nex_desktop/ui/dock.dart';
+import 'package:nex_desktop/ui/flyout.dart';
 
 Future<void> frames(WidgetTester t, [int count = 90]) async {
   for (var i = 0; i < count; i++) {
@@ -99,9 +99,10 @@ void main() {
     },
   );
   for (final edge in ['right', 'left']) {
-    testWidgets('$edge physical edge survives Persian RTL; flyout is inward', (
-      t,
-    ) async {
+    testWidgets(
+      '$edge physical edge survives Persian RTL; flyout is inward',
+      tags: 'golden',
+      (t) async {
       final c = await boot(t, edge);
       c.setPanel('emoji');
       await frames(t);
@@ -139,6 +140,7 @@ void main() {
   }
   testWidgets(
     'real flyout height anchors and clamps different content heights',
+    tags: 'golden',
     (t) async {
       final c = await boot(t, 'right');
       c.anchorY = 660;

@@ -4,13 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:right_panel/core/controller.dart';
-import 'package:right_panel/core/native.dart';
-import 'package:right_panel/core/spring.dart';
-import 'package:right_panel/main.dart';
-import 'package:right_panel/nex/features.dart';
-import 'package:right_panel/nex/store.dart';
-import 'package:right_panel/ui/dock.dart';
+import 'package:nex_desktop/core/controller.dart';
+import 'package:nex_desktop/core/native.dart';
+import 'package:nex_desktop/core/spring.dart';
+import 'package:nex_desktop/main.dart';
+import 'package:nex_desktop/nex/features.dart';
+import 'package:nex_desktop/nex/store.dart';
+import 'package:nex_desktop/ui/dock.dart';
 
 class _FakeNative extends NativeHost {
   bool passthrough = true;
@@ -176,12 +176,12 @@ void main() {
       await tester.runAsync(() async {
         await tester.enterText(
           find.byKey(const ValueKey('capture-field')),
-          'startup تایپ',
+          'startup \u062a\u0627\u06cc\u067e',
         );
         await features.session.flushed;
         expect(
           (await features.store.call<List<dynamic>>('timeline')).single.content,
-          'startup تایپ',
+          'startup \u062a\u0627\u06cc\u067e',
         );
       });
       await tester.pumpWidget(const SizedBox.shrink());
@@ -324,12 +324,12 @@ void main() {
       ..theme = 'ocean'
       ..edge = 'left'
       ..monitor = 1
-      ..recentEmoji = ['😀', '🔥']
+      ..recentEmoji = ['\u{1F600}', '\u{1F525}']
       ..snippets = ['hello'];
     final m = s.toMap();
     expect(m['theme'], 'ocean');
     expect(m['edge'], 'left');
-    expect(m['recentEmoji'], ['😀', '🔥']);
+    expect(m['recentEmoji'], ['\u{1F600}', '\u{1F525}']);
     expect(m['snippets'], ['hello']);
     final back = Settings.fromMap(Map<String, dynamic>.from(m));
     expect(back.theme, 'ocean');
@@ -364,12 +364,12 @@ void main() {
     controller.setPanel('emoji');
     await pumpSeconds(tester, 1.2);
     expect(controller.grow.v, closeTo(1.0, 0.02));
-    expect(find.text('Search emoji…'), findsOneWidget);
+    expect(find.text('Search emoji\u2026'), findsOneWidget);
 
     // emoji search filters (watermelon is not a category icon, so exactly 1)
     await tester.enterText(find.byType(TextField).first, 'watermelon');
     await tester.pump();
-    expect(find.text('🍉'), findsOneWidget);
+    expect(find.text('\u{1F349}'), findsOneWidget);
 
     controller.setPanel('clip');
     await pumpSeconds(tester, 1.2);

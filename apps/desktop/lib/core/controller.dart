@@ -14,144 +14,15 @@ import 'storage.dart';
 import 'theme_defs.dart';
 import 'package:nex_ui/nex_ui.dart';
 
-/// The persisted settings, JSON-compatible with the original app
-/// Domain content is held only by nex_data; this is shell-only JSON.
-class Settings {
-  Settings();
+export 'panel_settings.dart';
+export 'panel_geometry.dart';
+export 'panel_holds.dart';
+export 'panel_window_mode.dart';
+export 'panel_utility_state.dart';
 
-  String theme = 'midnight';
-  String language = 'fa';
-  String? installLanguageMarker;
-  String preset = 'classic';
-  String hotkey = 'N';
-  Color accent = const Color(0xFF000000);
-  bool startup = false;
-  bool paste = true;
-  bool magnify = true;
-  bool panelPinned = false;
-
-  /// 'window' = full desktop window (main mode); 'panel' = edge slide-out.
-  String windowMode = 'window';
-
-  /// Last normal (restored) frame of the desktop window, physical pixels,
-  /// persisted so the window reopens where the user left it.
-  Map<String, dynamic>? windowBounds;
-  bool windowMaximized = false;
-  List<String> recentEmoji = [];
-  List<Color> recentColors = [];
-  String edge = 'right';
-  int monitor = 0;
-  bool updates = true;
-  int lastCheck = 0;
-  List<String> hidden = [];
-  List<AppItem> apps = [];
-  List<String> snippets = [];
-  List<String> pins = [];
-  String engine = 'Google';
-  List<String> zones = [
-    'UTC',
-    'Europe/London',
-    'America/New_York',
-    'Asia/Tokyo',
-  ];
-  List<String>? dock;
-  List<String>? more;
-
-  static String _hex(Color c) =>
-      '#${c.toARGB32().toRadixString(16).padLeft(8, '0').substring(2).toUpperCase()}';
-  static Color _col(dynamic v) {
-    var s = (v ?? '#000000').toString();
-    if (s.length == 7 && s.startsWith('#')) {
-      return Color(int.parse('FF${s.substring(1)}', radix: 16));
-    }
-    if (s.length == 9 && s.startsWith('#')) {
-      return Color(int.parse(s.substring(1), radix: 16));
-    }
-    return const Color(0xFF000000);
-  }
-
-  Map<String, dynamic> toMap() => {
-    'theme': theme,
-    'language': language,
-    'installLanguageMarker': installLanguageMarker,
-    'preset': preset,
-    'hotkey': hotkey,
-    'accent': _hex(accent),
-    'startup': startup,
-    'paste': paste,
-    'magnify': magnify,
-    'panelPinned': panelPinned,
-    'windowMode': windowMode,
-    'windowBounds': windowBounds,
-    'windowMaximized': windowMaximized,
-    'recentEmoji': recentEmoji,
-    'recentColors': recentColors.map(_hex).toList(),
-    'edge': edge,
-    'monitor': monitor,
-    'updates': updates,
-    'lastCheck': lastCheck,
-    'hidden': hidden,
-    'apps': apps.map((a) => a.toJson()).toList(),
-    'snippets': snippets,
-    'pins': pins,
-    'engine': engine,
-    'zones': zones,
-    'dock': dock,
-    'more': more,
-  };
-
-  static Settings fromMap(Map<String, dynamic> j) {
-    final s = Settings();
-    s.theme = j['theme'] as String? ?? 'midnight';
-    s.language = j['language'] as String? ?? 'fa';
-    s.installLanguageMarker = j['installLanguageMarker'] as String?;
-    s.preset = j['preset'] as String? ?? 'classic';
-    s.hotkey = j['hotkey'] as String? ?? 'N';
-    s.accent = _col(j['accent']);
-    s.startup = j['startup'] as bool? ?? false;
-    s.paste = j['paste'] as bool? ?? true;
-    s.magnify = j['magnify'] as bool? ?? true;
-    s.panelPinned = j['panelPinned'] as bool? ?? false;
-    s.windowMode = (j['windowMode'] as String?) == 'panel' ? 'panel' : 'window';
-    final bounds = j['windowBounds'];
-    if (bounds is Map) {
-      s.windowBounds = bounds.cast<String, dynamic>();
-    } else if (bounds is List && bounds.length == 4) {
-      // Tolerate a plain [x, y, w, h] list from older JSON exports.
-      s.windowBounds = {
-        'x': (bounds[0] as num).toInt(),
-        'y': (bounds[1] as num).toInt(),
-        'w': (bounds[2] as num).toInt(),
-        'h': (bounds[3] as num).toInt(),
-      };
-    }
-    s.windowMaximized = j['windowMaximized'] as bool? ?? false;
-    s.recentEmoji = ((j['recentEmoji'] as List?) ?? [])
-        .map((e) => e.toString())
-        .toList();
-    s.recentColors = ((j['recentColors'] as List?) ?? [])
-        .map((e) => _col(e))
-        .toList();
-    s.edge = j['edge'] as String? ?? 'right';
-    s.monitor = (j['monitor'] as num?)?.toInt() ?? 0;
-    s.updates = j['updates'] as bool? ?? true;
-    s.lastCheck = (j['lastCheck'] as num?)?.toInt() ?? 0;
-    s.hidden = ((j['hidden'] as List?) ?? []).map((e) => e.toString()).toList();
-    s.apps = ((j['apps'] as List?) ?? [])
-        .whereType<Map>()
-        .map((m) => AppItem.fromJson(m.cast<String, dynamic>()))
-        .toList();
-    s.snippets = ((j['snippets'] as List?) ?? [])
-        .map((e) => e.toString())
-        .toList();
-    s.pins = ((j['pins'] as List?) ?? []).map((e) => e.toString()).toList();
-    s.engine = j['engine'] as String? ?? 'Google';
-    s.zones = ((j['zones'] as List?) ?? []).map((e) => e.toString()).toList();
-    s.dock = (j['dock'] as List?)?.map((e) => e.toString()).toList();
-    s.more = (j['more'] as List?)?.map((e) => e.toString()).toList();
-    return s;
-  }
-}
+import 'panel_settings.dart';
+import 'panel_geometry.dart';
+import 'panel_holds.dart';
 
 /// No-op host used when none is injected (tests).
 class _StubNativeHost extends NativeHost {
@@ -159,75 +30,9 @@ class _StubNativeHost extends NativeHost {
   dynamic noSuchMethod(Invocation invocation) => Future.value();
 }
 
-/// Info about a dockable widget: a registry tool or a pinned app.
-class ToolInfo {
-  const ToolInfo({
-    required this.id,
-    required this.name,
-    this.emoji,
-    this.svg,
-    required this.kind,
-    this.dockOnly = false,
-    this.fixed = false,
-    this.action,
-    this.app,
-  });
-
-  factory ToolInfo.of(String id) {
-    if (id.startsWith('app-')) {
-      final app = _controllerApps.firstWhere(
-        (a) => a.id == id,
-        orElse: () => AppItem(id: id, name: 'App', path: ''),
-      );
-      return ToolInfo(
-        id: id,
-        name: app.name,
-        emoji: app.icon == null ? '🚀' : null,
-        kind: ToolKind.app,
-        app: app,
-      );
-    }
-    final w = kTools[id]!;
-    return ToolInfo(
-      id: id,
-      name: w.name,
-      emoji: w.emoji,
-      svg: w.svg,
-      kind: w.kind,
-      dockOnly: w.dockOnly,
-      fixed: w.fixed,
-      action: w.action,
-    );
-  }
-
-  static List<AppItem> _controllerApps = [];
-
-  final String id;
-  final String name;
-  final String? emoji;
-  final String? svg;
-  final ToolKind kind;
-  final bool dockOnly;
-  final bool fixed;
-  final String? action;
-  final AppItem? app;
-}
-
-/// Per-tool springs, preserved across re-renders (like el._s / el._m / el._p
-/// on the DOM nodes) so tools never re-pop when the list is rebuilt.
-class ToolSprings {
-  ToolSprings()
-    : sp = Spring(0, 380, 25),
-      mg = Spring(0, 500, 30),
-      pr = Spring(0, 700, 28);
-  final Spring sp;
-  final Spring mg;
-  final Spring pr;
-}
-
 /// Owns every bit of app state and all interactions; the port of the
 /// original's module-level script plus the `app` object.
-class PanelController extends ChangeNotifier {
+class PanelController extends ChangeNotifier implements PanelHoldable {
   PanelController({NativeHost? nativeHost})
     : native = nativeHost ?? _StubNativeHost() {
     _wireNative();
@@ -235,7 +40,7 @@ class PanelController extends ChangeNotifier {
 
   final Storage storage = Storage();
   final NativeHost native;
-  late final NavigatorObserver routeObserver = _PanelRouteObserver(this);
+  late final NavigatorObserver routeObserver = PanelRouteObserver(this);
   bool _persistSettings = true;
   Future<void> Function()? beforeShutdown;
   void Function()? onCapture;
@@ -591,6 +396,7 @@ class PanelController extends ChangeNotifier {
 
   /// An owned lease keeps readers, recorders and OS dialogs visible. Releasing
   /// one lease cannot accidentally unlock another overlapping interaction.
+  @override
   VoidCallback holdOpen() {
     _interactionCount++;
     cancelClose();
@@ -713,7 +519,7 @@ class PanelController extends ChangeNotifier {
     normalize();
     if (preset == null && installLanguage != null) save();
 
-    ToolInfo._controllerApps = S.apps;
+    ToolInfo.controllerApps = S.apps;
     if (preset == null) {
       clips = _restorePinnedClips();
     }
@@ -811,7 +617,7 @@ class PanelController extends ChangeNotifier {
   }
 
   void save() {
-    ToolInfo._controllerApps = S.apps;
+    ToolInfo.controllerApps = S.apps;
     if (_persistSettings) storage.saveSettings(S.toMap());
   }
 
@@ -1352,7 +1158,7 @@ class PanelController extends ChangeNotifier {
     S.apps = S.apps.where((x) => x.id != id).toList();
     S.dock = S.dock!.where((x) => x != id).toList();
     S.more = S.more!.where((x) => x != id).toList();
-    ToolInfo._controllerApps = S.apps;
+    ToolInfo.controllerApps = S.apps;
     save();
     notifyListeners();
   }
@@ -1521,64 +1327,4 @@ class PanelController extends ChangeNotifier {
     toastMsg.dispose();
     super.dispose();
   }
-}
-
-/// Popup menus and secondary routes can extend beyond the measured flyout.
-/// Keep their host alive until Navigator dismisses them.
-class _PanelRouteObserver extends NavigatorObserver {
-  _PanelRouteObserver(this.controller);
-  final PanelController controller;
-  final _holds = <Route<dynamic>, VoidCallback>{};
-  @override
-  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    if (previousRoute != null) _holds[route] = controller.holdOpen();
-  }
-
-  @override
-  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) =>
-      _release(route);
-  @override
-  void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) =>
-      _release(route);
-  @override
-  void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) {
-    final held = _holds.containsKey(oldRoute);
-    if (oldRoute != null) _release(oldRoute);
-    if (held && newRoute != null) _holds[newRoute] = controller.holdOpen();
-  }
-
-  void _release(Route<dynamic> route) => _holds.remove(route)?.call();
-}
-
-Color hexToColor(String hex) {
-  var h = hex.replaceFirst('#', '');
-  if (h.length == 6) h = 'FF$h';
-  return Color(int.tryParse(h, radix: 16) ?? 0xFF000000);
-}
-
-String colorToHex(Color c) =>
-    '#${c.toARGB32().toRadixString(16).padLeft(8, '0').substring(2).toUpperCase()}';
-
-/// Live drag state for widget reordering (ghost, hovered zone, insert index).
-class DragInfo {
-  DragInfo({
-    required this.id,
-    required this.moved,
-    this.zone,
-    this.insertIdx = 0,
-    this.pointer,
-  });
-
-  final String id;
-  final bool moved;
-  final String? zone; // dock | more | wdock | wmore
-  final int insertIdx;
-  final Offset? pointer;
-}
-
-class DragCandidate {
-  DragCandidate(this.id, this.start);
-
-  final String id;
-  final Offset start;
 }

@@ -256,5 +256,44 @@
   "noEmojiFound": "No emoji found",
   "nothingYet": "Nothing yet",
   "unknownUnit": "Unknown unit",
-  "hotkeyInUse": "That shortcut is already used by another app"
+  "hotkeyInUse": "That shortcut is already used by another app",
+  "laterToday": "Later today",
+  "tomorrowMorning": "Tomorrow morning",
+  "customDateTime": "Date & time…",
+  "repeat": "Repeat",
+  "noRepeat": "Does not repeat",
+  "repeatDaily": "Every day",
+  "repeatWeekly": "Every week",
+  "repeatMonthly": "Every month",
+  "repeatYearly": "Every year",
+  "clearReminder": "Clear reminder",
+  "reminderSet": "Reminder set",
+  "overdue": "Overdue",
+  "shortcuts": "Shortcuts",
+  "keyboardShortcuts": "Keyboard shortcuts",
+  "actionNewNote": "New note",
+  "actionNewChecklist": "New checklist",
+  "actionSearch": "Search",
+  "actionLibrary": "Library",
+  "actionSettings": "Settings",
+  "actionMoveSelection": "Move selection",
+  "actionOpenNote": "Open note",
+  "actionCloseOrClear": "Close reader / Clear search",
+  "actionDelete": "Delete",
+  "actionPin": "Pin / Unpin",
+  "actionCopy": "Copy",
+  "noNoteSelected": "No note selected",
+  "selectedCount": "{count} selected",
+  "@selectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "clearSelection": "Clear selection",
+  "edit": "Edit",
+  "discard": "Discard",
+  "save": "Save",
+  "restored": "Restored successfully"
 }

@@ -10,6 +10,14 @@ add_executable(${BINARY_NAME} WIN32
   "flutter_window.cpp"
   "main.cpp"
   "native_bridge.cpp"
+  "native_common.cpp"
+  "native_startup.cpp"
+  "native_hotkeys.cpp"
+  "native_tray.cpp"
+  "native_window.cpp"
+  "native_clipboard.cpp"
+  "native_pickers.cpp"
+  "native_notifications.cpp"
   "utils.cpp"
   "win32_window.cpp"
   "${FLUTTER_MANAGED_DIR}/generated_plugin_registrant.cc"
@@ -30,12 +38,13 @@ target_compile_definitions(${BINARY_NAME} PRIVATE "FLUTTER_VERSION_BUILD=${FLUTT
 
 # Disable Windows macros that collide with C++ standard library functions.
 target_compile_definitions(${BINARY_NAME} PRIVATE "NOMINMAX")
+target_compile_definitions(${BINARY_NAME} PRIVATE "_SILENCE_EXPERIMENTAL_COROUTINE_DEPRECATION_WARNINGS")
 
 # Add dependency libraries and include directories. Add any application-specific
 # dependencies here.
 target_link_libraries(${BINARY_NAME} PRIVATE flutter flutter_wrapper_app)
 target_link_libraries(${BINARY_NAME} PRIVATE "dwmapi.lib" "comctl32.lib")
-target_link_libraries(${BINARY_NAME} PRIVATE "comdlg32.lib" "shell32.lib" "gdi32.lib" "user32.lib" "advapi32.lib" "ole32.lib" "uxtheme.lib")
+target_link_libraries(${BINARY_NAME} PRIVATE "comdlg32.lib" "shell32.lib" "gdi32.lib" "user32.lib" "advapi32.lib" "ole32.lib" "uxtheme.lib" "windowsapp.lib")
 target_include_directories(${BINARY_NAME} PRIVATE "${CMAKE_SOURCE_DIR}")
 
 # Run the Flutter tool portions of the build. This must not be removed.

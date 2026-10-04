@@ -1,8 +1,8 @@
 ; Build with tools/build_installer.ps1. All runtime files come from its payload.
 [Setup]
 AppId={{48B6A24D-07D7-4DE8-8D6C-801190DF6A42}
-AppName=Nex Windows (Test)
-AppVersion=0.10.0
+AppName=Nex
+AppVersion=0.11.0+7
 AppPublisher=Nex
 DefaultDirName={localappdata}\Programs\Nex
 DefaultGroupName=Nex
@@ -17,14 +17,14 @@ LicenseFile=..\LICENSE
 SetupIconFile=..\windows\runner\resources\app_icon.ico
 UninstallDisplayIcon={app}\nex_desktop.exe
 OutputDir=..\build\installer\output
-OutputBaseFilename=Nex-Windows-Setup-0.10.0-x64
+OutputBaseFilename=Nex-Windows-Setup-0.11.0-x64
 Compression=lzma2
 SolidCompression=yes
 AppMutex=Local\NexDesktopSingleton
 CloseApplications=no
 RestartApplications=no
-VersionInfoVersion=0.10.0.6
-VersionInfoDescription=Nex Windows test installer
+VersionInfoVersion=0.11.0.7
+VersionInfoDescription=Nex Windows installer
 
 [Languages]
 Name: "farsi"; MessagesFile: "Farsi.isl"
@@ -43,8 +43,8 @@ Name: "desktopicon"; Description: "{cm:DesktopShortcut}"; GroupDescription: "{cm
 Source: "..\build\installer\payload\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
-Name: "{group}\Nex"; Filename: "{app}\nex_desktop.exe"; WorkingDir: "{app}"
-Name: "{userdesktop}\Nex"; Filename: "{app}\nex_desktop.exe"; WorkingDir: "{app}"; Tasks: desktopicon
+Name: "{group}\Nex"; Filename: "{app}\nex_desktop.exe"; WorkingDir: "{app}"; AppUserModelID: "Nex.Desktop.App"
+Name: "{userdesktop}\Nex"; Filename: "{app}\nex_desktop.exe"; WorkingDir: "{app}"; Tasks: desktopicon; AppUserModelID: "Nex.Desktop.App"
 
 [Run]
 Filename: "{app}\nex_desktop.exe"; WorkingDir: "{app}"; Description: "{cm:LaunchNex}"; Flags: nowait postinstall skipifsilent

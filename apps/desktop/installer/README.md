@@ -1,6 +1,6 @@
 # Nex Windows test installer
 
-Inno Setup 6.7.3+ produces `Nex-Windows-Setup-0.10.0-x64.exe` for Windows 10/11 x64. It installs for the current user into `%LOCALAPPDATA%\Programs\Nex` without administrator privileges, offers Persian/English installer UI, creates a Start menu shortcut and optionally a desktop shortcut, and registers its uninstaller in Windows Settings. The chosen installer language becomes the app/tray language on the next launch, once per installation. Automatic startup remains controlled by Nex settings. Close Nex before updating or uninstalling; the installer uses the same singleton mutex.
+Inno Setup 6 produces `Nex-Windows-Setup-0.11.0-x64.exe` for Windows 10/11 x64. It installs for the current user into `%LOCALAPPDATA%\Programs\Nex` without administrator privileges, offers Persian/English installer UI, creates a Start menu shortcut and optionally a desktop shortcut, and registers its uninstaller in Windows Settings. The chosen installer language becomes the app/tray language on the next launch, once per installation. Automatic startup remains controlled by Nex settings. Close Nex before updating or uninstalling; the installer uses the same singleton mutex.
 
 The complete Flutter Release bundle is included, with app-local x64 Microsoft C++ redistributable DLLs, assets, fonts, SQLite and all plugin DLLs. It needs no runtime download during installation. User notes/media/settings in application-support locations survive uninstall. The optional startup registry value is removed only when it points to this installation's executable.
 

@@ -1,18 +1,22 @@
-# Nex Windows test
+# Nex Windows
 
-نسخهٔ آزمایشی ویندوز **0.10.0** (build 6) از Nex برای ویندوز، بر پایهٔ پروژهٔ Flutter Right Panel.
+نسخهٔ ویندوز **0.11.0+7** از Nex برای ویندوز، بر پایهٔ پروژهٔ Flutter دسکتاپ و معماری local-first.
 
-## حالت نمایش جدید
+## حالت نمایش و قابلیت‌های نسخهٔ 0.11.0
 
-از این نسخه، **پنجرهٔ کامل دسکتاپ** حالت اصلی برنامه است: یک پنجرهٔ معمولی ویندوز با کپشن، تغییر اندازه، حداکثر/حداقل کردن، نوار ناوبری (ثبت سریع، کتابخانه، ابزارها، تنظیمات) و همان داده‌ها و قابلیت‌های قبلی. **نوار لبه** (اسلاید از لبهٔ صفحه) به‌عنوان حالتی اختیاری حفظ شده و از تنظیمات یا دکمهٔ کنار نوار قابل تعویض است. هر دو حالت از یک پایگاه داده، یک جلسهٔ ثبت و یک تنظیمات مشترک استفاده می‌کنند و جای پنجره و اندازهٔ آن بین اجراها ذخیره می‌شود.
+- **پنجرهٔ کامل دسکتاپ (حالت دو ستونه):** در عرض‌های بالاتر از ۹۰۰ پیکسل، نمایش دو ستونهٔ فهرست یادداشت‌ها و مطالعه/ویرایشگر با جداکنندهٔ قابل کشیدن (Drag) و ذخیرهٔ موقعیت.
+- **یادآورهای پایدار ویندوز:** اتصال به سرویس اعلان‌های ویندوز (C++/WinRT Scheduled Toast Notifications) با شناسهٔ برنامه `Nex.Desktop.App`، عملکرد پایدار حتی پس از بستن برنامه و زمان‌بندی تکرار روزانه/هفتگی.
+- **بازیابی کامل نسخهٔ پشتیبان (Backup Restore):** بازیابی فایل‌های `.nexbak` و `.nexfull` (با رمزگشایی کلید خصوصی) با اعتبارسنجی مرحله‌ای و جابه‌جایی اتمیک.
+- **ثبت لینک و استخراج متادیتا:** مطالعهٔ مستقیم استریم صفحات وب تا سقف ۲۵۶ کیلوبایت و اولویت عنوان Open Graph.
+- **تعهدهای دوره‌ای (Commitments):** مدیریت تعهدهای دوره‌ای با روزهای هفته به تقویم فارسی (آغاز از شنبه).
+- **کلیدهای میانبر و منوی راست‌کلیک:** کلیدهای `Ctrl+N`، `Ctrl+Shift+N`، `Ctrl+F`، `Ctrl+L`، `Ctrl+,`، `Ctrl+P`، `Ctrl+C`، حذف با قابلیت Undo (`Ctrl+Z`)، راهنمای کلیدهای میانبر (`F1`) و انتخاب چندگانه (Multi-select).
 
 ## دریافت نسخهٔ آماده
 
-- [نصاب ویندوز x64 — 0.10.0](https://github.com/sanyzrn/Nex_windows_test/releases/download/v0.10.0/Nex-Windows-Setup-0.10.0-x64.exe)
-- [ZIP سورس همگام با این نسخه](https://github.com/sanyzrn/Nex_windows_test/archive/refs/tags/v0.10.0.zip)
-- [SHA-256 نصاب](https://github.com/sanyzrn/Nex_windows_test/releases/download/v0.10.0/SHA256SUMS)
+- [نسخه‌های منتشرشده و نصاب ویندوز](https://github.com/sanyzrn/Nex_windows_test/releases)
+- [SHA-256 نصاب](SHA256SUMS)
 
-فایل نصبی از GitHub Release دریافت می‌شود، شامل تمام وابستگی‌های اجرایی است و برای کاربر جاری نصب می‌شود. پیش از به‌روزرسانی، Nex را ببندید. داده‌های یادداشت‌ها با به‌روزرسانی حفظ می‌شوند. این نصاب آزمایشی امضای دیجیتال ندارد.
+فایل‌های نصبی منتشرشده از GitHub Releases دریافت می‌شوند. نصاب ۰.۱۱.۰ فعلاً خروجی محلی ساخت است و در گیت قرار نمی‌گیرد؛ checksum آن در `SHA256SUMS` ثبت شده است. نصاب شامل تمام وابستگی‌های اجرایی است و برای کاربر جاری نصب می‌شود. پیش از به‌روزرسانی، Nex را ببندید. داده‌های یادداشت‌ها با به‌روزرسانی حفظ می‌شوند. این نصاب آزمایشی امضای دیجیتال ندارد.
 
 ## ساخت از سورس
 
@@ -20,7 +24,7 @@
 
 نیازمندی‌ها: ویندوز x64، Flutter **3.35.0 یا جدیدتر / Dart 3.9.0 یا جدیدتر** و Visual Studio با workload توسعهٔ دسکتاپ C++.
 
-از Flutter نصب‌شده روی سیستم استفاده کنید. قفل FVM حذف شده است؛ SDKها فقط حداقل نسخه دارند و سقف نسخه ندارند. نصب یا downgrade خودکار SDK لازم نیست. اعتبارسنجی تاریخی ریلیز 0.9.0 مربوط به toolchain قبلی است.
+از Flutter نصب‌شده روی سیستم استفاده کنید. قفل FVM حذف شده است؛ فایل‌های `pubspec.yaml` محدودهٔ نسخه‌های سازگار SDK را تعیین می‌کنند. بررسی فعلی و CI از Flutter 3.44.8 / Dart 3.12.2 استفاده می‌کنند. نصب یا downgrade خودکار SDK لازم نیست. اعتبارسنجی تاریخی ریلیز 0.9.0 مربوط به toolchain قبلی است.
 
 ```powershell
 git clone https://github.com/sanyzrn/Nex_windows_test.git
@@ -52,7 +56,7 @@ flutter build windows --release --no-pub
 - نمایش درون پنل برای خواندن و ویرایش یادداشت، آیکون‌ها و فاصله‌های هماهنگ، سایه‌های ملایم‌تر.
 - اصلاح پخش صوت ویندوز، کنترل پایان پخش و ضبط WAV.
 
-اعتبارسنجی تحویل: **37 تست (شامل ۵ تست جدید پوستهٔ پنجره) و ۱۰ مقایسهٔ golden**، analyzer بدون ایراد. تست‌ها روی لینوکس اجرا شده‌اند؛ مقایسه‌های golden به دلیل تفاوت فونت‌های سیستم در لینوکس با خطای پیکسلی جزئی شکست می‌خورند که روی کد اصلی هم همین‌طور است و باید روی ویندوز بازبینی شوند. ساخت Release و نصاب و اجرای native روی ویندوز باید توسط مالک تکرار شود. ضبط میکروفون، مانیتورهای mixed-DPI و اهداف کارایی هنوز تست واقعی کامل ندارند. [گزارش تست](TEST_RESULTS.md) حدود دقیق بررسی‌ها و نتایج تاریخی را ثبت می‌کند.
+نتایج تست‌های نسخهٔ 0.11.0، بررسی‌های فعلی و محدودیت‌های اعتبارسنجی در [گزارش تست](docs/TEST_RESULTS.md) ثبت می‌شود. آزمون‌های واحد یادآور از زمان‌بند شبیه‌سازی‌شده استفاده می‌کنند؛ بررسی اعلان واقعی ویندوز و نمایش روی چند مانیتور همچنان به تست دستی نیاز دارد.
 
 ## ساختار و منشأ
 
@@ -60,9 +64,11 @@ flutter build windows --release --no-pub
 | --- | --- |
 | `apps/desktop` | سورس Flutter، کد native ویندوز، تست‌ها، فونت‌ها و ابزار ساخت نصاب |
 | `packages/core`, `data`, `ui`, `ai` | پکیج‌های لازم Nex با تغییرات مشترک نهایی |
-| `patches` | دو patch برای اعمال تغییرات مشترک به checkout اصلی Nex |
-| `HANDOFF.md`, `TEST_RESULTS.md` | گزارش تحویل و اعتبارسنجی نسخهٔ 0.10.0 |
+| `patches` | یک نسخه از دو patch برای تحویل تغییرات مشترک به checkout اصلی Nex |
+| `docs` | گزارش تحویل، اعتبارسنجی، خلاصهٔ وضعیت و راهنمای ادغام |
+| `docs/archive` | شرح کار تاریخی نسخهٔ ۰.۱۱ |
+| `spec` | داده‌های مشترک آزمون انطباق مدل‌ها |
 
 Nex packages originate from [sanyzrn/DbsNex](https://github.com/sanyzrn/DbsNex), base `4861feac41530c951cb9e637ff921c6472d7de58`. Desktop shell uses the owner's extracted `right_panel_flutter.zip`; the original [raminturne/right-panel](https://github.com/raminturne/right-panel) at `90dcdbde8e33816f08b681c65cd341aa796f81e4` was a read-only reference. No changes were pushed to either upstream repository.
 
-Nex notes/schema/repositories and shared design tokens remain the source of domain behaviour. AI is a removable stub; Windows reminders, backup restore UI, assistant/Vault and sync/OCR/on-device AI are absent or out of scope. See [desktop architecture and limitations](apps/desktop/README.md). Third-party attribution is in [THIRD_PARTY_NOTICES.md](apps/desktop/THIRD_PARTY_NOTICES.md); Nex uses the root MIT [LICENSE](LICENSE).
+Nex notes/schema/repositories and shared design tokens remain the source of domain behaviour. Windows reminders and backup restore UI are implemented; assistant/Vault and sync/OCR/on-device AI remain absent or out of scope. See [desktop architecture and limitations](apps/desktop/README.md) and the [integration guide](docs/INTEGRATION.md). Third-party attribution is in [THIRD_PARTY_NOTICES.md](apps/desktop/THIRD_PARTY_NOTICES.md); Nex uses the root MIT [LICENSE](LICENSE).

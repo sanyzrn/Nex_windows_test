@@ -1,6 +1,8 @@
+diff --git a/apps/client/lib/platform/theme_presets.dart b/apps/client/lib/platform/theme_presets.dart
+index 2222c0c..2c41682 100644
 --- a/apps/client/lib/platform/theme_presets.dart
 +++ b/apps/client/lib/platform/theme_presets.dart
-@@ -1,253 +1,2 @@
+@@ -1,261 +1,2 @@
 -import 'package:flutter/material.dart';
 -import 'package:nex_ui/nex_ui.dart';
 -import '../widgets/feature_label.dart';
@@ -242,6 +244,14 @@
 -            : colors.outline,
 -      ),
 -    ),
+-    // The base theme darkens the classic accent for quiet buttons' labels
+-    // (LOC-07); a palette's own primary is already a text tone, and the
+-    // classic one must not leak onto it.
+-    textButtonTheme: TextButtonThemeData(
+-      style: TextButton.styleFrom(
+-        foregroundColor: colors.primary,
+-      ).merge(base.textButtonTheme.style),
+-    ),
 -    outlinedButtonTheme: OutlinedButtonThemeData(
 -      style: base.outlinedButtonTheme.style?.copyWith(
 -        side: WidgetStatePropertyAll(BorderSide(color: colors.outline)),
@@ -254,16 +264,27 @@
 -    // on a coloured button — about 1:1 in dark.
 -  );
 -}
-+// Shared palette implementation; Android API is unchanged.
++﻿// Shared palette implementation; Android API is unchanged.
 +export 'package:nex_ui/tokens/nex_theme_presets.dart';
+diff --git a/packages/ui/lib/nex_ui.dart b/packages/ui/lib/nex_ui.dart
+index 22d26f2..89cd330 100644
 --- a/packages/ui/lib/nex_ui.dart
 +++ b/packages/ui/lib/nex_ui.dart
-@@ -27,3 +27,5 @@
+@@ -1,4 +1,4 @@
+-/// Nex shared Flutter UI package.
++﻿/// Nex shared Flutter UI package.
+ library;
+ 
+ export 'tokens/nex_accent_palette.dart';
+@@ -28,3 +28,5 @@ export 'widgets/nex_toast_pop.dart';
  export 'widgets/note_card.dart';
  export 'widgets/swipeable_note_card.dart';
  export 'widgets/tag_filter_row.dart';
 +
 +export 'tokens/nex_theme_presets.dart';
+diff --git a/packages/ui/lib/tokens/nex_theme_presets.dart b/packages/ui/lib/tokens/nex_theme_presets.dart
+new file mode 100644
+index 0000000..a30d442
 --- /dev/null
 +++ b/packages/ui/lib/tokens/nex_theme_presets.dart
 @@ -0,0 +1,254 @@

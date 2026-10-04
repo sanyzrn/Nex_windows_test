@@ -7,7 +7,7 @@ publish_to: "none"
 version: 0.1.0
 
 environment:
-  sdk: ">=3.9.0"
+  sdk: ^3.9.0
 
 dependencies:
   archive: ^4.0.2
@@ -23,5 +23,8 @@ dependencies:
 
 dev_dependencies:
   lints: ^5.0.0
-  # Preserve the existing test dependency; this change only updates SDK minima.
+  # Matches packages/core and packages/ai. A dependency bump took this to
+  # ^1.31.2, which needs Dart SDK ^3.11.0 — newer than the ^3.9.0 this
+  # package (and the repo's pinned Flutter/.fvmrc) targets, so `pub get`
+  # could not resolve it at all.
   test: ^1.25.0

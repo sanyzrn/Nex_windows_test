@@ -1597,6 +1597,198 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'That shortcut is already used by another app'**
   String get hotkeyInUse;
+
+  /// No description provided for @laterToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Later today'**
+  String get laterToday;
+
+  /// No description provided for @tomorrowMorning.
+  ///
+  /// In en, this message translates to:
+  /// **'Tomorrow morning'**
+  String get tomorrowMorning;
+
+  /// No description provided for @customDateTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Date & time…'**
+  String get customDateTime;
+
+  /// No description provided for @repeat.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat'**
+  String get repeat;
+
+  /// No description provided for @noRepeat.
+  ///
+  /// In en, this message translates to:
+  /// **'Does not repeat'**
+  String get noRepeat;
+
+  /// No description provided for @repeatDaily.
+  ///
+  /// In en, this message translates to:
+  /// **'Every day'**
+  String get repeatDaily;
+
+  /// No description provided for @repeatWeekly.
+  ///
+  /// In en, this message translates to:
+  /// **'Every week'**
+  String get repeatWeekly;
+
+  /// No description provided for @repeatMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Every month'**
+  String get repeatMonthly;
+
+  /// No description provided for @repeatYearly.
+  ///
+  /// In en, this message translates to:
+  /// **'Every year'**
+  String get repeatYearly;
+
+  /// No description provided for @clearReminder.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear reminder'**
+  String get clearReminder;
+
+  /// No description provided for @reminderSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder set'**
+  String get reminderSet;
+
+  /// No description provided for @overdue.
+  ///
+  /// In en, this message translates to:
+  /// **'Overdue'**
+  String get overdue;
+
+  /// No description provided for @shortcuts.
+  ///
+  /// In en, this message translates to:
+  /// **'Shortcuts'**
+  String get shortcuts;
+
+  /// No description provided for @keyboardShortcuts.
+  ///
+  /// In en, this message translates to:
+  /// **'Keyboard shortcuts'**
+  String get keyboardShortcuts;
+
+  /// No description provided for @actionNewNote.
+  ///
+  /// In en, this message translates to:
+  /// **'New note'**
+  String get actionNewNote;
+
+  /// No description provided for @actionNewChecklist.
+  ///
+  /// In en, this message translates to:
+  /// **'New checklist'**
+  String get actionNewChecklist;
+
+  /// No description provided for @actionSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get actionSearch;
+
+  /// No description provided for @actionLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'Library'**
+  String get actionLibrary;
+
+  /// No description provided for @actionSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get actionSettings;
+
+  /// No description provided for @actionMoveSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'Move selection'**
+  String get actionMoveSelection;
+
+  /// No description provided for @actionOpenNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Open note'**
+  String get actionOpenNote;
+
+  /// No description provided for @actionCloseOrClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Close reader / Clear search'**
+  String get actionCloseOrClear;
+
+  /// No description provided for @actionDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get actionDelete;
+
+  /// No description provided for @actionPin.
+  ///
+  /// In en, this message translates to:
+  /// **'Pin / Unpin'**
+  String get actionPin;
+
+  /// No description provided for @actionCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get actionCopy;
+
+  /// No description provided for @noNoteSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'No note selected'**
+  String get noNoteSelected;
+
+  /// No description provided for @selectedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} selected'**
+  String selectedCount(int count);
+
+  /// No description provided for @clearSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear selection'**
+  String get clearSelection;
+
+  /// No description provided for @edit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get edit;
+
+  /// No description provided for @discard.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard'**
+  String get discard;
+
+  /// No description provided for @save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get save;
+
+  /// No description provided for @restored.
+  ///
+  /// In en, this message translates to:
+  /// **'Restored successfully'**
+  String get restored;
 }
 
 class _AppLocalizationsDelegate

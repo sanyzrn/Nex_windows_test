@@ -81,10 +81,11 @@ class DesktopStore {
       reply.send([-1, false, e.toString()]);
       return;
     }
-    final notes = SqliteNoteRepository(db, localDeviceId: device);
-    final capture = CaptureService(notes, deviceId: device);
-    final threads = SqliteThreadRepository(db, notes, localDeviceId: device);
-    final maintenance = LibraryMaintenance(
+    var notes = SqliteNoteRepository(db, localDeviceId: device);
+    var capture = CaptureService(notes, deviceId: device);
+    var threads = SqliteThreadRepository(db, notes, localDeviceId: device);
+    var commitments = SqliteCommitmentRepository(db, localDeviceId: device);
+    var maintenance = LibraryMaintenance(
       notes,
       mediaRoot: p.join(root, 'media'),
     );
@@ -128,7 +129,13 @@ class DesktopStore {
                         .toList(),
                   );
                 } else {
-                  result = capture.submitTextCapture(text);
+                  final trimmed = text.trim();
+                  final normalisedUrl = normaliseUrl(trimmed);
+                  if (normalisedUrl != null) {
+                    result = capture.submitLinkCapture(trimmed);
+                  } else {
+                    result = capture.submitTextCapture(text);
+                  }
                 }
               case 'timeline':
                 result = notes.listTimeline(
@@ -218,7 +225,31 @@ class DesktopStore {
                 notes.setCaption(a['id'] as String, a['text'] as String);
                 result = null;
               case 'remind':
-                notes.setDueAt(a['id'] as String, a['at'] as DateTime?);
+                final repeatStr = a['repeat'] as String?;
+                final repeat = repeatStr != null
+                    ? NoteRepeat.fromWire(repeatStr)
+                    : NoteRepeat.once;
+                notes.setDueAt(
+                  a['id'] as String,
+                  a['at'] as DateTime?,
+                  repeat: repeat,
+                );
+                result = null;
+              case 'linkMeta':
+                notes.setLinkMetadata(
+                  a['id'] as String,
+                  title: a['title'] as String?,
+                  excerpt: a['excerpt'] as String?,
+                );
+                result = null;
+              case 'commitments':
+                result = commitments.list();
+              case 'commitmentSave':
+                result = commitments.save(a['commitment'] as NexCommitment);
+              case 'commitmentMet':
+                result = commitments.markMet(a['id'] as String);
+              case 'commitmentDelete':
+                commitments.delete(a['id'] as String);
                 result = null;
               case 'media':
                 // Stream-copy and hash inside this isolate. Never load arbitrary files into UI memory.
@@ -300,6 +331,61 @@ class DesktopStore {
                   key: key,
                 );
                 result = key;
+              case 'restoreBackup':
+                final backupPath = a['file'] as String;
+                final key = a['key'] as String?;
+                String libraryPath = backupPath;
+                Map<String, dynamic>? restoredSettings;
+                Directory? unpackStaging;
+                if (backupPath.endsWith('.nexfull') ||
+                    backupPath.endsWith('.fullbak')) {
+                  if (key == null || key.trim().isEmpty) {
+                    throw ArgumentError('Recovery key required');
+                  }
+                  unpackStaging = Directory(p.join(root, '.unpack-${newUuidV7()}'))
+                    ..createSync(recursive: true);
+                  final unpacked = FullBackup.unpack(
+                    backupPath,
+                    unpackStaging.path,
+                    key.trim(),
+                    modelHash: '',
+                    modelBytes: 0,
+                  );
+                  libraryPath = p.join(unpackStaging.path, 'library.nexbak');
+                  restoredSettings =
+                      unpacked['desktopShell'] as Map<String, dynamic>?;
+                }
+                db.close();
+                try {
+                  NexBackupArchive.restore(
+                    liveDbPath: p.join(root, 'nex.sqlite'),
+                    mediaDir: p.join(root, 'media'),
+                    backupFile: libraryPath,
+                  );
+                } finally {
+                  if (unpackStaging?.existsSync() == true) {
+                    try {
+                      unpackStaging!.deleteSync(recursive: true);
+                    } catch (_) {}
+                  }
+                  db = NexDatabase.open(p.join(root, 'nex.sqlite'));
+                  notes = SqliteNoteRepository(db, localDeviceId: device);
+                  capture = CaptureService(notes, deviceId: device);
+                  threads = SqliteThreadRepository(
+                    db,
+                    notes,
+                    localDeviceId: device,
+                  );
+                  commitments = SqliteCommitmentRepository(
+                    db,
+                    localDeviceId: device,
+                  );
+                  maintenance = LibraryMaintenance(
+                    notes,
+                    mediaRoot: p.join(root, 'media'),
+                  );
+                }
+                result = restoredSettings;
               case 'close':
                 db.close();
                 commands.close();

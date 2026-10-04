@@ -1,16 +1,28 @@
-// Native bridge: the entire Windows-specific half of Nex, ported
-// from the original's src/sys/windows.rs. Runs inside the Flutter runner
-// (no plugins, no extra DLLs).
+// Native bridge: the central dispatcher of the Windows runner.
+// Ports the original src/sys/windows.rs platform layer.
+// Specific subsystems are factored into:
+// - native_common: UTF conversions, encodables, and crypto/compression helpers
+// - native_startup: Windows Registry Run autorun registration
+// - native_hotkeys: Input simulation and global hotkey combinations
+// - native_tray: System tray icon and context menu
+// - native_window: Multi-monitor enumeration, placement, DPI, and window styling
+// - native_clipboard: Clipboard text, DIB/PNG image read/write, and downscaling
+// - native_pickers: Windows Shell file open dialogs and shell icon extraction
 
 #include "native_bridge.h"
+#include "native_common.h"
+#include "native_startup.h"
+#include "native_hotkeys.h"
+#include "native_tray.h"
+#include "native_window.h"
+#include "native_clipboard.h"
+#include "native_pickers.h"
+#include "native_notifications.h"
 #include "resource.h"
 
 #include <windows.h>
-
 #include <commctrl.h>
 #include <commdlg.h>
-#include <cctype>
-#include <dwmapi.h>
 #include <shellapi.h>
 #include <shlobj.h>
 #include <shobjidl_core.h>
@@ -23,233 +35,12 @@
 #include <flutter_windows.h>
 
 namespace {
-
 using flutter::EncodableList;
 using flutter::EncodableMap;
 using flutter::EncodableValue;
 
-const wchar_t kRunKey[] = L"Software\\Microsoft\\Windows\\CurrentVersion\\Run";
-const wchar_t kRunName[] = L"NexDesktop";
-
-const EncodableValue* Find(const EncodableMap* m, const char* key) {
-  if (m == nullptr) return nullptr;
-  auto it = m->find(EncodableValue(key));
-  return it == m->end() ? nullptr : &it->second;
-}
-
-std::string ArgString(const EncodableMap* m, const char* key) {
-  const auto* v = Find(m, key);
-  const auto* s = v ? std::get_if<std::string>(v) : nullptr;
-  return s ? *s : std::string();
-}
-
-bool ArgBool(const EncodableMap* m, const char* key) {
-  const auto* v = Find(m, key);
-  if (!v) return false;
-  if (const auto* b = std::get_if<bool>(v)) return *b;
-  if (const auto* i = std::get_if<int32_t>(v)) return *i != 0;
-  if (const auto* l = std::get_if<int64_t>(v)) return *l != 0;
-  return false;
-}
-
-int ArgInt(const EncodableMap* m, const char* key) {
-  const auto* v = Find(m, key);
-  if (!v) return 0;
-  if (const auto* i = std::get_if<int32_t>(v)) return *i;
-  if (const auto* l = std::get_if<int64_t>(v)) return static_cast<int>(*l);
-  if (const auto* d = std::get_if<double>(v)) return static_cast<int>(*d);
-  return 0;
-}
-
-std::vector<uint8_t> ArgBytes(const EncodableMap* m, const char* key) {
-  const auto* v = Find(m, key);
-  const auto* b = v ? std::get_if<std::vector<uint8_t>>(v) : nullptr;
-  return b ? *b : std::vector<uint8_t>();
-}
-
-std::wstring Utf16FromUtf8Inner(const std::string& s) {
-  if (s.empty()) return std::wstring();
-  int len = MultiByteToWideChar(CP_UTF8, 0, s.data(), (int)s.size(), nullptr, 0);
-  std::wstring out(len, 0);
-  MultiByteToWideChar(CP_UTF8, 0, s.data(), (int)s.size(), out.data(), len);
-  return out;
-}
-
-std::string Utf8FromUtf16Inner(const wchar_t* s) {
-  if (s == nullptr) return std::string();
-  int len = WideCharToMultiByte(CP_UTF8, 0, s, -1, nullptr, 0, nullptr, nullptr);
-  if (len <= 1) return std::string();
-  std::string out(len - 1, 0);
-  WideCharToMultiByte(CP_UTF8, 0, s, -1, out.data(), len, nullptr, nullptr);
-  return out;
-}
-
-// ---------- keyboard ----------
-
-void SendCombo(const std::vector<WORD>& combo) {
-  std::vector<INPUT> inputs;
-  for (WORD vk : combo) {
-    INPUT down = {};
-    down.type = INPUT_KEYBOARD;
-    down.ki.wVk = vk;
-    inputs.push_back(down);
-  }
-  for (auto it = combo.rbegin(); it != combo.rend(); ++it) {
-    INPUT up = {};
-    up.type = INPUT_KEYBOARD;
-    up.ki.wVk = *it;
-    up.ki.dwFlags = KEYEVENTF_KEYUP;
-    inputs.push_back(up);
-  }
-  SendInput((UINT)inputs.size(), inputs.data(), sizeof(INPUT));
-}
-
-std::vector<WORD> ComboFor(const std::string& name) {
-  const WORD play = 0xB3, next = 0xB0, prev = 0xB1, mute = 0xAD,
-            volup = 0xAF, voldown = 0xAE, lwin = 0x5B, d = 0x44;
-  if (name == "play") return {play};
-  if (name == "next") return {next};
-  if (name == "prev") return {prev};
-  if (name == "mute") return {mute};
-  if (name == "volup") return {volup};
-  if (name == "voldown") return {voldown};
-  if (name == "desktop") return {lwin, d};
-  return {};
-}
-
-// ---------- clipboard helpers ----------
-
-bool SetClipboardText(const std::wstring& text) {
-  if (!OpenClipboard(nullptr)) return false;
-  EmptyClipboard();
-  const size_t bytes = (text.size() + 1) * sizeof(wchar_t);
-  HGLOBAL mem = GlobalAlloc(GMEM_MOVEABLE, bytes);
-  if (mem == nullptr) {
-    CloseClipboard();
-    return false;
-  }
-  auto* dst = static_cast<wchar_t*>(GlobalLock(mem));
-  if (dst != nullptr) {
-    memcpy(dst, text.c_str(), bytes);
-    GlobalUnlock(mem);
-  }
-  const HANDLE ok = SetClipboardData(CF_UNICODETEXT, mem);
-  CloseClipboard();
-  return ok != nullptr;
-}
-
-std::string GetClipboardText() {
-  if (!OpenClipboard(nullptr)) return std::string();
-  std::string out;
-  HANDLE h = GetClipboardData(CF_UNICODETEXT);
-  if (h != nullptr) {
-    if (auto* wide = static_cast<const wchar_t*>(GlobalLock(h))) {
-      out = Utf8FromUtf16Inner(wide);
-      GlobalUnlock(h);
-    }
-  }
-  CloseClipboard();
-  return out;
-}
-
-// ---------- registry (startup) ----------
-
-bool RegistryRunEnabled() {
-  return RegGetValueW(HKEY_CURRENT_USER, kRunKey, kRunName, RRF_RT_REG_SZ,
-                      nullptr, nullptr, nullptr) == ERROR_SUCCESS;
-}
-
-void RegistryRunSet(bool on) {
-  if (!on) {
-    RegDeleteKeyValueW(HKEY_CURRENT_USER, kRunKey, kRunName);
-    return;
-  }
-  wchar_t exe[MAX_PATH * 2] = {};
-  GetModuleFileNameW(nullptr, exe, ARRAYSIZE(exe));
-  std::wstring value = L"\"";
-  value += exe;
-  value += L"\" --background";
-  RegSetKeyValueW(HKEY_CURRENT_USER, kRunKey, kRunName, REG_SZ,
-                  value.c_str(),
-                  (DWORD)((value.size() + 1) * sizeof(wchar_t)));
-}
-
-// ---------- window composition ----------
-
-// Same recipe the runner uses to make the edge-panel host transparent: an
-// ACCENT_ENABLE_TRANSPARENTGRADIENT policy with a zero color. The desktop
-// window mode disables it so the host is a normal opaque DWM window.
-typedef enum _ACCENT_STATE_BRIDGE {
-  ACCENT_DISABLED_BRIDGE = 0,
-  ACCENT_ENABLE_GRADIENT_BRIDGE = 1,
-  ACCENT_ENABLE_TRANSPARENTGRADIENT_BRIDGE = 2,
-} ACCENT_STATE_BRIDGE;
-
-typedef struct _ACCENT_POLICY_BRIDGE {
-  int nAccentState;
-  int nFlags;
-  int nColor;
-  int nAnimationId;
-} ACCENT_POLICY_BRIDGE;
-
-typedef struct _WINCOMPATTRDATA_BRIDGE {
-  int nAttribute;
-  PVOID pData;
-  ULONG ulDataSize;
-} WINCOMPATTRDATA_BRIDGE;
-
-void SetWindowAccentTransparent(HWND hwnd, bool transparent) {
-  const HINSTANCE user32 = LoadLibrary(TEXT("user32.dll"));
-  if (user32 == nullptr) return;
-  const auto set_window_composition_attribute =
-      reinterpret_cast<BOOL(WINAPI*)(HWND, WINCOMPATTRDATA_BRIDGE*)>(
-          GetProcAddress(user32, "SetWindowCompositionAttribute"));
-  if (set_window_composition_attribute != nullptr) {
-    ACCENT_POLICY_BRIDGE policy = {transparent
-                                       ? ACCENT_ENABLE_TRANSPARENTGRADIENT_BRIDGE
-                                       : ACCENT_DISABLED_BRIDGE,
-                                   2, 0, 0};
-    WINCOMPATTRDATA_BRIDGE data = {19, &policy, sizeof(policy)};
-    set_window_composition_attribute(hwnd, &data);
-  }
-  FreeLibrary(user32);
-}
-
-// ---------- monitors ----------
-
-struct MonitorItem {
-  HMONITOR handle;
-  int x, y, w, h;
-  std::wstring name;
-};
-
-std::vector<MonitorItem> CollectMonitors() {
-  std::vector<MonitorItem> out;
-  EnumDisplayMonitors(
-      nullptr, nullptr,
-      [](HMONITOR mon, HDC, LPRECT, LPARAM lparam) -> BOOL {
-        auto* list = reinterpret_cast<std::vector<MonitorItem>*>(lparam);
-        MONITORINFOEXW mi = {};
-        mi.cbSize = sizeof(mi);
-        if (GetMonitorInfoW(mon, &mi)) {
-          list->push_back(MonitorItem{mon,
-              mi.rcMonitor.left, mi.rcMonitor.top,
-              mi.rcMonitor.right - mi.rcMonitor.left,
-              mi.rcMonitor.bottom - mi.rcMonitor.top, std::wstring(mi.szDevice)});
-        }
-        return TRUE;
-      },
-      reinterpret_cast<LPARAM>(&out));
-  return out;
-}
-
 std::atomic<uint64_t> g_last_image_id{0};
-
-
 }  // namespace
-
-std::string PanelUtf8FromUtf16(const wchar_t* s) { return Utf8FromUtf16Inner(s); }
-std::wstring Utf16FromUtf8(const std::string& s) { return Utf16FromUtf8Inner(s); }
 
 // ================= bridge lifecycle =================
 
@@ -367,7 +158,10 @@ void NativeBridge::HandleMethodCall(
     SetCursorPos(ArgInt(args, "x"), ArgInt(args, "y"));
     result->Success();
   } else if (name == "probeHotkey") {
-    if (hotkey_registered_) SendCombo({VK_CONTROL, VK_MENU, static_cast<WORD>(hotkey_vk_)});
+    if (hotkey_registered_) {
+      SendCombo({VK_CONTROL, VK_MENU, static_cast<WORD>(hotkey_vk_)});
+      PostMessage(window_, WM_HOTKEY, 1, 0);
+    }
     result->Success(EncodableValue(hotkey_registered_));
   } else if (name == "hotkey") {
     const auto key = ArgString(args, "key");
@@ -402,7 +196,6 @@ void NativeBridge::HandleMethodCall(
     result->Success();
   } else if (name == "screenOff") {
     RunWorker([this]() {
-      // let the panel slide away first
       if (WaitOrStop(600)) return;
       PostMessage(window_, WM_SYSCOMMAND, SC_MONITORPOWER, 2);
     });
@@ -470,6 +263,31 @@ void NativeBridge::HandleMethodCall(
   } else if (name == "ready") {
     StartClipboardWatch();
     result->Success();
+  } else if (name == "scheduleReminder") {
+    const bool ok = ScheduleToastNotification(
+        ArgString(args, "id"),
+        ArgString(args, "noteId"),
+        ArgString(args, "title"),
+        ArgString(args, "body"),
+        ArgInt64(args, "fireAt"));
+    result->Success(EncodableValue(ok));
+  } else if (name == "cancelReminder") {
+    const bool ok = CancelScheduledToastNotification(ArgString(args, "id"));
+    result->Success(EncodableValue(ok));
+  } else if (name == "showOverdueReminder") {
+    const bool ok = ShowImmediateToast(
+        ArgString(args, "id"),
+        ArgString(args, "noteId"),
+        ArgString(args, "title"),
+        ArgString(args, "body"));
+    result->Success(EncodableValue(ok));
+  } else if (name == "listScheduledReminders") {
+    const auto ids = ListScheduledToastIds();
+    EncodableList list;
+    for (const auto& id : ids) {
+      list.push_back(EncodableValue(id));
+    }
+    result->Success(EncodableValue(list));
   } else {
     result->NotImplemented();
   }
@@ -480,14 +298,10 @@ void NativeBridge::HandleMethodCall(
 void NativeBridge::SetPassthrough(bool on) {
   passthrough_ = !window_mode_ && on;
   if (window_mode_) {
-    // The desktop window is never click-through or topmost; "reveal"
-    // restores and focuses it instead.
     if (!on) FocusWindow();
     return;
   }
   LONG ex = GetWindowLong(window_, GWL_EXSTYLE);
-  // Hide the closed host instead of putting a DirectComposition child inside
-  // a layered parent. That combination produced a ghost shadow/invisible UI.
   ex &= ~(WS_EX_TRANSPARENT | WS_EX_LAYERED | WS_EX_TOOLWINDOW);
   ex |= WS_EX_APPWINDOW;
   SetWindowLong(window_, GWL_EXSTYLE, ex);
@@ -501,8 +315,6 @@ void NativeBridge::SetWindowMode(const std::string& mode, int x, int y, int w,
   const bool to_window = (mode == "window");
   window_mode_ = to_window;
   if (!to_window) {
-    // Back to the edge panel shell: borderless, topmost tool window that
-    // stays hidden until the edge/hotkey/tray reveals it.
     passthrough_ = true;
     SetWindowAccentTransparent(window_, true);
     SetWindowLong(window_, GWL_STYLE, WS_POPUP);
@@ -524,8 +336,6 @@ void NativeBridge::SetWindowMode(const std::string& mode, int x, int y, int w,
   ex |= WS_EX_APPWINDOW;
   SetWindowLong(window_, GWL_EXSTYLE, ex);
 
-  // Validate the saved frame against current monitors: keep a frame that is
-  // at least partly visible, otherwise center a comfortable default.
   const auto monitors = CollectMonitors();
   const bool saved = w >= 320 && h >= 320 && x > -32000 && y > -32000;
   bool placed = false;
@@ -537,7 +347,6 @@ void NativeBridge::SetWindowMode(const std::string& mode, int x, int y, int w,
       if (IntersectRect(&hit, &frame, &area) &&
           hit.right - hit.left >= 100 && hit.bottom - hit.top >= 100) {
         placed = true;
-        // Clamp the size to this monitor and keep the title bar reachable.
         w = std::min(w, m.w);
         h = std::min(h, m.h);
         x = std::max(m.x, std::min(x, m.x + m.w - w));
@@ -547,7 +356,6 @@ void NativeBridge::SetWindowMode(const std::string& mode, int x, int y, int w,
     }
   }
   if (!placed) {
-    // Center a comfortable default on the primary monitor's work area.
     HMONITOR primary = MonitorFromWindow(window_, MONITOR_DEFAULTTOPRIMARY);
     MONITORINFO mi = {};
     mi.cbSize = sizeof(mi);
@@ -576,7 +384,6 @@ void NativeBridge::SetWindowMode(const std::string& mode, int x, int y, int w,
       ShowWindow(window_, SW_MAXIMIZE);
       SetForegroundWindow(window_);
     } else {
-      // Defer to the first rendered frame; no empty-window flash.
       pending_show_ = true;
       pending_show_maximized_ = true;
     }
@@ -606,9 +413,6 @@ flutter::EncodableMap NativeBridge::WindowFrame() const {
   const bool zoomed = IsZoomed(window_) != FALSE;
   RECT r{};
   if (zoomed) {
-    // While maximized, remember the restore position instead of the
-    // monitor-filling frame. WINDOWPLACEMENT reports workspace coordinates;
-    // shift them back to screen space using the window's monitor insets.
     WINDOWPLACEMENT wp = {};
     wp.length = sizeof(wp);
     GetWindowPlacement(window_, &wp);
@@ -637,13 +441,7 @@ flutter::EncodableMap NativeBridge::WindowFrame() const {
 }
 
 void NativeBridge::FocusWindow() {
-  if (window_ == nullptr) return;
-  if (IsIconic(window_)) {
-    ShowWindow(window_, SW_RESTORE);
-  } else if (!IsWindowVisible(window_)) {
-    ShowWindow(window_, SW_SHOW);
-  }
-  SetForegroundWindow(window_);
+  FocusWindowTarget(window_);
 }
 
 void NativeBridge::RememberForeground() {
@@ -679,7 +477,7 @@ std::string NativeBridge::PinWindow() {
   }
   wchar_t buf[120] = {};
   const int n = GetWindowTextW(hwnd, buf, 120);
-  std::string title = Utf8FromUtf16Inner(n > 0 ? buf : L"");
+  std::string title = PanelUtf8FromUtf16(n > 0 ? buf : L"");
   if (title.size() > 40) title = title.substr(0, 40) + "…";
   const bool on_top =
       (GetWindowLongPtrW(hwnd, GWL_EXSTYLE) & WS_EX_TOPMOST) != 0;
@@ -696,47 +494,11 @@ void NativeBridge::Launch(const std::string& target) {
 
 flutter::EncodableMap NativeBridge::ApplyPlacement(const std::string& edge,
                                                    int monitor) {
-  const auto monitors = CollectMonitors();
-  EncodableMap out;
-  if (monitors.empty()) return out;
-  const size_t idx = monitor >= 0 && (size_t)monitor < monitors.size()
-                         ? (size_t)monitor
-                         : 0;
-  const auto& m = monitors[idx];
-  const UINT dpi = FlutterDesktopGetDpiForMonitor(m.handle);
-  const double scale = dpi == 0 ? 1.0 : dpi / 96.0;
-  const int w = (int)(480 * scale);
-  const int h = (int)(680 * scale);
-  const int hClamped = h < m.h ? h : m.h;
-  const bool left = edge == "left";
-  placement_edge_ = left ? "left" : "right";
-  placement_display_ = m.name;
-  const int x = left ? m.x : (m.x + m.w - w);
-  const int y = m.y + (m.h - hClamped) / 2;
-  SetWindowPos(window_, nullptr, x, y, w, hClamped,
-               SWP_NOZORDER | SWP_NOACTIVATE);
-  out[EncodableValue("x")] = EncodableValue(x);
-  out[EncodableValue("y")] = EncodableValue(y);
-  out[EncodableValue("w")] = EncodableValue(w);
-  out[EncodableValue("h")] = EncodableValue(hClamped);
-  out[EncodableValue("edgeX")] = EncodableValue(left ? m.x : m.x + m.w);
-  out[EncodableValue("scale")] = EncodableValue(scale);
-  out[EncodableValue("onLeft")] = EncodableValue(left);
-  out[EncodableValue("monitor")] = EncodableValue(static_cast<int32_t>(idx));
-  return out;
+  return ComputePlacement(window_, edge, monitor, placement_edge_, placement_display_);
 }
 
 std::vector<flutter::EncodableMap> NativeBridge::Screens() {
-  std::vector<flutter::EncodableMap> out;
-  for (const auto& m : CollectMonitors()) {
-    EncodableMap item;
-    item[EncodableValue("name")] =
-        EncodableValue(Utf8FromUtf16Inner(m.name.c_str()));
-    item[EncodableValue("w")] = EncodableValue(m.w);
-    item[EncodableValue("h")] = EncodableValue(m.h);
-    out.push_back(std::move(item));
-  }
-  return out;
+  return EnumerateScreens();
 }
 
 // ================= eyedropper =================
@@ -745,7 +507,6 @@ void NativeBridge::PickColor() {
   if (picking_) return;
   picking_ = true;
   RunWorker([this]() {
-    // wait for the current press to release
     while (!stopping_ && GetAsyncKeyState(VK_LBUTTON) < 0) {
       if (WaitOrStop(10)) return;
     }
@@ -773,7 +534,7 @@ void NativeBridge::PickColor() {
   });
 }
 
-// ================= native color dialog (input type=color) =================
+// ================= native color dialog =================
 
 void NativeBridge::PickCustomColor(const std::string& currentHex) {
   RunWorker([this, currentHex]() {
@@ -847,7 +608,7 @@ void NativeBridge::PickApp(bool folder) {
         if (SUCCEEDED(dialog->GetResult(&item))) {
           PWSTR selected = nullptr;
           if (SUCCEEDED(item->GetDisplayName(SIGDN_FILESYSPATH, &selected))) {
-            const auto path = Utf8FromUtf16Inner(selected);
+            const auto path = PanelUtf8FromUtf16(selected);
             CoTaskMemFree(selected);
             if (!path.empty()) PostEvent("pickedApp", EncodableValue(EncodableMap{
               {EncodableValue("path"), EncodableValue(path)}}));
@@ -866,72 +627,6 @@ void NativeBridge::PickApp(bool folder) {
 
 // ================= app icons =================
 
-std::string IconDataUriFor(const std::string& path) {
-  const std::wstring wide = Utf16FromUtf8(path);
-  HICON icon = nullptr;
-  std::string lower = path;
-  std::transform(lower.begin(), lower.end(), lower.begin(),
-    [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
-  if (lower.size() > 4 && lower.substr(lower.size() - 4) == ".exe") {
-    UINT id = 0;
-    PrivateExtractIconsW(wide.c_str(), 0, 64, 64, &icon, &id, 1, 0);
-  }
-  if (icon == nullptr) {
-    SHFILEINFOW info = {};
-    SHGetFileInfoW(wide.c_str(), FILE_ATTRIBUTE_NORMAL, &info, sizeof(info),
-                   SHGFI_SYSICONINDEX);
-    // {46EB5926-582E-4017-9FDF-E8998DAA0950} = IID_IImageList
-    const CLSID iid_iimagelist = {0x46eb5926, 0x582e, 0x4017,
-                                  {0x9f, 0xdf, 0xe8, 0x99, 0x8d, 0xaa, 0x09, 0x50}};
-    void* list = nullptr;
-    if (SHGetImageList(SHIL_EXTRALARGE, iid_iimagelist, &list) >= 0 && list != nullptr) {
-      icon = ImageList_GetIcon((HIMAGELIST)list, info.iIcon, ILD_TRANSPARENT);
-      reinterpret_cast<IUnknown*>(list)->Release();
-    }
-  }
-  if (icon == nullptr) return std::string();
-  ICONINFO ii = {};
-  GetIconInfo(icon, &ii);
-  std::string out;
-  if (ii.hbmColor != nullptr) {
-    BITMAP bm = {};
-    GetObjectW(ii.hbmColor, sizeof(bm), &bm);
-    if (bm.bmWidth > 0 && bm.bmHeight > 0) {
-      BITMAPINFO bi = {};
-      bi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-      bi.bmiHeader.biWidth = bm.bmWidth;
-      bi.bmiHeader.biHeight = -bm.bmHeight;
-      bi.bmiHeader.biPlanes = 1;
-      bi.bmiHeader.biBitCount = 32;
-      bi.bmiHeader.biCompression = BI_RGB;
-      const size_t px_count = (size_t)bm.bmWidth * bm.bmHeight;
-      std::vector<uint8_t> px(px_count * 4);
-      HDC dc = CreateCompatibleDC(nullptr);
-      if (GetDIBits(dc, ii.hbmColor, 0, bm.bmHeight, px.data(), &bi,
-                    DIB_RGB_COLORS) != 0) {
-        bool has_alpha = false;
-        for (size_t i = 3; i < px.size(); i += 4) {
-          if (px[i] != 0) {
-            has_alpha = true;
-            break;
-          }
-        }
-        for (size_t i = 0; i < px.size(); i += 4) {
-          std::swap(px[i], px[i + 2]);  // BGRA -> RGBA
-          if (!has_alpha) px[i + 3] = 255;
-        }
-        const auto png = PngEncode((uint32_t)bm.bmWidth, (uint32_t)bm.bmHeight, px);
-        out = "data:image/png;base64," + Base64Encode(png);
-      }
-      DeleteDC(dc);
-    }
-  }
-  if (ii.hbmMask != nullptr) DeleteObject(ii.hbmMask);
-  if (ii.hbmColor != nullptr) DeleteObject(ii.hbmColor);
-  DestroyIcon(icon);
-  return out;
-}
-
 void NativeBridge::AppIconFor(const std::string& id, const std::string& path) {
   RunWorker([this, id, path]() {
     CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
@@ -949,139 +644,24 @@ void NativeBridge::AppIconFor(const std::string& id, const std::string& path) {
 // ================= registry startup =================
 
 bool NativeBridge::StartupRegistryEnabled() { return RegistryRunEnabled(); }
-
 void NativeBridge::SetStartupRegistry(bool on) { RegistryRunSet(on); }
 
 // ================= clipboard images =================
 
-namespace {
-
-// Port of dib_to_rgba: reads a CF_DIB into RGBA.
-bool DibToRgba(const uint8_t* dib, size_t size, uint32_t* out_w, uint32_t* out_h,
-               std::vector<uint8_t>* out) {
-  if (dib == nullptr || size < sizeof(BITMAPINFOHEADER)) return false;
-  const auto* head = reinterpret_cast<const BITMAPINFOHEADER*>(dib);
-  const int32_t w = head->biWidth;
-  const int32_t h = head->biHeight;
-  if (w <= 0 || h == 0 || w > 10000 || (h > 10000 || h < -10000)) return false;
-  if ((head->biBitCount != 24 && head->biBitCount != 32) ||
-      (head->biCompression != BI_RGB && head->biCompression != BI_BITFIELDS) ||
-      head->biSize < sizeof(BITMAPINFOHEADER) || head->biSize > size) return false;
-  const uint32_t rows = (uint32_t)(h > 0 ? h : -h);
-  const bool flip = h > 0;
-  const size_t bpp = head->biBitCount / 8;
-  const size_t stride = ((size_t)w * bpp + 3) & ~3;
-  const size_t masks = head->biCompression == BI_BITFIELDS && head->biSize == sizeof(BITMAPINFOHEADER) ? 12 : 0;
-  const uint64_t offset = head->biSize + masks + static_cast<uint64_t>(head->biClrUsed) * 4;
-  if (offset > size || stride * rows > size - offset) return false;
-  const uint8_t* pixels = dib + static_cast<size_t>(offset);
-  out->assign((size_t)w * rows * 4, 0);
-  for (uint32_t y = 0; y < rows; y++) {
-    const size_t src_row = flip ? (rows - 1 - y) : y;
-    const uint8_t* src = pixels + src_row * stride;
-    for (int32_t x = 0; x < w; x++) {
-      const uint8_t* p = src + (size_t)x * bpp;
-      const size_t i = ((size_t)y * w + x) * 4;
-      (*out)[i] = p[2];
-      (*out)[i + 1] = p[1];
-      (*out)[i + 2] = p[0];
-      (*out)[i + 3] = bpp == 4 ? (p[3] != 0 ? p[3] : 255) : 255;
-    }
-  }
-  *out_w = (uint32_t)w;
-  *out_h = rows;
-  return true;
-}
-
-// Nearest-neighbour downscale, port of thumbnail().
-void Downscale(uint32_t w, uint32_t h, const std::vector<uint8_t>& src,
-               uint32_t max_dim, uint32_t* out_w, uint32_t* out_h,
-               std::vector<uint8_t>* out) {
-  if (w <= max_dim && h <= max_dim) {
-    *out_w = w;
-    *out_h = h;
-    *out = src;
-    return;
-  }
-  const double scale = (double)max_dim / (w > h ? w : h);
-  if (scale > 1.0) {
-    *out_w = w;
-    *out_h = h;
-    *out = src;
-    return;
-  }
-  const uint32_t tw = std::max(1u, (uint32_t)(w * scale));
-  const uint32_t th = std::max(1u, (uint32_t)(h * scale));
-  out->assign((size_t)tw * th * 4, 0);
-  for (uint32_t y = 0; y < th; y++) {
-    for (uint32_t x = 0; x < tw; x++) {
-      const size_t si = (((size_t)y * h / th) * w + ((size_t)x * w / tw)) * 4;
-      const size_t di = ((size_t)y * tw + x) * 4;
-      memcpy(out->data() + di, src.data() + si, 4);
-    }
-  }
-  *out_w = tw;
-  *out_h = th;
-}
-
-}  // namespace
-
 void NativeBridge::SetClipboardImage(int w, int h, const std::vector<uint8_t>& rgba) {
-  if (w <= 0 || h <= 0 || rgba.size() != (size_t)w * h * 4) return;
-  const size_t header = sizeof(BITMAPINFOHEADER);
-  std::vector<uint8_t> buf(header + (size_t)w * h * 4);
-  auto* head = reinterpret_cast<BITMAPINFOHEADER*>(buf.data());
-  head->biSize = header;
-  head->biWidth = w;
-  head->biHeight = h;  // positive: bottom-up
-  head->biPlanes = 1;
-  head->biBitCount = 32;
-  head->biCompression = BI_RGB;
-  head->biSizeImage = (DWORD)(w * h * 4);
-  for (int y = 0; y < h; y++) {
-    const size_t src = (size_t)(h - 1 - y) * w * 4;
-    for (int x = 0; x < w; x++) {
-      const size_t s = src + (size_t)x * 4;
-      const size_t d = header + ((size_t)y * w + x) * 4;
-      buf[d] = rgba[s + 2];
-      buf[d + 1] = rgba[s + 1];
-      buf[d + 2] = rgba[s];
-      buf[d + 3] = rgba[s + 3];
-    }
-  }
-  if (!OpenClipboard(nullptr)) return;
-  EmptyClipboard();
-  HGLOBAL mem = GlobalAlloc(GMEM_MOVEABLE, buf.size());
-  if (mem != nullptr) {
-    void* dst = GlobalLock(mem);
-    memcpy(dst, buf.data(), buf.size());
-    GlobalUnlock(mem);
-    SetClipboardData(CF_DIB, mem);
-  }
-  CloseClipboard();
+  ::SetClipboardImage(w, h, rgba);
 }
-
-// ================= clipboard watch =================
 
 void NativeBridge::ReadClipboardImage(int request) {
   RunWorker([this, request]() {
     EncodableMap args{{EncodableValue("request"), EncodableValue(request)}};
-    if (OpenClipboard(nullptr)) {
-      HANDLE handle = GetClipboardData(CF_DIBV5);
-      if (handle == nullptr) handle = GetClipboardData(CF_DIB);
-      if (handle != nullptr) {
-        const auto* dib = static_cast<const uint8_t*>(GlobalLock(handle));
-        uint32_t w = 0, h = 0;
-        std::vector<uint8_t> rgba;
-        if (DibToRgba(dib, GlobalSize(handle), &w, &h, &rgba)) {
-          args[EncodableValue("id")] = EncodableValue(std::to_string(FnvHash(rgba)));
-          args[EncodableValue("w")] = EncodableValue(static_cast<int32_t>(w));
-          args[EncodableValue("h")] = EncodableValue(static_cast<int32_t>(h));
-          args[EncodableValue("rgba")] = EncodableValue(std::move(rgba));
-        }
-        if (dib != nullptr) GlobalUnlock(handle);
-      }
-      CloseClipboard();
+    std::vector<uint8_t> rgba;
+    uint32_t w = 0, h = 0;
+    if (ReadRawClipboardImage(rgba, w, h)) {
+      args[EncodableValue("id")] = EncodableValue(std::to_string(FnvHash(rgba)));
+      args[EncodableValue("w")] = EncodableValue(static_cast<int32_t>(w));
+      args[EncodableValue("h")] = EncodableValue(static_cast<int32_t>(h));
+      args[EncodableValue("rgba")] = EncodableValue(std::move(rgba));
     }
     PostEvent("clipboardRead", EncodableValue(std::move(args)));
   });
@@ -1105,31 +685,21 @@ void NativeBridge::StartClipboardWatch() {
           continue;
         }
         // no text: try an image
-        if (OpenClipboard(nullptr)) {
-          HANDLE h = GetClipboardData(CF_DIB);
-          if (h != nullptr) {
-            if (const auto* dib = static_cast<const uint8_t*>(GlobalLock(h))) {
-              const size_t size = GlobalSize(h);
-              uint32_t w = 0, ht = 0;
-              std::vector<uint8_t> rgba;
-              if (DibToRgba(dib, size, &w, &ht, &rgba)) {
-                uint32_t tw = 0, th = 0;
-                std::vector<uint8_t> thumb;
-                Downscale(w, ht, rgba, 1600, &tw, &th, &thumb);
-                const uint64_t id = FnvHash(thumb) ^ (((uint64_t)tw) << 32) ^ th;
-                if (g_last_image_id.exchange(id) != id) {
-                  EncodableMap args;
-                  args[EncodableValue("id")] = EncodableValue(std::to_string(id));
-                  args[EncodableValue("w")] = EncodableValue((int32_t)tw);
-                  args[EncodableValue("h")] = EncodableValue((int32_t)th);
-                  args[EncodableValue("rgba")] = EncodableValue(std::move(thumb));
-                  PostEvent("clipImage", EncodableValue(args));
-                }
-              }
-              GlobalUnlock(h);
-            }
+        std::vector<uint8_t> rgba;
+        uint32_t w = 0, ht = 0;
+        if (ReadRawClipboardImage(rgba, w, ht)) {
+          uint32_t tw = 0, th = 0;
+          std::vector<uint8_t> thumb;
+          Downscale(w, ht, rgba, 1600, &tw, &th, &thumb);
+          const uint64_t id = FnvHash(thumb) ^ (((uint64_t)tw) << 32) ^ th;
+          if (g_last_image_id.exchange(id) != id) {
+            EncodableMap args;
+            args[EncodableValue("id")] = EncodableValue(std::to_string(id));
+            args[EncodableValue("w")] = EncodableValue(static_cast<int32_t>(tw));
+            args[EncodableValue("h")] = EncodableValue(static_cast<int32_t>(th));
+            args[EncodableValue("rgba")] = EncodableValue(std::move(thumb));
+            PostEvent("clipImage", EncodableValue(args));
           }
-          CloseClipboard();
         }
       }
       if (WaitOrStop(400)) return;
@@ -1139,87 +709,16 @@ void NativeBridge::StartClipboardWatch() {
 
 // ================= tray =================
 
-std::vector<uint8_t> TrayIconRgba() {
-  // black liquid drop with a white ring, 32x32 — port of util::tray_rgba().
-  std::vector<uint8_t> px(32 * 32 * 4, 0);
-  for (int y = 0; y < 32; y++) {
-    for (int x = 0; x < 32; x++) {
-      const float dx = (float)x - 15.5f;
-      const float dy = (float)y - 15.5f;
-      const float d = std::sqrt(dx * dx + dy * dy);
-      const size_t i = ((size_t)y * 32 + x) * 4;
-      const float edge = std::min(std::max(15.5f - d, 0.0f), 1.0f);
-      if (edge > 0.0f) {
-        const float ringRaw = 1.0f - (std::abs(d - 8.0f) - 1.4f);
-        const float ring = std::min(std::max(ringRaw, 0.0f), 1.0f);
-        const uint8_t v = (uint8_t)(ring * 255);
-        px[i] = v;
-        px[i + 1] = v;
-        px[i + 2] = v;
-        px[i + 3] = (uint8_t)(edge * 255);
-      }
-    }
-  }
-  return px;
-}
-
 void NativeBridge::CreateTray() {
-  if (tray_icon_ != nullptr) DestroyIcon(tray_icon_);
-  if (tray_menu_ != nullptr) DestroyMenu(tray_menu_);
-  tray_menu_ = nullptr;
-  tray_icon_ = CopyIcon(LoadIconW(GetModuleHandleW(nullptr), MAKEINTRESOURCEW(IDI_APP_ICON)));
-  if (tray_icon_ == nullptr) return;
-
-  NOTIFYICONDATAW nid = {};
-  nid.cbSize = sizeof(nid);
-  nid.hWnd = window_;
-  nid.uID = 1;
-  nid.uFlags = NIF_MESSAGE | NIF_ICON | NIF_TIP;
-  nid.uCallbackMessage = WM_APP_TRAY;
-  nid.hIcon = tray_icon_;
-  wcscpy_s(nid.szTip, L"Nex");
-  tray_added_ = Shell_NotifyIconW(NIM_ADD, &nid) != FALSE;
-
-  tray_menu_ = CreatePopupMenu();
-  AppendMenuW(tray_menu_, MF_STRING, IDM_TRAY_OPEN, L"Nex");
-  AppendMenuW(tray_menu_, MF_STRING, IDM_TRAY_SETTINGS, L"Nex");
-  AppendMenuW(tray_menu_, MF_STRING, IDM_TRAY_ADDAPP, L"Nex");
-  AppendMenuW(tray_menu_, MF_SEPARATOR, 0, nullptr);
-  UINT flag = MF_STRING | (StartupRegistryEnabled() ? MF_CHECKED : 0);
-  AppendMenuW(tray_menu_, flag, IDM_TRAY_STARTUP, L"Nex");
-  AppendMenuW(tray_menu_, MF_SEPARATOR, 0, nullptr);
-  AppendMenuW(tray_menu_, MF_STRING, IDM_TRAY_QUIT, L"Nex");
+  tray_added_ = CreateTrayIcon(window_, tray_icon_, tray_menu_, StartupRegistryEnabled());
 }
 
 void NativeBridge::RemoveTray() {
-  if (tray_added_) {
-    NOTIFYICONDATAW nid = {};
-    nid.cbSize = sizeof(nid);
-    nid.hWnd = window_;
-    nid.uID = 1;
-    Shell_NotifyIconW(NIM_DELETE, &nid);
-    tray_added_ = false;
-  }
-  if (tray_icon_ != nullptr) {
-    DestroyIcon(tray_icon_);
-    tray_icon_ = nullptr;
-  }
-  if (tray_menu_ != nullptr) {
-    DestroyMenu(tray_menu_);
-    tray_menu_ = nullptr;
-  }
+  RemoveTrayIcon(window_, tray_icon_, tray_menu_, tray_added_);
 }
 
 void NativeBridge::ShowTrayMenu() {
-  if (tray_menu_ == nullptr) return;
-  CheckMenuItem(tray_menu_, IDM_TRAY_STARTUP,
-                StartupRegistryEnabled() ? MF_CHECKED : MF_UNCHECKED);
-  POINT p{};
-  GetCursorPos(&p);
-  SetForegroundWindow(window_);
-  TrackPopupMenu(tray_menu_, TPM_RIGHTBUTTON | TPM_BOTTOMALIGN, p.x, p.y, 0,
-                 window_, nullptr);
-  PostMessage(window_, WM_NULL, 0, 0);
+  ShowTrayContextMenu(window_, tray_menu_, StartupRegistryEnabled());
 }
 
 // ================= messages =================
@@ -1232,9 +731,6 @@ bool NativeBridge::OnMessage(HWND hwnd, UINT message, WPARAM wparam, LPARAM lpar
     return true;
   }
   if (message == WM_DISPLAYCHANGE || message == WM_DPICHANGED) {
-    // Let Win32 process the suggested DPI rectangle, then re-anchor using the
-    // selected display's current scale rather than stale Dart placement data.
-    // The desktop window keeps its own frame; only the edge panel re-anchors.
     if (!window_mode_) PostMessage(window_, WM_APP_PLACEMENT, 0, 0);
   }
   if (message == WM_APP_PLACEMENT) {
@@ -1265,7 +761,6 @@ bool NativeBridge::OnMessage(HWND hwnd, UINT message, WPARAM wparam, LPARAM lpar
     return true;
   }
   if (message == taskbar_created_msg_ && taskbar_created_msg_ != 0) {
-    // Explorer restarted: re-add the tray icon.
     if (tray_added_) {
       tray_added_ = false;
       CreateTray();
@@ -1273,18 +768,17 @@ bool NativeBridge::OnMessage(HWND hwnd, UINT message, WPARAM wparam, LPARAM lpar
     return false;
   }
   if (message == WM_GETMINMAXINFO && window_mode_) {
-    // Keep the desktop window comfortably resizable with a sane minimum.
     auto* mmi = reinterpret_cast<MINMAXINFO*>(lparam);
     const UINT dpi = FlutterDesktopGetDpiForMonitor(
         MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST));
     const double scale = dpi == 0 ? 1.0 : dpi / 96.0;
     mmi->ptMinTrackSize.x = static_cast<LONG>(520 * scale);
     mmi->ptMinTrackSize.y = static_cast<LONG>(560 * scale);
-    return false;  // let DefWindowProc apply the adjusted limits
+    return false;
   }
 
   if (message == WM_APP_TRAY) {
-    const UINT mouse = (UINT)lparam;
+    const UINT mouse = static_cast<UINT>(lparam);
     if (mouse == WM_LBUTTONUP || mouse == WM_LBUTTONDBLCLK) {
       SetPassthrough(false);
       SetForegroundWindow(window_);
@@ -1318,13 +812,13 @@ bool NativeBridge::OnMessage(HWND hwnd, UINT message, WPARAM wparam, LPARAM lpar
     return false;
   }
   if (message == WM_DROPFILES) {
-    HDROP drop = (HDROP)wparam;
+    HDROP drop = reinterpret_cast<HDROP>(wparam);
     wchar_t buf[MAX_PATH * 2] = {};
     const UINT count = DragQueryFileW(drop, 0xFFFFFFFF, nullptr, 0);
     flutter::EncodableList paths;
     for (UINT i = 0; i < count && i < 16; i++) {
       if (DragQueryFileW(drop, i, buf, ARRAYSIZE(buf)) > 0) {
-        paths.push_back(EncodableValue(Utf8FromUtf16Inner(buf)));
+        paths.push_back(EncodableValue(PanelUtf8FromUtf16(buf)));
       }
     }
     DragFinish(drop);
@@ -1333,109 +827,4 @@ bool NativeBridge::OnMessage(HWND hwnd, UINT message, WPARAM wparam, LPARAM lpar
     return true;
   }
   return false;
-}
-
-// ================= tiny PNG encoder + base64 + hash (ports of util.rs) =================
-
-namespace {
-
-uint32_t Crc32(const uint8_t* data, size_t len) {
-  uint32_t c = 0xFFFFFFFFu;
-  for (size_t i = 0; i < len; i++) {
-    c ^= data[i];
-    for (int k = 0; k < 8; k++) {
-      c = (c & 1) ? (0xEDB88320u ^ (c >> 1)) : (c >> 1);
-    }
-  }
-  return ~c;
-}
-
-void WriteBE32(std::vector<uint8_t>* out, uint32_t v) {
-  out->push_back((uint8_t)(v >> 24));
-  out->push_back((uint8_t)(v >> 16));
-  out->push_back((uint8_t)(v >> 8));
-  out->push_back((uint8_t)v);
-}
-
-void AppendChunk(std::vector<uint8_t>* out, const char* kind, const uint8_t* data, size_t len) {
-  WriteBE32(out, (uint32_t)len);
-  std::vector<uint8_t> body(kind, kind + 4);
-  body.insert(body.end(), data, data + len);
-  out->insert(out->end(), body.begin(), body.end());
-  WriteBE32(out, Crc32(body.data(), body.size()));
-}
-
-}  // namespace
-
-std::vector<uint8_t> PngEncode(uint32_t w, uint32_t h,
-                               const std::vector<uint8_t>& rgba) {
-  // raw scanlines with filter byte 0
-  std::vector<uint8_t> raw;
-  raw.reserve((size_t)h * ((size_t)w * 4 + 1));
-  for (uint32_t y = 0; y < h; y++) {
-    raw.push_back(0);
-    raw.insert(raw.end(), rgba.begin() + (size_t)y * w * 4,
-               rgba.begin() + (size_t)(y + 1) * w * 4);
-  }
-  // uncompressed deflate: stored blocks
-  std::vector<uint8_t> z{0x78, 0x01};
-  const size_t chunk = 65535;
-  const size_t blocks = (raw.size() + chunk - 1) / chunk;
-  for (size_t i = 0; i < blocks; i++) {
-    const size_t start = i * chunk;
-    const size_t len = std::min(chunk, raw.size() - start);
-    const bool last = i == blocks - 1;
-    z.push_back(last ? 1 : 0);
-    z.push_back((uint8_t)(len & 0xff));
-    z.push_back((uint8_t)((len >> 8) & 0xff));
-    const uint16_t nlen = (uint16_t)~(uint16_t)len;
-    z.push_back((uint8_t)(nlen & 0xff));
-    z.push_back((uint8_t)((nlen >> 8) & 0xff));
-    z.insert(z.end(), raw.begin() + start, raw.begin() + start + len);
-  }
-  uint32_t a = 1, b = 0;
-  for (uint8_t byte : raw) {
-    a = (a + byte) % 65521;
-    b = (b + a) % 65521;
-  }
-  WriteBE32(&z, (b << 16) | a);
-
-  std::vector<uint8_t> out{0x89, 'P', 'N', 'G', '\r', '\n', 0x1a, '\n'};
-  std::vector<uint8_t> ihdr;
-  WriteBE32(&ihdr, w);
-  WriteBE32(&ihdr, h);
-  ihdr.insert(ihdr.end(), {8, 6, 0, 0, 0});
-  AppendChunk(&out, "IHDR", ihdr.data(), ihdr.size());
-  AppendChunk(&out, "IDAT", z.data(), z.size());
-  AppendChunk(&out, "IEND", nullptr, 0);
-  return out;
-}
-
-std::string Base64Encode(const std::vector<uint8_t>& data) {
-  static const char* table =
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-  std::string s;
-  s.reserve(data.size() * 4 / 3 + 4);
-  for (size_t i = 0; i < data.size(); i += 3) {
-    const uint32_t n = (uint32_t)data[i] << 16 |
-                       (i + 1 < data.size() ? (uint32_t)data[i + 1] : 0) << 8 |
-                       (i + 2 < data.size() ? (uint32_t)data[i + 2] : 0);
-    const size_t have = std::min((size_t)3, data.size() - i);
-    for (int k = 0; k < 4; k++) {
-      if ((size_t)k <= have) {
-        s.push_back(table[(n >> (18 - 6 * k)) & 63]);
-      } else {
-        s.push_back('=');
-      }
-    }
-  }
-  return s;
-}
-
-uint64_t FnvHash(const std::vector<uint8_t>& data) {
-  uint64_t h = 0xcbf29ce484222325ULL;
-  for (uint8_t byte : data) {
-    h = (h ^ byte) * 0x100000001b3ULL;
-  }
-  return h ^ data.size();
 }

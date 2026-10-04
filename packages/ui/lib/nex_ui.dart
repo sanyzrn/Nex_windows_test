@@ -1,8 +1,9 @@
-/// Nex shared Flutter UI package.
+﻿/// Nex shared Flutter UI package.
 library;
 
 export 'tokens/nex_accent_palette.dart';
 export 'tokens/nex_appearance.dart';
+export 'tokens/nex_contrast.dart';
 export 'tokens/nex_relative_time.dart';
 export 'tokens/nex_haptics.dart';
 export 'tokens/nex_text_direction.dart';

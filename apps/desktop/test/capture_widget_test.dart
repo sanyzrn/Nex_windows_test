@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nex_data/nex_data.dart';
 import 'package:nex_ui/nex_ui.dart';
-import 'package:right_panel/l10n/app_localizations.dart';
-import 'package:right_panel/nex/features.dart';
-import 'package:right_panel/nex/store.dart';
+import 'package:nex_desktop/l10n/app_localizations.dart';
+import 'package:nex_desktop/nex/features.dart';
+import 'package:nex_desktop/nex/store.dart';
 
 void main() {
   testWidgets(

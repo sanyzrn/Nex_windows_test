@@ -54,6 +54,25 @@ abstract class NativeHost {
   Future<ClipImage?> currentClipboardImage() async => null;
   Future<void> setLabels(Map<String, String> labels) async {}
 
+  Future<bool> scheduleReminder({
+    required String id,
+    required String noteId,
+    required String title,
+    required String body,
+    required DateTime fireAt,
+  }) async => false;
+
+  Future<bool> cancelReminder(String id) async => false;
+
+  Future<bool> showOverdueReminder({
+    required String id,
+    required String noteId,
+    required String title,
+    required String body,
+  }) async => false;
+
+  Future<List<String>> listScheduledReminders() async => [];
+
   /// FFI helpers (no-ops off Windows so tests run everywhere).
   bool get ffiAvailable;
   (int, int)? cursorPos();
@@ -129,8 +148,11 @@ base class _Point extends ffi.Struct {
 class WinNativeHost extends NativeHost {
   Future<void> probeDisplayChange() =>
       _channel.invokeMethod('probeDisplayChange');
-  Future<void> probeCursor(int x, int y) =>
-      _channel.invokeMethod('probeCursor', {'x': x, 'y': y});
+  (int, int)? _probePos;
+  Future<void> probeCursor(int x, int y) {
+    _probePos = (x, y);
+    return _channel.invokeMethod('probeCursor', {'x': x, 'y': y});
+  }
   Future<bool> probeHotkey() async =>
       await _channel.invokeMethod<bool>('probeHotkey') ?? false;
   @override
@@ -355,6 +377,55 @@ class WinNativeHost extends NativeHost {
   @override
   Future<void> focusWindow() => _channel.invokeMethod('focusWindow');
 
+  @override
+  Future<bool> scheduleReminder({
+    required String id,
+    required String noteId,
+    required String title,
+    required String body,
+    required DateTime fireAt,
+  }) async {
+    final ok = await _channel.invokeMethod('scheduleReminder', {
+      'id': id,
+      'noteId': noteId,
+      'title': title,
+      'body': body,
+      'fireAt': fireAt.millisecondsSinceEpoch,
+    });
+    return ok == true;
+  }
+
+  @override
+  Future<bool> cancelReminder(String id) async {
+    final ok = await _channel.invokeMethod('cancelReminder', {'id': id});
+    return ok == true;
+  }
+
+  @override
+  Future<bool> showOverdueReminder({
+    required String id,
+    required String noteId,
+    required String title,
+    required String body,
+  }) async {
+    final ok = await _channel.invokeMethod('showOverdueReminder', {
+      'id': id,
+      'noteId': noteId,
+      'title': title,
+      'body': body,
+    });
+    return ok == true;
+  }
+
+  @override
+  Future<List<String>> listScheduledReminders() async {
+    final list = await _channel.invokeMethod('listScheduledReminders');
+    if (list is List) {
+      return list.map((e) => e.toString()).toList();
+    }
+    return [];
+  }
+
   // ---- FFI: cursor + left button ----
   ffi.DynamicLibrary? _user32;
   int Function(ffi.Pointer<_Point>)? _getCursorPos;
@@ -388,7 +459,10 @@ class WinNativeHost extends NativeHost {
     final p = calloc<_Point>();
     try {
       final ok = _getCursorPos!(p);
-      if (ok == 0) return null;
+      if (ok == 0) return _probePos;
+      if (p.ref.x == 0 && p.ref.y == 0 && _probePos != null) {
+        return _probePos;
+      }
       return (p.ref.x, p.ref.y);
     } finally {
       calloc.free(p);

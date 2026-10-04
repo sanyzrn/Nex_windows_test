@@ -7,6 +7,7 @@ import '../core/controller.dart';
 import '../core/registry.dart';
 import '../nex/features.dart';
 import '../nex/settings.dart';
+import '../nex/shortcuts_dialog.dart';
 import 'dock.dart' show AppIconImage;
 import 'flyout.dart' show buildPanelView;
 import 'svg_icon.dart';
@@ -65,13 +66,41 @@ class _NexWindowShellState extends State<NexWindowShell> {
           child: Focus(
             autofocus: true,
             onKeyEvent: (node, event) {
-              if (event is KeyDownEvent &&
-                  event.logicalKey == LogicalKeyboardKey.escape) {
-                final tool = c.windowTool.value;
-                if (tool != null) {
-                  c.windowTool.value = null;
-                  c.refresh();
+              if (event is KeyDownEvent) {
+                final isCtrl = HardwareKeyboard.instance.isControlPressed;
+                final isShift = HardwareKeyboard.instance.isShiftPressed;
+
+                if (event.logicalKey == LogicalKeyboardKey.f1 ||
+                    (isCtrl && event.logicalKey == LogicalKeyboardKey.slash)) {
+                  showShortcutsDialog(context);
                   return KeyEventResult.handled;
+                }
+
+                if (isCtrl && event.logicalKey == LogicalKeyboardKey.keyL) {
+                  c.selectWindowSection('library');
+                  return KeyEventResult.handled;
+                }
+
+                if (isCtrl && event.logicalKey == LogicalKeyboardKey.comma) {
+                  c.selectWindowSection('settings');
+                  return KeyEventResult.handled;
+                }
+
+                if (isCtrl && event.logicalKey == LogicalKeyboardKey.keyN) {
+                  c.selectWindowSection('capture');
+                  if (widget.features != null) {
+                    widget.features!.checklist = isShift;
+                  }
+                  return KeyEventResult.handled;
+                }
+
+                if (event.logicalKey == LogicalKeyboardKey.escape) {
+                  final tool = c.windowTool.value;
+                  if (tool != null) {
+                    c.windowTool.value = null;
+                    c.refresh();
+                    return KeyEventResult.handled;
+                  }
                 }
               }
               return KeyEventResult.ignored;
@@ -111,7 +140,7 @@ class _WindowNavRail extends StatelessWidget {
     return ValueListenableBuilder<String>(
       valueListenable: controller.windowSection,
       builder: (context, section, _) => Container(
-        width: wide ? 88 : 62,
+        width: wide ? 88 : 64,
         decoration: BoxDecoration(
           color: scheme.surfaceContainerLow,
           border: BorderDirectional(
@@ -121,9 +150,9 @@ class _WindowNavRail extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const SizedBox(height: 14),
+            const SizedBox(height: 16),
             const _Logo(),
-            const SizedBox(height: 14),
+            const SizedBox(height: 18),
             _NavItem(
               controller: controller,
               id: 'capture',
@@ -131,6 +160,7 @@ class _WindowNavRail extends StatelessWidget {
               label: l.navCapture,
               selected: section == 'capture',
               wide: wide,
+              shortcut: 'Ctrl+N',
             ),
             _NavItem(
               controller: controller,
@@ -139,6 +169,7 @@ class _WindowNavRail extends StatelessWidget {
               label: l.library,
               selected: section == 'library',
               wide: wide,
+              shortcut: 'Ctrl+L',
             ),
             _NavItem(
               controller: controller,
@@ -155,14 +186,40 @@ class _WindowNavRail extends StatelessWidget {
               label: l.settings,
               selected: section == 'settings',
               wide: wide,
+              shortcut: 'Ctrl+,',
             ),
             const Spacer(),
             if (recording) ...[
               _RecordingBadge(features: features),
               const SizedBox(height: 10),
             ],
+            _ThemeToggleButton(controller: controller),
+            const _ShortcutsHelpButton(),
             _ModeSwitchButton(controller: controller),
-            const SizedBox(height: 14),
+            const SizedBox(height: 8),
+            Tooltip(
+              message: Localizations.localeOf(context).languageCode == 'fa'
+                  ? 'دیتابیس محلی نکس: فعال و ایمن'
+                  : 'Nex Local Engine: Active & secure',
+              child: Center(
+                child: Container(
+                  width: 8,
+                  height: 8,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Color(0xFF10B981),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Color(0x6610B981),
+                        blurRadius: 6,
+                        spreadRadius: 1,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
           ],
         ),
       ),
@@ -176,21 +233,33 @@ class _Logo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return Container(
-      width: 40,
-      height: 40,
-      decoration: BoxDecoration(
-        color: scheme.primary,
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: [
-          BoxShadow(
-            color: scheme.primary.withValues(alpha: .35),
-            offset: const Offset(0, 4),
-            blurRadius: 12,
+    return Center(
+      child: Container(
+        width: 42,
+        height: 42,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              scheme.primary,
+              Color.alphaBlend(
+                scheme.tertiary.withValues(alpha: 0.3),
+                scheme.primary,
+              ),
+            ],
           ),
-        ],
+          borderRadius: BorderRadius.circular(13),
+          boxShadow: [
+            BoxShadow(
+              color: scheme.primary.withValues(alpha: .30),
+              offset: const Offset(0, 4),
+              blurRadius: 14,
+            ),
+          ],
+        ),
+        child: Icon(Icons.water_drop_rounded, color: scheme.onPrimary, size: 22),
       ),
-      child: Icon(Icons.water_drop_rounded, color: scheme.onPrimary, size: 22),
     );
   }
 }
@@ -203,6 +272,7 @@ class _NavItem extends StatefulWidget {
     required this.label,
     required this.selected,
     required this.wide,
+    this.shortcut,
   });
 
   final PanelController controller;
@@ -211,6 +281,7 @@ class _NavItem extends StatefulWidget {
   final String label;
   final bool selected;
   final bool wide;
+  final String? shortcut;
 
   @override
   State<_NavItem> createState() => _NavItemState();
@@ -223,11 +294,15 @@ class _NavItemState extends State<_NavItem> {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final selected = widget.selected;
+    final tooltipText = widget.shortcut != null
+        ? '${widget.label} (${widget.shortcut})'
+        : widget.label;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       child: Tooltip(
-        message: widget.label,
-        waitDuration: const Duration(milliseconds: 600),
+        message: tooltipText,
+        waitDuration: const Duration(milliseconds: 500),
         child: MouseRegion(
           cursor: SystemMouseCursors.click,
           onEnter: (_) => setState(() => _hover = true),
@@ -236,14 +311,23 @@ class _NavItemState extends State<_NavItem> {
             behavior: HitTestBehavior.opaque,
             onTap: () => widget.controller.selectWindowSection(widget.id),
             child: AnimatedContainer(
-              duration: const Duration(milliseconds: 260),
-              curve: kPop,
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeOutCubic,
               height: 56,
               decoration: BoxDecoration(
                 color: selected
                     ? scheme.primary
                     : (_hover ? scheme.surfaceContainerHigh : null),
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: selected
+                    ? [
+                        BoxShadow(
+                          color: scheme.primary.withValues(alpha: 0.25),
+                          offset: const Offset(0, 3),
+                          blurRadius: 8,
+                        ),
+                      ]
+                    : null,
               ),
               child: widget.wide
                   ? Column(
@@ -254,7 +338,7 @@ class _NavItemState extends State<_NavItem> {
                           size: 22,
                           color: selected
                               ? scheme.onPrimary
-                              : scheme.onSurfaceVariant,
+                              : (_hover ? scheme.onSurface : scheme.onSurfaceVariant),
                         ),
                         const SizedBox(height: 3),
                         Text(
@@ -262,12 +346,12 @@ class _NavItemState extends State<_NavItem> {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            fontSize: 10.5,
-                            height: 1.0,
-                            fontWeight: selected ? FontWeight.w600 : null,
+                            fontSize: 11,
+                            height: 1.1,
+                            fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
                             color: selected
                                 ? scheme.onPrimary
-                                : scheme.onSurfaceVariant,
+                                : (_hover ? scheme.onSurface : scheme.onSurfaceVariant),
                           ),
                         ),
                       ],
@@ -278,7 +362,7 @@ class _NavItemState extends State<_NavItem> {
                         size: 24,
                         color: selected
                             ? scheme.onPrimary
-                            : scheme.onSurfaceVariant,
+                            : (_hover ? scheme.onSurface : scheme.onSurfaceVariant),
                       ),
                     ),
             ),
@@ -335,6 +419,111 @@ class _RecordingBadgeState extends State<_RecordingBadge>
   }
 }
 
+class _ThemeToggleButton extends StatefulWidget {
+  const _ThemeToggleButton({required this.controller});
+  final PanelController controller;
+
+  @override
+  State<_ThemeToggleButton> createState() => _ThemeToggleButtonState();
+}
+
+class _ThemeToggleButtonState extends State<_ThemeToggleButton> {
+  bool _hover = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final isLight = widget.controller.palette.isLight;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      child: Tooltip(
+        message: isLight ? 'Dark theme' : 'Light theme',
+        waitDuration: const Duration(milliseconds: 400),
+        child: MouseRegion(
+          cursor: SystemMouseCursors.click,
+          onEnter: (_) => setState(() => _hover = true),
+          onExit: (_) => setState(() => _hover = false),
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () {
+              widget.controller.S.theme = isLight ? 'dark' : 'light';
+              widget.controller.save();
+              widget.controller.refresh();
+            },
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              height: 38,
+              decoration: BoxDecoration(
+                color: _hover
+                    ? scheme.surfaceContainerHigh
+                    : Colors.transparent,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Center(
+                child: Icon(
+                  isLight ? Icons.dark_mode_outlined : Icons.light_mode_outlined,
+                  size: 20,
+                  color: _hover ? scheme.onSurface : scheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ShortcutsHelpButton extends StatefulWidget {
+  const _ShortcutsHelpButton();
+
+  @override
+  State<_ShortcutsHelpButton> createState() => _ShortcutsHelpButtonState();
+}
+
+class _ShortcutsHelpButtonState extends State<_ShortcutsHelpButton> {
+  bool _hover = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final l = AppLocalizations.of(context)!;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      child: Tooltip(
+        message: '${l.keyboardShortcuts} (F1)',
+        waitDuration: const Duration(milliseconds: 400),
+        child: MouseRegion(
+          cursor: SystemMouseCursors.click,
+          onEnter: (_) => setState(() => _hover = true),
+          onExit: (_) => setState(() => _hover = false),
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () => showShortcutsDialog(context),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              height: 38,
+              decoration: BoxDecoration(
+                color: _hover
+                    ? scheme.surfaceContainerHigh
+                    : Colors.transparent,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Center(
+                child: Icon(
+                  Icons.keyboard_outlined,
+                  size: 20,
+                  color: _hover ? scheme.onSurface : scheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _ModeSwitchButton extends StatefulWidget {
   const _ModeSwitchButton({required this.controller});
 
@@ -352,7 +541,7 @@ class _ModeSwitchButtonState extends State<_ModeSwitchButton> {
     final l = AppLocalizations.of(context)!;
     final scheme = Theme.of(context).colorScheme;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       child: Tooltip(
         message: l.switchToPanel,
         waitDuration: const Duration(milliseconds: 400),
@@ -364,18 +553,20 @@ class _ModeSwitchButtonState extends State<_ModeSwitchButton> {
             behavior: HitTestBehavior.opaque,
             onTap: () => widget.controller.setWindowMode('panel'),
             child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              height: 42,
+              duration: const Duration(milliseconds: 180),
+              height: 38,
               decoration: BoxDecoration(
                 color: _hover
                     ? scheme.surfaceContainerHigh
-                    : scheme.surfaceContainer,
-                borderRadius: BorderRadius.circular(12),
+                    : Colors.transparent,
+                borderRadius: BorderRadius.circular(10),
               ),
-              child: Icon(
-                Icons.view_sidebar_outlined,
-                size: 21,
-                color: scheme.onSurfaceVariant,
+              child: Center(
+                child: Icon(
+                  Icons.view_sidebar_outlined,
+                  size: 20,
+                  color: _hover ? scheme.onSurface : scheme.onSurfaceVariant,
+                ),
               ),
             ),
           ),
@@ -402,18 +593,18 @@ class _WindowSection extends StatelessWidget {
           valueListenable: c.windowTool,
           builder: (context, tool, _) {
             final body = switch (section) {
-              'library' => _CenteredColumn(
-                maxWidth: 720,
-                child: NexScope.maybeOf(context) == null
-                    ? const _MissingStoreNotice()
-                    : const NexLibraryView(),
-              ),
+              'library' => NexScope.maybeOf(context) == null
+                  ? const _CenteredColumn(
+                      maxWidth: 720,
+                      child: _MissingStoreNotice(),
+                    )
+                  : const NexLibraryView(),
               'tools' =>
                 tool == null
                     ? const _ToolsDirectory()
                     : _ToolCard(controller: c, toolId: tool),
               'settings' => const _CenteredColumn(
-                maxWidth: 560,
+                maxWidth: 720,
                 child: _SettingsSection(),
               ),
               _ => const _CaptureSection(),
@@ -473,6 +664,7 @@ class _SectionHeader extends StatelessWidget {
     final l = AppLocalizations.of(context)!;
     final scheme = Theme.of(context).colorScheme;
     final f = NexScope.maybeOf(context);
+    final isFa = Localizations.localeOf(context).languageCode == 'fa';
     final title = switch (section) {
       'library' => l.library,
       'tools' =>
@@ -482,10 +674,16 @@ class _SectionHeader extends StatelessWidget {
       'settings' => l.settings,
       _ => l.capture,
     };
+    final subtitle = switch (section) {
+      'library' => isFa ? 'کتابخانه یادداشت‌ها و جستجوی لحظه‌ای' : 'Local library & instant search',
+      'tools' => isFa ? 'ابزارهای سریع و افزونه‌های متصل' : 'Quick utilities & connected tools',
+      'settings' => isFa ? 'تنظیمات، پوسته و امنیت داده‌ها' : 'Preferences, theme & data safety',
+      _ => isFa ? 'ثبت سریع افکار و چک‌لیست‌ها' : 'Fast capture & persistent scratchpad',
+    };
     final recording = f?.recordingAt != null;
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(24, 18, 24, 14),
+      padding: const EdgeInsets.fromLTRB(24, 16, 24, 14),
       decoration: BoxDecoration(
         color: scheme.surface,
         border: Border(
@@ -505,12 +703,27 @@ class _SectionHeader extends StatelessWidget {
             ),
             const SizedBox(width: 12),
           ],
-          Text(
-            title,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.w600,
-              letterSpacing: -.2,
-            ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                title,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: -.3,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                subtitle,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: scheme.onSurfaceVariant.withValues(alpha: 0.8),
+                  fontWeight: FontWeight.w500,
+                  fontSize: 11.5,
+                ),
+              ),
+            ],
           ),
           const Spacer(),
           if (recording) ...[
@@ -520,8 +733,17 @@ class _SectionHeader extends StatelessWidget {
           if (section == 'capture')
             _HeaderIcon(
               icon: Icons.add_rounded,
-              tooltip: l.newNote,
+              tooltip: '${l.newNote} (Ctrl+N)',
               onTap: () => f?.fresh(),
+            ),
+          if (section == 'library')
+            _HeaderIcon(
+              icon: Icons.add_rounded,
+              tooltip: '${l.newNote} (Ctrl+N)',
+              onTap: () {
+                controller.selectWindowSection('capture');
+                f?.fresh();
+              },
             ),
         ],
       ),

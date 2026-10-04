@@ -511,6 +511,8 @@ void main() {
             slivers: [
               SliverReorderableList(
                 itemCount: 3,
+                // Retain compatibility with the minimum Flutter 3.35 SDK.
+                // ignore: deprecated_member_use
                 onReorder: onReorder,
                 itemBuilder: (context, index) => SizedBox(
                   key: ValueKey(index),
@@ -588,6 +590,8 @@ void main() {
               slivers: [
                 SliverReorderableList(
                   itemCount: 1,
+                  // Retain compatibility with the minimum Flutter 3.35 SDK.
+                  // ignore: deprecated_member_use
                   onReorder: (_, _) {},
                   itemBuilder: (context, index) => SizedBox(
                     key: const ValueKey(0),

@@ -31,3 +31,6 @@
 *.ps1  text eol=crlf
 
 *.exe binary
+
+# Blank context lines in unified diffs carry a required leading space.
+*.patch whitespace=-blank-at-eol

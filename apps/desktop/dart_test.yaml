@@ -1,0 +1,7 @@
+tags:
+  golden:
+    on_platform:
+      linux:
+        skip: "Golden tests are host-specific to Windows font rendering."
+      mac-os:
+        skip: "Golden tests are host-specific to Windows font rendering."

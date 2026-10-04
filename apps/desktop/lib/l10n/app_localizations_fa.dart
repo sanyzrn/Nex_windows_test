@@ -793,4 +793,102 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get hotkeyInUse => 'این کلید میان‌بر در اختیار برنامهٔ دیگری است';
+
+  @override
+  String get laterToday => 'امروز، دیرتر';
+
+  @override
+  String get tomorrowMorning => 'فردا صبح';
+
+  @override
+  String get customDateTime => 'تاریخ و زمان…';
+
+  @override
+  String get repeat => 'تکرار';
+
+  @override
+  String get noRepeat => 'بدون تکرار';
+
+  @override
+  String get repeatDaily => 'هر روز';
+
+  @override
+  String get repeatWeekly => 'هر هفته';
+
+  @override
+  String get repeatMonthly => 'هر ماه';
+
+  @override
+  String get repeatYearly => 'هر سال';
+
+  @override
+  String get clearReminder => 'حذف یادآور';
+
+  @override
+  String get reminderSet => 'یادآور تنظیم شد';
+
+  @override
+  String get overdue => 'عقب‌افتاده';
+
+  @override
+  String get shortcuts => 'کلیدهای میانبر';
+
+  @override
+  String get keyboardShortcuts => 'کلیدهای میانبر صفحه‌کلید';
+
+  @override
+  String get actionNewNote => 'یادداشت جدید';
+
+  @override
+  String get actionNewChecklist => 'فهرست جدید';
+
+  @override
+  String get actionSearch => 'جستجو';
+
+  @override
+  String get actionLibrary => 'کتابخانه';
+
+  @override
+  String get actionSettings => 'تنظیمات';
+
+  @override
+  String get actionMoveSelection => 'حرکت بین یادداشت‌ها';
+
+  @override
+  String get actionOpenNote => 'باز کردن یادداشت';
+
+  @override
+  String get actionCloseOrClear => 'بستن یادداشت / پاک کردن جستجو';
+
+  @override
+  String get actionDelete => 'حذف';
+
+  @override
+  String get actionPin => 'سنجاق / لغو سنجاق';
+
+  @override
+  String get actionCopy => 'رونوشت';
+
+  @override
+  String get noNoteSelected => 'یادداشتی انتخاب نشده است';
+
+  @override
+  String selectedCount(int count) {
+    return '$count مورد انتخاب شد';
+  }
+
+  @override
+  String get clearSelection => 'لغو انتخاب';
+
+  @override
+  String get edit => 'ویرایش';
+
+  @override
+  String get discard => 'صرف‌نظر';
+
+  @override
+  String get save => 'ذخیره';
+
+  @override
+  String get restored => 'با موفقیت بازیابی شد';
 }

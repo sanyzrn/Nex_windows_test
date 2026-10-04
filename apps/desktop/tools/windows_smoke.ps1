@@ -34,18 +34,27 @@ $result | Add-Member fullBundle $true
 if (-not ('NexWindowProbe' -as [type])) {
     Add-Type @'
 using System;
+using System.Text;
 using System.Runtime.InteropServices;
 public static class NexWindowProbe {
     private delegate bool EnumProc(IntPtr hwnd, IntPtr unused);
     [DllImport("user32.dll")] private static extern bool EnumWindows(EnumProc callback, IntPtr unused);
     [DllImport("user32.dll")] private static extern uint GetWindowThreadProcessId(IntPtr hwnd, out uint processId);
     [DllImport("user32.dll")] private static extern bool IsWindowVisible(IntPtr hwnd);
+    [DllImport("user32.dll")] private static extern int GetClassName(IntPtr hwnd, StringBuilder lpClassName, int nMaxCount);
     [DllImport("user32.dll")] public static extern bool PostMessage(IntPtr hwnd, uint message, IntPtr wparam, IntPtr lparam);
     public static IntPtr VisibleWindow(uint processId) {
         IntPtr found = IntPtr.Zero;
         EnumWindows((hwnd, unused) => {
             uint owner; GetWindowThreadProcessId(hwnd, out owner);
-            if (owner == processId && IsWindowVisible(hwnd)) { found = hwnd; return false; }
+            if (owner == processId && IsWindowVisible(hwnd)) {
+                var sb = new StringBuilder(256);
+                GetClassName(hwnd, sb, 256);
+                if (sb.ToString() == "RIGHT_PANEL_WIN32_WINDOW") {
+                    found = hwnd;
+                    return false;
+                }
+            }
             return true;
         }, IntPtr.Zero);
         return found;

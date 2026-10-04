@@ -1,4 +1,99 @@
-# Observed validation — 2026-10-02
+# Repository cleanup validation — 2026-10-04
+
+Current checks ran locally on Windows with Flutter 3.44.8 / Dart 3.12.2. These results supersede the earlier reported validation below.
+
+| Check | Current observed result |
+| --- | --- |
+| Desktop `flutter analyze --no-pub` | PASS, no issues |
+| Desktop `flutter test --no-pub --reporter expanded` | PASS, 59 tests including 8 golden tests / 10 image comparisons |
+| Core `dart analyze --fatal-infos`; `dart test` | PASS, no issues; 198 tests |
+| Data `dart analyze --fatal-infos`; `dart test` | PASS, no issues; 198 tests passed, 14 skipped |
+| UI `flutter analyze --no-pub --fatal-infos`; `flutter test --no-pub` | PASS, no issues after compatibility cleanup; 188 tests. The 20 affected tag/swipe tests were rerun and passed |
+| AI `flutter analyze --no-pub --fatal-infos`; `flutter test --no-pub` | PASS, no issues; 74 tests |
+| Desktop `flutter pub get --enforce-lockfile` with documented mirror | PASS; dependency versions retained |
+| AI-removal CI commands, run locally | PASS; remove optional `nex_ai`, resolve, analyze with no issues, 51 non-golden tests. Original manifest/lockfile restored and resolution rechecked |
+| Windows `flutter build windows --release --no-pub` | PASS; Release runner built in 94.4 seconds after regenerating local caches |
+| `tools/windows_smoke.ps1` | PASS; tray/hotkey/capture, both edges, display refresh, startup restoration, single-instance, rendered GUI and exit code 0 |
+| `tools/build_installer.ps1` | PASS; Inno Setup 6.7.3, 13,810,715-byte installer; current SHA-256 is in root `SHA256SUMS` |
+
+Total: **717 tests passed**, with 14 data-suite skips. Skips are not passing coverage. The full desktop suite was compared normally after refreshing and reviewing the changed Windows baselines; `--update-goldens` alone is not counted as a comparison pass.
+
+The first golden run failed six tests against older baselines. Review exposed a real settings defect: wide mode controls squeezed the narrow-panel label into almost one character per line. Settings rows now place controls below text on narrow surfaces, with an assertion for label height/control placement. Reader fixtures now seed a fixed local timestamp instead of using the wall clock. Eight changed baseline images were reviewed for settings, both physical edges, calculator, both capture languages and both readers. CI pins the validated Flutter version to reduce SDK rendering drift.
+
+The initial build attempts failed because local generated plugin directories could not be recreated as symlinks. `flutter clean` and dependency resolution regenerated the ephemeral Windows files. Flutter commands are subsequently run sequentially within the app.
+
+The final desktop benchmark inserted 10,000 notes in **15,737 ms** (1.57 ms/note), loaded 50 timeline rows in **2 ms**, and searched English/Persian in **12 ms / 9 ms**. An earlier run under concurrent package testing took 48,909 ms to insert the same count; these measurements are machine/load dependent and do not measure desktop frame time.
+
+Cleanup moved active documentation to `docs/`, archived the old task, removed identical duplicate transfer patches and the redundant summary, fixed PowerShell quoting/error propagation in the AI-removal CI step, and retained generated/runtime output exclusions. Installer checksums are computed from the actual local artifact; installers are not Git payloads. Historical patch application and upstream-base metadata were not revalidated against DbsNex.
+
+Reminder unit tests use `FakeReminderScheduler`. Actual WinRT toast delivery after exit/reboot, mixed-DPI displays, microphone/clipboard hardware paths and clean-machine installation remain manual checks. No GitHub CI, publishing or push is claimed.
+
+---
+
+# Earlier reported validation — 2026-10-04 (Release 0.11.0+7)
+
+This section is retained as prior handoff history. Its installer hash did not match the local file during cleanup; the repository-root `SHA256SUMS` now records the actual artifact. The prior reminder test description overstates native coverage: those tests exercise Dart reconciliation with a fake scheduler.
+
+## Environment
+- OS: Windows 11 x64 (Build 26100)
+- Flutter: 3.44.8 / Dart 3.12.2
+- MSVC: Visual Studio 2022 C++ Compiler (v143)
+- Inno Setup: 6.4.1
+
+## Summary of Test Results
+- **`apps/desktop`**: 51/51 unit & integration tests PASS.
+- **`packages/core`**: 198/198 tests PASS.
+- **`packages/data`**: 198/198 tests PASS (14 sync tests skipped pending live Phase 2 backend).
+- **`packages/ui`**: 188/188 tests PASS.
+- **`packages/ai`**: 74/74 tests PASS.
+- **Total Test Suite**: **709 tests PASS** across the repository.
+- **Static Analysis**: `flutter analyze` reports 0 issues across all packages.
+- **Windows Smoke Test (`windows_smoke.ps1`)**: PASS with exit code 0.
+- **Installer Build (`build_installer.ps1`)**: PASS (`Nex-Windows-Setup-0.11.0-x64.exe`, SHA256 `3c1b6095543a3f2b5b965ab22911edb833bf5c09972b1050b7fadfc28450b8cb`).
+
+## WP5 Measured Benchmark Performance
+Run via `apps/desktop/test/large_library_benchmark_test.dart` over 10,000 notes inserted into a clean SQLite instance:
+- **10,000 note insert time**: 14,984 ms total (1.50 ms per note).
+- **First page of timeline (50 notes)**: **2 ms**.
+- **English full-text search ("meeting")**: **14 ms** (200 matching notes returned).
+- **Persian normalized search ("کتاب" with Arabic Kaf folding)**: **10 ms** (200 matching notes returned).
+
+## WP3 & WP4 Desktop Feature Validations
+1. **Durable Reminders**: `test/reminders_test.dart` (6/6 pass). Validates WinRT native toast scheduling and Dart state reconciliation across app restarts.
+2. **Backup & Restore**: `test/backup_restore_test.dart` (2/2 pass). Validates atomic database replacement for `.nexbak` and password/key-derived `.nexfull`.
+3. **Link Notes Reader**: `test/link_reader_test.dart` (5/5 pass). Validates 256 KB streaming cap, Open Graph meta extraction, HTML unescaping, and protocol whitelisting.
+4. **Window Mode & 2-Pane**: `test/window_mode_wp4_test.dart` (3/3 pass). Validates responsive 2-pane view at >= 900px, divider width persistence, and single-pane fallback.
+5. **Note Copy Rules**: `test/note_copy_test.dart` (4/4 pass). Validates Android text copy semantics and metadata preservation.
+
+## Native Smoke Probe Output (`windows_smoke.ps1`)
+```json
+{
+    "hotkey": true,
+    "monitors": 1,
+    "tray": true,
+    "workers": 1,
+    "hotkeyDelivered": true,
+    "captureOpened": true,
+    "startupToggle": true,
+    "placements": [
+        { "monitor": 0, "edge": "left", "edgeX": 0, "h": 680, "onLeft": true, "scale": 1.0, "w": 480, "x": 0, "y": 200, "edgeReveal": true },
+        { "monitor": 0, "edge": "right", "edgeX": 1920, "h": 680, "onLeft": false, "scale": 1.0, "w": 480, "x": 1440, "y": 200, "edgeReveal": true }
+    ],
+    "displayChangeRefresh": true,
+    "startupRestored": true,
+    "singleInstance": true,
+    "exitCode": 0,
+    "shutdownWaitMs": 1939,
+    "fullBundle": true,
+    "normalGuiFirstFrame": true,
+    "normalGuiAliveAfterCapture": true,
+    "normalGuiExitCode": 0
+}
+```
+
+---
+
+# Historical Validation (Earlier Passes)
 
 ## Window mode, fixes and audit — 0.10.0+6 (Linux validation)
 
