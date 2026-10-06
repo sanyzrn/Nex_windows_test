@@ -26,6 +26,8 @@ export 'panel_utility_state.dart';
 part 'controller_actions.dart';
 part 'controller_clipboard.dart';
 part 'controller_lifecycle.dart';
+part 'controller_timers.dart';
+part 'controller_wiring.dart';
 
 /// No-op host used when none is injected (tests).
 class _StubNativeHost extends NativeHost {
@@ -33,9 +35,10 @@ class _StubNativeHost extends NativeHost {
   dynamic noSuchMethod(Invocation invocation) => Future.value();
 }
 
-/// Core state of the panel controller. Split across three mixins in
-/// controller_actions.dart, controller_clipboard.dart and
-/// controller_lifecycle.dart (same library, so private members are shared).
+/// Core state of the panel controller. Split across five mixins in
+/// controller_actions.dart, controller_clipboard.dart,
+/// controller_lifecycle.dart, controller_timers.dart and
+/// controller_wiring.dart (same library, so private members are shared).
 abstract class PanelStateBase extends ChangeNotifier implements PanelHoldable {
   PanelStateBase({NativeHost? nativeHost})
     : native = nativeHost ?? _StubNativeHost();
@@ -73,7 +76,16 @@ abstract class PanelStateBase extends ChangeNotifier implements PanelHoldable {
   void appAdded({required String path, String? icon});
   Future<void> setWindowMode(String mode);
   Future<void> quit();
-
+  void _wireNative();
+  void clip(String text);
+  void onTray(String id);
+  void blur();
+  void onFilesDropped(List<String> paths);
+  void onPickedColor(String? hex);
+  void onPickedCustomColor(String? hex);
+  void setPickerActive(bool active);
+  void iconFor(String id, String icon);
+  void disposeTimers();
 
   final Storage storage = Storage();
   final NativeHost native;
@@ -192,90 +204,6 @@ abstract class PanelStateBase extends ChangeNotifier implements PanelHoldable {
   DragCandidate? _dragCandidate;
   bool _dragMoved = false;
 
-  // ---- timer / stopwatch (kept alive across panel closes) ----
-  int tTotal = 300;
-  int tLeft = 300;
-  Timer? tRun;
-
-  void timerPreset(int minutes) {
-    tRun?.cancel();
-    tRun = null;
-    tTotal = tLeft = minutes * 60;
-    notifyListeners();
-  }
-
-  void timerToggle() {
-    if (tRun != null) {
-      tRun?.cancel();
-      tRun = null;
-    } else {
-      if (tLeft == 0) tLeft = tTotal;
-      tRun = Timer.periodic(const Duration(seconds: 1), (_) {
-        tLeft--;
-        if (tLeft <= 0) {
-          tRun?.cancel();
-          tRun = null;
-          tLeft = 0;
-          unawaited(native.beep().catchError((_) {}));
-          sticky = true;
-          open();
-          _later(const Duration(milliseconds: 140), () => openWidget('timer'));
-          toast('⏰ Time is up!');
-        }
-        notifyListeners();
-      });
-    }
-    notifyListeners();
-  }
-
-  void timerReset() {
-    tRun?.cancel();
-    tRun = null;
-    tLeft = tTotal;
-    notifyListeners();
-  }
-
-  double swStart = 0;
-  int swAcc = 0;
-  Timer? swTimer;
-  List<int> swLaps = [];
-  final ValueNotifier<String> swDisplay = ValueNotifier('00:00.00');
-
-  int get swNow =>
-      swAcc +
-      (swTimer != null
-          ? (DateTime.now().millisecondsSinceEpoch - swStart).round()
-          : 0);
-
-  void swToggle() {
-    if (swTimer != null) {
-      swAcc = swNow;
-      swTimer?.cancel();
-      swTimer = null;
-      swDisplay.value = fmtSwValue(swAcc);
-    } else {
-      swStart = DateTime.now().millisecondsSinceEpoch.toDouble();
-      swTimer = Timer.periodic(const Duration(milliseconds: 16), (_) {
-        swDisplay.value = fmtSwValue(swNow);
-      });
-    }
-    notifyListeners();
-  }
-
-  void swLapOrReset() {
-    if (swTimer != null) {
-      swLaps.insert(0, swNow);
-    } else {
-      swAcc = 0;
-      swLaps = [];
-      swDisplay.value = fmtSwValue(0);
-    }
-    notifyListeners();
-  }
-
-  static String fmtSwValue(int ms) =>
-      '${(ms ~/ 60000).toString().padLeft(2, '0')}:${((ms ~/ 1000) % 60).toString().padLeft(2, '0')}.${((ms ~/ 10) % 100).toString().padLeft(2, '0')}';
-
   int _textFocusCount = 0;
   void focusGained() => _textFocusCount++;
   void focusLost() => _textFocusCount = math.max(0, _textFocusCount - 1);
@@ -371,7 +299,6 @@ abstract class PanelStateBase extends ChangeNotifier implements PanelHoldable {
 
   double get dir => S.edge == 'left' ? -1 : 1;
   double get screenHeight => 680;
-
 
   // ---- misc ----
   void pushRecentEmoji(String em) {
@@ -522,9 +449,7 @@ abstract class PanelStateBase extends ChangeNotifier implements PanelHoldable {
     }
     _delayed.clear();
     if (native is WinNativeHost) (native as WinNativeHost).dispose();
-    tRun?.cancel();
-    swTimer?.cancel();
-    swDisplay.dispose();
+    disposeTimers();
     toolScroll.dispose();
     dragInfo.dispose();
     dropHintOn.dispose();
@@ -542,4 +467,9 @@ abstract class PanelStateBase extends ChangeNotifier implements PanelHoldable {
 /// The composed controller the app and tests construct. Same library, so the
 /// mixins and this class share every private member.
 class PanelController = PanelStateBase
-    with PanelLifecycle, PanelActions, PanelClipboardOps;
+    with
+        PanelLifecycle,
+        PanelTimers,
+        PanelWiring,
+        PanelActions,
+        PanelClipboardOps;

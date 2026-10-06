@@ -6,8 +6,6 @@ part of 'controller.dart';
 
 /// Boot, settings persistence, the original `app` object and placement.
 mixin PanelLifecycle on PanelStateBase {
-
-
   // ================= lifecycle =================
   /// [preset] and [useNative] exist so tests can boot without touching
   /// the filesystem or the platform channel.
@@ -121,38 +119,10 @@ mixin PanelLifecycle on PanelStateBase {
   }
 
   @override
-  void _wireNative() {
-    if (native is WinNativeHost) {
-      (native as WinNativeHost).events = NativeEvents(
-        onPlacement: (map) async {
-          placement = Placement.fromMap(map);
-          S.edge = placement!.onLeft ? 'left' : 'right';
-          S.monitor = (map['monitor'] as num?)?.toInt() ?? S.monitor;
-          try {
-            screens = await native.screens();
-          } catch (_) {}
-          if (!_disposed) notifyListeners();
-        },
-        onClipText: clip,
-        onClipImage: (img) => addClipImage(img),
-        onTray: onTray,
-        onBlur: blur,
-        onFilesDropped: onFilesDropped,
-        onPickedColor: onPickedColor,
-        onPickedCustomColor: onPickedCustomColor,
-        onPickedApp: (path) => appAdded(path: path),
-        onPickerState: setPickerActive,
-        onAppIcon: iconFor,
-      );
-    }
-  }
-
-  @override
   void save() {
     ToolInfo.controllerApps = S.apps;
     if (_persistSettings) storage.saveSettings(S.toMap());
   }
-
 
   // ================= the `app` object =================
   @override
@@ -300,6 +270,7 @@ mixin PanelLifecycle on PanelStateBase {
     unawaited(native.appIcon(id, path).catchError((_) {}));
   }
 
+  @override
   void iconFor(String id, String icon) {
     final a = S.apps.where((x) => x.id == id).toList();
     if (a.isEmpty || icon.isEmpty) return;
@@ -316,6 +287,7 @@ mixin PanelLifecycle on PanelStateBase {
     notifyListeners();
   }
 
+  @override
   void blur() {
     // A desktop window must survive losing focus; only the edge panel
     // auto-hides (the original's WindowEvent::Focused(false) behaviour).
@@ -323,12 +295,14 @@ mixin PanelLifecycle on PanelStateBase {
     if (isOpen && !keepOpen && !sticky && !dragging && !picking) close();
   }
 
+  @override
   void setPickerActive(bool active) {
     picking = active;
     cancelClose();
     if (!active && isOpen) sticky = true;
   }
 
+  @override
   void clip(String text) => addClip(text);
 
   @override
@@ -343,6 +317,7 @@ mixin PanelLifecycle on PanelStateBase {
   }
 
   @override
+  @override
   void addClipImage(ClipImage img) {
     clips = [
       ClipEntry.image(img, time: DateTime.now()),
@@ -351,6 +326,7 @@ mixin PanelLifecycle on PanelStateBase {
     notifyListeners();
   }
 
+  @override
   void onPickedColor(String? hex) {
     picking = false;
     if (hex == null) return;
@@ -374,6 +350,7 @@ mixin PanelLifecycle on PanelStateBase {
     await native.pickCustomColor(pickedColorHex).catchError((_) {});
   }
 
+  @override
   void onPickedCustomColor(String? hex) {
     if (hex == null) return;
     pickedColorHex = hex;
@@ -412,6 +389,7 @@ mixin PanelLifecycle on PanelStateBase {
     show('settings');
   }
 
+  @override
   void onFilesDropped(List<String> paths) {
     dropHintOn.value = false;
     if (importFiles != null) {
@@ -423,6 +401,7 @@ mixin PanelLifecycle on PanelStateBase {
     }
   }
 
+  @override
   void onTray(String id) {
     if (isWindowMode) {
       // The desktop window is always the primary surface.
