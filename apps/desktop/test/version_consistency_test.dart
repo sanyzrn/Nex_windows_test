@@ -75,7 +75,8 @@ void main() {
   });
 
   test('the About screen renders the shared version constant', () {
-    final settings = read('lib/nex/settings.dart');
+    // The About card lives in the settings_tools_about part file.
+    final settings = read('lib/nex/settings_tools_about.dart');
     expect(settings, contains('kAppShortVersion'));
     expect(settings, contains('kAppVersionString'));      // The old hard-coded literal must not come back.
       expect(
