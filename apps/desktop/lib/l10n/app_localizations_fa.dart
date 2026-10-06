@@ -873,6 +873,22 @@ class AppLocalizationsFa extends AppLocalizations {
   String get noNoteSelected => 'یادداشتی انتخاب نشده است';
 
   @override
+  String get noNoteSelectedHint =>
+      'برای پیمایش از کلیدهای جهت‌نما و برای یادداشت جدید از Ctrl+N استفاده کنید';
+
+  @override
+  String get filterAll => 'همه';
+
+  @override
+  String get filterAllTypes => 'همه انواع';
+
+  @override
+  String get filterAllTags => 'همه برچسب‌ها';
+
+  @override
+  String get filterAllThreads => 'همه رشته‌ها';
+
+  @override
   String selectedCount(int count) {
     return '$count مورد انتخاب شد';
   }

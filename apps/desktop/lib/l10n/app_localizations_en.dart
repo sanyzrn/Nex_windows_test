@@ -872,6 +872,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noNoteSelected => 'No note selected';
 
   @override
+  String get noNoteSelectedHint =>
+      'Use ↑ / ↓ to navigate notes, or Ctrl+N to create';
+
+  @override
+  String get filterAll => 'All';
+
+  @override
+  String get filterAllTypes => 'All types';
+
+  @override
+  String get filterAllTags => 'All tags';
+
+  @override
+  String get filterAllThreads => 'All threads';
+
+  @override
   String selectedCount(int count) {
     return '$count selected';
   }

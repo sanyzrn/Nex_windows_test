@@ -1754,6 +1754,36 @@ abstract class AppLocalizations {
   /// **'No note selected'**
   String get noNoteSelected;
 
+  /// No description provided for @noNoteSelectedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Use ↑ / ↓ to navigate notes, or Ctrl+N to create'**
+  String get noNoteSelectedHint;
+
+  /// No description provided for @filterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get filterAll;
+
+  /// No description provided for @filterAllTypes.
+  ///
+  /// In en, this message translates to:
+  /// **'All types'**
+  String get filterAllTypes;
+
+  /// No description provided for @filterAllTags.
+  ///
+  /// In en, this message translates to:
+  /// **'All tags'**
+  String get filterAllTags;
+
+  /// No description provided for @filterAllThreads.
+  ///
+  /// In en, this message translates to:
+  /// **'All threads'**
+  String get filterAllThreads;
+
   /// No description provided for @selectedCount.
   ///
   /// In en, this message translates to:

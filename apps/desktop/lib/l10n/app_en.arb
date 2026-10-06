@@ -283,6 +283,11 @@
   "actionPin": "Pin / Unpin",
   "actionCopy": "Copy",
   "noNoteSelected": "No note selected",
+  "noNoteSelectedHint": "Use ↑ / ↓ to navigate notes, or Ctrl+N to create",
+  "filterAll": "All",
+  "filterAllTypes": "All types",
+  "filterAllTags": "All tags",
+  "filterAllThreads": "All threads",
   "selectedCount": "{count} selected",
   "@selectedCount": {
     "placeholders": {

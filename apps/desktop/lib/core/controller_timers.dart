@@ -90,6 +90,7 @@ mixin PanelTimers on PanelStateBase {
 
   /// Cancels the timer engines; called from [PanelStateBase.dispose] —
   /// deliberately no super.dispose() here, that would recurse.
+  @override
   void disposeTimers() {
     tRun?.cancel();
     swTimer?.cancel();
