@@ -15,6 +15,7 @@ add_executable(${BINARY_NAME} WIN32
   "native_hotkeys.cpp"
   "native_tray.cpp"
   "native_window.cpp"
+  "native_caption.cpp"
   "native_clipboard.cpp"
   "native_pickers.cpp"
   "native_notifications.cpp"

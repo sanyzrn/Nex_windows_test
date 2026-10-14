@@ -12,27 +12,21 @@ mixin _LibraryActions on _LibraryStateBase {
   Future<void> _deleteNote(Note note) async {
     final id = note.id;
     _lastDeletedId = id;
-    await store.call('delete', {'id': id});
+    final features = NexScope.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final l = AppLocalizations.of(context)!;
+    try {
+      await deleteNoteWithUndo(features, id, messenger, l);
+    } catch (e) {
+      showNexNotice(messenger, '${l.failed}: $e');
+      return;
+    }
     if (!mounted) return;
     setState(() {
       if (selectedNote?.id == id) selectedNote = null;
       _selectedIds.remove(id);
     });
     await load();
-    if (mounted) {
-      final l = AppLocalizations.of(context)!;
-      showNexNotice(
-        ScaffoldMessenger.of(context),
-        l.deleted,
-        action: SnackBarAction(
-          label: l.undo,
-          onPressed: () async {
-            await store.call<void>('restore', {'id': id});
-            if (mounted) await load();
-          },
-        ),
-      );
-    }
   }
 
   @override
@@ -41,7 +35,7 @@ mixin _LibraryActions on _LibraryStateBase {
     final id = _lastDeletedId!;
     _lastDeletedId = null;
     await store.call('restore', {'id': id});
-    await load();
+    if (mounted) await load();
   }
 
   @override

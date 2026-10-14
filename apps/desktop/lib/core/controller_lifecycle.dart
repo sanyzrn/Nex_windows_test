@@ -56,6 +56,10 @@ mixin PanelLifecycle on PanelStateBase {
     }
 
     if (useNative) {
+      try {
+        screens = await native.screens();
+        S.monitor = displayIndex(screens, S.monitorName, S.monitor);
+      } catch (_) {}
       if (isWindowMode) {
         // Main mode: a full desktop window, restoring the saved frame.
         try {
@@ -311,6 +315,9 @@ mixin PanelLifecycle on PanelStateBase {
   Future<void> applyPlacement(String edge, int monitor) async {
     S.edge = edge;
     S.monitor = monitor;
+    if (monitor >= 0 && monitor < screens.length) {
+      S.monitorName = screens[monitor]['name'] as String?;
+    }
     save();
     if (isWindowMode) {
       notifyListeners();

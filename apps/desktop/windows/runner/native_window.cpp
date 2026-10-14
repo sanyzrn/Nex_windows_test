@@ -111,6 +111,7 @@ flutter::EncodableMap ComputePlacement(HWND window, const std::string& edge,
   out[EncodableValue("scale")] = EncodableValue(scale);
   out[EncodableValue("onLeft")] = EncodableValue(left);
   out[EncodableValue("monitor")] = EncodableValue(static_cast<int32_t>(idx));
+  out[EncodableValue("display")] = EncodableValue(Utf8FromUtf16Inner(m.name.c_str()));
   return out;
 }
 

@@ -107,6 +107,30 @@ class _Shot {
 
 const _matrix = <_Shot>[
   _Shot(
+    'settings_tools_panel_dark_fa',
+    locale: 'fa',
+    theme: 'dark',
+    target: 'toolsSettings',
+  ),
+  _Shot('settings_tools_panel_light_en', target: 'toolsSettings'),
+  _Shot(
+    'settings_tools_window_dark_fa',
+    locale: 'fa',
+    theme: 'dark',
+    target: 'toolsSettings',
+    mode: 'window',
+    size: Size(1200, 800),
+  ),
+  _Shot(
+    'settings_tools_window_fa_scale2',
+    locale: 'fa',
+    theme: 'dark',
+    target: 'toolsSettings',
+    mode: 'window',
+    size: Size(700, 900),
+    textScale: 2,
+  ),
+  _Shot(
     'product_clipboard_dark_fa',
     locale: 'fa',
     theme: 'dark',
@@ -334,7 +358,7 @@ Future<void> _go(WidgetTester t, PanelController c, _Shot spec) async {
   switch (spec.target) {
     case 'timeline' || 'reader':
       window ? c.selectWindowSection('library') : c.openWidget('timeline');
-    case 'settings' || 'appearance' || 'backup':
+    case 'settings' || 'appearance' || 'backup' || 'toolsSettings':
       window ? c.selectWindowSection('settings') : c.openWidget('settings');
     case 'more':
       window ? c.selectWindowSection('tools') : c.openWidget('more');
@@ -342,6 +366,15 @@ Future<void> _go(WidgetTester t, PanelController c, _Shot spec) async {
       c.openWidget(spec.target == 'palette' ? 'note' : spec.target);
   }
   await _frames(t, 90);
+  if (spec.target == 'toolsSettings') {
+    final l = AppLocalizations.of(t.element(find.byType(Scaffold)))!;
+    if (!window) {
+      await t.tap(find.byKey(const ValueKey('settings-category')));
+      await _frames(t, 45);
+    }
+    await t.tap(find.text(l.settingsTools).last);
+    await _frames(t, 90);
+  }
   if (spec.target == 'appearance' || spec.target == 'backup') {
     final l = AppLocalizations.of(t.element(find.byType(Scaffold)))!;
     await t.tap(

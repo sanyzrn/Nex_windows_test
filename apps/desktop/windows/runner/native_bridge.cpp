@@ -147,6 +147,9 @@ void NativeBridge::HandleMethodCall(
     result->Success();
   } else if (name == "diagnostics") {
     RECT client{}, view{};
+    MONITORINFO monitor{};
+    monitor.cbSize = sizeof(monitor);
+    GetMonitorInfo(MonitorFromWindow(window_, MONITOR_DEFAULTTONEAREST), &monitor);
     GetClientRect(window_, &client);
     GetClientRect(controller_->view()->GetNativeWindow(), &view);
     result->Success(EncodableValue(EncodableMap{
@@ -158,6 +161,8 @@ void NativeBridge::HandleMethodCall(
       {EncodableValue("clientHeight"), EncodableValue(static_cast<int32_t>(client.bottom))},
       {EncodableValue("viewWidth"), EncodableValue(static_cast<int32_t>(view.right))},
       {EncodableValue("viewHeight"), EncodableValue(static_cast<int32_t>(view.bottom))},
+      {EncodableValue("workWidth"), EncodableValue(static_cast<int32_t>(monitor.rcWork.right - monitor.rcWork.left))},
+      {EncodableValue("workHeight"), EncodableValue(static_cast<int32_t>(monitor.rcWork.bottom - monitor.rcWork.top))},
       {EncodableValue("tray"), EncodableValue(tray_added_)},
       {EncodableValue("hotkey"), EncodableValue(hotkey_registered_)},
       {EncodableValue("workers"), EncodableValue(static_cast<int32_t>(workers_.size()))},
@@ -270,6 +275,9 @@ void NativeBridge::HandleMethodCall(
     result->Success(EncodableValue(WindowFrame()));
   } else if (name == "surfaceReady") {
     SurfaceReady(ArgString(args, "mode"));
+    result->Success();
+  } else if (name == "windowCommand") {
+    WindowCommand(ArgString(args, "command"));
     result->Success();
   } else if (name == "focusWindow") {
     FocusWindow();
@@ -455,12 +463,14 @@ void NativeBridge::RequestSurfaceFrame() {
 }
 
 flutter::EncodableMap NativeBridge::WindowFrame() const {
-  const bool zoomed = IsZoomed(window_) != FALSE;
+  WINDOWPLACEMENT wp = {};
+  wp.length = sizeof(wp);
+  GetWindowPlacement(window_, &wp);
+  const bool iconic = IsIconic(window_) != FALSE;
+  const bool zoomed = IsZoomed(window_) != FALSE ||
+      (iconic && (wp.flags & WPF_RESTORETOMAXIMIZED) != 0);
   RECT r{};
-  if (zoomed) {
-    WINDOWPLACEMENT wp = {};
-    wp.length = sizeof(wp);
-    GetWindowPlacement(window_, &wp);
+  if (zoomed || iconic) {
     HMONITOR mon = MonitorFromWindow(window_, MONITOR_DEFAULTTONEAREST);
     MONITORINFO mi = {};
     mi.cbSize = sizeof(mi);
@@ -837,7 +847,15 @@ bool NativeBridge::OnMessage(HWND hwnd, UINT message, WPARAM wparam, LPARAM lpar
     const double scale = dpi == 0 ? 1.0 : dpi / 96.0;
     mmi->ptMinTrackSize.x = static_cast<LONG>(520 * scale);
     mmi->ptMinTrackSize.y = static_cast<LONG>(560 * scale);
-    return false;
+    MONITORINFO mi{};
+    mi.cbSize = sizeof(mi);
+    if (GetMonitorInfo(MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST), &mi)) {
+      mmi->ptMaxPosition.x = mi.rcWork.left - mi.rcMonitor.left;
+      mmi->ptMaxPosition.y = mi.rcWork.top - mi.rcMonitor.top;
+      mmi->ptMaxSize.x = mi.rcWork.right - mi.rcWork.left;
+      mmi->ptMaxSize.y = mi.rcWork.bottom - mi.rcWork.top;
+    }
+    return true;
   }
 
   if (message == WM_APP_TRAY) {

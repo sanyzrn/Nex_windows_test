@@ -2,7 +2,7 @@
 [Setup]
 AppId={{48B6A24D-07D7-4DE8-8D6C-801190DF6A42}
 AppName=Nex
-AppVersion=0.12.0+8
+AppVersion=0.12.1+9
 AppPublisher=Nex
 DefaultDirName={localappdata}\Programs\Nex
 DefaultGroupName=Nex
@@ -11,19 +11,24 @@ ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 MinVersion=10.0
 DisableProgramGroupPage=yes
-WizardStyle=modern
+DisableWelcomePage=no
+WizardStyle=modern dark includetitlebar hidebevels
+WizardBackColor=#11161B
+WizardImageFile=artwork\wizard-brand.png
+WizardSmallImageFile=artwork\wizard-logo.png
+WizardImageStretch=yes
 ShowLanguageDialog=yes
 LicenseFile=..\LICENSE
 SetupIconFile=..\windows\runner\resources\app_icon.ico
 UninstallDisplayIcon={app}\nex_desktop.exe
 OutputDir=..\build\installer\output
-OutputBaseFilename=Nex-Windows-Setup-0.12.0-x64
+OutputBaseFilename=Nex-Windows-Setup-0.12.1-x64
 Compression=lzma2
 SolidCompression=yes
 AppMutex=Local\NexDesktopSingleton
 CloseApplications=no
 RestartApplications=no
-VersionInfoVersion=0.12.0.8
+VersionInfoVersion=0.12.1.9
 VersionInfoDescription=Nex Windows installer
 
 [Languages]

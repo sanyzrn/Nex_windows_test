@@ -21,9 +21,10 @@ void main() {
 
   test('pubspec.yaml declares the same version', () {
     final pubspec = read('pubspec.yaml');
-    final match = RegExp(r'^version:\s*(\S+)', multiLine: true).firstMatch(
-      pubspec,
-    );
+    final match = RegExp(
+      r'^version:\s*(\S+)',
+      multiLine: true,
+    ).firstMatch(pubspec);
     expect(match, isNotNull, reason: 'pubspec.yaml has no version line');
     expect(match!.group(1), kAppVersionString);
   });
@@ -70,19 +71,22 @@ void main() {
   });
 
   test('root README and desktop CHANGELOG state this version', () {
-    expect(read('../../README.md'), contains('0.12.0+8'));
-    expect(read('CHANGELOG.md'), contains('## 0.12.0'));
+    expect(read('../../README.md'), contains(kAppVersionString));
+    expect(read('CHANGELOG.md'), contains('## $kAppShortVersion'));
   });
 
   test('the About screen renders the shared version constant', () {
     // The About card lives in the settings_tools_about part file.
     final settings = read('lib/nex/settings_tools_about.dart');
     expect(settings, contains('kAppShortVersion'));
-    expect(settings, contains('kAppVersionString'));      // The old hard-coded literal must not come back.
-      expect(
-        RegExp(r'v0\.\d+\.\d+ \(Build \d+\)').hasMatch(settings),
-        isFalse,
-        reason: 'About screen must use app_meta constants, not literals',
-      );
+    expect(
+      settings,
+      contains('kAppVersionString'),
+    ); // The old hard-coded literal must not come back.
+    expect(
+      RegExp(r'v0\.\d+\.\d+ \(Build \d+\)').hasMatch(settings),
+      isFalse,
+      reason: 'About screen must use app_meta constants, not literals',
+    );
   });
 }

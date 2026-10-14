@@ -61,6 +61,9 @@ WNDPROC g_view_orig_proc = nullptr;
 
 LRESULT CALLBACK PanelViewSubclassProc(HWND hwnd, UINT message, WPARAM wparam,
                                        LPARAM lparam) {
+  if (g_bridge != nullptr) {
+    if (auto result = g_bridge->FrameMessage(hwnd, message, wparam, lparam)) return *result;
+  }
   if (g_bridge != nullptr && g_bridge->OnMessage(hwnd, message, wparam, lparam)) {
     return 0;
   }
@@ -138,6 +141,9 @@ LRESULT
 FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
                               WPARAM const wparam,
                               LPARAM const lparam) noexcept {
+  if (bridge_) {
+    if (auto result = bridge_->FrameMessage(hwnd, message, wparam, lparam)) return *result;
+  }
   // Taskbar activation and accessibility tools can focus the top-level host.
   // Keyboard input belongs to Flutter's child HWND, including after restore.
   if (message == WM_SETFOCUS && flutter_controller_) {

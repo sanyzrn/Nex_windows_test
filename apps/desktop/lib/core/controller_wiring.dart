@@ -13,12 +13,19 @@ mixin PanelWiring on PanelStateBase {
           placement = Placement.fromMap(map);
           S.edge = placement!.onLeft ? 'left' : 'right';
           S.monitor = (map['monitor'] as num?)?.toInt() ?? S.monitor;
+          S.monitorName = map['display'] as String? ?? S.monitorName;
+          save();
           try {
             screens = await native.screens();
           } catch (_) {}
           if (!_disposed) notifyListeners();
         },
         onClipText: clip,
+        onWindowState: (maximized) {
+          if (_disposed) return;
+          S.windowMaximized = maximized;
+          refresh();
+        },
         onClipImage: (img) => addClipImage(img),
         onTray: onTray,
         onOpenNote: (uri) => onOpenNote?.call(uri),

@@ -101,6 +101,20 @@ void main() {
       expect(displayNumber({'name': r'\\.\DISPLAY2'}, 0), '2');
       expect(displayNumber({'name': r'\\.\DISPLAY1'}, 1), '1');
       expect(displayNumber({'name': 'unknown'}, 0), '1');
+      final displays = [
+        {'name': r'\\.\DISPLAY2'},
+        {'name': r'\\.\DISPLAY1'},
+      ];
+      final settings = Settings()
+        ..monitor = 0
+        ..monitorName = r'\\.\DISPLAY1';
+      final restored = Settings.fromMap(settings.toMap());
+      expect(displayIndex(displays, restored.monitorName, restored.monitor), 1);
+      expect(
+        displayIndex(displays.reversed.toList(), restored.monitorName, 1),
+        0,
+      );
+      expect(displayIndex([], restored.monitorName, 1), 0);
     },
   );
 
@@ -262,4 +276,28 @@ void main() {
       expect(t.takeException(), isNull);
     },
   );
+
+  testWidgets('delete and Undo survive leaving the reader during the save', (
+    t,
+  ) async {
+    final fixture = await _fixture(t);
+    final action = find.widgetWithText(OutlinedButton, 'Delete');
+    await t.ensureVisible(action);
+    await t.tap(action);
+    fixture.c.selectWindowSection('tools');
+    await _database(t);
+    final deleted = await t.runAsync(
+      () => fixture.f.store.call<Note?>('get', {'id': 'checklist'}),
+    );
+    expect(deleted, isNull);
+    final trash = await t.runAsync(() => fixture.f.store.call<List<Note>>('trash'));
+    expect(trash!.any((n) => n.id == 'checklist'), isTrue);
+    await t.tap(find.text('Undo'));
+    await _database(t);
+    final restored = await t.runAsync(
+      () => fixture.f.store.call<Note?>('get', {'id': 'checklist'}),
+    );
+    expect(restored!.deletedAt, isNull);
+    expect(t.takeException(), isNull);
+  });
 }

@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'data.dart';
 import 'models.dart';
 import 'native.dart';
+import 'display_identity.dart';
 import 'panel_geometry.dart';
 import 'panel_holds.dart';
 import 'panel_settings.dart';

@@ -17,6 +17,7 @@ import 'dock.dart' show AppIconImage;
 import 'flyout.dart' show buildPanelView;
 import 'svg_icon.dart';
 import 'widgets.dart';
+import 'window_caption.dart';
 
 part 'window_nav_rail.dart';
 part 'window_section.dart';
@@ -62,11 +63,18 @@ class _NexWindowShellState extends State<NexWindowShell> {
   Widget build(BuildContext context) {
     final c = widget.controller;
     final scheme = Theme.of(context).colorScheme;
-    Widget buildSurface(BuildContext context, Widget? child) => Row(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+    Widget buildSurface(BuildContext context, Widget? child) => Column(
       children: [
-        _WindowNavRail(controller: c, features: widget.features),
-        Expanded(child: _WindowSection(controller: c)),
+        NexWindowCaption(controller: c),
+        Expanded(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _WindowNavRail(controller: c, features: widget.features),
+              Expanded(child: _WindowSection(controller: c)),
+            ],
+          ),
+        ),
       ],
     );
     return Scaffold(

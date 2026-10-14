@@ -10,6 +10,12 @@ import 'package:nex_desktop/ui/shell.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class _Native extends NativeHost {
+  bool button = false;
+  (int, int)? position;
+  @override
+  bool leftDown() => button;
+  @override
+  (int, int)? cursorPos() => position;
   final calls = <String>[];
   Completer<void>? gate;
   @override
@@ -172,6 +178,38 @@ void main() {
       },
     );
   }
+
+  testWidgets(
+    'global outside clicks still dismiss after release while closed',
+    (t) async {
+      final native = _Native()..position = (1000, 1000);
+      final c = PanelController(nativeHost: native);
+      await c.bootstrap(
+        preset: Settings()..windowMode = 'panel',
+        useNative: false,
+      );
+      c.placement = Placement.fromMap({
+        'x': 0,
+        'y': 0,
+        'w': 480,
+        'h': 680,
+        'scale': 1,
+        'edgeX': 480,
+        'onLeft': false,
+      });
+      for (var i = 0; i < 3; i++) {
+        c.open();
+        c.sticky = true;
+        native.button = true;
+        c.pollPanelPointer();
+        expect(c.isOpen, isFalse);
+        native.button = false;
+        c.pollPanelPointer();
+        await t.pump(const Duration(seconds: 1));
+      }
+      c.dispose();
+    },
+  );
 
   testWidgets('outside pointer movement does not keep extending auto-close', (
     t,

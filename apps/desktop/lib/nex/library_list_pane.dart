@@ -51,15 +51,19 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
                   icon: const Icon(Icons.push_pin_outlined, size: 20),
                   tooltip: l.pin,
                   onPressed: () async {
-                    for (final id in _selectedIds) {
-                      final n = notes.firstWhere(
-                        (x) => x.id == id,
-                        orElse: () => notes.first,
-                      );
-                      await store.call(n.pinnedAt == null ? 'pin' : 'unpin', {
-                        'id': id,
-                      });
-                    }
+                    final features = NexScope.of(context);
+                    final chosen = notes
+                        .where((n) => _selectedIds.contains(n.id))
+                        .toList();
+                    await features.guard(() async {
+                      for (final n in chosen) {
+                        await features.store.call(
+                          n.pinnedAt == null ? 'pin' : 'unpin',
+                          {'id': n.id},
+                        );
+                      }
+                    });
+                    if (!mounted) return;
                     setState(() => _selectedIds.clear());
                     await load();
                   },
@@ -80,10 +84,18 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
                   icon: const Icon(Icons.delete_outline_rounded, size: 20),
                   tooltip: l.delete,
                   onPressed: () async {
+                    final features = NexScope.of(context);
+                    final messenger = ScaffoldMessenger.of(context);
                     final idsToDelete = Set<String>.from(_selectedIds);
-                    for (final id in idsToDelete) {
-                      await store.call('delete', {'id': id});
-                    }
+                    await features.guard(() async {
+                      for (final id in idsToDelete) {
+                        await features.store.call('delete', {'id': id});
+                      }
+                      if (idsToDelete.contains(features.session.id)) {
+                        await features.fresh();
+                      }
+                    });
+                    if (!mounted) return;
                     setState(() {
                       _selectedIds.clear();
                       if (idsToDelete.contains(selectedNote?.id)) {
@@ -92,20 +104,21 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
                     });
                     await load();
                     if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          persist: false,
-                          showCloseIcon: true,
-                          content: Text(l.deleted),
-                          action: SnackBarAction(
-                            label: l.undo,
-                            onPressed: () async {
+                      showNexNotice(
+                        messenger,
+                        l.deleted,
+                        action: SnackBarAction(
+                          label: l.undo,
+                          onPressed: () async {
+                            await features.guard(() async {
                               for (final id in idsToDelete) {
-                                await store.call('restore', {'id': id});
+                                await features.store.call('restore', {
+                                  'id': id,
+                                });
                               }
-                              await load();
-                            },
-                          ),
+                            });
+                            if (mounted) await load();
+                          },
                         ),
                       );
                     }
@@ -453,7 +466,7 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
                       TextButton(
                         onPressed: () async {
                           await store.call<void>('restore', {'id': note.id});
-                          await load();
+                          if (mounted) await load();
                         },
                         child: Text(l.restore),
                       ),

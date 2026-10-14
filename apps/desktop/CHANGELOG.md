@@ -1,3 +1,13 @@
+## 0.12.1
+
+- Reliable outside-click panel dismissal and hover between readers and tools.
+- Windows display labels use the actual display device number.
+- Create, rename, search and delete tags from the library.
+- Deleted notes offer only restore; Undo notices expire.
+- Interactive checklist previews and refreshed reader state.
+- Categorized compact settings with tool search and placement controls.
+- Custom desktop title bar and a minimal dark installer.
+
 # Changelog
 
 ## 0.12.0 (2026-10-04)

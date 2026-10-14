@@ -131,9 +131,11 @@ Future<void> panelSmoke(String output) async {
       features.focus.requestFocus();
       await waitFor(() => features.focus.hasFocus);
       await hover('timeline');
+      final readerHold = c.holdOpen(modal: false);
       c.S.panelPinned = true;
       await hover('clip');
       await hover('calc');
+      readerHold();
       await checkpoint('hover completed $i');
       final shown = await native.diagnostics();
       if (shown['visible'] != true) throw StateError('Panel did not reveal');
@@ -158,6 +160,34 @@ Future<void> panelSmoke(String output) async {
         'hoverPinned': true,
       });
     }
+    await native.windowCommand('maximize');
+    await waitFor(() => c.S.windowMaximized);
+    final maximized = await native.diagnostics();
+    if (maximized['clientWidth'] != maximized['workWidth'] ||
+        maximized['clientHeight'] != maximized['workHeight']) {
+      throw StateError('Custom caption extends outside the monitor work area');
+    }
+    if (maximized['clientWidth'] != maximized['viewWidth'] ||
+        maximized['clientHeight'] != maximized['viewHeight']) {
+      throw StateError(
+        'Maximized caption leaves an incorrectly sized Flutter view',
+      );
+    }
+    await native.windowCommand('maximize');
+    await waitFor(() => !c.S.windowMaximized);
+    await native.windowCommand('minimize');
+    await Future<void>.delayed(const Duration(milliseconds: 150));
+    final minimizedFrame = await native.windowFrame();
+    if ((minimizedFrame?['x'] as num? ?? -32000) <= -32000 ||
+        (minimizedFrame?['w'] as num? ?? 0) < 520) {
+      throw StateError('Minimizing loses the saved normal window frame');
+    }
+    await native.focusWindow();
+    result['caption'] = {
+      'minimizedFrame': minimizedFrame,
+      'maximized': maximized,
+      'restored': await native.diagnostics(),
+    };
     await screenshot('panel-probe-window');
     result['pass'] = errors.isEmpty;
   } catch (error, stack) {

@@ -12,6 +12,7 @@
 #include <memory>
 #include <mutex>
 #include <string>
+#include <optional>
 
 #include <flutter/encodable_value.h>
 #include <flutter/flutter_view_controller.h>
@@ -53,6 +54,8 @@ class NativeBridge {
   /// Handles tray messages and drains the cross-thread event queue.
   /// Returns true if the message was consumed.
   bool OnMessage(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam);
+  std::optional<LRESULT> FrameMessage(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam);
+  void WindowCommand(const std::string& command);
 
   /// True when the settings say a tray "start with Windows" checkmark shows.
   bool StartupEnabled();

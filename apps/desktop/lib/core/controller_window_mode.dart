@@ -32,6 +32,10 @@ mixin PanelWindowTransitions on PanelStateBase {
       _resetPanelSurface();
       try {
         await native.setWindowMode('panel');
+        try {
+          screens = await native.screens();
+          S.monitor = displayIndex(screens, S.monitorName, S.monitor);
+        } catch (_) {}
         final p = await native.applyPlacement(S.edge, S.monitor);
         if (p != null) placement = Placement.fromMap(p);
       } catch (_) {}

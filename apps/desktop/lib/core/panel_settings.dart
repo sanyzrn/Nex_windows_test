@@ -40,6 +40,7 @@ class Settings {
   List<Color> recentColors = [];
   String edge = 'right';
   int monitor = 0;
+  String? monitorName;
   bool updates = true;
   int lastCheck = 0;
   List<String> hidden = [];
@@ -88,6 +89,7 @@ class Settings {
     'recentColors': recentColors.map(_hex).toList(),
     'edge': edge,
     'monitor': monitor,
+    'monitorName': monitorName,
     'updates': updates,
     'lastCheck': lastCheck,
     'hidden': hidden,
@@ -135,6 +137,7 @@ class Settings {
         .toList();
     s.edge = j['edge'] as String? ?? 'right';
     s.monitor = (j['monitor'] as num?)?.toInt() ?? 0;
+    s.monitorName = j['monitorName'] as String?;
     s.updates = j['updates'] as bool? ?? true;
     s.lastCheck = (j['lastCheck'] as num?)?.toInt() ?? 0;
     s.hidden = ((j['hidden'] as List?) ?? []).map((e) => e.toString()).toList();

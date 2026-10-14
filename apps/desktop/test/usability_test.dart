@@ -113,7 +113,11 @@ void main() {
       c.sticky = false;
       c.focusGained();
       c.blur();
-      expect(c.isOpen, true);
+      expect(c.isOpen, false);
+      expect(c.typing, false);
+      c.open();
+      c.focusGained();
+      expect(c.maybeClose(), false);
       c.focusLost();
       c.focusLost();
       expect(c.typing, false);
@@ -296,7 +300,7 @@ void main() {
 
   for (final locale in ['en', 'fa']) {
     testWidgets(
-      '$locale capture and inline reader have no scrim, duplicated editor or accidental hover switch',
+      '$locale inline reader has no scrim and permits hover switching between tools',
       tags: 'golden',
       (t) async {
         t.view.physicalSize = const Size(480, 680);
@@ -344,6 +348,10 @@ void main() {
           matchesGoldenFile('goldens/capture_$locale.png'),
         );
         c.openWidget('timeline');
+        await t.pump();
+        await t.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 150)),
+        );
         await frames(t);
         for (var i = 0; i < 4; i++) {
           await t.runAsync(() async {
@@ -364,9 +372,11 @@ void main() {
         );
         expect(find.byType(TextField), findsNothing);
         expect(c.interacting, true);
-        c.sticky = false;
-        c.blur();
-        expect(c.isOpen, true);
+        expect(c.modalOpen, false);
+        await expectLater(
+          find.byType(Scaffold),
+          matchesGoldenFile('goldens/reader_$locale.png'),
+        );
         final mouse = await t.createGesture(kind: PointerDeviceKind.mouse);
         await mouse.addPointer(location: Offset.zero);
         await mouse.moveTo(
@@ -377,13 +387,24 @@ void main() {
           ),
         );
         await frames(t);
-        expect(c.panel, 'timeline');
+        expect(c.panel, 'settings');
         await mouse.removePointer();
-        await frames(t, 180);
-        await expectLater(
-          find.byType(Scaffold),
-          matchesGoldenFile('goldens/reader_$locale.png'),
+        c.openWidget('timeline');
+        for (var i = 0; i < 6; i++) {
+          await t.pump();
+          await t.runAsync(
+            () => Future<void>.delayed(const Duration(milliseconds: 30)),
+          );
+        }
+        await frames(t);
+        expect(
+          find.byType(NoteCard),
+          findsWidgets,
+          reason:
+              '${c.panel} open=${c.isOpen}; ${t.widgetList<Text>(find.byType(Text)).map((w) => w.data).join(" | ")}',
         );
+        await t.tap(find.byType(NoteCard).first);
+        await frames(t);
         await t.tap(
           find.byTooltip(
             locale == 'en'
@@ -401,6 +422,8 @@ void main() {
             'Edited immediately',
           );
         });
+        c.blur();
+        expect(c.isOpen, false);
         await t.pumpWidget(const SizedBox());
         expect(c.interacting, false);
         c.dispose();
