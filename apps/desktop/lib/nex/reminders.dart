@@ -5,6 +5,7 @@
 import 'package:nex_core/nex_core.dart';
 import 'package:nex_data/nex_data.dart';
 import '../core/native.dart';
+import 'reminder_policy.dart';
 
 /// Interface for scheduling durable Windows toast reminders.
 abstract interface class ReminderScheduler {
@@ -41,14 +42,13 @@ class NativeReminderScheduler implements ReminderScheduler {
     required String title,
     required String body,
     required DateTime fireAt,
-  }) =>
-      _host.scheduleReminder(
-        id: id,
-        noteId: noteId,
-        title: title,
-        body: body,
-        fireAt: fireAt,
-      );
+  }) => _host.scheduleReminder(
+    id: id,
+    noteId: noteId,
+    title: title,
+    body: body,
+    fireAt: fireAt,
+  );
 
   @override
   Future<bool> cancel(String id) => _host.cancelReminder(id);
@@ -59,13 +59,12 @@ class NativeReminderScheduler implements ReminderScheduler {
     required String noteId,
     required String title,
     required String body,
-  }) =>
-      _host.showOverdueReminder(
-        id: id,
-        noteId: noteId,
-        title: title,
-        body: body,
-      );
+  }) => _host.showOverdueReminder(
+    id: id,
+    noteId: noteId,
+    title: title,
+    body: body,
+  );
 
   @override
   Future<Set<String>> listScheduledIds() async {
@@ -149,11 +148,13 @@ class ReconciliationSummary {
     required this.scheduledCount,
     required this.cancelledCount,
     required this.overdueCount,
+    this.failedCount = 0,
   });
 
   final int scheduledCount;
   final int cancelledCount;
   final int overdueCount;
+  final int failedCount;
 }
 
 /// Pure Dart engine that keeps the scheduled toast notifications in sync with SQLite.
@@ -164,23 +165,7 @@ class ReminderReconciliationEngine {
     NoteRepeat repeat,
     DateTime now,
   ) {
-    if (repeat == NoteRepeat.once) {
-      return dueAt;
-    }
-    DateTime candidate = dueAt;
-    if (repeat == NoteRepeat.daily) {
-      while (!candidate.isAfter(now)) {
-        candidate = candidate.add(const Duration(days: 1));
-      }
-      return candidate;
-    }
-    if (repeat == NoteRepeat.weekly) {
-      while (!candidate.isAfter(now)) {
-        candidate = candidate.add(const Duration(days: 7));
-      }
-      return candidate;
-    }
-    return candidate;
+    return nextReminderOccurrence(dueAt, repeat, now);
   }
 
   /// Reconciles the scheduled set against active non-deleted notes in the database.
@@ -191,58 +176,75 @@ class ReminderReconciliationEngine {
     Set<String>? notifiedOverdueIds,
   }) async {
     final now = (nowOverride ?? DateTime.now()).toUtc();
-    final upcomingNotes = repo.listUpcomingReminders();
+    return reconcileNotes(
+      notes: reminderCandidates(repo, now),
+      scheduler: scheduler,
+      nowOverride: now,
+      notifiedOverdueIds: notifiedOverdueIds,
+    );
+  }
+
+  static Future<ReconciliationSummary> reconcileNotes({
+    required Iterable<Note> notes,
+    required ReminderScheduler scheduler,
+    DateTime? nowOverride,
+    Set<String>? notifiedOverdueIds,
+    String fallbackTitle = 'Nex',
+  }) async {
+    final now = (nowOverride ?? DateTime.now()).toUtc();
 
     final targetMap =
         <String, ({DateTime fireAt, String title, String body})>{};
+    final noteIds = {
+      for (final note in notes) reminderScheduleId(note.id): note.id,
+    };
     int overdueCount = 0;
+    int failedCount = 0;
 
-    for (final note in upcomingNotes) {
+    for (final note in notes) {
       if (note.deletedAt != null || note.dueAt == null) continue;
       final due = note.dueAt!.toUtc();
       final String bodyText;
       final dt = note.displayText?.trim();
       if (dt != null && dt.isNotEmpty) {
-        bodyText = dt;
+        bodyText = String.fromCharCodes(dt.runes.take(240));
       } else {
         final c = note.content?.trim();
-        bodyText = (c != null && c.isNotEmpty) ? c : 'Nex Note';
+        bodyText = (c != null && c.isNotEmpty) ? c : fallbackTitle;
       }
       final titleText = note.title?.trim().isNotEmpty == true
           ? note.title!
-          : 'Nex Reminder';
+          : fallbackTitle;
+      final id = reminderScheduleId(note.id);
+      final receipt = reminderReceipt(note);
 
       if (note.dueRepeat == NoteRepeat.once) {
-        if (due.isBefore(now)) {
+        if (!due.isAfter(now)) {
           if (now.difference(due).inHours < 48) {
             final shouldShow =
                 notifiedOverdueIds == null ||
-                !notifiedOverdueIds.contains(note.id);
+                !notifiedOverdueIds.contains(receipt);
             if (shouldShow) {
-              await scheduler.showOverdue(
-                id: note.id,
+              final shown = await scheduler.showOverdue(
+                id: id,
                 noteId: note.id,
                 title: titleText,
                 body: bodyText,
               );
-              notifiedOverdueIds?.add(note.id);
-              overdueCount++;
+              if (shown) {
+                notifiedOverdueIds?.add(receipt);
+                overdueCount++;
+              } else {
+                failedCount++;
+              }
             }
           }
         } else {
-          targetMap[note.id] = (
-            fireAt: due,
-            title: titleText,
-            body: bodyText,
-          );
+          targetMap[id] = (fireAt: due, title: titleText, body: bodyText);
         }
       } else {
         final nextFire = computeNextOccurrence(due, note.dueRepeat, now);
-        targetMap[note.id] = (
-          fireAt: nextFire,
-          title: titleText,
-          body: bodyText,
-        );
+        targetMap[id] = (fireAt: nextFire, title: titleText, body: bodyText);
       }
     }
 
@@ -252,26 +254,34 @@ class ReminderReconciliationEngine {
 
     for (final id in currentlyScheduled) {
       if (!targetMap.containsKey(id)) {
-        await scheduler.cancel(id);
-        cancelledCount++;
+        if (await scheduler.cancel(id)) {
+          cancelledCount++;
+        } else {
+          failedCount++;
+        }
       }
     }
 
     for (final entry in targetMap.entries) {
-      await scheduler.schedule(
+      final scheduled = await scheduler.schedule(
         id: entry.key,
-        noteId: entry.key,
+        noteId: noteIds[entry.key]!,
         title: entry.value.title,
         body: entry.value.body,
         fireAt: entry.value.fireAt,
       );
-      scheduledCount++;
+      if (scheduled) {
+        scheduledCount++;
+      } else {
+        failedCount++;
+      }
     }
 
     return ReconciliationSummary(
       scheduledCount: scheduledCount,
       cancelledCount: cancelledCount,
       overdueCount: overdueCount,
+      failedCount: failedCount,
     );
   }
 }

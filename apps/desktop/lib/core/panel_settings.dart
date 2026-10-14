@@ -7,6 +7,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:nex_ui/nex_ui.dart';
 import 'models.dart';
 
 /// The persisted settings, JSON-compatible with the original app.
@@ -26,6 +27,10 @@ class Settings {
 
   /// 'window' = full desktop window (main mode); 'panel' = edge slide-out.
   String windowMode = 'window';
+
+  /// Timeline card density: 'compact' | 'standard' | 'readable'. Feeds
+  /// [NexCardDensityScope] around the library (IDEAS.md, density modes).
+  String cardDensity = 'standard';
 
   /// Last normal (restored) frame of the desktop window, physical pixels,
   /// persisted so the window reopens where the user left it.
@@ -76,6 +81,7 @@ class Settings {
     'magnify': magnify,
     'panelPinned': panelPinned,
     'windowMode': windowMode,
+    'cardDensity': cardDensity,
     'windowBounds': windowBounds,
     'windowMaximized': windowMaximized,
     'recentEmoji': recentEmoji,
@@ -107,6 +113,7 @@ class Settings {
     s.magnify = j['magnify'] as bool? ?? true;
     s.panelPinned = j['panelPinned'] as bool? ?? false;
     s.windowMode = (j['windowMode'] as String?) == 'panel' ? 'panel' : 'window';
+    s.cardDensity = NexCardDensity.fromWire(j['cardDensity'] as String?).name;
     final bounds = j['windowBounds'];
     if (bounds is Map) {
       s.windowBounds = bounds.cast<String, dynamic>();

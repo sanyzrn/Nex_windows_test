@@ -38,8 +38,7 @@ class _ItemRowState extends State<ItemRow> {
 
   @override
   Widget build(BuildContext context) {
-    final (p, _, dir) = LiquidScope.of(context);
-    final shift = _hover ? -4.0 * dir : 0.0;
+    final p = LiquidScope.paletteOf(context);
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       onEnter: (_) => setState(() => _hover = true),
@@ -50,7 +49,6 @@ class _ItemRowState extends State<ItemRow> {
         child: AnimatedContainer(
           duration: Duration(milliseconds: widget.springy ? 350 : 0),
           curve: kPop,
-          transform: Matrix4.translationValues(shift, 0, 0),
           decoration: BoxDecoration(
             color: _hover ? p.soft2 : p.soft,
             borderRadius: BorderRadius.circular(12),
@@ -61,41 +59,34 @@ class _ItemRowState extends State<ItemRow> {
               ),
             ),
           ),
-          padding: EdgeInsets.only(
-            left: widget.pinned ? 9 : 12,
-            right: widget.plain ? 12 : 54,
-            top: 9,
-            bottom: 9,
-          ),
-          child: Stack(
-            alignment: Alignment.centerRight,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  DefaultTextStyle(
-                    style: _body(
-                      context,
-                    ).copyWith(overflow: TextOverflow.ellipsis),
-                    maxLines: 1,
-                    child: widget.child,
-                  ),
-                  if (widget.sub != null)
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                     DefaultTextStyle(
-                      style: _body(context, size: 10, color: p.muted),
+                      style: _body(
+                        context,
+                      ).copyWith(overflow: TextOverflow.ellipsis),
                       maxLines: 1,
-                      child: widget.sub!,
+                      child: widget.child,
                     ),
-                ],
+                    if (widget.sub != null)
+                      DefaultTextStyle(
+                        style: _body(context, size: 10, color: p.muted),
+                        maxLines: 1,
+                        child: widget.sub!,
+                      ),
+                  ],
+                ),
               ),
               if (widget.trailing != null)
-                AnimatedOpacity(
-                  duration: const Duration(milliseconds: 150),
-                  opacity: _hover || widget.pinned ? 1 : 0,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [widget.trailing!],
-                  ),
+                Padding(
+                  padding: const EdgeInsetsDirectional.only(start: 10),
+                  child: widget.trailing!,
                 ),
             ],
           ),
@@ -118,33 +109,15 @@ class ItemAction extends StatefulWidget {
 }
 
 class _ItemActionState extends State<ItemAction> {
-  bool _hover = false;
-
   @override
   Widget build(BuildContext context) {
-    final p = LiquidScope.paletteOf(context);
-    return MouseRegion(
-      onEnter: (_) => setState(() => _hover = true),
-      onExit: (_) => setState(() => _hover = false),
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: widget.onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 100),
-          width: 22,
-          height: 22,
-          decoration: BoxDecoration(
-            color: _hover ? p.soft2 : Colors.transparent,
-            borderRadius: BorderRadius.circular(7),
-          ),
-          child: Center(
-            child: DefaultTextStyle(
-              style: _body(context, size: 12, color: _hover ? p.ink : p.muted),
-              child: widget.child,
-            ),
-          ),
-        ),
-      ),
+    return IconButton(
+      tooltip: widget.tooltip,
+      onPressed: widget.onTap,
+      padding: const EdgeInsets.all(6),
+      constraints: const BoxConstraints.tightFor(width: 32, height: 32),
+      iconSize: 17,
+      icon: widget.child,
     );
   }
 }

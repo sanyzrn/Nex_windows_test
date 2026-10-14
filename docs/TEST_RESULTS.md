@@ -1,3 +1,62 @@
+# Current persistent clipboard validation — 2026-10-14, Windows 0.12.0+8
+
+Full desktop suite **159 PASS**, unchanged ordinary golden comparisons; final focused clipboard checks **8 PASS** after immutable identity caching; analysis **PASS**, no issues; UI hygiene, package-host and whitespace checks **PASS**. Windows Release/installer **PASS**. Actual tested Release writer was forcibly terminated after committed acknowledgement without database close/checkpoint; a fresh Release reader recovered **50** recent entries, exact image bytes/time and the old evicted image pin, exit 0. No actual Windows reboot/power cut or installation was performed.
+
+Root installer: `Nex-Windows-Setup-0.12.0-Clipboard-x64.exe`, **13,877,393 bytes**, SHA-256 `1454156b4fcfadbd1e904ac209022c918f4b57870423bcd5aea58bbe2d15c86e`. Production source hashes match the build snapshot; packaged EXE matches the tested Release. No user clipboard, notes, preferences or installed instance was altered by diagnostic tests. Tools were inspected and described; none were removed.
+
+Evidence: `apps/desktop/build/clipboard-tests-final.log`, `clipboard-tests-focused.log`, `clipboard-analysis.log`, `clipboard-build-final.log`, `clipboard-native-probe-final/write.json`, `clipboard-native-probe-final/read.json`, `clipboard-installer.log`. See [CLIPBOARD_PERSISTENCE.md](CLIPBOARD_PERSISTENCE.md).
+
+---
+
+# Previous product iteration validation — 2026-10-14, Windows 0.12.0+8
+
+Full desktop suite **153 PASS**, ordinary golden comparisons after intentional home/library/dock/clipboard updates; desktop analysis **PASS** with no issues; UI hygiene, package-host and whitespace checks **PASS**. Visual matrix **40 screens**, including both clipboard languages and large text. Custom 09:00 picker input, UTC persistence, scheduling retries, cancellation, workspace refresh/navigation and pagination selection are covered.
+
+Windows Release **PASS**. Actual isolated Release runner reminder probe **PASS**: local tomorrow 09:00 and replacement 10:00 preserved exactly in the Windows queue, one entry per reminder, cancellation verified. Actual mode/mouse probe **PASS** across right/left/right: hidden panel immediately after switching, native/Flutter dimensions match, pinned/focus hover works, no Flutter errors, exit 0.
+
+Root installer: `Nex-Windows-Setup-0.12.0-Product-x64.exe`, **13,864,597 bytes**, SHA-256 `e3dcc180de777e4dc25def6325ae4fdca09f457e01c3be6d7086b3126fb58748`. Inno compilation **PASS**; packaged executable hash matches the tested Release; production Dart/native source hashes match the build snapshot. No install/upgrade or actual installed toast-click test was run. No existing user instance was stopped or upgraded.
+
+Evidence: `apps/desktop/build/product-tests-final.log`, `product-analysis.log`, `product-build-final.log`, `product-native-reminder.json`, `product-native-panel/result.json`, `product-installer.log`. These are local ignored build artifacts. See [PRODUCT_ITERATION.md](PRODUCT_ITERATION.md) for implementation, limitations (including recurring reminders after full exit) and remaining work, and [the visual report](../design/product/README.md).
+
+---
+
+# Previous panel repair validation — 2026-10-14, Windows 0.12.0+8
+
+Full suite **140 PASS**, unchanged golden comparisons; desktop analysis **PASS**; UI hygiene, package-host and whitespace checks **PASS**. Windows Release, installer packaging and the actual isolated Release runner mode/mouse test **PASS**: three cycles on right/left/right, matching native/Flutter panel dimensions, focus/pinned hover, no Flutter errors, exit 0. See [PANEL_FIX.md](PANEL_FIX.md) for evidence, installer hash and remaining DPI/install coverage. The installed user instance was not closed or upgraded.
+
+---
+
+# Usability validation — 2026-10-14, Windows 0.12.0+8
+
+Usability phase: full desktop suite **135 PASS**, ordinary golden comparisons unchanged; final focused regression/benchmark run **14 PASS**; desktop analysis **PASS**, no issues; UI hygiene and `git diff --check` **PASS**. Package-host guard passes the repository and rejects three injected invalid fixtures. See [USABILITY_PHASE.md](USABILITY_PHASE.md) for measurements, build details and remaining native verification. GitHub Actions itself was not run remotely.
+
+Windows Release and installer packaging also passed. Current root executable: `Nex-Windows-Setup-0.12.0-Usability-x64.exe`, 13,830,579 bytes, SHA-256 `a9e36b90ed5295c2c1a01e7e724112401870a366f3a5af4e42fcebda93286d6f`. Native runtime and installation/upgrade were not exercised; the existing installed Nex remained open. The reminder engine has not yet been wired into the running app.
+
+The older results below describe the prior appearance phase.
+
+---
+
+# Desktop redesign validation — 2026-10-09, Windows 0.12.0+8
+
+Observed on the owner's Windows machine with Flutter 3.44.8 / Dart 3.12.2:
+
+| Check | Result |
+| --- | --- |
+| Desktop `flutter analyze --no-pub` | PASS, no issues |
+| UI package `flutter analyze --no-pub` | PASS, no issues |
+| `tools/check_ui_hygiene.ps1 -LibDir lib` | PASS |
+| Desktop `flutter test --no-pub --timeout 90s --reporter expanded` | PASS, 120 tests, ordinary golden comparisons |
+| Review harness | 38 images; real shadows, bundled fonts, window/panel, RTL, text 1.0/1.5/2.0 samples |
+| `flutter build windows --release --no-pub` | PASS, isolated temporary source snapshot |
+| Inno Setup 6.7.3 compilation | PASS, root redesign installer, 13,829,419 bytes |
+| Installer upgrade, clean-VM installation, Narrator, native smoke, OS High Contrast | NOT RUN; existing installed Nex remained open |
+
+Before images were captured before source changes. Golden baselines were regenerated for the intentional redesign and then compared normally. Existing test assumptions tied to the old icon, layout position and unscrolled tools grid were updated without removing behavioural assertions. Two inherited clipboard tests needed real async SQLite execution to finish reliably. The full suite was rerun after the final reader-font and selection fixes.
+
+The new interface report is [design/redesign/README.md](../design/redesign/README.md). The older entries below describe earlier states and are not validation of the current redesign or the entire legacy quality brief. No new performance improvement is claimed in this phase.
+
+---
+
 # CI golden portability fix — 2026-10-04
 
 GitHub Actions [run 37183791506](https://github.com/sanyzrn/Nex_windows_test/actions/runs/37183791506) on commit `162506f` passed dependency resolution and analysis, then failed three of 59 desktop tests. Only `emoji_panel.png` (129 pixels), `right_shell.png` and `left_shell.png` (125 pixels each) differed, about 0.04% of their 326,400 pixels. The runner was Windows Server 2025; local baselines use Windows 11 and load the host Segoe UI Emoji font. Font raster differences are the likely explanation; the original run did not upload failure images for visual confirmation.

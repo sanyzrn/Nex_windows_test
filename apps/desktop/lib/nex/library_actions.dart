@@ -124,11 +124,7 @@ mixin _LibraryActions on _LibraryStateBase {
           context,
           note: note,
           onSave: (dueAt, repeat) async {
-            await store.call('remind', {
-              'id': note.id,
-              'at': dueAt,
-              'repeat': repeat.wireName,
-            });
+            await NexScope.of(context).remind(note.id, dueAt, repeat);
             await load();
           },
         );

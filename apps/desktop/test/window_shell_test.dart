@@ -112,6 +112,8 @@ void main() {
     expect(find.byType(NexLibraryView), findsNothing);
     final emojiTile = find.text('Emoji');
     expect(emojiTile, findsOneWidget);
+    await tester.ensureVisible(emojiTile);
+    await tester.pumpAndSettle();
     await tester.tap(emojiTile);
     await _settle(tester);
     expect(find.byTooltip('Back to tools'), findsOneWidget);

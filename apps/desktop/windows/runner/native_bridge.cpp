@@ -45,7 +45,7 @@ std::atomic<uint64_t> g_last_image_id{0};
 // ================= bridge lifecycle =================
 
 NativeBridge::NativeBridge(HWND window, flutter::FlutterViewController* controller)
-    : window_(window),
+    : window_(window), controller_(controller),
       channel_(controller->engine()->messenger(), "rp/native",
                &flutter::StandardMethodCodec::GetInstance()) {
   channel_.SetMethodCallHandler(
@@ -146,7 +146,18 @@ void NativeBridge::HandleMethodCall(
     }
     result->Success();
   } else if (name == "diagnostics") {
+    RECT client{}, view{};
+    GetClientRect(window_, &client);
+    GetClientRect(controller_->view()->GetNativeWindow(), &view);
     result->Success(EncodableValue(EncodableMap{
+      {EncodableValue("visible"), EncodableValue(IsWindowVisible(window_) != FALSE)},
+      {EncodableValue("windowMode"), EncodableValue(window_mode_)},
+      {EncodableValue("surfaceReady"), EncodableValue(surface_ready_)},
+      {EncodableValue("passthrough"), EncodableValue(passthrough_)},
+      {EncodableValue("clientWidth"), EncodableValue(static_cast<int32_t>(client.right))},
+      {EncodableValue("clientHeight"), EncodableValue(static_cast<int32_t>(client.bottom))},
+      {EncodableValue("viewWidth"), EncodableValue(static_cast<int32_t>(view.right))},
+      {EncodableValue("viewHeight"), EncodableValue(static_cast<int32_t>(view.bottom))},
       {EncodableValue("tray"), EncodableValue(tray_added_)},
       {EncodableValue("hotkey"), EncodableValue(hotkey_registered_)},
       {EncodableValue("workers"), EncodableValue(static_cast<int32_t>(workers_.size()))},
@@ -205,9 +216,13 @@ void NativeBridge::HandleMethodCall(
     result->Success();
   } else if (name == "keepAwake") {
     const bool on = ArgBool(args, "on");
-    SetThreadExecutionState(on ? ES_CONTINUOUS | ES_SYSTEM_REQUIRED | ES_DISPLAY_REQUIRED
-                               : ES_CONTINUOUS);
-    result->Success();
+    const auto previous = SetThreadExecutionState(
+        on ? ES_CONTINUOUS | ES_SYSTEM_REQUIRED | ES_DISPLAY_REQUIRED : ES_CONTINUOUS);
+    if (previous == 0) {
+      result->Error("keep_awake_failed", "Windows could not change the execution state");
+    } else {
+      result->Success();
+    }
   } else if (name == "screenshot") {
     RunWorker([this]() {
       if (WaitOrStop(350)) return;
@@ -253,6 +268,9 @@ void NativeBridge::HandleMethodCall(
     result->Success();
   } else if (name == "windowFrame") {
     result->Success(EncodableValue(WindowFrame()));
+  } else if (name == "surfaceReady") {
+    SurfaceReady(ArgString(args, "mode"));
+    result->Success();
   } else if (name == "focusWindow") {
     FocusWindow();
     result->Success();
@@ -281,6 +299,16 @@ void NativeBridge::HandleMethodCall(
         ArgString(args, "title"),
         ArgString(args, "body"));
     result->Success(EncodableValue(ok));
+  } else if (name == "reminderDiagnosticError") {
+    result->Success(EncodableValue(ReminderDiagnosticError()));
+  } else if (name == "scheduledReminderDetails") {
+    EncodableList list;
+    for (const auto& [id, at] : ListScheduledToastDetails()) {
+      list.push_back(EncodableValue(EncodableMap{
+          {EncodableValue("id"), EncodableValue(id)},
+          {EncodableValue("fireAt"), EncodableValue(at)}}));
+    }
+    result->Success(EncodableValue(list));
   } else if (name == "listScheduledReminders") {
     const auto ids = ListScheduledToastIds();
     EncodableList list;
@@ -302,17 +330,23 @@ void NativeBridge::SetPassthrough(bool on) {
     return;
   }
   LONG ex = GetWindowLong(window_, GWL_EXSTYLE);
-  ex &= ~(WS_EX_TRANSPARENT | WS_EX_LAYERED | WS_EX_TOOLWINDOW);
-  ex |= WS_EX_APPWINDOW;
+  ex &= ~(WS_EX_TRANSPARENT | WS_EX_LAYERED | WS_EX_APPWINDOW);
+  ex |= WS_EX_TOOLWINDOW;
   SetWindowLong(window_, GWL_EXSTYLE, ex);
   SetWindowPos(window_, HWND_TOPMOST, 0, 0, 0, 0,
                SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_FRAMECHANGED);
-  ShowWindow(window_, on ? SW_HIDE : SW_SHOWNOACTIVATE);
+  ShowWindow(window_, (on || !surface_ready_) ? SW_HIDE : SW_SHOWNOACTIVATE);
 }
 
 void NativeBridge::SetWindowMode(const std::string& mode, int x, int y, int w,
                                   int h, bool maximized, bool show) {
   const bool to_window = (mode == "window");
+  // Never resize/reveal the previous Flutter surface in the new host frame.
+  ShowWindow(window_, SW_HIDE);
+  surface_ready_ = false;
+  ++surface_generation_;
+  surface_requested_generation_ = UINT64_MAX;
+  pending_show_ = false;
   window_mode_ = to_window;
   if (!to_window) {
     passthrough_ = true;
@@ -379,34 +413,45 @@ void NativeBridge::SetWindowMode(const std::string& mode, int x, int y, int w,
 
   SetWindowPos(window_, HWND_NOTOPMOST, x, y, w, h,
                SWP_NOACTIVATE | SWP_FRAMECHANGED);
-  if (maximized) {
-    if (first_frame_done_) {
-      ShowWindow(window_, SW_MAXIMIZE);
-      SetForegroundWindow(window_);
-    } else {
-      pending_show_ = true;
-      pending_show_maximized_ = true;
-    }
-  } else if (show) {
-    if (first_frame_done_) {
-      ShowWindow(window_, SW_SHOW);
-      SetForegroundWindow(window_);
-    } else {
-      pending_show_ = true;
-      pending_show_maximized_ = false;
-    }
-  } else {
-    ShowWindow(window_, SW_HIDE);
-  }
+  pending_show_ = show;
+  pending_show_maximized_ = maximized;
 }
 
 void NativeBridge::OnFirstFrame() {
   first_frame_done_ = true;
+  surface_ready_ = true;
   if (window_mode_ && pending_show_) {
     pending_show_ = false;
     ShowWindow(window_, pending_show_maximized_ ? SW_MAXIMIZE : SW_SHOW);
     SetForegroundWindow(window_);
+  } else if (!window_mode_ && !passthrough_) {
+    ShowWindow(window_, SW_SHOWNOACTIVATE);
   }
+}
+
+void NativeBridge::SurfaceReady(const std::string& mode) {
+  if ((mode == "window") != window_mode_) return;
+  surface_requested_generation_ = surface_generation_;
+  RequestSurfaceFrame();
+}
+
+void NativeBridge::RequestSurfaceFrame() {
+  if (surface_ready_ || frame_callback_pending_ ||
+      surface_requested_generation_ != surface_generation_) return;
+  const auto generation = surface_generation_;
+  frame_callback_pending_ = true;
+  controller_->engine()->SetNextFrameCallback([this, generation]() {
+    frame_callback_pending_ = false;
+    if (generation == surface_generation_ &&
+        surface_requested_generation_ == generation) {
+      OnFirstFrame();
+    } else {
+      // The client wrapper clears its callback after invoking it. Register
+      // the next generation on a later message, outside that callback.
+      PostMessage(window_, WM_APP_SURFACE_FRAME, 0, 0);
+    }
+  });
+  controller_->ForceRedraw();
 }
 
 flutter::EncodableMap NativeBridge::WindowFrame() const {
@@ -441,6 +486,10 @@ flutter::EncodableMap NativeBridge::WindowFrame() const {
 }
 
 void NativeBridge::FocusWindow() {
+  if (!surface_ready_) {
+    if (window_mode_) pending_show_ = true;
+    return;
+  }
   FocusWindowTarget(window_);
 }
 
@@ -724,6 +773,20 @@ void NativeBridge::ShowTrayMenu() {
 // ================= messages =================
 
 bool NativeBridge::OnMessage(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam) {
+  if (message == WM_COPYDATA) {
+    const auto* data = reinterpret_cast<const COPYDATASTRUCT*>(lparam);
+    if (data && data->dwData == 0x4E45584E && data->lpData && data->cbData > 1 && data->cbData <= 1024) {
+      const auto* bytes = static_cast<const char*>(data->lpData);
+      if (bytes[data->cbData - 1] != '\0') return true;
+      PostEvent("openNote", EncodableValue(EncodableMap{
+        {EncodableValue("uri"), EncodableValue(std::string(bytes, data->cbData - 1))}}));
+      return true;
+    }
+  }
+  if (message == WM_APP_SURFACE_FRAME) {
+    RequestSurfaceFrame();
+    return true;
+  }
   if (message == WM_APP_SHOW) {
     SetPassthrough(false);
     SetForegroundWindow(window_);

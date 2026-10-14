@@ -16,7 +16,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nex_data/nex_data.dart';
 import 'package:nex_desktop/core/controller.dart';
+import 'package:nex_desktop/core/models.dart';
 import 'package:nex_desktop/core/native.dart';
+import 'package:nex_desktop/l10n/app_localizations.dart';
 import 'package:nex_desktop/main.dart';
 import 'package:nex_desktop/nex/features.dart';
 import 'package:nex_desktop/nex/store.dart';
@@ -71,6 +73,7 @@ Future<_Store> _openStore(String name, {int count = 0}) async {
   final repo = SqliteNoteRepository(db);
   for (var i = 0; i < count; i++) {
     repo.insert(_note(i));
+    if (i % 7 == 0) repo.pinNote('review-$i');
   }
   db.close();
   final features = NexFeatures(await DesktopStore.open(root.path, name));
@@ -103,26 +106,118 @@ class _Shot {
 }
 
 const _matrix = <_Shot>[
+  _Shot(
+    'product_clipboard_dark_fa',
+    locale: 'fa',
+    theme: 'dark',
+    target: 'clip',
+  ),
+  _Shot('product_clipboard_light_en', target: 'clip'),
+  // Desktop redesign: full-size writing, RTL, large type and secondary flows.
+  _Shot(
+    'redesign_window_capture_1200_light_en',
+    mode: 'window',
+    size: Size(1200, 800),
+  ),
+  _Shot(
+    'redesign_window_capture_1600_dark_en',
+    mode: 'window',
+    size: Size(1600, 1000),
+    theme: 'dark',
+  ),
+  _Shot(
+    'redesign_window_capture_700_light_fa_scale2',
+    mode: 'window',
+    size: Size(700, 900),
+    locale: 'fa',
+    textScale: 2,
+  ),
+  _Shot(
+    'redesign_window_tools_1200_dark_fa',
+    mode: 'window',
+    size: Size(1200, 800),
+    locale: 'fa',
+    theme: 'dark',
+    target: 'more',
+  ),
+  _Shot(
+    'redesign_window_tools_700_light_fa_scale2',
+    mode: 'window',
+    size: Size(700, 900),
+    locale: 'fa',
+    textScale: 2,
+    target: 'more',
+  ),
+  _Shot(
+    'redesign_window_settings_1200_light_en_appearance',
+    mode: 'window',
+    size: Size(1200, 800),
+    target: 'appearance',
+  ),
+  _Shot(
+    'redesign_window_settings_1200_dark_fa_backup',
+    mode: 'window',
+    size: Size(1200, 800),
+    locale: 'fa',
+    theme: 'dark',
+    target: 'backup',
+  ),
+  _Shot(
+    'redesign_window_settings_700_dark_fa_scale2',
+    mode: 'window',
+    size: Size(700, 900),
+    locale: 'fa',
+    theme: 'dark',
+    textScale: 2,
+    target: 'settings',
+  ),
+  _Shot(
+    'redesign_window_palette_1200_dark_fa',
+    mode: 'window',
+    size: Size(1200, 800),
+    locale: 'fa',
+    theme: 'dark',
+    target: 'palette',
+  ),
+  _Shot(
+    'redesign_capture_panel_left_dark_fa_scale2',
+    locale: 'fa',
+    theme: 'dark',
+    edge: 'left',
+    textScale: 2,
+  ),
   // Panel, right edge, both languages, both themes — the primary audit grid.
   _Shot('capture_panel_right_light_en'),
   _Shot('capture_panel_right_dark_en', theme: 'dark'),
   _Shot('capture_panel_right_light_fa', locale: 'fa'),
   _Shot('capture_panel_right_dark_fa', locale: 'fa', theme: 'dark'),
   _Shot('timeline_panel_right_light_en', target: 'timeline'),
-  _Shot('timeline_panel_right_dark_fa', target: 'timeline', locale: 'fa', theme: 'dark'),
+  _Shot(
+    'timeline_panel_right_dark_fa',
+    target: 'timeline',
+    locale: 'fa',
+    theme: 'dark',
+  ),
   _Shot('reader_panel_right_light_en', target: 'reader'),
-  _Shot('reader_panel_right_dark_fa', target: 'reader', locale: 'fa', theme: 'dark'),
+  _Shot(
+    'reader_panel_right_dark_fa',
+    target: 'reader',
+    locale: 'fa',
+    theme: 'dark',
+  ),
   _Shot('settings_panel_right_light_en', target: 'settings'),
-  _Shot('settings_panel_right_dark_fa', target: 'settings', locale: 'fa', theme: 'dark'),
+  _Shot(
+    'settings_panel_right_dark_fa',
+    target: 'settings',
+    locale: 'fa',
+    theme: 'dark',
+  ),
   _Shot('emoji_panel_right_dark_en', target: 'emoji', theme: 'dark'),
   _Shot('more_panel_right_light_fa', target: 'more', locale: 'fa'),
   _Shot('color_panel_right_dark_en', target: 'color', theme: 'dark'),
   // Left edge and large text: the two regression-prone frame conditions.
   _Shot('capture_panel_left_light_en', edge: 'left'),
-  _Shot(
-    'capture_panel_right_light_en_scale15',
-    textScale: 1.5,
-  ),
+  _Shot('capture_panel_right_light_en_scale15', textScale: 1.5),
   // Desktop window at the three widths called out by the task.
   _Shot(
     'window_capture_1200_dark_fa',
@@ -193,11 +288,7 @@ const _matrix = <_Shot>[
   _Shot('preset_ocean_panel_dark_en', theme: 'dark', preset: 'ocean'),
 ];
 
-Future<PanelController> _boot(
-  WidgetTester t,
-  _Shot spec,
-  _Store store,
-) async {
+Future<PanelController> _boot(WidgetTester t, _Shot spec, _Store store) async {
   t.view.physicalSize = spec.size;
   t.view.devicePixelRatio = 1;
   addTearDown(t.view.reset);
@@ -216,25 +307,55 @@ Future<PanelController> _boot(
     useNative: false,
   );
   c.open();
-  await t.pumpWidget(RightPanelApp(controller: c, features: store.features));
+  if (spec.target == 'clip') {
+    c.clips = [
+      ClipEntry.text(
+        spec.locale == 'fa'
+            ? 'متن بلند فارسی برای بررسی فاصلهٔ دکمه‌های علاقه‌مندی و حذف در کلیپ‌بورد'
+            : 'A long clipboard item with favorite and delete controls beside the text',
+        time: DateTime.now(),
+      ),
+      ClipEntry.text('https://example.com/notes/windows', time: DateTime.now()),
+    ];
+  }
+  await t.pumpWidget(
+    RepaintBoundary(
+      key: const ValueKey('review-surface'),
+      child: RightPanelApp(controller: c, features: store.features),
+    ),
+  );
   await _frames(t);
   return c;
 }
 
 /// Navigates to [spec.target] in whichever mode is active and settles springs.
 Future<void> _go(WidgetTester t, PanelController c, _Shot spec) async {
-  final window = spec.mode == 'window';  switch (spec.target) {
+  final window = spec.mode == 'window';
+  switch (spec.target) {
     case 'timeline' || 'reader':
       window ? c.selectWindowSection('library') : c.openWidget('timeline');
-    case 'settings':
+    case 'settings' || 'appearance' || 'backup':
       window ? c.selectWindowSection('settings') : c.openWidget('settings');
     case 'more':
       window ? c.selectWindowSection('tools') : c.openWidget('more');
-    case 'emoji' || 'color' || 'note':
-      c.openWidget(spec.target);
+    case 'emoji' || 'color' || 'note' || 'palette' || 'clip':
+      c.openWidget(spec.target == 'palette' ? 'note' : spec.target);
   }
   await _frames(t, 90);
-  if (spec.target == 'timeline' || spec.target == 'reader') {
+  if (spec.target == 'appearance' || spec.target == 'backup') {
+    final l = AppLocalizations.of(t.element(find.byType(Scaffold)))!;
+    await t.tap(
+      find.text(
+        spec.target == 'appearance' ? l.settingsAppearance : l.settingsBackup,
+      ),
+    );
+    await t.pumpAndSettle();
+  }
+  if (spec.target == 'palette') {
+    await t.tap(find.byKey(const ValueKey('workspace-command')));
+    await t.pumpAndSettle();
+  }
+  if (window || spec.target == 'timeline' || spec.target == 'reader') {
     // The library view loads its first page from the store isolate.
     for (var i = 0; i < 4; i++) {
       await t.runAsync(() async {
@@ -266,7 +387,7 @@ void main() {
       debugDisableShadows = false;
       try {
         await expectLater(
-          find.byType(Scaffold),
+          find.byKey(const ValueKey('review-surface')),
           matchesGoldenFile('review_goldens/${spec.name}.png'),
         );
       } finally {

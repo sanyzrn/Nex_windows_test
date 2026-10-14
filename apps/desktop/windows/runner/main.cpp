@@ -22,10 +22,32 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
     CreateAndAttachConsole();
   }
 
-  // Only one copy runs at a time (same as the original).
+  auto command_line_arguments = GetCommandLineArguments();
+  const bool panel_probe = (command_line_arguments.size() == 4 &&
+                           command_line_arguments[0] == "--clipboard-smoke") ||
+                          (command_line_arguments.size() == 2 &&
+                          (command_line_arguments[0] == "--panel-smoke" ||
+                           command_line_arguments[0] == "--reminder-smoke"));
+  // The diagnostic runner uses isolated data and does not activate or replace
+  // an existing user instance. Normal launches keep the singleton contract.
+  const std::wstring mutex_name = panel_probe
+      ? L"Local\\NexPanelProbe-" + std::to_wstring(GetCurrentProcessId())
+      : L"Local\\NexDesktopSingleton";
   HANDLE mutex =
-      ::CreateMutexW(nullptr, TRUE, L"Local\\NexDesktopSingleton");
+      ::CreateMutexW(nullptr, TRUE, mutex_name.c_str());
   if (mutex != nullptr && ::GetLastError() == ERROR_ALREADY_EXISTS) {
+    if (command_line_arguments.size() == 2 && command_line_arguments[0] == "--open-note") {
+      const HWND existing = FindWindowW(L"RIGHT_PANEL_WIN32_WINDOW", L"Nex");
+      if (existing != nullptr) {
+        const auto& uri = command_line_arguments[1];
+        COPYDATASTRUCT data{0x4E45584E, static_cast<DWORD>(uri.size() + 1),
+                            const_cast<char*>(uri.c_str())};
+        DWORD_PTR ignored = 0;
+        SendMessageTimeoutW(existing, WM_COPYDATA, 0, reinterpret_cast<LPARAM>(&data),
+                            SMTO_ABORTIFHUNG, 1500, &ignored);
+      }
+      return EXIT_SUCCESS;
+    }
     if (wcsstr(GetCommandLineW(), L"--native-smoke") == nullptr) {
       const HWND existing = FindWindowW(L"RIGHT_PANEL_WIN32_WINDOW", L"Nex");
       if (existing != nullptr) {
@@ -46,8 +68,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
   ::SetCurrentProcessExplicitAppUserModelID(L"Nex.Desktop.App");
 
   flutter::DartProject project(L"data");
-
-  std::vector<std::string> command_line_arguments = GetCommandLineArguments();
 
   project.set_dart_entrypoint_arguments(std::move(command_line_arguments));
 

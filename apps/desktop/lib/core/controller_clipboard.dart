@@ -6,8 +6,6 @@ part of 'controller.dart';
 
 /// Clipboard history operations and the dock/More widget manager.
 mixin PanelClipboardOps on PanelStateBase {
-
-
   // ---- clipboard history ops ----
   @override
   void deliver(String text) {
@@ -26,38 +24,15 @@ mixin PanelClipboardOps on PanelStateBase {
   }
 
   void togglePinClip(ClipEntry c) {
-    if (c.isImage) {
-      c.pinned = !c.pinned;
-      if (c.pinned) {
-        storage.pinImage(c.image!);
-      } else {
-        storage.unpinImage(c.image!.id);
-      }
-    } else {
-      if (c.pinned) {
-        S.pins = S.pins.where((x) => x != c.text).toList();
-        c.pinned = false;
-      } else {
-        S.pins = [c.text!, ...S.pins].take(30).toList();
-        c.pinned = true;
-      }
-      save();
-    }
-    notifyListeners();
+    clipboard.togglePin(c);
+    S.pins = clipboard.pinnedTexts;
+    save();
   }
 
   void removeClip(ClipEntry c) {
-    if (c.isImage) {
-      if (c.pinned) storage.unpinImage(c.image!.id);
-      clips = clips.where((x) => x.image?.id != c.image!.id).toList();
-    } else {
-      if (c.pinned) {
-        S.pins = S.pins.where((x) => x != c.text).toList();
-        save();
-      }
-      clips = clips.where((x) => x.text != c.text).toList();
-    }
-    notifyListeners();
+    clipboard.remove(c);
+    S.pins = clipboard.pinnedTexts;
+    save();
   }
 
   void copyImage(ClipImage img) {

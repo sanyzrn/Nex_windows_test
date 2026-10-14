@@ -50,6 +50,9 @@ abstract class NativeHost {
 
   /// Restores (if minimized) and brings the window to the foreground.
   Future<void> focusWindow() async {}
+
+  /// Called after the new Flutter shell has laid out and painted.
+  Future<void> surfaceReady(String mode) async {}
   Future<bool> configureHotkey(String key) async => false;
   Future<ClipImage?> currentClipboardImage() async => null;
   Future<void> setLabels(Map<String, String> labels) async {}
@@ -120,11 +123,13 @@ class NativeEvents {
     required this.onAppIcon,
     this.onPlacement,
     this.onPickerState,
+    this.onOpenNote,
   });
 
   final void Function(String text) onClipText;
   final void Function(ClipImage img) onClipImage;
   final void Function(String id) onTray;
+  final void Function(String)? onOpenNote;
   final void Function() onBlur;
   final void Function(List<String> paths) onFilesDropped;
   final void Function(String? hex) onPickedColor;
@@ -153,6 +158,7 @@ class WinNativeHost extends NativeHost {
     _probePos = (x, y);
     return _channel.invokeMethod('probeCursor', {'x': x, 'y': y});
   }
+
   Future<bool> probeHotkey() async =>
       await _channel.invokeMethod<bool>('probeHotkey') ?? false;
   @override
@@ -230,6 +236,9 @@ class WinNativeHost extends NativeHost {
         break;
       case 'tray':
         events?.onTray(map['id'] as String? ?? '');
+        break;
+      case 'openNote':
+        events?.onOpenNote?.call(map['uri'] as String? ?? '');
         break;
       case 'blur':
         events?.onBlur();
@@ -375,6 +384,10 @@ class WinNativeHost extends NativeHost {
   }
 
   @override
+  Future<void> surfaceReady(String mode) =>
+      _channel.invokeMethod('surfaceReady', {'mode': mode});
+
+  @override
   Future<void> focusWindow() => _channel.invokeMethod('focusWindow');
 
   @override
@@ -426,7 +439,16 @@ class WinNativeHost extends NativeHost {
     return [];
   }
 
-  // ---- FFI: cursor + left button ----
+  Future<List<Map<String, dynamic>>> scheduledReminderDetails() async {
+    final list = await _channel.invokeMethod<List<dynamic>>(
+      'scheduledReminderDetails',
+    );
+    return (list ?? []).map((e) => (e as Map).cast<String, dynamic>()).toList();
+  }
+
+  Future<String?> reminderDiagnosticError() =>
+      _channel.invokeMethod<String>('reminderDiagnosticError');
+
   ffi.DynamicLibrary? _user32;
   int Function(ffi.Pointer<_Point>)? _getCursorPos;
   int Function(int)? _getAsyncKeyState;

@@ -27,6 +27,7 @@ class NexSettingsView extends StatefulWidget {
 
 abstract class _SettingsStateBase extends State<NexSettingsView> {
   String? recoveryKey;
+  int category = 0;
 
   // Card builders implemented in the part files of this library; declared
   // here so the base build can compose them.
@@ -39,6 +40,19 @@ abstract class _SettingsStateBase extends State<NexSettingsView> {
     final l = AppLocalizations.of(context)!;
     final f = NexScope.maybeOf(context);
     final scheme = Theme.of(context).colorScheme;
+    final cards = [
+      ..._buildDisplayAppearance(context),
+      ..._buildShortcutsBackup(context),
+      ..._buildToolsAbout(context),
+    ];
+    final names = [
+      l.settingsDisplay,
+      l.settingsAppearance,
+      l.settingsShortcuts,
+      l.settingsBackup,
+      l.settingsTools,
+      l.settingsAbout,
+    ];
 
     return Material(
       type: MaterialType.transparency,
@@ -54,9 +68,29 @@ abstract class _SettingsStateBase extends State<NexSettingsView> {
           children: [
             // No page title here: the flyout's panel header already names the
             // view (audit defect 5 - "Settings" used to appear twice).
-            ..._buildDisplayAppearance(context),
-            ..._buildShortcutsBackup(context),
-            ..._buildToolsAbout(context),
+            if (widget.windowLayout) ...[
+              NexWorkspaceIntro(
+                title: l.workspaceSettingsDescription,
+                description: l.modeDescription,
+                compact: true,
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  for (var i = 0; i < names.length; i++)
+                    ChoiceChip(
+                      label: Text(names[i]),
+                      selected: category == i,
+                      onSelected: (_) => setState(() => category = i),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              cards[category],
+            ] else
+              ...cards,
 
             if (f?.error != null)
               Padding(
@@ -100,11 +134,11 @@ class _SettingsCard extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: scheme.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: scheme.onSurface.withValues(alpha: 0.08)),
+        color: scheme.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: scheme.outlineVariant),
       ),
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(MediaQuery.sizeOf(context).width < 900 ? 16 : 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

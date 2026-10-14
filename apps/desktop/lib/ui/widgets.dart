@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -40,6 +41,11 @@ class LiquidScope extends InheritedNotifier<PanelController> {
 
   static LiquidPalette paletteOf(BuildContext context) => of(context).$1;
   static PanelController panelOf(BuildContext context) => of(context).$2;
+
+  /// Null when no shell is above (tests, embedders). Callers fall back to
+  /// defaults instead of requiring the full liquid scope.
+  static PanelController? maybePanelOf(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<LiquidScope>()?.notifier;
   static int dirOf(BuildContext context) => of(context).$3;
 }
 

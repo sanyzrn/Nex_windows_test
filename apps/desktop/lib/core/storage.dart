@@ -7,9 +7,14 @@ import '../core/models.dart';
 /// Shell preferences and pinned clipboard previews in NexDesktopShell.
 /// Domain notes are exclusively stored through nex_data.
 class Storage {
-  Storage();
+  Storage({Directory? directory}) : _directory = directory;
+  final Directory? _directory;
 
   Directory get dir {
+    if (_directory != null) {
+      _directory.createSync(recursive: true);
+      return _directory;
+    }
     final base =
         Platform.environment['APPDATA'] ?? Platform.environment['HOME'] ?? '.';
     final d = Directory('$base${Platform.pathSeparator}NexDesktopShell');

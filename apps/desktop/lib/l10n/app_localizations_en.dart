@@ -697,6 +697,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get utility139 => 'Lagos';
 
   @override
+  String get utility140 => 'Could not change keep awake';
+
+  @override
   String get dropFiles => 'Drop files or images to capture';
 
   @override
@@ -872,6 +875,80 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noNoteSelected => 'No note selected';
 
   @override
+  String get todayTitle => 'Today';
+
+  @override
+  String dueCount(int count) {
+    return '$count due';
+  }
+
+  @override
+  String overdueCount(int count) {
+    return '$count overdue';
+  }
+
+  @override
+  String get emptyLibraryTitle => 'Your library is empty';
+
+  @override
+  String get emptyLibraryHint =>
+      'Capture first, think later. Everything stays on this PC.';
+
+  @override
+  String get emptyLibraryWrite => 'Write the first note';
+
+  @override
+  String get emptyLibraryTools => 'Browse the tools';
+
+  @override
+  String get emptyLibraryShortcuts => 'Learn the shortcuts';
+
+  @override
+  String get settingsDensity => 'Card density';
+
+  @override
+  String get densityCompact => 'Compact';
+
+  @override
+  String get densityStandard => 'Standard';
+
+  @override
+  String get densityReadable => 'Readable';
+
+  @override
+  String get paletteOpen => 'Command palette';
+
+  @override
+  String get paletteHint => 'Search notes, jump anywhere, run actions (Ctrl+K)';
+
+  @override
+  String get paletteSearchHint => 'Search notes, screens and actions…';
+
+  @override
+  String get paletteNoResults => 'Nothing matches';
+
+  @override
+  String get paletteSectionNotes => 'Notes';
+
+  @override
+  String get paletteSectionGoTo => 'Go to';
+
+  @override
+  String get paletteSectionActions => 'Actions';
+
+  @override
+  String get paletteActionNewNote => 'New note';
+
+  @override
+  String get paletteActionToggleTheme => 'Toggle light / dark theme';
+
+  @override
+  String get paletteActionOpenTools => 'Open the tools';
+
+  @override
+  String get pasteLinkSaved => 'Link note created';
+
+  @override
   String get noNoteSelectedHint =>
       'Use ↑ / ↓ to navigate notes, or Ctrl+N to create';
 
@@ -970,4 +1047,119 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get libraryUnavailableHint =>
       'Open the library view from the dock, or restart Nex to load your notes.';
+
+  @override
+  String get workspaceLabel => 'YOUR SPACE';
+
+  @override
+  String get workspaceLocal => 'Private. On this device.';
+
+  @override
+  String get workspaceSearch => 'Find or jump to…';
+
+  @override
+  String get workspaceCaptureTitle => 'Room for your\nnext thought.';
+
+  @override
+  String get workspaceCaptureDescription =>
+      'A thought, a list, a little reminder. Start typing; Nex keeps it.';
+
+  @override
+  String get workspaceCaptureFooter => 'No save button. Just your thoughts.';
+
+  @override
+  String get workspaceToolsTitle => 'Small tools.\nLess friction.';
+
+  @override
+  String get workspaceToolsDescription =>
+      'The useful things, a little closer. Built for your desktop.';
+
+  @override
+  String get workspaceEssentials => 'Within reach';
+
+  @override
+  String get workspaceAllTools => 'Your toolbox';
+
+  @override
+  String get workspaceUtilityHint => 'Open this tool';
+
+  @override
+  String get workspaceClipboardHint => 'What you copied, ready to use.';
+
+  @override
+  String get workspaceAwakeHint => 'Keep your screen with you.';
+
+  @override
+  String get workspaceTimerHint => 'A little time to focus.';
+
+  @override
+  String get workspaceCalculatorHint => 'Work out the little things.';
+
+  @override
+  String get workspaceColorHint => 'Pick a colour from anywhere.';
+
+  @override
+  String get workspaceSettingsDescription => 'Make this space feel like yours.';
+
+  @override
+  String get workspaceReaderTitle => 'A place to return to.';
+
+  @override
+  String get workspaceReaderHint =>
+      'Pick a note on the side. Your words get the whole page.';
+
+  @override
+  String get workspaceToolsSearch => 'Find a tool…';
+
+  @override
+  String get workspaceBrand => 'Nex';
+
+  @override
+  String get reminderFutureRequired => 'Choose a time in the future.';
+
+  @override
+  String get reminderDeliveryFailed =>
+      'The time was saved, but Windows could not schedule the notification. Check Windows notification settings and try again.';
+
+  @override
+  String get reminderSaveFailed =>
+      'The reminder could not be saved. Please try again.';
+
+  @override
+  String get workspaceNotebook => 'Your notebook';
+
+  @override
+  String get workspaceRecent => 'Recent notes';
+
+  @override
+  String get workspacePinned => 'Pinned';
+
+  @override
+  String get workspaceViewAll => 'View all';
+
+  @override
+  String get workspaceStartHint =>
+      'Your next note starts here. Recent notes stay within reach.';
+
+  @override
+  String get workspaceNoRecent => 'Notes you capture will appear here.';
+
+  @override
+  String get workspaceNoPinned => 'Pin a note to keep it close.';
+
+  @override
+  String get workspaceTotal => 'Notes';
+
+  @override
+  String get workspaceMedia => 'Attachments';
+
+  @override
+  String get saving => 'Saving…';
+
+  @override
+  String get clipboardSaveFailed =>
+      'Clipboard history could not be saved. These changes are not yet safe after restart.';
+
+  @override
+  String get clipboardRetry => 'Retry saving';
 }

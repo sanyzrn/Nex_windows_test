@@ -97,12 +97,12 @@ class NoteMetadataLine extends StatelessWidget {
     final l = AppLocalizations.of(context)!;
     final fa = Localizations.localeOf(context).languageCode == 'fa';
     final style = Theme.of(context).textTheme.bodySmall!.copyWith(
-          color: Theme.of(context).colorScheme.onSurfaceVariant,
-          fontSize: 11.5,
-        );
+      color: Theme.of(context).colorScheme.onSurfaceVariant,
+      fontSize: 11.5,
+    );
     final muted = Theme.of(context).colorScheme.onSurfaceVariant;
     final time =
-        '${note.createdAt.hour.toString().padLeft(2, '0')}:${note.createdAt.minute.toString().padLeft(2, '0')}';
+        '${note.createdAt.toLocal().hour.toString().padLeft(2, '0')}:${note.createdAt.toLocal().minute.toString().padLeft(2, '0')}';
     final dot = Padding(
       padding: const EdgeInsets.symmetric(horizontal: 6),
       child: Text('•', style: TextStyle(color: muted, height: 1)),
@@ -114,7 +114,7 @@ class NoteMetadataLine extends StatelessWidget {
           Icon(Icons.schedule_rounded, size: 13, color: muted),
           const SizedBox(width: 4),
           Text(
-            nexDisplayDate(note.createdAt, solar: fa, persian: fa, time: true),
+            nexDisplayDate(note.createdAt, solar: fa, persian: fa),
             style: style,
           ),
         ],
@@ -170,18 +170,18 @@ class NoteActionBar extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final pinned = note.pinnedAt != null;
     final cells = <Widget>[
-      _ToolAction(
-        label: l.copy,
-        icon: Icons.copy_rounded,
-        onPressed: onCopy,
-      ),
+      _ToolAction(label: l.copy, icon: Icons.copy_rounded, onPressed: onCopy),
       _ToolAction(
         label: pinned ? l.unpin : l.pin,
         icon: pinned ? Icons.push_pin : Icons.push_pin_outlined,
         onPressed: onPin,
         accent: pinned ? scheme.primary : null,
       ),
-      _ToolAction(label: l.remind, icon: Icons.alarm_add_outlined, onPressed: onRemind),
+      _ToolAction(
+        label: l.remind,
+        icon: Icons.alarm_add_outlined,
+        onPressed: onRemind,
+      ),
       _ToolAction(
         label: l.delete,
         icon: Icons.delete_outline_rounded,
@@ -195,29 +195,16 @@ class NoteActionBar extends StatelessWidget {
           onPressed: onOpenMedia,
         ),
     ];
-    final rows = <Widget>[];
-    for (var i = 0; i < cells.length; i += 2) {
-      final second = i + 1 < cells.length
-          ? cells[i + 1]
-          : const Spacer();
-      rows.add(
-        Row(
-          children: [
-            Expanded(child: cells[i]),
-            const SizedBox(width: 8),
-            second,
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: [
+          for (var i = 0; i < cells.length; i++) ...[
+            if (i > 0) const SizedBox(width: 8),
+            cells[i],
           ],
-        ),
-      );
-    }
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        for (var i = 0; i < rows.length; i++) ...[
-          if (i > 0) const SizedBox(height: 8),
-          rows[i],
         ],
-      ],
+      ),
     );
   }
 }
@@ -257,7 +244,10 @@ class _ToolAction extends StatelessWidget {
               : (accent ?? scheme.outlineVariant),
         ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        textStyle: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600),
+        textStyle: Theme.of(context).textTheme.labelLarge?.copyWith(
+          fontSize: 12.5,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }

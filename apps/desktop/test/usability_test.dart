@@ -219,8 +219,8 @@ void main() {
         await t.pumpWidget(RightPanelApp(controller: c, features: f));
         c.anchorY = 660;
         await frames(t);
-        expect(t.getCenter(find.text('Add image')).dy, greaterThan(c.flyH));
-        await t.tap(find.text('Add image'), kind: PointerDeviceKind.mouse);
+        expect(t.getCenter(find.text('Add audio')).dy, greaterThan(c.flyH));
+        await t.tap(find.text('Add audio'), kind: PointerDeviceKind.mouse);
         await t.pump();
         expect(c.interacting, true);
         c.blur();

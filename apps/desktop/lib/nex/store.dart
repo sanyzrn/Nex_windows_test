@@ -4,6 +4,7 @@ import 'dart:isolate';
 import 'package:nex_core/nex_core.dart';
 import 'package:nex_data/nex_data.dart';
 import 'package:path/path.dart' as p;
+import 'reminder_policy.dart';
 
 /// One persistent database isolate; every command uses Nex's repositories.
 class DesktopStore {
@@ -15,6 +16,8 @@ class DesktopStore {
   final Map<int, Completer<dynamic>> _pending = {};
   int _sequence = 0;
   bool _closed = false;
+  final _reminderChanges = StreamController<void>.broadcast();
+  Stream<void> get reminderChanges => _reminderChanges.stream;
 
   static Future<DesktopStore> open(String root, String deviceId) async {
     final replies = ReceivePort();
@@ -59,13 +62,24 @@ class DesktopStore {
     final result = Completer<dynamic>();
     _pending[id] = result;
     _commands.send([id, command, args]);
-    return result.future.then((value) => value as T);
+    return result.future.then((value) {
+      if (const {
+        'remind',
+        'delete',
+        'restore',
+        'restoreBackup',
+      }.contains(command)) {
+        _reminderChanges.add(null);
+      }
+      return value as T;
+    });
   }
 
   Future<void> close() async {
     if (_closed) return;
     await call<void>('close'); // FIFO: commits all earlier captures first.
     _closed = true;
+    await _reminderChanges.close();
     _replies.close();
     _isolate.kill();
   }
@@ -224,6 +238,39 @@ class DesktopStore {
               case 'caption':
                 notes.setCaption(a['id'] as String, a['text'] as String);
                 result = null;
+              case 'workspace':
+                final totals = notes.db.select('''SELECT COUNT(*) AS total,
+                  SUM(CASE WHEN pinned_at IS NOT NULL THEN 1 ELSE 0 END) AS pinned,
+                  SUM(CASE WHEN media_uri IS NOT NULL THEN 1 ELSE 0 END) AS media
+                  FROM notes WHERE deleted_at IS NULL''').single;
+                List<Note> previews(
+                  String order,
+                  String filter,
+                  int limit,
+                ) => notes.db
+                    .select(
+                      'SELECT id FROM notes WHERE deleted_at IS NULL $filter ORDER BY $order LIMIT ?',
+                      [limit],
+                    )
+                    .map((row) => notes.getById(row['id'] as String))
+                    .whereType<Note>()
+                    .toList();
+                result = {
+                  'total': totals['total'] ?? 0,
+                  'pinned': totals['pinned'] ?? 0,
+                  'media': totals['media'] ?? 0,
+                  'recent': previews('created_at DESC', '', 6),
+                  'pins': previews(
+                    'pinned_at DESC',
+                    'AND pinned_at IS NOT NULL',
+                    3,
+                  ),
+                };
+              case 'reminderCandidates':
+                result = reminderCandidates(
+                  notes,
+                  a['now'] as DateTime? ?? DateTime.now(),
+                );
               case 'remind':
                 final repeatStr = a['repeat'] as String?;
                 final repeat = repeatStr != null
@@ -342,8 +389,9 @@ class DesktopStore {
                   if (key == null || key.trim().isEmpty) {
                     throw ArgumentError('Recovery key required');
                   }
-                  unpackStaging = Directory(p.join(root, '.unpack-${newUuidV7()}'))
-                    ..createSync(recursive: true);
+                  unpackStaging = Directory(
+                    p.join(root, '.unpack-${newUuidV7()}'),
+                  )..createSync(recursive: true);
                   final unpacked = FullBackup.unpack(
                     backupPath,
                     unpackStaging.path,

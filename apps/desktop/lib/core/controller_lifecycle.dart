@@ -48,7 +48,11 @@ mixin PanelLifecycle on PanelStateBase {
 
     ToolInfo.controllerApps = S.apps;
     if (preset == null) {
-      clips = _restorePinnedClips();
+      await clipboard.initialize(storage.dir, _restorePinnedClips());
+      S.pins = clipboard.pinnedTexts;
+      if (clipboard.recent.isNotEmpty) {
+        lastClip = clipboard.recent.first.text ?? '';
+      }
     }
 
     if (useNative) {
@@ -205,53 +209,6 @@ mixin PanelLifecycle on PanelStateBase {
     setPanel('more', fromMore: true);
   }
 
-  /// Switches between the desktop window (main) and edge panel (optional).
-  /// Persists the desktop window's frame so nothing is lost between modes.
-  @override
-  Future<void> setWindowMode(String mode) async {
-    if (mode != 'window' && mode != 'panel') return;
-    if (mode == S.windowMode) return;
-    final leavingWindow = S.windowMode == 'window';
-    if (leavingWindow) {
-      await _rememberWindowFrame();
-    }
-    S.windowMode = mode;
-    save();
-    if (mode == 'panel') {
-      // Return to the edge: borderless, topmost, hidden until revealed.
-      isOpen = false;
-      try {
-        await native.setWindowMode('panel');
-        final p = await native.applyPlacement(S.edge, S.monitor);
-        if (p != null) placement = Placement.fromMap(p);
-      } catch (_) {}
-    } else {
-      windowTool.value = null;
-      windowSection.value = 'capture';
-      try {
-        await native.setWindowMode(
-          'window',
-          bounds: S.windowBounds,
-          maximized: S.windowMaximized,
-          show: true,
-        );
-      } catch (_) {}
-    }
-    notifyListeners();
-  }
-
-  Future<void> _rememberWindowFrame() async {
-    try {
-      final frame = await native.windowFrame();
-      if (frame != null &&
-          (frame['w'] as num?) != null &&
-          (frame['h'] as num?) != null) {
-        S.windowBounds = frame;
-        S.windowMaximized = frame['maximized'] == true;
-      }
-    } catch (_) {}
-  }
-
   @override
   void appAdded({required String path, String? icon}) {
     if (path.trim().isEmpty) return;
@@ -309,21 +266,13 @@ mixin PanelLifecycle on PanelStateBase {
   void addClip(String text) {
     if (text.trim().isEmpty) return;
     lastClip = text;
-    clips = [
-      ClipEntry.text(text, time: DateTime.now()),
-      ...clips.where((c) => c.text != text || c.isImage),
-    ].take(50).toList();
-    notifyListeners();
+    clipboard.add(ClipEntry.text(text, time: DateTime.now()));
   }
 
   @override
-  @override
   void addClipImage(ClipImage img) {
-    clips = [
-      ClipEntry.image(img, time: DateTime.now()),
-      ...clips.where((c) => c.image?.id != img.id),
-    ].take(50).toList();
-    notifyListeners();
+    lastClip = '';
+    clipboard.add(ClipEntry.image(img, time: DateTime.now()));
   }
 
   @override
@@ -474,7 +423,11 @@ mixin PanelLifecycle on PanelStateBase {
     if (isWindowMode) await _rememberWindowFrame();
     if (isWindowMode) save();
     try {
+      await clipboard.flushed;
+      if (clipboard.error != null) await clipboard.retry();
+      if (clipboard.error != null) throw StateError('Clipboard not persisted');
       await beforeShutdown?.call();
+      await clipboard.close();
     } catch (_) {
       _quitQueued = false;
       return;

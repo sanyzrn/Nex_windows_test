@@ -10,6 +10,7 @@
 /// library_filter_widgets.dart.
 library;
 
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:nex_core/nex_core.dart';
@@ -17,10 +18,12 @@ import 'package:nex_ui/nex_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../l10n/app_localizations.dart';
+import '../ui/widgets.dart';
 import 'features_state.dart';
 import 'note_copy.dart';
 import 'note_detail_view.dart';
 import 'reminder_picker.dart';
+import 'reminder_policy.dart';
 import 'shortcuts_dialog.dart';
 import 'store.dart';
 
@@ -28,6 +31,7 @@ part 'library_actions.dart';
 part 'library_filter_widgets.dart';
 part 'library_keys.dart';
 part 'library_list_pane.dart';
+part 'library_workspace.dart';
 
 class NexLibraryView extends StatefulWidget {
   const NexLibraryView({super.key});
@@ -61,8 +65,10 @@ abstract class _LibraryStateBase extends State<NexLibraryView> {
   Note? selectedNote;
   VoidCallback? _detailRelease;
   int generation = 0;
+  Timer? _searchDebounce;
   int _libraryRevision = -1;
   double _paneWidth = 380.0;
+  double _layoutWidth = 0;
   String? _lastDeletedId;
 
   DesktopStore get store => NexScope.of(context).store;
@@ -96,14 +102,35 @@ abstract class _LibraryStateBase extends State<NexLibraryView> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final revision = NexScope.of(context).libraryRevision;
+    final features = NexScope.of(context);
+    final requested = features.takeRequestedNote();
+    if (requested != null) {
+      _detailRelease?.call();
+      _detailRelease = NexPanelScope.maybeOf(context)?.holdOpen();
+      selectedNote = requested;
+      _selectedIds.clear();
+    }
+    final revision = features.libraryRevision;
     if (_libraryRevision != revision) {
       _libraryRevision = revision;
       load();
     }
   }
 
+  void _queryChanged(String value) {
+    _searchDebounce?.cancel();
+    // Invalidate a request immediately, even while the next query waits.
+    generation++;
+    setState(() {
+      loading = true;
+      failure = null;
+    });
+    _searchDebounce = Timer(const Duration(milliseconds: 150), () => load());
+  }
+
   Future<void> load({bool append = false}) async {
+    _searchDebounce?.cancel();
+    final database = store;
     final token = ++generation;
     setState(() {
       loading = true;
@@ -111,12 +138,12 @@ abstract class _LibraryStateBase extends State<NexLibraryView> {
     });
     try {
       final rows = trash
-          ? await store.call<List<Note>>('trash')
+          ? await database.call<List<Note>>('trash')
           : query.text.isNotEmpty ||
                 type != null ||
                 tag != null ||
                 thread != null
-          ? await store.call<List<Note>>('search', {
+          ? await database.call<List<Note>>('search', {
               'thread': thread,
               'filters': SearchFilters(
                 query: query.text,
@@ -124,12 +151,22 @@ abstract class _LibraryStateBase extends State<NexLibraryView> {
                 tagIds: tag == null ? [] : [tag!],
               ),
             })
-          : await store.call<List<Note>>('timeline', {
+          : await database.call<List<Note>>('timeline', {
               'offset': append ? notes.length : 0,
             });
-      final allTags = await store.call<List<Tag>>('tags');
-      final allThreads = await store.call<List<NoteThread>>('threads');
       if (!mounted || token != generation) return;
+      final allTags = await database.call<List<Tag>>('tags');
+      if (!mounted || token != generation) return;
+      final allThreads = await database.call<List<NoteThread>>('threads');
+      if (!mounted || token != generation) return;
+      final outside = selectedNote;
+      if (!append && outside != null && !rows.any((n) => n.id == outside.id)) {
+        final current = await database.call<Note?>('get', {'id': outside.id});
+        if (!mounted || token != generation) return;
+        if (selectedNote?.id == outside.id) {
+          selectedNote = current?.deletedAt == null ? current : null;
+        }
+      }
       setState(() {
         notes = append ? [...notes, ...rows] : rows;
         tags = allTags;
@@ -146,7 +183,19 @@ abstract class _LibraryStateBase extends State<NexLibraryView> {
           final idx = notes.indexWhere((n) => n.id == selectedNote!.id);
           if (idx >= 0) {
             selectedNote = notes[idx];
+          } else if (!append &&
+              (query.text.isNotEmpty ||
+                  type != null ||
+                  tag != null ||
+                  thread != null ||
+                  trash)) {
+            _detailRelease?.call();
+            _detailRelease = null;
+            selectedNote = null;
           }
+        }
+        if (selectedNote == null && _layoutWidth >= 900 && notes.isNotEmpty) {
+          selectedNote = notes.first;
         }
       });
     } catch (e) {
@@ -161,6 +210,7 @@ abstract class _LibraryStateBase extends State<NexLibraryView> {
 
   @override
   void dispose() {
+    _searchDebounce?.cancel();
     _detailRelease?.call();
     generation++;
     query.dispose();
@@ -175,134 +225,102 @@ abstract class _LibraryStateBase extends State<NexLibraryView> {
     final l = AppLocalizations.of(context)!;
     final fa = Localizations.localeOf(context).languageCode == 'fa';
 
-    return Focus(
-      focusNode: _libraryFocusNode,
-      autofocus: true,
-      onKeyEvent: _handleKeyEvent,
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final isTwoPane = constraints.maxWidth >= 900.0;
-          final height = constraints.maxHeight.isFinite
-              ? constraints.maxHeight
-              : 530.0;
+    // Card density (IDEAS.md): the user's compact/standard/readable choice
+    // from Settings feeds every NoteCard below through the nex_ui scope.
+    // No scope above (tests, embeds) keeps the standard density.
+    final c = LiquidScope.maybePanelOf(context);
+    return NexCardDensityScope(
+      density: NexCardDensity.fromWire(c?.S.cardDensity),
+      child: Focus(
+        focusNode: _libraryFocusNode,
+        autofocus: true,
+        onKeyEvent: _handleKeyEvent,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            _layoutWidth = constraints.maxWidth;
+            final isTwoPane = constraints.maxWidth >= 900.0;
+            final height = constraints.maxHeight.isFinite
+                ? constraints.maxHeight
+                : 530.0;
 
-          if (!isTwoPane) {
-            // Single-pane mode: if note selected, show detail view; otherwise list
-            if (selectedNote != null) {
+            if (!isTwoPane) {
+              // Single-pane mode: if note selected, show detail view; otherwise list
+              if (selectedNote != null) {
+                return SizedBox(
+                  height: height,
+                  child: NexNoteDetail(
+                    note: selectedNote!,
+                    onClose: () {
+                      _detailRelease?.call();
+                      _detailRelease = null;
+                      setState(() => selectedNote = null);
+                      load();
+                    },
+                  ),
+                );
+              }
               return SizedBox(
                 height: height,
-                child: NexNoteDetail(
-                  note: selectedNote!,
-                  onClose: () {
-                    _detailRelease?.call();
-                    _detailRelease = null;
-                    setState(() => selectedNote = null);
-                    load();
-                  },
-                ),
+                child: _buildListPane(context, l, fa),
               );
             }
+
+            // Two-pane mode: list pane on one side, detail pane on the other
+            final clampedWidth = _paneWidth.clamp(
+              280.0,
+              constraints.maxWidth - 360.0,
+            );
+
             return SizedBox(
               height: height,
-              child: _buildListPane(context, l, fa),
-            );
-          }
-
-          // Two-pane mode: list pane on one side, detail pane on the other
-          final clampedWidth = _paneWidth.clamp(
-            280.0,
-            constraints.maxWidth - 360.0,
-          );
-
-          return SizedBox(
-            height: height,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                SizedBox(
-                  width: clampedWidth,
-                  child: _buildListPane(context, l, fa),
-                ),
-                // Draggable vertical divider
-                MouseRegion(
-                  cursor: SystemMouseCursors.resizeColumn,
-                  child: GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onHorizontalDragUpdate: (details) {
-                      final isRtl =
-                          Directionality.of(context) == TextDirection.rtl;
-                      final delta = isRtl
-                          ? -details.delta.dx
-                          : details.delta.dx;
-                      final newWidth = (_paneWidth + delta).clamp(
-                        280.0,
-                        constraints.maxWidth - 360.0,
-                      );
-                      setState(() => _paneWidth = newWidth);
-                      _persistPaneWidth(newWidth);
-                    },
-                    child: const _SplitterHandle(),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  SizedBox(
+                    width: clampedWidth,
+                    child: _buildListPane(context, l, fa),
                   ),
-                ),
-                // Right pane: reader or editor
-                Expanded(
-                  child: selectedNote != null
-                      ? NexNoteDetail(
-                          key: ValueKey(selectedNote!.id),
-                          note: selectedNote!,
-                          onClose: () {
-                            _detailRelease?.call();
-                            _detailRelease = null;
-                            setState(() => selectedNote = null);
-                            load();
-                          },
-                        )
-                      : Center(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(22),
-                                decoration: BoxDecoration(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .surfaceContainerHighest
-                                      .withValues(alpha: 0.45),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Icon(
-                                  Icons.article_outlined,
-                                  size: 48,
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.primary.withValues(alpha: 0.7),
-                                ),
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                l.noNoteSelected,
-                                style: Theme.of(context).textTheme.titleMedium
-                                    ?.copyWith(fontWeight: FontWeight.w600),
-                              ),
-                              const SizedBox(height: 6),
-                              Text(
-                                l.noNoteSelectedHint,
-                                textAlign: TextAlign.center,
-                                style: Theme.of(context).textTheme.bodySmall
-                                    ?.copyWith(
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.onSurfaceVariant,
-                                    ),
-                              ),
-                            ],
-                          ),
-                        ),
-                ),
-              ],
-            ),
-          );
-        },
+                  // Draggable vertical divider
+                  MouseRegion(
+                    cursor: SystemMouseCursors.resizeColumn,
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onHorizontalDragUpdate: (details) {
+                        final isRtl =
+                            Directionality.of(context) == TextDirection.rtl;
+                        final delta = isRtl
+                            ? -details.delta.dx
+                            : details.delta.dx;
+                        final newWidth = (_paneWidth + delta).clamp(
+                          280.0,
+                          constraints.maxWidth - 360.0,
+                        );
+                        setState(() => _paneWidth = newWidth);
+                        _persistPaneWidth(newWidth);
+                      },
+                      child: const _SplitterHandle(),
+                    ),
+                  ),
+                  // Right pane: reader or editor
+                  Expanded(
+                    child: selectedNote != null
+                        ? NexNoteDetail(
+                            key: ValueKey(selectedNote!.id),
+                            note: selectedNote!,
+                            onClose: () {
+                              _detailRelease?.call();
+                              _detailRelease = null;
+                              setState(() => selectedNote = null);
+                              load();
+                            },
+                          )
+                        : const _LibraryReaderEmpty(),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }
@@ -311,4 +329,4 @@ abstract class _LibraryStateBase extends State<NexLibraryView> {
 /// The composed state the library renders. Same library, so the mixins and
 /// this class share every private member.
 class _NexLibraryViewState = _LibraryStateBase
-    with _LibraryActions, _LibraryKeys, _LibraryListPane;
+    with _LibraryActions, _LibraryKeys, _LibraryWorkspace, _LibraryListPane;

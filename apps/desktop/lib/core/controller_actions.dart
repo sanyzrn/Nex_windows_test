@@ -6,9 +6,6 @@ part of 'controller.dart';
 
 /// The mixin contract... fields belong to [PanelBase]; see controller.dart.
 mixin PanelActions on PanelStateBase {
-
-
-
   @override
   void beginDragCandidate(String id, Offset position) {
     _dragCandidate = DragCandidate(id, position);
@@ -117,7 +114,7 @@ mixin PanelActions on PanelStateBase {
     }
     if (_dragMoved) {
       // clicks that happen right after a drag are swallowed
-      Future.delayed(const Duration(milliseconds: 60), () {
+      _later(const Duration(milliseconds: 60), () {
         _dragMoved = false;
       });
     }
@@ -215,7 +212,7 @@ mixin PanelActions on PanelStateBase {
         unawaited(native.screenshot().catchError((_) {}));
         break;
       case 'awake':
-        toggleAwake();
+        unawaited(toggleAwake());
         break;
       case 'pinwin':
         native
@@ -258,10 +255,21 @@ mixin PanelActions on PanelStateBase {
     }
   }
 
-  void toggleAwake() {
-    awake = !awake;
-    unawaited(native.keepAwake(awake).catchError((_) {}));
-    toast(awake ? '☀ PC stays awake' : 'Sleep allowed again');
+  Future<void> toggleAwake() async {
+    if (awakeBusy || _disposed) return;
+    awakeBusy = true;
     notifyListeners();
+    final next = !awake;
+    try {
+      await native.keepAwake(next);
+      if (_disposed) return;
+      awake = next;
+      toast(awake ? '☀ PC stays awake' : 'Sleep allowed again');
+    } catch (_) {
+      if (!_disposed) toast('Could not change keep awake');
+    } finally {
+      awakeBusy = false;
+      if (!_disposed) notifyListeners();
+    }
   }
 }

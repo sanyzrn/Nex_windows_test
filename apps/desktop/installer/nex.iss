@@ -49,6 +49,11 @@ Name: "{userdesktop}\Nex"; Filename: "{app}\nex_desktop.exe"; WorkingDir: "{app}
 [Run]
 Filename: "{app}\nex_desktop.exe"; WorkingDir: "{app}"; Description: "{cm:LaunchNex}"; Flags: nowait postinstall skipifsilent
 
+[Registry]
+Root: HKCU; Subkey: "Software\Classes\nex-win"; ValueType: string; ValueData: "URL:Nex note"; Flags: uninsdeletekey
+Root: HKCU; Subkey: "Software\Classes\nex-win"; ValueType: string; ValueName: "URL Protocol"; ValueData: ""
+Root: HKCU; Subkey: "Software\Classes\nex-win\shell\open\command"; ValueType: string; ValueData: """{app}\nex_desktop.exe"" --open-note ""%1"""
+
 [UninstallDelete]
 Type: files; Name: "{app}\install-language.txt"
 

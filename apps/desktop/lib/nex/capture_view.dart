@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:nex_ui/nex_ui.dart';
+import 'package:nex_core/nex_core.dart' show nexDigits;
 
 import '../core/controller.dart';
 import '../l10n/app_localizations.dart';
@@ -18,13 +19,19 @@ import 'features_state.dart';
 part 'capture_wide.dart';
 
 abstract class CaptureViewBase extends StatelessWidget {
-  const CaptureViewBase({super.key, this.pickFiles, this.compact = true});
+  const CaptureViewBase({
+    super.key,
+    this.pickFiles,
+    this.compact = true,
+    this.embedded = false,
+  });
 
   final Future<List<XFile>> Function(List<XTypeGroup>)? pickFiles;
 
   /// Compact layout fits the 360px edge flyout; the wide layout fills the
   /// desktop window's content area with a proper editor.
   final bool compact;
+  final bool embedded;
 
   /// Desktop window layout builder; implemented in capture_wide.dart.
   Widget _buildWide(
@@ -65,15 +72,21 @@ abstract class CaptureViewBase extends StatelessWidget {
         ?.controller;
     if (!compact) return _buildWide(context, f, l, c);
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Row(
             children: [
+              Icon(
+                Icons.check_circle_outline,
+                size: 14,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+              const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  l.savedLocally,
+                  f.saving ? l.saving : l.savedLocally,
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
               ),
@@ -89,31 +102,8 @@ abstract class CaptureViewBase extends StatelessWidget {
               const SingleActivator(
                 LogicalKeyboardKey.keyV,
                 control: true,
-              ): () async {
-                final text = await Clipboard.getData(Clipboard.kTextPlain);
-                if (text?.text?.isNotEmpty == true) {
-                  final selection = f.composer.selection;
-                  final value = f.composer.text;
-                  final start = selection.isValid
-                      ? selection.start
-                      : value.length;
-                  final end = selection.isValid ? selection.end : value.length;
-                  f.composer.value = TextEditingValue(
-                    text: value.replaceRange(start, end, text!.text!),
-                    selection: TextSelection.collapsed(
-                      offset: start + text.text!.length,
-                    ),
-                  );
-                  f.write(f.composer.text);
-                } else if (c != null) {
-                  await f.guard(() async {
-                    final image = await c.native.currentClipboardImage();
-                    if (image != null) {
-                      await f.pasteImage(image, rethrowError: true);
-                    }
-                  });
-                }
-              },
+              ): () =>
+                  unawaited(_pasteIntoComposer(context, f, c)),
             },
             child: Focus(
               onFocusChange: (focused) =>
@@ -123,12 +113,19 @@ abstract class CaptureViewBase extends StatelessWidget {
                 controller: f.composer,
                 focusNode: f.focus,
                 autofocus: true,
-                minLines: 4,
-                maxLines: 8,
+                minLines: 5,
+                maxLines: 9,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyLarge?.copyWith(fontSize: 18, height: 1.65),
                 textDirection: nexDirectionOf(f.composer.text),
                 decoration: InputDecoration(
                   hintText: l.captureHint,
                   filled: true,
+                  fillColor: Theme.of(
+                    context,
+                  ).colorScheme.surfaceContainerLowest,
+                  contentPadding: const EdgeInsets.all(20),
                 ),
                 onChanged: f.write,
               ),
@@ -148,86 +145,7 @@ abstract class CaptureViewBase extends StatelessWidget {
               Text(l.checklist),
             ],
           ),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              _CaptureAction(
-                label: l.pasteText,
-                onPressed: () async {
-                  final clip = await Clipboard.getData(Clipboard.kTextPlain);
-                  if (clip?.text?.isNotEmpty == true) {
-                    await f.fresh();
-                    f.composer.text = clip!.text!;
-                    f.write(clip.text!);
-                  }
-                },
-                icon: Icons.content_paste_rounded,
-              ),
-              _CaptureAction(
-                label: l.addImage,
-                onPressed: f.importing
-                    ? null
-                    : () => _choose(context, f, [
-                        XTypeGroup(
-                          label: l.photo,
-                          extensions: const [
-                            'png',
-                            'jpg',
-                            'jpeg',
-                            'webp',
-                            'gif',
-                            'bmp',
-                          ],
-                        ),
-                      ]),
-                icon: Icons.add_photo_alternate_outlined,
-              ),
-              _CaptureAction(
-                label: l.attach,
-                onPressed: f.importing ? null : () => _choose(context, f),
-                icon: Icons.attach_file_rounded,
-              ),
-              _CaptureAction(
-                label: l.addAudio,
-                onPressed: f.importing
-                    ? null
-                    : () => _choose(context, f, [
-                        XTypeGroup(
-                          label: l.voice,
-                          extensions: const [
-                            'wav',
-                            'mp3',
-                            'm4a',
-                            'aac',
-                            'ogg',
-                            'opus',
-                            'flac',
-                            'wma',
-                          ],
-                        ),
-                      ]),
-                icon: Icons.audio_file_outlined,
-              ),
-              _CaptureAction(
-                label: f.recordingAt == null ? l.record : l.stop,
-                onPressed: f.recordingBusy ? null : () => f.record(c),
-                icon: f.recordingAt == null
-                    ? Icons.mic_none_rounded
-                    : Icons.stop_circle_outlined,
-              ),
-              if (c != null)
-                _CaptureAction(
-                  label: l.pastePhoto,
-                  onPressed: () => f.guard(() async {
-                    final image = await c.native.currentClipboardImage();
-                    if (image == null) throw StateError(l.noClipboardImage);
-                    await f.pasteImage(image, rethrowError: true);
-                  }),
-                  icon: Icons.content_paste_go_rounded,
-                ),
-            ],
-          ),
+          _actions(context, f, l, c),
           if (f.importing || f.recordingBusy)
             const Padding(
               padding: EdgeInsets.only(top: 12),
@@ -257,27 +175,136 @@ abstract class CaptureViewBase extends StatelessWidget {
     );
   }
 
-  Future<void> _paste(NexFeatures f, PanelController? c) async {
-    final text = await Clipboard.getData(Clipboard.kTextPlain);
-    if (text?.text?.isNotEmpty == true) {
-      final selection = f.composer.selection;
-      final value = f.composer.text;
-      final start = selection.isValid ? selection.start : value.length;
-      final end = selection.isValid ? selection.end : value.length;
-      f.composer.value = TextEditingValue(
-        text: value.replaceRange(start, end, text!.text!),
-        selection: TextSelection.collapsed(offset: start + text.text!.length),
-      );
-      f.write(f.composer.text);
-    } else if (c != null) {
-      await f.guard(() async {
-        final image = await c.native.currentClipboardImage();
-        if (image != null) {
-          await f.pasteImage(image, rethrowError: true);
-        }
-      });
-    }
+  Widget _actions(
+    BuildContext context,
+    NexFeatures f,
+    AppLocalizations l,
+    PanelController? c,
+  ) {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        _CaptureAction(
+          label: l.pasteText,
+          onPressed: () => _pasteText(f),
+          icon: Icons.content_paste_rounded,
+        ),
+        _CaptureAction(
+          label: l.addImage,
+          onPressed: f.importing
+              ? null
+              : () => _choose(context, f, [
+                  XTypeGroup(
+                    label: l.photo,
+                    extensions: const [
+                      'png',
+                      'jpg',
+                      'jpeg',
+                      'webp',
+                      'gif',
+                      'bmp',
+                    ],
+                  ),
+                ]),
+          icon: Icons.add_photo_alternate_outlined,
+        ),
+        _CaptureAction(
+          label: l.attach,
+          onPressed: f.importing ? null : () => _choose(context, f),
+          icon: Icons.attach_file_rounded,
+        ),
+        _CaptureAction(
+          label: l.addAudio,
+          onPressed: f.importing
+              ? null
+              : () => _choose(context, f, [
+                  XTypeGroup(
+                    label: l.voice,
+                    extensions: const [
+                      'wav',
+                      'mp3',
+                      'm4a',
+                      'aac',
+                      'ogg',
+                      'opus',
+                      'flac',
+                      'wma',
+                    ],
+                  ),
+                ]),
+          icon: Icons.audio_file_outlined,
+        ),
+        _CaptureAction(
+          label: f.recordingAt == null ? l.record : l.stop,
+          onPressed: f.recordingBusy ? null : () => f.record(c),
+          icon: f.recordingAt == null
+              ? Icons.mic_none_rounded
+              : Icons.stop_circle_outlined,
+        ),
+        if (c != null)
+          _CaptureAction(
+            label: l.pastePhoto,
+            onPressed: () => f.guard(() async {
+              final image = await c.native.currentClipboardImage();
+              if (image == null) throw StateError(l.noClipboardImage);
+              await f.pasteImage(image, rethrowError: true);
+            }),
+            icon: Icons.content_paste_go_rounded,
+          ),
+      ],
+    );
   }
+
+  /// A bare URL on the clipboard (no whitespace around it).
+  static final _bareUrl = RegExp(r'^https?://\S+$', caseSensitive: false);
+
+  /// Ctrl+V edits the current note in both layouts. The separate Paste text
+  /// action below deliberately starts a new capture.
+  Future<void> _pasteIntoComposer(
+    BuildContext context,
+    NexFeatures f,
+    PanelController? c,
+  ) {
+    final session = f.session;
+    return f.guard(() async {
+      final clip = await Clipboard.getData(Clipboard.kTextPlain);
+      if (!context.mounted || !identical(session, f.session)) return;
+      final text = clip?.text;
+      if (text != null && text.isNotEmpty) {
+        final selection = f.composer.selection;
+        final value = f.composer.text;
+        final start = selection.isValid ? selection.start : value.length;
+        final end = selection.isValid ? selection.end : value.length;
+        f.composer.value = TextEditingValue(
+          text: value.replaceRange(start, end, text),
+          selection: TextSelection.collapsed(offset: start + text.length),
+        );
+        await session.write(f.composer.text, checklist: f.checklist);
+      } else if (c != null) {
+        final image = await c.native.currentClipboardImage();
+        if (!context.mounted || !identical(session, f.session)) return;
+        if (image != null) await f.pasteImage(image, rethrowError: true);
+      }
+    });
+  }
+
+  /// Paste text (IDEAS.md, paste-to-note intelligence): a bare URL becomes
+  /// a link note immediately instead of parking the URL in the composer —
+  /// the store's capture path detects URLs, and the page preview is fetched
+  /// later, off the capture path. Any other text lands in the composer.
+  Future<void> _pasteText(NexFeatures f) => f.guard(() async {
+    final clip = await Clipboard.getData(Clipboard.kTextPlain);
+    if (clip?.text?.isNotEmpty != true) return;
+    final trimmed = clip!.text!.trim();
+    await f.fresh();
+    if (_bareUrl.hasMatch(trimmed)) {
+      f.write(trimmed);
+      return;
+    }
+    f.composer.text = clip.text!;
+    f.write(clip.text!);
+  });
 }
 
 /// The composed capture view. Same library, so the mixin and this class

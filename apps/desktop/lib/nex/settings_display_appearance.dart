@@ -24,6 +24,9 @@ mixin _SettingsDisplayAppearance on _SettingsStateBase {
             title: l.interfaceMode,
             subtitle: l.modeDescription,
             control: SegmentedButton<String>(
+              direction: MediaQuery.textScalerOf(context).scale(1) > 1.4
+                  ? Axis.vertical
+                  : Axis.horizontal,
               segments: [
                 ButtonSegment(
                   value: 'window',
@@ -46,6 +49,9 @@ mixin _SettingsDisplayAppearance on _SettingsStateBase {
               title: l.edge,
               subtitle: c.isWindowMode ? l.edgePanelOnly : null,
               control: SegmentedButton<String>(
+                direction: MediaQuery.textScalerOf(context).scale(1) > 1.4
+                    ? Axis.vertical
+                    : Axis.horizontal,
                 segments: [
                   ButtonSegment(value: 'left', label: Text(l.left)),
                   ButtonSegment(value: 'right', label: Text(l.right)),
@@ -101,6 +107,9 @@ mixin _SettingsDisplayAppearance on _SettingsStateBase {
           _SettingRow(
             title: l.colorMode,
             control: SegmentedButton<String>(
+              direction: MediaQuery.textScalerOf(context).scale(1) > 1.4
+                  ? Axis.vertical
+                  : Axis.horizontal,
               segments: [
                 ButtonSegment(
                   value: 'light',
@@ -116,6 +125,34 @@ mixin _SettingsDisplayAppearance on _SettingsStateBase {
               selected: {c.palette.isLight ? 'light' : 'dark'},
               onSelectionChanged: (v) {
                 c.S.theme = v.first;
+                c.save();
+                c.refresh();
+              },
+            ),
+          ),
+          const Divider(height: 1),
+          // Card density (IDEAS.md): compact / standard / readable, feeding
+          // the NexCardDensityScope around the library.
+          _SettingRow(
+            title: l.settingsDensity,
+            control: SegmentedButton<String>(
+              direction: MediaQuery.textScalerOf(context).scale(1) > 1.4
+                  ? Axis.vertical
+                  : Axis.horizontal,
+              segments: [
+                ButtonSegment(value: 'compact', label: Text(l.densityCompact)),
+                ButtonSegment(
+                  value: 'standard',
+                  label: Text(l.densityStandard),
+                ),
+                ButtonSegment(
+                  value: 'readable',
+                  label: Text(l.densityReadable),
+                ),
+              ],
+              selected: {c.S.cardDensity},
+              onSelectionChanged: (v) {
+                c.S.cardDensity = v.first;
                 c.save();
                 c.refresh();
               },

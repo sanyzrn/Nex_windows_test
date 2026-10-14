@@ -25,6 +25,7 @@
 #define WM_APP_QUIT (WM_APP + 3)
 #define WM_APP_PLACEMENT (WM_APP + 4)
 #define WM_APP_SHOW (WM_APP + 5)
+#define WM_APP_SURFACE_FRAME (WM_APP + 6)
 
 // Tray menu command ids.
 #define IDM_TRAY_OPEN 40001
@@ -68,12 +69,14 @@ class NativeBridge {
 
   /// Reveal a deferred window-mode launch after the first Flutter frame.
   void OnFirstFrame();
+  void SurfaceReady(const std::string& mode);
 
  private:
   void PostEvent(const std::string& method, flutter::EncodableValue args);
   void DrainEvents();
 
   void SetPassthrough(bool on);
+  void RequestSurfaceFrame();
   void PasteIntoPrevious(const std::string& text);
   void PressKey(const std::string& name);
   std::string PinWindow();
@@ -111,12 +114,17 @@ class NativeBridge {
   std::vector<Worker> workers_;
 
   HWND window_;
+  flutter::FlutterViewController* controller_;
   flutter::MethodChannel<flutter::EncodableValue> channel_;
 
   HWND previous_foreground_ = nullptr;
   bool passthrough_ = false;
   bool window_mode_ = false;
   bool first_frame_done_ = false;
+  bool surface_ready_ = false;
+  uint64_t surface_generation_ = 0;
+  uint64_t surface_requested_generation_ = 0;
+  bool frame_callback_pending_ = false;
   bool pending_show_ = false;
   bool pending_show_maximized_ = false;
   bool tray_added_ = false;

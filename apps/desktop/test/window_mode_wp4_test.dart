@@ -39,11 +39,7 @@ void main() {
           child: NexScope(
             features: features,
             child: const Scaffold(
-              body: SizedBox(
-                width: 800,
-                height: 600,
-                child: NexLibraryView(),
-              ),
+              body: SizedBox(width: 800, height: 600, child: NexLibraryView()),
             ),
           ),
         ),
@@ -92,11 +88,7 @@ void main() {
           child: NexScope(
             features: features,
             child: const Scaffold(
-              body: SizedBox(
-                width: 1200,
-                height: 700,
-                child: NexLibraryView(),
-              ),
+              body: SizedBox(width: 1200, height: 700, child: NexLibraryView()),
             ),
           ),
         ),
@@ -108,9 +100,17 @@ void main() {
     });
     await tester.pump(const Duration(milliseconds: 100));
 
-    // Two-pane: list on one side, empty placeholder or reader on other side
-    expect(find.byIcon(Icons.article_outlined), findsOneWidget); // Empty state placeholder
-    expect(find.text('No note selected'), findsOneWidget);
+    for (var i = 0; i < 4; i++) {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 75)),
+      );
+      await tester.pump();
+    }
+    expect(find.byType(NexNoteDetail), findsOneWidget);
+    expect(find.text('Two-pane note test'), findsWidgets);
+    expect(find.text('No note selected'), findsNothing);
+
+    await tester.pumpWidget(const SizedBox());
 
     await tester.runAsync(() async {
       await features.store.close();
@@ -118,7 +118,9 @@ void main() {
     });
   });
 
-  testWidgets('shortcuts dialog displays desktop keyboard shortcuts', (tester) async {
+  testWidgets('shortcuts dialog displays desktop keyboard shortcuts', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       MaterialApp(
         locale: const Locale('en'),

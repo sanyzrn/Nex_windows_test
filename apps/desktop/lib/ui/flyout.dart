@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -137,15 +138,29 @@ class _PanelHeader extends StatelessWidget {
     final l = AppLocalizations.of(context)!;
     final features = NexScope.maybeOf(context);
     return Padding(
-      padding: const EdgeInsetsDirectional.fromSTEB(18, 8, 8, 0),
+      padding: const EdgeInsetsDirectional.fromSTEB(20, 16, 12, 8),
       child: Row(
         children: [
           Expanded(
-            child: Text(
-              utilityLabelForText(context, ToolInfo.of(id).name),
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Nex',
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    fontSize: 10,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  utilityLabelForText(context, ToolInfo.of(id).name),
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
             ),
           ),
           IconButton(
@@ -279,13 +294,20 @@ class _Rise extends StatefulWidget {
 
 class _RiseState extends State<_Rise> {
   bool _started = false;
+  Timer? _riseTimer;
 
   @override
   void initState() {
     super.initState();
-    Future.delayed(widget.delay, () {
+    _riseTimer = Timer(widget.delay, () {
       if (mounted) setState(() => _started = true);
     });
+  }
+
+  @override
+  void dispose() {
+    _riseTimer?.cancel();
+    super.dispose();
   }
 
   @override

@@ -34,8 +34,13 @@ $manifest = @(Get-ChildItem -LiteralPath $payload -File -Recurse | Sort-Object F
   [pscustomobject]@{ path = $_.FullName.Substring($payload.Length + 1).Replace('\', '/'); sha256 = (Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant(); bytes = $_.Length }
 })
 $manifest | ConvertTo-Json -Depth 3 | Set-Content -LiteralPath (Join-Path $appRoot 'build/installer/payload-manifest.json') -Encoding utf8
-& $ISCC ('/O' + $Output) (Join-Path $appRoot 'installer/nex.iss')
+$installerScript = Join-Path $appRoot 'installer/nex.iss'
+$outputName = Select-String -LiteralPath $installerScript -Pattern '^OutputBaseFilename=(.+)$'
+if (-not $outputName -or $outputName.Count -ne 1) { throw 'Installer must declare one OutputBaseFilename.' }
+$outputBase = $outputName.Matches[0].Groups[1].Value.Trim()
+if ($outputBase -ne [IO.Path]::GetFileName($outputBase) -or $outputBase.IndexOfAny([IO.Path]::GetInvalidFileNameChars()) -ge 0) { throw 'Invalid installer output filename.' }
+& $ISCC ('/O' + $Output) $installerScript
 if ($LASTEXITCODE -ne 0) { throw "Inno compilation failed with exit $LASTEXITCODE" }
-$setupPath = Join-Path $Output 'Nex-Windows-Setup-0.11.0-x64.exe'
+$setupPath = Join-Path $Output ($outputBase + '.exe')
 Get-Item -LiteralPath $setupPath | Select-Object FullName, Length
 Get-FileHash -LiteralPath $setupPath -Algorithm SHA256

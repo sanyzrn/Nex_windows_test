@@ -21,6 +21,7 @@ mixin PanelWiring on PanelStateBase {
         onClipText: clip,
         onClipImage: (img) => addClipImage(img),
         onTray: onTray,
+        onOpenNote: (uri) => onOpenNote?.call(uri),
         onBlur: blur,
         onFilesDropped: onFilesDropped,
         onPickedColor: onPickedColor,

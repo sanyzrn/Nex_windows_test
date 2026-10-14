@@ -44,6 +44,7 @@ class _FieldState extends State<Field> {
   late final FocusNode _ownNode;
   bool _hadFocus = false;
   PanelController? _trackedPanel;
+  Timer? _focusTimer;
 
   @override
   void initState() {
@@ -51,7 +52,7 @@ class _FieldState extends State<Field> {
     _ownNode = widget.focusNode ?? FocusNode();
     _ownNode.addListener(_focusChanged);
     if (widget.autofocusDelayed) {
-      Future.delayed(const Duration(milliseconds: 60), () {
+      _focusTimer = Timer(const Duration(milliseconds: 60), () {
         if (mounted) _ownNode.requestFocus();
       });
     }
@@ -67,6 +68,7 @@ class _FieldState extends State<Field> {
 
   @override
   void dispose() {
+    _focusTimer?.cancel();
     // If disposed while focused, release the typing guard so the panel can
     // still auto-close.
     if (_hadFocus) _trackedPanel?.focusLost();

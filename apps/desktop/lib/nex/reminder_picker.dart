@@ -9,6 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:nex_core/nex_core.dart';
 
 import '../l10n/app_localizations.dart';
+import 'reminder_coordinator.dart' show ReminderDeliveryFailure;
+import 'reminder_policy.dart';
 
 /// Shows a dialog to pick or clear a note reminder.
 Future<void> showReminderPicker(
@@ -36,12 +38,20 @@ class _ReminderPickerDialogState extends State<_ReminderPickerDialog> {
   DateTime? _selectedDue;
   late NoteRepeat _repeat;
   bool _saving = false;
+  String? _failure;
 
   @override
   void initState() {
     super.initState();
-    _selectedDue = widget.note.dueAt;
+    _selectedDue = widget.note.dueAt?.toLocal();
     _repeat = widget.note.dueRepeat;
+    if (_selectedDue != null && _repeat != NoteRepeat.once) {
+      _selectedDue = nextReminderOccurrence(
+        _selectedDue!,
+        _repeat,
+        DateTime.now(),
+      ).toLocal();
+    }
   }
 
   void _pickLaterToday() {
@@ -60,9 +70,15 @@ class _ReminderPickerDialogState extends State<_ReminderPickerDialog> {
 
   void _pickTomorrowMorning() {
     final now = DateTime.now();
-    final tomorrow = now.add(const Duration(days: 1));
+    final tomorrow = DateTime(now.year, now.month, now.day + 1);
     setState(() {
-      _selectedDue = DateTime(tomorrow.year, tomorrow.month, tomorrow.day, 9, 0);
+      _selectedDue = DateTime(
+        tomorrow.year,
+        tomorrow.month,
+        tomorrow.day,
+        9,
+        0,
+      );
     });
   }
 
@@ -80,6 +96,10 @@ class _ReminderPickerDialogState extends State<_ReminderPickerDialog> {
     final pickedTime = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.fromDateTime(initialDate),
+      builder: (context, child) => MediaQuery(
+        data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
+        child: child!,
+      ),
     );
     if (pickedTime == null || !mounted) return;
 
@@ -95,10 +115,29 @@ class _ReminderPickerDialogState extends State<_ReminderPickerDialog> {
   }
 
   Future<void> _apply(DateTime? due, NoteRepeat repeat) async {
-    setState(() => _saving = true);
+    if (_saving) return;
+    final l = AppLocalizations.of(context)!;
+    if (due != null &&
+        repeat == NoteRepeat.once &&
+        !due.isAfter(DateTime.now())) {
+      setState(() => _failure = l.reminderFutureRequired);
+      return;
+    }
+    setState(() {
+      _saving = true;
+      _failure = null;
+    });
     try {
       await widget.onSave(due, repeat);
       if (mounted) Navigator.of(context).pop();
+    } catch (error) {
+      if (mounted) {
+        setState(
+          () => _failure = error is ReminderDeliveryFailure
+              ? l.reminderDeliveryFailed
+              : l.reminderSaveFailed,
+        );
+      }
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -119,9 +158,7 @@ class _ReminderPickerDialogState extends State<_ReminderPickerDialog> {
     }
 
     return AlertDialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       title: Row(
         children: [
           Container(
@@ -145,120 +182,136 @@ class _ReminderPickerDialogState extends State<_ReminderPickerDialog> {
       ),
       content: SizedBox(
         width: 380,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            if (_selectedDue != null)
-              Container(
-                margin: const EdgeInsets.only(bottom: 14),
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.primaryContainer,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: theme.colorScheme.primary.withValues(alpha: 0.3),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (_selectedDue != null)
+                Container(
+                  margin: const EdgeInsets.only(bottom: 14),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 10,
                   ),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.alarm,
-                      size: 20,
-                      color: theme.colorScheme.onPrimaryContainer,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: theme.colorScheme.primary.withValues(alpha: 0.3),
                     ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        formatDue(_selectedDue!),
-                        style: TextStyle(
-                          color: theme.colorScheme.onPrimaryContainer,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 13,
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.alarm,
+                        size: 20,
+                        color: theme.colorScheme.onPrimaryContainer,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          formatDue(_selectedDue!.toLocal()),
+                          key: const ValueKey('reminder-selected-time'),
+                          style: TextStyle(
+                            color: theme.colorScheme.onPrimaryContainer,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              ),
-            // Quick choice chips
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                ActionChip(
-                  avatar: const Icon(Icons.wb_twilight, size: 16),
-                  label: Text(l.laterToday),
-                  onPressed: _pickLaterToday,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+                    ],
                   ),
                 ),
-                ActionChip(
-                  avatar: const Icon(Icons.wb_sunny_outlined, size: 16),
-                  label: Text(l.tomorrowMorning),
-                  onPressed: _pickTomorrowMorning,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                ActionChip(
-                  avatar: const Icon(Icons.calendar_month_outlined, size: 16),
-                  label: Text(l.customDateTime),
-                  onPressed: _pickCustomDateTime,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            // Repeat cadence selector
-            Text(
-              l.repeat,
-              style: theme.textTheme.labelMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 8),
-            DropdownButtonFormField<NoteRepeat>(
-              initialValue: _repeat,
-              decoration: InputDecoration(
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 10,
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide(
-                    color: theme.colorScheme.outlineVariant.withValues(
-                      alpha: 0.5,
+              // Quick choice chips
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  ActionChip(
+                    avatar: const Icon(Icons.wb_twilight, size: 16),
+                    label: Text(l.laterToday),
+                    onPressed: _saving ? null : _pickLaterToday,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
                     ),
                   ),
+                  ActionChip(
+                    avatar: const Icon(Icons.wb_sunny_outlined, size: 16),
+                    label: Text(l.tomorrowMorning),
+                    onPressed: _saving ? null : _pickTomorrowMorning,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  ActionChip(
+                    avatar: const Icon(Icons.calendar_month_outlined, size: 16),
+                    label: Text(l.customDateTime),
+                    onPressed: _saving ? null : _pickCustomDateTime,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              // Repeat cadence selector
+              Text(
+                l.repeat,
+                style: theme.textTheme.labelMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
                 ),
               ),
-              items: [
-                DropdownMenuItem(
-                  value: NoteRepeat.once,
-                  child: Text(l.noRepeat),
+              const SizedBox(height: 8),
+              DropdownButtonFormField<NoteRepeat>(
+                initialValue: _repeat,
+                decoration: InputDecoration(
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 10,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(
+                      color: theme.colorScheme.outlineVariant.withValues(
+                        alpha: 0.5,
+                      ),
+                    ),
+                  ),
                 ),
-                DropdownMenuItem(
-                  value: NoteRepeat.daily,
-                  child: Text(l.repeatDaily),
+                items: [
+                  DropdownMenuItem(
+                    value: NoteRepeat.once,
+                    child: Text(l.noRepeat),
+                  ),
+                  DropdownMenuItem(
+                    value: NoteRepeat.daily,
+                    child: Text(l.repeatDaily),
+                  ),
+                  DropdownMenuItem(
+                    value: NoteRepeat.weekly,
+                    child: Text(l.repeatWeekly),
+                  ),
+                ],
+                onChanged: _saving
+                    ? null
+                    : (val) {
+                        if (val != null) setState(() => _repeat = val);
+                      },
+              ),
+              if (_failure != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 16),
+                  child: Text(
+                    _failure!,
+                    style: TextStyle(color: theme.colorScheme.error),
+                  ),
                 ),
-                DropdownMenuItem(
-                  value: NoteRepeat.weekly,
-                  child: Text(l.repeatWeekly),
-                ),
-              ],
-              onChanged: (val) {
-                if (val != null) setState(() => _repeat = val);
-              },
-            ),
-          ],
+            ],
+          ),
         ),
       ),
       actions: [
@@ -267,7 +320,7 @@ class _ReminderPickerDialogState extends State<_ReminderPickerDialog> {
             onPressed: _saving ? null : () => _apply(null, NoteRepeat.once),
             child: Text(
               l.clearReminder,
-              style: const TextStyle(color: Colors.red),
+              style: TextStyle(color: theme.colorScheme.error),
             ),
           ),
         TextButton(

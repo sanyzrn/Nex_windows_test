@@ -1412,6 +1412,12 @@ abstract class AppLocalizations {
   /// **'Lagos'**
   String get utility139;
 
+  /// No description provided for @utility140.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not change keep awake'**
+  String get utility140;
+
   /// No description provided for @dropFiles.
   ///
   /// In en, this message translates to:
@@ -1754,6 +1760,144 @@ abstract class AppLocalizations {
   /// **'No note selected'**
   String get noNoteSelected;
 
+  /// No description provided for @todayTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get todayTitle;
+
+  /// No description provided for @dueCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} due'**
+  String dueCount(int count);
+
+  /// No description provided for @overdueCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} overdue'**
+  String overdueCount(int count);
+
+  /// No description provided for @emptyLibraryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your library is empty'**
+  String get emptyLibraryTitle;
+
+  /// No description provided for @emptyLibraryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Capture first, think later. Everything stays on this PC.'**
+  String get emptyLibraryHint;
+
+  /// No description provided for @emptyLibraryWrite.
+  ///
+  /// In en, this message translates to:
+  /// **'Write the first note'**
+  String get emptyLibraryWrite;
+
+  /// No description provided for @emptyLibraryTools.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse the tools'**
+  String get emptyLibraryTools;
+
+  /// No description provided for @emptyLibraryShortcuts.
+  ///
+  /// In en, this message translates to:
+  /// **'Learn the shortcuts'**
+  String get emptyLibraryShortcuts;
+
+  /// No description provided for @settingsDensity.
+  ///
+  /// In en, this message translates to:
+  /// **'Card density'**
+  String get settingsDensity;
+
+  /// No description provided for @densityCompact.
+  ///
+  /// In en, this message translates to:
+  /// **'Compact'**
+  String get densityCompact;
+
+  /// No description provided for @densityStandard.
+  ///
+  /// In en, this message translates to:
+  /// **'Standard'**
+  String get densityStandard;
+
+  /// No description provided for @densityReadable.
+  ///
+  /// In en, this message translates to:
+  /// **'Readable'**
+  String get densityReadable;
+
+  /// No description provided for @paletteOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Command palette'**
+  String get paletteOpen;
+
+  /// No description provided for @paletteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search notes, jump anywhere, run actions (Ctrl+K)'**
+  String get paletteHint;
+
+  /// No description provided for @paletteSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search notes, screens and actions…'**
+  String get paletteSearchHint;
+
+  /// No description provided for @paletteNoResults.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing matches'**
+  String get paletteNoResults;
+
+  /// No description provided for @paletteSectionNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes'**
+  String get paletteSectionNotes;
+
+  /// No description provided for @paletteSectionGoTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to'**
+  String get paletteSectionGoTo;
+
+  /// No description provided for @paletteSectionActions.
+  ///
+  /// In en, this message translates to:
+  /// **'Actions'**
+  String get paletteSectionActions;
+
+  /// No description provided for @paletteActionNewNote.
+  ///
+  /// In en, this message translates to:
+  /// **'New note'**
+  String get paletteActionNewNote;
+
+  /// No description provided for @paletteActionToggleTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Toggle light / dark theme'**
+  String get paletteActionToggleTheme;
+
+  /// No description provided for @paletteActionOpenTools.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the tools'**
+  String get paletteActionOpenTools;
+
+  /// No description provided for @pasteLinkSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Link note created'**
+  String get pasteLinkSaved;
+
   /// No description provided for @noNoteSelectedHint.
   ///
   /// In en, this message translates to:
@@ -1933,6 +2077,222 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Open the library view from the dock, or restart Nex to load your notes.'**
   String get libraryUnavailableHint;
+
+  /// No description provided for @workspaceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'YOUR SPACE'**
+  String get workspaceLabel;
+
+  /// No description provided for @workspaceLocal.
+  ///
+  /// In en, this message translates to:
+  /// **'Private. On this device.'**
+  String get workspaceLocal;
+
+  /// No description provided for @workspaceSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Find or jump to…'**
+  String get workspaceSearch;
+
+  /// No description provided for @workspaceCaptureTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Room for your\nnext thought.'**
+  String get workspaceCaptureTitle;
+
+  /// No description provided for @workspaceCaptureDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'A thought, a list, a little reminder. Start typing; Nex keeps it.'**
+  String get workspaceCaptureDescription;
+
+  /// No description provided for @workspaceCaptureFooter.
+  ///
+  /// In en, this message translates to:
+  /// **'No save button. Just your thoughts.'**
+  String get workspaceCaptureFooter;
+
+  /// No description provided for @workspaceToolsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Small tools.\nLess friction.'**
+  String get workspaceToolsTitle;
+
+  /// No description provided for @workspaceToolsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'The useful things, a little closer. Built for your desktop.'**
+  String get workspaceToolsDescription;
+
+  /// No description provided for @workspaceEssentials.
+  ///
+  /// In en, this message translates to:
+  /// **'Within reach'**
+  String get workspaceEssentials;
+
+  /// No description provided for @workspaceAllTools.
+  ///
+  /// In en, this message translates to:
+  /// **'Your toolbox'**
+  String get workspaceAllTools;
+
+  /// No description provided for @workspaceUtilityHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Open this tool'**
+  String get workspaceUtilityHint;
+
+  /// No description provided for @workspaceClipboardHint.
+  ///
+  /// In en, this message translates to:
+  /// **'What you copied, ready to use.'**
+  String get workspaceClipboardHint;
+
+  /// No description provided for @workspaceAwakeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep your screen with you.'**
+  String get workspaceAwakeHint;
+
+  /// No description provided for @workspaceTimerHint.
+  ///
+  /// In en, this message translates to:
+  /// **'A little time to focus.'**
+  String get workspaceTimerHint;
+
+  /// No description provided for @workspaceCalculatorHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Work out the little things.'**
+  String get workspaceCalculatorHint;
+
+  /// No description provided for @workspaceColorHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a colour from anywhere.'**
+  String get workspaceColorHint;
+
+  /// No description provided for @workspaceSettingsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Make this space feel like yours.'**
+  String get workspaceSettingsDescription;
+
+  /// No description provided for @workspaceReaderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'A place to return to.'**
+  String get workspaceReaderTitle;
+
+  /// No description provided for @workspaceReaderHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a note on the side. Your words get the whole page.'**
+  String get workspaceReaderHint;
+
+  /// No description provided for @workspaceToolsSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Find a tool…'**
+  String get workspaceToolsSearch;
+
+  /// No description provided for @workspaceBrand.
+  ///
+  /// In en, this message translates to:
+  /// **'Nex'**
+  String get workspaceBrand;
+
+  /// No description provided for @reminderFutureRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a time in the future.'**
+  String get reminderFutureRequired;
+
+  /// No description provided for @reminderDeliveryFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The time was saved, but Windows could not schedule the notification. Check Windows notification settings and try again.'**
+  String get reminderDeliveryFailed;
+
+  /// No description provided for @reminderSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The reminder could not be saved. Please try again.'**
+  String get reminderSaveFailed;
+
+  /// No description provided for @workspaceNotebook.
+  ///
+  /// In en, this message translates to:
+  /// **'Your notebook'**
+  String get workspaceNotebook;
+
+  /// No description provided for @workspaceRecent.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent notes'**
+  String get workspaceRecent;
+
+  /// No description provided for @workspacePinned.
+  ///
+  /// In en, this message translates to:
+  /// **'Pinned'**
+  String get workspacePinned;
+
+  /// No description provided for @workspaceViewAll.
+  ///
+  /// In en, this message translates to:
+  /// **'View all'**
+  String get workspaceViewAll;
+
+  /// No description provided for @workspaceStartHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Your next note starts here. Recent notes stay within reach.'**
+  String get workspaceStartHint;
+
+  /// No description provided for @workspaceNoRecent.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes you capture will appear here.'**
+  String get workspaceNoRecent;
+
+  /// No description provided for @workspaceNoPinned.
+  ///
+  /// In en, this message translates to:
+  /// **'Pin a note to keep it close.'**
+  String get workspaceNoPinned;
+
+  /// No description provided for @workspaceTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes'**
+  String get workspaceTotal;
+
+  /// No description provided for @workspaceMedia.
+  ///
+  /// In en, this message translates to:
+  /// **'Attachments'**
+  String get workspaceMedia;
+
+  /// No description provided for @saving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving…'**
+  String get saving;
+
+  /// No description provided for @clipboardSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Clipboard history could not be saved. These changes are not yet safe after restart.'**
+  String get clipboardSaveFailed;
+
+  /// No description provided for @clipboardRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry saving'**
+  String get clipboardRetry;
 }
 
 class _AppLocalizationsDelegate

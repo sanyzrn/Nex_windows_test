@@ -31,3 +31,4 @@ export 'widgets/swipeable_note_card.dart';
 export 'widgets/tag_filter_row.dart';
 
 export 'tokens/nex_theme_presets.dart';
+export 'widgets/nex_workspace.dart';

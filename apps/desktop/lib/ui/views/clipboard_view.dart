@@ -31,19 +31,9 @@ class _ClipboardViewState extends State<ClipboardView> {
     final q = _search.text.toLowerCase();
 
     final pinnedImages = c.clips.where((x) => x.isImage && x.pinned).toList();
-    final pinnedText = c.S.pins
-        .map(
-          (t) => c.clips.firstWhere(
-            (x) => x.text == t,
-            orElse: () =>
-                ClipEntry.text(t, time: DateTime.now())..pinned = true,
-          ),
-        )
-        .toList();
-    final rest = c.clips
-        .where((x) => x.isImage ? !x.pinned : !c.S.pins.contains(x.text))
-        .toList();
-    final list = [...pinnedImages.where((x) => true), ...pinnedText, ...rest]
+    final pinnedText = c.clipboard.favorites.where((x) => !x.isImage).toList();
+    final rest = c.clips.where((x) => !x.pinned).toList();
+    final list = [...pinnedImages, ...pinnedText, ...rest]
         .where((x) => x.isImage || (x.text ?? '').toLowerCase().contains(q))
         .toList();
 
@@ -57,8 +47,7 @@ class _ClipboardViewState extends State<ClipboardView> {
             label: utilityLabel(context, 'utility2'),
             onTap: () {
               // Pinned entries survive a clear; only unpinned history goes.
-              c.clips = c.clips.where((x) => x.pinned).toList();
-              setState(() {});
+              c.clipboard.clear();
             },
           ),
         ),
@@ -68,6 +57,21 @@ class _ClipboardViewState extends State<ClipboardView> {
           autofocusDelayed: true,
           onChanged: (_) => setState(() {}),
         ),
+        if (c.clipboard.saving) Text(AppLocalizations.of(context)!.saving),
+        if (c.clipboard.error != null)
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                AppLocalizations.of(context)!.clipboardSaveFailed,
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
+              ),
+              TextButton(
+                onPressed: c.clipboard.retry,
+                child: Text(AppLocalizations.of(context)!.clipboardRetry),
+              ),
+            ],
+          ),
         ConstrainedBox(
           constraints: const BoxConstraints(maxHeight: 300),
           child: list.isEmpty
@@ -119,17 +123,25 @@ class _TextClipItem extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             ItemAction(
-              child: Text(entry.pinned ? '★' : '☆'),
+              tooltip: entry.pinned
+                  ? AppLocalizations.of(context)!.unpin
+                  : AppLocalizations.of(context)!.pin,
+              child: Icon(
+                entry.pinned ? Icons.star_rounded : Icons.star_outline_rounded,
+              ),
               onTap: () => c.togglePinClip(entry),
             ),
             ItemAction(
-              child: const Text('×'),
+              tooltip: AppLocalizations.of(context)!.delete,
+              child: const Icon(Icons.delete_outline_rounded),
               onTap: () => c.removeClip(entry),
             ),
           ],
         ),
         child: Text(
-          text.length > 120 ? text.substring(0, 120) : text,
+          text,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
           textDirection: nexDirectionOf(text),
         ),
       ),
@@ -160,11 +172,17 @@ class _ImageClipItem extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             ItemAction(
-              child: Text(entry.pinned ? '★' : '☆'),
+              tooltip: entry.pinned
+                  ? AppLocalizations.of(context)!.unpin
+                  : AppLocalizations.of(context)!.pin,
+              child: Icon(
+                entry.pinned ? Icons.star_rounded : Icons.star_outline_rounded,
+              ),
               onTap: () => c.togglePinClip(entry),
             ),
             ItemAction(
-              child: const Text('×'),
+              tooltip: AppLocalizations.of(context)!.delete,
+              child: const Icon(Icons.delete_outline_rounded),
               onTap: () => c.removeClip(entry),
             ),
           ],

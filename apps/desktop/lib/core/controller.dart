@@ -14,6 +14,7 @@ import 'panel_settings.dart';
 import 'registry.dart';
 import 'spring.dart';
 import 'storage.dart';
+import 'clipboard_state.dart';
 import 'theme_defs.dart';
 import 'package:nex_ui/nex_ui.dart';
 
@@ -28,6 +29,7 @@ part 'controller_clipboard.dart';
 part 'controller_lifecycle.dart';
 part 'controller_timers.dart';
 part 'controller_wiring.dart';
+part 'controller_window_mode.dart';
 
 /// No-op host used when none is injected (tests).
 class _StubNativeHost extends NativeHost {
@@ -35,17 +37,17 @@ class _StubNativeHost extends NativeHost {
   dynamic noSuchMethod(Invocation invocation) => Future.value();
 }
 
-/// Core state of the panel controller. Split across five mixins in
-/// controller_actions.dart, controller_clipboard.dart,
-/// controller_lifecycle.dart, controller_timers.dart and
-/// controller_wiring.dart (same library, so private members are shared).
 abstract class PanelStateBase extends ChangeNotifier implements PanelHoldable {
-  PanelStateBase({NativeHost? nativeHost})
-    : native = nativeHost ?? _StubNativeHost();
+  PanelStateBase({NativeHost? nativeHost, Storage? storage})
+    : storage = storage ?? Storage(),
+      native = nativeHost ?? _StubNativeHost() {
+    clipboard.addListener(_clipboardChanged);
+  }
+  void _clipboardChanged() {
+    if (!_disposed) notifyListeners();
+  }
 
   // ==== forward declarations ====
-  // Members implemented in the three mixins of this library; declared here so
-  // every mixin and the core body can call them.
   void bootstrap({
     Settings? preset,
     bool useNative = true,
@@ -75,6 +77,7 @@ abstract class PanelStateBase extends ChangeNotifier implements PanelHoldable {
   void moveWidget(String id, String list, int idx, {bool withHidden = false});
   void appAdded({required String path, String? icon});
   Future<void> setWindowMode(String mode);
+  Future<void> _rememberWindowFrame();
   Future<void> quit();
   void _wireNative();
   void clip(String text);
@@ -87,23 +90,28 @@ abstract class PanelStateBase extends ChangeNotifier implements PanelHoldable {
   void iconFor(String id, String icon);
   void disposeTimers();
 
-  final Storage storage = Storage();
+  final Storage storage;
+  final clipboard = ClipboardState();
   final NativeHost native;
   late final NavigatorObserver routeObserver = PanelRouteObserver(this);
   bool _persistSettings = true;
   Future<void> Function()? beforeShutdown;
   void Function()? onCapture;
+  void Function(String)? onOpenNote;
   void Function(List<String>)? importFiles;
 
   late Settings S;
-  List<ClipEntry> clips = [];
+  List<ClipEntry> get clips => clipboard.entries;
+  set clips(List<ClipEntry> entries) => clipboard.seed(entries);
   String lastClip = '';
   bool awake = false;
+  bool awakeBusy = false;
   bool picking = false;
   bool settingsChangedWhileTyping = false;
 
   // ---- interaction state (module-level vars of the original) ----
   bool isOpen = false;
+  bool windowModeChanging = false;
   String? panel;
 
   /// The main mode: 'window' shows the full desktop window shell; 'panel'
@@ -238,8 +246,25 @@ abstract class PanelStateBase extends ChangeNotifier implements PanelHoldable {
   /// Public notify for views (ChangeNotifier.notifyListeners is protected).
   void refresh() => notifyListeners();
 
-  LiquidPalette get palette => paletteFromTheme(appTheme);
+  (String, String, String)? _themeKey;
+  ThemeData? _cachedTheme;
+  LiquidPalette? _cachedPalette;
+
+  LiquidPalette get palette {
+    final theme = appTheme;
+    return _cachedPalette ??= paletteFromTheme(theme);
+  }
+
   ThemeData get appTheme {
+    final key = (S.theme, S.preset, S.language);
+    if (_themeKey == key && _cachedTheme != null) return _cachedTheme!;
+    final theme = _buildAppTheme();
+    _themeKey = key;
+    _cachedPalette = null;
+    return _cachedTheme = theme;
+  }
+
+  ThemeData _buildAppTheme() {
     final base = nexApplyThemePreset(
       S.theme == 'light' || S.theme == 'sky'
           ? nexLightTheme(
@@ -277,14 +302,14 @@ abstract class PanelStateBase extends ChangeNotifier implements PanelHoldable {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          side: BorderSide(color: scheme.onSurface.withValues(alpha: .16)),
+          side: BorderSide(color: scheme.outline),
           minimumSize: const Size(0, 42),
         ),
       ),
       iconButtonTheme: IconButtonThemeData(
         style: IconButton.styleFrom(
           minimumSize: const Size(36, 36),
-          maximumSize: const Size(40, 40),
+          maximumSize: const Size(48, 48),
           padding: const EdgeInsets.all(8),
         ),
       ),
@@ -346,6 +371,7 @@ abstract class PanelStateBase extends ChangeNotifier implements PanelHoldable {
 
   bool maybeClose() {
     if (isOpen && !keepOpen && !sticky && !dragging && !picking) {
+      if (outT?.isActive == true) return true;
       outT?.cancel();
       outT = Timer(const Duration(milliseconds: 600), () {
         if (!keepOpen && !sticky && !dragging && !picking) close();
@@ -394,7 +420,7 @@ abstract class PanelStateBase extends ChangeNotifier implements PanelHoldable {
 
   Future<void> _edgeTick() async {
     // The edge reveal only belongs to the panel mode.
-    if (isWindowMode) {
+    if (isWindowMode || windowModeChanging) {
       _near = false;
       return;
     }
@@ -428,7 +454,6 @@ abstract class PanelStateBase extends ChangeNotifier implements PanelHoldable {
         dist <= 8 * pl.scale &&
         (!buttonDown || _held > 30)) {
       unawaited(native.rememberForeground().catchError((_) {}));
-      unawaited(native.setPassthrough(false).catchError((_) {}));
       open();
       if (buttonDown) dropHintOn.value = true;
       _near = false;
@@ -444,6 +469,7 @@ abstract class PanelStateBase extends ChangeNotifier implements PanelHoldable {
   @override
   void dispose() {
     _disposed = true;
+    clipboard.dispose();
     for (final timer in _delayed) {
       timer.cancel();
     }
@@ -464,12 +490,11 @@ abstract class PanelStateBase extends ChangeNotifier implements PanelHoldable {
   }
 }
 
-/// The composed controller the app and tests construct. Same library, so the
-/// mixins and this class share every private member.
 class PanelController = PanelStateBase
     with
         PanelLifecycle,
         PanelTimers,
         PanelWiring,
+        PanelWindowTransitions,
         PanelActions,
         PanelClipboardOps;

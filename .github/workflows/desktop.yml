@@ -17,9 +17,8 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-          # Same Flutter stable the DbsNex monorepo pins in .fvmrc; keeps
-          # golden rendering aligned with upstream. Packages resolve from the
-          # default pub.dev — no mirror, no third-party package host.
+          # Desktop SDK used to validate the Windows golden baselines.
+          # The upstream Android checkout pins its SDK independently.
           flutter-version: '3.44.8'
           cache: true
 
@@ -28,22 +27,11 @@ jobs:
       # fail the build.
       - name: Guard against package mirrors
         shell: pwsh
-        run: |
-          $wf = Get-Content -LiteralPath .github/workflows/desktop.yml -Raw
-          if ($wf -match 'flutter-io\.cn|PUB_HOSTED_URL|FLUTTER_STORAGE_BASE_URL') {
-            Write-Error "Package mirror host or override found in the workflow. Use default pub.dev."
-            exit 1
-          }
-          $pub = Get-Content -LiteralPath apps/desktop/pubspec.yaml -Raw
-          if ($pub -match 'flutter-io\.cn') {
-            Write-Error "Mirror host recorded in pubspec.yaml."
-            exit 1
-          }
-          $readme = Get-Content -LiteralPath README.md -Raw
-          if ($readme -match 'PUB_HOSTED_URL\s*=') {
-            Write-Error "README still instructs a package mirror. Remove it."
-            exit 1
-          }
+        run: ./tools/check_package_hosts.ps1
+
+      - name: Install dependencies
+        working-directory: apps/desktop
+        run: flutter pub get --enforce-lockfile
 
       # Rule 10: one version everywhere, enforced before anything builds.
       - name: Version consistency check
@@ -58,10 +46,6 @@ jobs:
         shell: pwsh
         run: ../../tools/check_ui_hygiene.ps1 -LibDir lib
 
-      - name: Install dependencies
-        working-directory: apps/desktop
-        run: flutter pub get --enforce-lockfile
-
       - name: Analyze code
         working-directory: apps/desktop
         run: flutter analyze --no-pub
@@ -70,19 +54,13 @@ jobs:
         working-directory: apps/desktop
         run: flutter test --no-pub
 
-      # WP2: the review screenshot matrix is regenerated on every run and
-      # uploaded for inspection. It does not gate the build; it exists so a
-      # reviewer can look at every screen in both languages and themes.
-      - name: Render review screenshot matrix
-        working-directory: apps/desktop
-        run: flutter test --no-pub test/review_screens_test.dart --reporter expanded
-
-      - name: Upload review screenshot matrix
+      # The full suite above compares this matrix against the current app.
+      - name: Upload reviewed screenshot matrix
         if: always()
         uses: actions/upload-artifact@v6
         with:
           name: review-screens
-          path: design/after/
+          path: apps/desktop/test/review_goldens/
           if-no-files-found: ignore
           retention-days: 14
 

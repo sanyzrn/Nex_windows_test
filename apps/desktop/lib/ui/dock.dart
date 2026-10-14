@@ -91,8 +91,10 @@ class Dock extends StatelessWidget {
                   viewportH: viewportH,
                   bodyH: bodyH,
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 22),
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  top: 22,
                   child: Column(
                     children: [
                       _ToolsViewport(

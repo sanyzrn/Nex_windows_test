@@ -697,6 +697,9 @@ class AppLocalizationsFa extends AppLocalizations {
   String get utility139 => 'لاگوس';
 
   @override
+  String get utility140 => 'تغییر وضعیت بیدار نگه‌داشتن انجام نشد';
+
+  @override
   String get dropFiles => 'برای ثبت، فایل یا تصویر را اینجا رها کنید';
 
   @override
@@ -873,6 +876,81 @@ class AppLocalizationsFa extends AppLocalizations {
   String get noNoteSelected => 'یادداشتی انتخاب نشده است';
 
   @override
+  String get todayTitle => 'امروز';
+
+  @override
+  String dueCount(int count) {
+    return '$count سررسید امروز';
+  }
+
+  @override
+  String overdueCount(int count) {
+    return '$count گذشته از موعد';
+  }
+
+  @override
+  String get emptyLibraryTitle => 'کتابخانه شما خالی است';
+
+  @override
+  String get emptyLibraryHint =>
+      'اول ثبت، بعد فکر کردن. همه‌چیز روی همین رایانه می‌ماند.';
+
+  @override
+  String get emptyLibraryWrite => 'نوشتن اولین یادداشت';
+
+  @override
+  String get emptyLibraryTools => 'مرور ابزارها';
+
+  @override
+  String get emptyLibraryShortcuts => 'یادگیری کلیدهای میان‌بر';
+
+  @override
+  String get settingsDensity => 'تراکم کارت‌ها';
+
+  @override
+  String get densityCompact => 'فشرده';
+
+  @override
+  String get densityStandard => 'استاندارد';
+
+  @override
+  String get densityReadable => 'خوانا';
+
+  @override
+  String get paletteOpen => 'پالت فرمان';
+
+  @override
+  String get paletteHint =>
+      'جستجوی یادداشت‌ها، پرش سریع و اجرای کنش‌ها (Ctrl+K)';
+
+  @override
+  String get paletteSearchHint => 'جستجوی یادداشت‌ها، صفحه‌ها و کنش‌ها…';
+
+  @override
+  String get paletteNoResults => 'چیزی پیدا نشد';
+
+  @override
+  String get paletteSectionNotes => 'یادداشت‌ها';
+
+  @override
+  String get paletteSectionGoTo => 'برو به';
+
+  @override
+  String get paletteSectionActions => 'کنش‌ها';
+
+  @override
+  String get paletteActionNewNote => 'یادداشت جدید';
+
+  @override
+  String get paletteActionToggleTheme => 'تغییر روشن / تاریک';
+
+  @override
+  String get paletteActionOpenTools => 'باز کردن ابزارها';
+
+  @override
+  String get pasteLinkSaved => 'یادداشت پیوند ساخته شد';
+
+  @override
   String get noNoteSelectedHint =>
       'برای پیمایش از کلیدهای جهت‌نما و برای یادداشت جدید از Ctrl+N استفاده کنید';
 
@@ -971,4 +1049,121 @@ class AppLocalizationsFa extends AppLocalizations {
   @override
   String get libraryUnavailableHint =>
       'از داک، نمای کتابخانه را باز کنید یا نکس را دوباره اجرا کنید تا یادداشت‌ها بارگذاری شوند.';
+
+  @override
+  String get workspaceLabel => 'فضای شما';
+
+  @override
+  String get workspaceLocal => 'خصوصی؛ روی همین دستگاه';
+
+  @override
+  String get workspaceSearch => 'جستجو یا رفتن به…';
+
+  @override
+  String get workspaceCaptureTitle => 'جایی برای\nفکرهای شما.';
+
+  @override
+  String get workspaceCaptureDescription =>
+      'یک فکر، یک فهرست، یک یادآوری کوچک. بنویسید؛ نکس نگهش می‌دارد.';
+
+  @override
+  String get workspaceCaptureFooter => 'فقط بنویسید؛ ذخیره خودکار است.';
+
+  @override
+  String get workspaceToolsTitle => 'ابزارهای کوچک،\nکارهای آسان‌تر.';
+
+  @override
+  String get workspaceToolsDescription =>
+      'چیزهای کاربردی، همیشه نزدیک شما. برای کارهای روزمره در ویندوز.';
+
+  @override
+  String get workspaceEssentials => 'دم‌دست';
+
+  @override
+  String get workspaceAllTools => 'جعبه‌ابزار شما';
+
+  @override
+  String get workspaceUtilityHint => 'باز کردن ابزار';
+
+  @override
+  String get workspaceClipboardHint =>
+      'چیزهایی که کپی کرده‌اید، آمادهٔ استفاده.';
+
+  @override
+  String get workspaceAwakeHint => 'صفحه را هنگام کار روشن نگه دارید.';
+
+  @override
+  String get workspaceTimerHint => 'کمی زمان برای تمرکز.';
+
+  @override
+  String get workspaceCalculatorHint => 'حساب‌های کوچک روزمره.';
+
+  @override
+  String get workspaceColorHint => 'انتخاب رنگ از هر جای صفحه.';
+
+  @override
+  String get workspaceSettingsDescription =>
+      'این فضا را به سلیقهٔ خودتان تنظیم کنید.';
+
+  @override
+  String get workspaceReaderTitle => 'جایی برای برگشتن به فکرها.';
+
+  @override
+  String get workspaceReaderHint =>
+      'یادداشتی از فهرست انتخاب کنید؛ این صفحه برای خواندن آن است.';
+
+  @override
+  String get workspaceToolsSearch => 'جستجوی ابزار…';
+
+  @override
+  String get workspaceBrand => 'Nex';
+
+  @override
+  String get reminderFutureRequired => 'زمانی در آینده انتخاب کنید.';
+
+  @override
+  String get reminderDeliveryFailed =>
+      'زمان ذخیره شد، اما ویندوز نتوانست اعلان را زمان‌بندی کند. تنظیمات اعلان ویندوز را بررسی کنید و دوباره تلاش کنید.';
+
+  @override
+  String get reminderSaveFailed => 'یادآور ذخیره نشد. دوباره تلاش کنید.';
+
+  @override
+  String get workspaceNotebook => 'دفتر یادداشت شما';
+
+  @override
+  String get workspaceRecent => 'یادداشت‌های اخیر';
+
+  @override
+  String get workspacePinned => 'پین‌شده‌ها';
+
+  @override
+  String get workspaceViewAll => 'دیدن همه';
+
+  @override
+  String get workspaceStartHint =>
+      'یادداشت بعدی از اینجا شروع می‌شود؛ نوشته‌های اخیر هم کنار دست شما هستند.';
+
+  @override
+  String get workspaceNoRecent =>
+      'یادداشت‌هایی که ثبت کنید اینجا دیده می‌شوند.';
+
+  @override
+  String get workspaceNoPinned => 'برای دسترسی سریع، یادداشتی را پین کنید.';
+
+  @override
+  String get workspaceTotal => 'یادداشت';
+
+  @override
+  String get workspaceMedia => 'پیوست';
+
+  @override
+  String get saving => 'در حال ذخیره…';
+
+  @override
+  String get clipboardSaveFailed =>
+      'ذخیرهٔ تاریخچهٔ کلیپ‌بورد انجام نشد. این تغییرها هنوز پس از اجرای دوباره محفوظ نیستند.';
+
+  @override
+  String get clipboardRetry => 'تلاش دوباره برای ذخیره';
 }

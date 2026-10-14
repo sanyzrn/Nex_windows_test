@@ -1,78 +1,52 @@
-// Copyright (c) 2026 Nex contributors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
-// Part of the window shell split (see window_shell.dart); do not import
-// this file directly.
 part of 'window_shell.dart';
 
 class _WindowSection extends StatelessWidget {
   const _WindowSection({required this.controller});
-
   final PanelController controller;
-
   @override
   Widget build(BuildContext context) {
-    final c = controller;
     return ValueListenableBuilder<String>(
-      valueListenable: c.windowSection,
-      builder: (context, section, _) {
-        return ValueListenableBuilder<String?>(
-          valueListenable: c.windowTool,
-          builder: (context, tool, _) {
-            final body = switch (section) {
-              'library' =>
-                NexScope.maybeOf(context) == null
-                    ? const _CenteredColumn(
-                        maxWidth: 720,
-                        child: _MissingStoreNotice(),
-                      )
-                    : const NexLibraryView(),
-              'tools' =>
-                tool == null
-                    ? const _ToolsDirectory()
-                    : _ToolCard(controller: c, toolId: tool),
-              'settings' => const _CenteredColumn(
-                maxWidth: 720,
-                child: _SettingsSection(),
+      valueListenable: controller.windowSection,
+      builder: (context, section, _) => ValueListenableBuilder<String?>(
+        valueListenable: controller.windowTool,
+        builder: (context, tool, _) {
+          final body = switch (section) {
+            'library' =>
+              NexScope.maybeOf(context) == null
+                  ? const Center(child: _MissingStoreNotice())
+                  : const NexLibraryView(),
+            'tools' =>
+              tool == null
+                  ? const _ToolsDirectory()
+                  : _ToolCard(controller: controller, toolId: tool),
+            'settings' => const _SettingsSection(),
+            _ => const _CaptureSection(),
+          };
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _SectionHeader(
+                controller: controller,
+                section: section,
+                tool: tool,
               ),
-              _ => const _CaptureSection(),
-            };
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _SectionHeader(controller: c, section: section, tool: tool),
-                Expanded(
-                  child: Stack(
-                    children: [
-                      AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 280),
-                        switchInCurve: Curves.easeOutCubic,
-                        switchOutCurve: Curves.easeInCubic,
-                        transitionBuilder: (child, animation) => FadeTransition(
-                          opacity: animation,
-                          child: SlideTransition(
-                            position: Tween(
-                              begin: const Offset(0, .015),
-                              end: Offset.zero,
-                            ).animate(animation),
-                            child: child,
-                          ),
-                        ),
-                        child: KeyedSubtree(
-                          key: ValueKey('section-$section-${tool ?? ''}'),
-                          child: body,
-                        ),
-                      ),
-                      _WindowToast(controller: c),
-                    ],
-                  ),
+              Expanded(
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    // A capture focus/controller must have only one live subtree.
+                    KeyedSubtree(
+                      key: ValueKey('section-$section-${tool ?? ''}'),
+                      child: body,
+                    ),
+                    _WindowToast(controller: controller),
+                  ],
                 ),
-              ],
-            );
-          },
-        );
-      },
+              ),
+            ],
+          );
+        },
+      ),
     );
   }
 }
@@ -83,146 +57,86 @@ class _SectionHeader extends StatelessWidget {
     required this.section,
     required this.tool,
   });
-
   final PanelController controller;
   final String section;
   final String? tool;
-
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context)!;
-    final scheme = Theme.of(context).colorScheme;
-    final f = NexScope.maybeOf(context);
-    final isFa = Localizations.localeOf(context).languageCode == 'fa';
+    final c = Theme.of(context).colorScheme;
     final title = switch (section) {
       'library' => l.library,
       'tools' =>
-        tool != null
-            ? utilityLabelForText(context, ToolInfo.of(tool!).name)
-            : l.navTools,
+        tool == null
+            ? l.navTools
+            : utilityLabelForText(context, ToolInfo.of(tool!).name),
       'settings' => l.settings,
       _ => l.capture,
     };
-    final subtitle = switch (section) {
-      'library' =>
-        isFa
-            ? 'کتابخانه یادداشت‌ها و جستجوی لحظه‌ای'
-            : 'Local library & instant search',
-      'tools' =>
-        isFa
-            ? 'ابزارهای سریع و افزونه‌های متصل'
-            : 'Quick utilities & connected tools',
-      'settings' =>
-        isFa
-            ? 'تنظیمات، پوسته و امنیت داده‌ها'
-            : 'Preferences, theme & data safety',
-      _ =>
-        isFa
-            ? 'ثبت سریع افکار و چک‌لیست‌ها'
-            : 'Fast capture & persistent scratchpad',
-    };
-    final recording = f?.recordingAt != null;
-
+    final small = MediaQuery.sizeOf(context).width < 900;
     return Container(
-      padding: const EdgeInsets.fromLTRB(24, 16, 24, 14),
+      padding: EdgeInsetsDirectional.fromSTEB(
+        small ? 20 : 32,
+        12,
+        small ? 20 : 32,
+        12,
+      ),
       decoration: BoxDecoration(
-        color: scheme.surface,
-        border: Border(
-          bottom: BorderSide(color: scheme.onSurface.withValues(alpha: .07)),
-        ),
+        border: Border(bottom: BorderSide(color: c.outlineVariant)),
       ),
       child: Row(
         children: [
           if (section == 'tools' && tool != null) ...[
-            _HeaderIcon(
-              icon: Icons.arrow_back_rounded,
+            IconButton(
               tooltip: l.backToTools,
-              onTap: () {
+              icon: const BackButtonIcon(),
+              onPressed: () {
                 controller.windowTool.value = null;
                 controller.refresh();
               },
             ),
-            const SizedBox(width: 12),
-          ],
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                title,
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: -.3,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                subtitle,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: scheme.onSurfaceVariant.withValues(alpha: 0.8),
-                  fontWeight: FontWeight.w500,
-                  fontSize: 11.5,
-                ),
-              ),
-            ],
-          ),
-          const Spacer(),
-          if (recording) ...[
-            RecordStopButton(controller: controller),
             const SizedBox(width: 8),
           ],
-          if (section == 'capture')
-            _HeaderIcon(
-              icon: Icons.add_rounded,
-              tooltip: '${l.newNote} (Ctrl+N)',
-              onTap: () => f?.fresh(),
+          Expanded(
+            child: Text(
+              title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(
+                context,
+              ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
             ),
-          if (section == 'library')
-            _HeaderIcon(
-              icon: Icons.add_rounded,
-              tooltip: '${l.newNote} (Ctrl+N)',
-              onTap: () {
-                controller.selectWindowSection('capture');
-                f?.fresh();
-              },
+          ),
+          if (NexScope.maybeOf(context)?.recordingAt != null)
+            RecordStopButton(controller: controller),
+          const SizedBox(width: 12),
+          OutlinedButton.icon(
+            key: const ValueKey('workspace-command'),
+            onPressed: () => showCommandPalette(
+              context,
+              controller: controller,
+              features: NexScope.maybeOf(context),
             ),
+            icon: const Icon(Icons.search_outlined, size: 18),
+            label: small
+                ? const NexShortcutHint('Ctrl+K')
+                : Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(l.workspaceSearch),
+                      const SizedBox(width: 24),
+                      const NexShortcutHint('Ctrl+K'),
+                    ],
+                  ),
+            style: OutlinedButton.styleFrom(
+              backgroundColor: c.surfaceContainerLowest,
+              foregroundColor: c.onSurfaceVariant,
+              side: BorderSide(color: c.outlineVariant),
+              minimumSize: const Size(0, 40),
+            ),
+          ),
         ],
       ),
     );
   }
 }
-
-class _HeaderIcon extends StatelessWidget {
-  const _HeaderIcon({
-    required this.icon,
-    required this.tooltip,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String tooltip;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return Tooltip(
-      message: tooltip,
-      waitDuration: const Duration(milliseconds: 500),
-      child: IconButton(
-        onPressed: onTap,
-        icon: Icon(icon, size: 22, color: scheme.onSurfaceVariant),
-        style: IconButton.styleFrom(
-          backgroundColor: scheme.surfaceContainerHigh,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          minimumSize: const Size(40, 40),
-        ),
-      ),
-    );
-  }
-}
-
-/// Capsule holding the capture editor. Gives the text field a bounded,
-/// generous area and keeps every action from the flyout capture view.

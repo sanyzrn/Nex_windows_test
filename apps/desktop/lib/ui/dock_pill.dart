@@ -46,6 +46,7 @@ class _Pill extends StatelessWidget {
                 scaleX: sxP,
                 scaleY: syP,
                 child: Container(
+                  key: const ValueKey('dock-active-pill'),
                   decoration: BoxDecoration(
                     color: controller.palette.inv,
                     // Audit defect 12: the active marker was a circle while

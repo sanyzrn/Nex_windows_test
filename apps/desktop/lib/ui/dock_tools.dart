@@ -32,7 +32,7 @@ class _ToolSlot extends StatelessWidget {
         final P = pr.v.clamp(0.0, 1.0);
         final dir = controller.dir;
 
-        final tx = ((1 - p) * 20 - M * 5) * dir;
+        final tx = (1 - p) * 20 * dir;
         final scale = (.55 + .45 * p) * (1 + M * .16) * (1 - P * .14);
 
         Widget child = ToolVisual(
@@ -135,6 +135,7 @@ class ToolVisualState extends State<ToolVisual> {
       return MouseRegion(
         cursor: SystemMouseCursors.click,
         onEnter: _enter,
+        onHover: _hoverMove,
         onExit: _exit,
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
@@ -186,6 +187,7 @@ class ToolVisualState extends State<ToolVisual> {
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       onEnter: _enter,
+      onHover: _hoverMove,
       onExit: _exit,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
@@ -244,15 +246,27 @@ class ToolVisualState extends State<ToolVisual> {
   void _enter(PointerEnterEvent e) {
     setState(() => _hover = true);
     // port of the tab mouseover: switch panel when sweeping across tools
+    _openOnHover();
+  }
+
+  void _hoverMove(PointerHoverEvent e) => _openOnHover();
+
+  void _openOnHover() {
     final c = widget.controller;
-    if (c.panel == null || c.dragging || c.keepOpen) return;
+    if (widget.tileStyle ||
+        !c.isOpen ||
+        c.windowModeChanging ||
+        c.dragging ||
+        c.interacting ||
+        c.picking) {
+      return;
+    }
     final info = ToolInfo.of(widget.id);
     final id = widget.id;
     if (info.kind == ToolKind.panel &&
         (id != c.panel || c.sub) &&
         !(id == 'more' && c.sub)) {
-      c.anchorY = c.dockAnchorOf?.call(id) ?? c.anchorY;
-      c.setPanel(id);
+      c.openWidget(id);
       _openedOnEnter = true;
     }
   }

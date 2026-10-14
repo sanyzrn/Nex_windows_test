@@ -95,8 +95,39 @@ void main() {
     );
 
     expect(summary.scheduledCount, 1);
-    expect(scheduler.scheduled['n_daily']!.fireAt, DateTime.utc(2026, 10, 11, 9, 0));
+    expect(
+      scheduler.scheduled['n_daily']!.fireAt,
+      DateTime.utc(2026, 10, 11, 9, 0),
+    );
   });
+
+  test(
+    'missed one-off reminder is shown once and old reminders are ignored',
+    () async {
+      final now = DateTime.utc(2026, 10, 10, 12);
+      final recent = createNote('recent', 'Missed recently');
+      final old = createNote('old', 'Expired reminder');
+      repo.setDueAt(recent.id, now.subtract(const Duration(hours: 47)));
+      repo.setDueAt(old.id, now.subtract(const Duration(hours: 49)));
+      final notified = <String>{};
+      final first = await ReminderReconciliationEngine.reconcile(
+        repo: repo,
+        scheduler: scheduler,
+        nowOverride: now,
+        notifiedOverdueIds: notified,
+      );
+      expect(first.overdueCount, 1);
+      expect(scheduler.overdueShown.single.noteId, recent.id);
+      final second = await ReminderReconciliationEngine.reconcile(
+        repo: repo,
+        scheduler: scheduler,
+        nowOverride: now,
+        notifiedOverdueIds: notified,
+      );
+      expect(second.overdueCount, 0);
+      expect(scheduler.overdueShown.length, 1);
+    },
+  );
 
   test('weekly repeat advances fireAt past current time', () async {
     final note = createNote('n_weekly', 'Trash collection');
@@ -111,7 +142,10 @@ void main() {
     );
 
     expect(summary.scheduledCount, 1);
-    expect(scheduler.scheduled['n_weekly']!.fireAt, DateTime.utc(2026, 10, 15, 8, 0));
+    expect(
+      scheduler.scheduled['n_weekly']!.fireAt,
+      DateTime.utc(2026, 10, 15, 8, 0),
+    );
   });
 
   test('cancelling or clearing reminder removes it from schedule', () async {

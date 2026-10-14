@@ -7,8 +7,8 @@
 part of 'library_view.dart';
 
 /// The list pane: selection banner, search field, filter bar, failure row,
-/// empty states and the note card list with date dividers.
-mixin _LibraryListPane on _LibraryStateBase {
+/// the Today strip, empty states and the note card list with date dividers.
+mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
   @override
   Widget _buildListPane(BuildContext context, AppLocalizations l, bool fa) {
     final theme = Theme.of(context);
@@ -124,6 +124,7 @@ mixin _LibraryListPane on _LibraryStateBase {
               }
             },
             child: TextField(
+              key: const ValueKey('library-search'),
               controller: query,
               focusNode: _searchFocusNode,
               textDirection: nexDirectionOf(query.text),
@@ -168,7 +169,7 @@ mixin _LibraryListPane on _LibraryStateBase {
                         ),
                       ),
               ),
-              onChanged: (_) => load(),
+              onChanged: _queryChanged,
             ),
           ),
         ),
@@ -204,6 +205,7 @@ mixin _LibraryListPane on _LibraryStateBase {
           },
           onShortcutsTap: () => showShortcutsDialog(context),
         ),
+        if (!trash && notes.any(_dueToday)) _buildTodayStrip(context, l, fa),
         if (failure != null)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -214,27 +216,20 @@ mixin _LibraryListPane on _LibraryStateBase {
           ),
         if (notes.isEmpty && !loading)
           Expanded(
-            child: Center(
-              child: NexEmptyState(
-                icon: trash
-                    ? Icons.delete_outline_rounded
-                    : query.text.isNotEmpty
-                    ? Icons.search_off_rounded
-                    : (type != null || tag != null || thread != null)
-                    ? Icons.filter_list_off_rounded
-                    : Icons.note_alt_outlined,
-                message: trash
-                    ? '${l.trash}: ${l.empty}'
-                    : query.text.isNotEmpty
-                    ? '${l.search}: ${l.empty}'
-                    : l.empty,
-                action:
-                    (query.text.isNotEmpty ||
-                        type != null ||
-                        tag != null ||
-                        thread != null ||
-                        trash)
-                    ? TextButton.icon(
+            child: _isFilteredEmpty
+                ? Center(
+                    child: NexEmptyState(
+                      icon: trash
+                          ? Icons.delete_outline_rounded
+                          : query.text.isNotEmpty
+                          ? Icons.search_off_rounded
+                          : Icons.filter_list_off_rounded,
+                      message: trash
+                          ? '${l.trash}: ${l.empty}'
+                          : query.text.isNotEmpty
+                          ? '${l.search}: ${l.empty}'
+                          : l.empty,
+                      action: TextButton.icon(
                         icon: const Icon(Icons.refresh_rounded, size: 16),
                         label: Text(l.clear),
                         onPressed: () {
@@ -244,10 +239,12 @@ mixin _LibraryListPane on _LibraryStateBase {
                           trash = false;
                           load();
                         },
-                      )
-                    : null,
-              ),
-            ),
+                      ),
+                    ),
+                  )
+                // Designed first-run state (IDEAS.md): three concrete
+                // actions instead of a bare "empty" line.
+                : _buildFirstRunEmpty(context, l),
           )
         else
           Expanded(
@@ -329,7 +326,9 @@ mixin _LibraryListPane on _LibraryStateBase {
                         child: NoteCard(
                           note: note,
                           showDue: true,
-                          selected: isCardSelected,
+                          selected: _selectedIds.isNotEmpty
+                              ? isCardSelected
+                              : null,
                           strings: NexCardStrings(
                             noteOfType: (t) =>
                                 '${l.note}: ${noteTypeLabel(l, NoteType.values.firstWhere((x) => x.name == t, orElse: () => NoteType.text))}',
@@ -351,6 +350,11 @@ mixin _LibraryListPane on _LibraryStateBase {
                               NexRelativeUnit.years => l.yearsAgo(time.count),
                             },
                             dueLabel: (due, repeat) {
+                              due = nextReminderOccurrence(
+                                due,
+                                repeat,
+                                DateTime.now(),
+                              ).toLocal();
                               final now = DateTime.now();
                               final isOverdue = due.isBefore(now);
                               final repeatText = switch (repeat) {

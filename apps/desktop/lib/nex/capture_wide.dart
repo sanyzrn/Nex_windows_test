@@ -1,294 +1,222 @@
-// Copyright (c) 2026 Nex contributors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
-// Part of the capture view split (see capture_view.dart); do not import
-// this file directly.
 part of 'capture_view.dart';
 
-/// Desktop window layout builder plus the shared capture action tile.
 mixin CaptureWide on CaptureViewBase {
   @override
-  /// Desktop window layout: a comfortable bounded editor, a checklist
-  /// switch, one action row and honest status lines.
   Widget _buildWide(
     BuildContext context,
     NexFeatures f,
     AppLocalizations l,
     PanelController? c,
   ) {
-    final scheme = Theme.of(context).colorScheme;
-    final editor = CallbackShortcuts(
-      bindings: {
-        const SingleActivator(LogicalKeyboardKey.keyV, control: true): () =>
-            _paste(f, c),
-      },
-      child: Focus(
-        onFocusChange: (focused) => focused ? c?.focusGained() : c?.focusLost(),
-        child: TextField(
-          key: const ValueKey('capture-field'),
-          controller: f.composer,
-          focusNode: f.focus,
-          autofocus: true,
-          expands: true,
-          minLines: null,
-          maxLines: null,
-          textAlignVertical: TextAlignVertical.top,
-          textDirection: nexDirectionOf(f.composer.text),
-          decoration: InputDecoration(
-            hintMaxLines: 1,
-            hintText: l.captureHint,
-            filled: true,
-            fillColor: scheme.surfaceContainerLowest,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: scheme.outlineVariant.withValues(alpha: 0.35),
-              ),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: scheme.outlineVariant.withValues(alpha: 0.35),
-              ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: scheme.primary, width: 1.5),
-            ),
-          ),
-          onChanged: f.write,
-        ),
-      ),
-    );
-
-    return Align(
-      alignment: Alignment.topCenter,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 820),
-        child: Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: scheme.surfaceContainerLow,
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: scheme.onSurface.withValues(alpha: 0.08)),
-            boxShadow: [
-              BoxShadow(
-                color: scheme.shadow.withValues(alpha: 0.05),
-                offset: const Offset(0, 6),
-                blurRadius: 18,
-                spreadRadius: -4,
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Row(
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final small = constraints.maxWidth < 650 || constraints.maxHeight < 650;
+        final body = Padding(
+          padding: embedded ? EdgeInsets.zero : EdgeInsets.all(small ? 24 : 32),
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 880),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Container(
-                    width: 7,
-                    height: 7,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: scheme.primary,
+                  if (!embedded)
+                    NexWorkspaceIntro(
+                      title: l.workspaceCaptureTitle,
+                      description: l.workspaceCaptureDescription,
+                      compact: small,
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      l.savedLocally,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: scheme.onSurfaceVariant,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                  // Audit defect 9: the add affordance is discoverable —
-                  // visible label plus a tooltip for the icon.
-                  Tooltip(
-                    message: l.newNote,
-                    child: ActionChip(
-                      avatar: const Icon(Icons.add, size: 18),
-                      label: Text(l.newNote),
-                      onPressed: () => f.fresh(),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 14),
-              Expanded(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(minHeight: 180),
-                  child: editor,
-                ),
-              ),
-              const SizedBox(height: 14),
-              Row(
-                children: [
-                  Switch(
-                    value: f.checklist,
-                    onChanged: f.session.id == null
-                        ? (v) {
-                            f.checklist = v;
-                            f.notify();
-                          }
-                        : null,
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    l.checklist,
-                    style: const TextStyle(fontWeight: FontWeight.w500),
-                  ),
-                  const Spacer(),
-                  ListenableBuilder(
-                    listenable: f.composer,
-                    builder: (context, _) {
-                      final text = f.composer.text;
-                      final words = text.trim().isEmpty
-                          ? 0
-                          : text.trim().split(RegExp(r'\s+')).length;
-                      final chars = text.length;
-                      return Text(
-                        l.editorCount(words, chars),
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: scheme.onSurfaceVariant.withValues(alpha: 0.7),
-                          fontSize: 11,
+                  if (!embedded) SizedBox(height: small ? 24 : 32),
+                  NexWorkspaceCard(
+                    key: const ValueKey('workspace-editor'),
+                    padding: EdgeInsets.zero,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
+                            24,
+                            12,
+                            16,
+                            12,
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.check_circle_outline,
+                                size: 16,
+                                color: scheme.onSurfaceVariant,
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  f.saving ? l.saving : l.savedLocally,
+                                  style: theme.textTheme.labelSmall?.copyWith(
+                                    color: scheme.onSurfaceVariant,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              TextButton.icon(
+                                onPressed: () => f.fresh(),
+                                icon: const Icon(Icons.add, size: 18),
+                                label: Text(l.newNote),
+                              ),
+                            ],
+                          ),
                         ),
-                      );
-                    },
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  _CaptureAction(
-                    label: l.pasteText,
-                    onPressed: () async {
-                      final clip = await Clipboard.getData(
-                        Clipboard.kTextPlain,
-                      );
-                      if (clip?.text?.isNotEmpty == true) {
-                        await f.fresh();
-                        f.composer.text = clip!.text!;
-                        f.write(clip.text!);
-                      }
-                    },
-                    icon: Icons.content_paste_rounded,
-                  ),
-                  _CaptureAction(
-                    label: l.addImage,
-                    onPressed: f.importing
-                        ? null
-                        : () => _choose(context, f, [
-                            XTypeGroup(
-                              label: l.photo,
-                              extensions: const [
-                                'png',
-                                'jpg',
-                                'jpeg',
-                                'webp',
-                                'gif',
-                                'bmp',
-                              ],
+                        Divider(height: 1, color: scheme.outlineVariant),
+                        CallbackShortcuts(
+                          bindings: {
+                            const SingleActivator(
+                              LogicalKeyboardKey.keyV,
+                              control: true,
+                            ): () =>
+                                unawaited(_pasteIntoComposer(context, f, c)),
+                          },
+                          child: Focus(
+                            onFocusChange: (focused) =>
+                                focused ? c?.focusGained() : c?.focusLost(),
+                            child: TextField(
+                              key: const ValueKey('capture-field'),
+                              controller: f.composer,
+                              focusNode: f.focus,
+                              autofocus: true,
+                              minLines: embedded || constraints.maxHeight < 850
+                                  ? 4
+                                  : 7,
+                              maxLines: small ? 10 : 16,
+                              textAlignVertical: TextAlignVertical.top,
+                              textDirection: nexDirectionOf(f.composer.text),
+                              style: theme.textTheme.bodyLarge?.copyWith(
+                                fontSize: 20,
+                                height: 1.65,
+                              ),
+                              decoration: InputDecoration(
+                                hintText: l.captureHint,
+                                hintStyle: theme.textTheme.headlineSmall
+                                    ?.copyWith(color: scheme.onSurfaceVariant),
+                                filled: false,
+                                contentPadding: const EdgeInsets.all(28),
+                                border: InputBorder.none,
+                                enabledBorder: InputBorder.none,
+                                focusedBorder: InputBorder.none,
+                              ),
+                              onChanged: f.write,
                             ),
-                          ]),
-                    icon: Icons.add_photo_alternate_outlined,
-                  ),
-                  _CaptureAction(
-                    label: l.attach,
-                    onPressed: f.importing ? null : () => _choose(context, f),
-                    icon: Icons.attach_file_rounded,
-                  ),
-                  _CaptureAction(
-                    label: l.addAudio,
-                    onPressed: f.importing
-                        ? null
-                        : () => _choose(context, f, [
-                            XTypeGroup(
-                              label: l.voice,
-                              extensions: const [
-                                'wav',
-                                'mp3',
-                                'm4a',
-                                'aac',
-                                'ogg',
-                                'opus',
-                                'flac',
-                                'wma',
-                              ],
-                            ),
-                          ]),
-                    icon: Icons.audio_file_outlined,
-                  ),
-                  _CaptureAction(
-                    label: f.recordingAt == null ? l.record : l.stop,
-                    onPressed: f.recordingBusy ? null : () => f.record(c),
-                    icon: f.recordingAt == null
-                        ? Icons.mic_none_rounded
-                        : Icons.stop_circle_outlined,
-                  ),
-                  if (c != null)
-                    _CaptureAction(
-                      label: l.pastePhoto,
-                      onPressed: () => f.guard(() async {
-                        final image = await c.native.currentClipboardImage();
-                        if (image == null) throw StateError(l.noClipboardImage);
-                        await f.pasteImage(image, rethrowError: true);
-                      }),
-                      icon: Icons.content_paste_go_rounded,
+                          ),
+                        ),
+                        Divider(height: 1, color: scheme.outlineVariant),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 8,
+                          ),
+                          child: Wrap(
+                            alignment: WrapAlignment.spaceBetween,
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            spacing: 16,
+                            runSpacing: 4,
+                            children: [
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Switch(
+                                    value: f.checklist,
+                                    onChanged: f.session.id == null
+                                        ? (v) {
+                                            f.checklist = v;
+                                            f.notify();
+                                          }
+                                        : null,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    l.checklist,
+                                    style: theme.textTheme.labelMedium,
+                                  ),
+                                ],
+                              ),
+                              ListenableBuilder(
+                                listenable: f.composer,
+                                builder: (context, _) {
+                                  final text = f.composer.text;
+                                  return Text(
+                                    nexDigits(
+                                      l.editorCount(
+                                        text.trim().isEmpty
+                                            ? 0
+                                            : text
+                                                  .trim()
+                                                  .split(RegExp(r'\s+'))
+                                                  .length,
+                                        text.length,
+                                      ),
+                                      persian:
+                                          Localizations.localeOf(
+                                            context,
+                                          ).languageCode ==
+                                          'fa',
+                                    ),
+                                    style: theme.textTheme.labelSmall?.copyWith(
+                                      color: scheme.onSurfaceVariant,
+                                    ),
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                ],
-              ),
-              if (f.importing || f.recordingBusy)
-                const Padding(
-                  padding: EdgeInsets.only(top: 12),
-                  child: LinearProgressIndicator(),
-                ),
-              if (f.recordingAt != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 12),
-                  child: Text(
-                    l.recording,
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.error,
-                    ),
                   ),
-                ),
-              if (f.importedCount > 0 && !f.importing)
-                Padding(
-                  padding: const EdgeInsets.only(top: 12),
-                  child: Align(
-                    alignment: AlignmentDirectional.centerStart,
-                    child: TextButton.icon(
-                      onPressed: c == null
-                          ? null
-                          : () => c.openWidget('timeline'),
-                      icon: const Icon(
-                        Icons.check_circle_outline_rounded,
-                        size: 18,
+                  const SizedBox(height: 16),
+                  _actions(context, f, l, c),
+                  if (f.importing || f.recordingBusy)
+                    const Padding(
+                      padding: EdgeInsets.only(top: 12),
+                      child: LinearProgressIndicator(),
+                    ),
+                  if (f.recordingAt != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 12),
+                      child: Text(
+                        l.recording,
+                        style: TextStyle(color: scheme.error),
                       ),
+                    ),
+                  if (f.importedCount > 0 && !f.importing)
+                    TextButton.icon(
+                      onPressed: () => c?.selectWindowSection('library'),
+                      icon: const Icon(Icons.check_circle_outline, size: 18),
                       label: Text(l.mediaAdded(f.importedCount)),
                     ),
-                  ),
-                ),
-              if (f.error != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 12),
-                  child: Text(
-                    '${l.failed}: ${f.error}',
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.error,
+                  if (f.error != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 12),
+                      child: Text(
+                        '${l.failed}: ${f.error}',
+                        style: TextStyle(color: scheme.error),
+                      ),
                     ),
-                  ),
-                ),
-            ],
+                  if (!embedded) const SizedBox(height: 24),
+                  if (!embedded)
+                    Text(
+                      l.workspaceCaptureFooter,
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                      ),
+                    ),
+                ],
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+        return embedded ? body : SingleChildScrollView(child: body);
+      },
     );
   }
 }
@@ -305,26 +233,30 @@ class _CaptureAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return SizedBox(
-      width: 152,
-      child: OutlinedButton.icon(
-        onPressed: onPressed,
-        icon: Icon(icon, size: 18),
-        label: Text(
-          label,
-          maxLines: 2,
-          textAlign: TextAlign.start,
-          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
-        ),
-        style: OutlinedButton.styleFrom(
-          alignment: AlignmentDirectional.centerStart,
-          // Audit defect 8: at 40% alpha the outline vanished in light mode.
-          // The outline token plus a container-high fill keeps every tile
-          // legible on both the light and the dark capture card.
-          backgroundColor: scheme.surfaceContainerHigh,
-          side: BorderSide(color: scheme.outline),
-        ),
-      ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final columns = constraints.maxWidth >= 740 ? 3 : 2;
+        return SizedBox(
+          width: (constraints.maxWidth - (columns - 1) * 8) / columns,
+          child: OutlinedButton.icon(
+            onPressed: onPressed,
+            icon: Icon(icon, size: 19),
+            label: Text(
+              label,
+              maxLines: 2,
+              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+            ),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: scheme.onSurface,
+              backgroundColor: scheme.surfaceContainerLowest,
+              side: BorderSide(color: scheme.outline),
+              alignment: AlignmentDirectional.centerStart,
+              minimumSize: const Size(0, 52),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            ),
+          ),
+        );
+      },
     );
   }
 }

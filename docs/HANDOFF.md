@@ -1,3 +1,61 @@
+# Agent Handoff: persistent clipboard and tool explanations — 2026-10-14
+
+Owner requested durable last-50 clipboard history across Windows shutdown plus a one-line explanation of every tool before choosing removals. Implemented separate SQLite clipboard storage at `%APPDATA%/NexDesktopShell/clipboard.sqlite`, a dedicated isolate, atomic FULL WAL commits, cached immutable keys and incremental image-blob transmission. Retains 50 distinct recent text/image entries, MRU recopy, separate favorites, persisted delete/clear/pin/unpin, one-time legacy pin migration. Loads before native watching and drains before quit. Saving/error/retry are visible; unreadable databases are not silently overwritten. Clearing preserves pins. Old native image preview/downscaling remains unchanged.
+
+Full suite **159 PASS**, ordinary unchanged goldens; final focused **8 PASS**; analysis/hygiene/host guard/whitespace PASS; Release and installer PASS. Actual isolated Release writer committed 60 entries, was forcibly terminated without close/checkpoint, and a fresh reader recovered 50 recent entries, exact image bytes/time and an evicted image favorite. This never touched the user's real clipboard/data/app. No actual OS reboot or installation was run. Root installer `Nex-Windows-Setup-0.12.0-Clipboard-x64.exe`, 13,877,393 bytes, SHA-256 `1454156b4fcfadbd1e904ac209022c918f4b57870423bcd5aea58bbe2d15c86e`. Source/build and tested/packaged EXE hashes match. Snapshot remains `C:\Users\zrn_s\AppData\Local\Temp\nex-product-build-20261014-081747`; logs under `apps/desktop/build/clipboard-*`.
+
+No tools were removed. Await the owner's selection after the full tool descriptions. Pin window toggles previous-foreground always-on-top; Generate creates UUID/date/time/random/sample data; Text tools transforms copied text; Snippets saves reusable texts. All other registry definitions/handlers were inspected. The older product/reminder backlog remains below. See [CLIPBOARD_PERSISTENCE.md](CLIPBOARD_PERSISTENCE.md). No commit/push; preserve existing work.
+
+---
+
+# Agent Handoff: previous notebook workspace and reminder repair — 2026-10-14
+
+Current owner request: improve both appearance and daily functionality, fully inspect reminders (09:00 changed on reopening), dock hover centering, and clipboard controls overlapping text. Implemented the notebook home with exact totals/pins/recent previews and quick Windows tools; wide library autoselection and retained off-page activation; independent clipboard action lane/two-line previews; actual dock center fix (full-width column plus removal of hover translation).
+
+Reminders now use local display/calendar repeat calculations, explicit 24-hour input, validation, save/retry guards and a serial startup/mutation/30-second coordinator. Real Windows testing caught 16-char developer ID rejection and optional `ToastNotifier.Setting` ERROR_NOT_FOUND despite successful scheduling; both repaired. Native IDs are stable 15 chars for UUIDs. Installer registers note protocol activation; native forwarding and Dart routing support cold/existing app launches. Details and remaining delivery/recurrence limitations are in [PRODUCT_ITERATION.md](PRODUCT_ITERATION.md).
+
+Validation: full suite **153 PASS**, ordinary goldens; analysis/hygiene/host guard/whitespace PASS; 40 visual screens; Release and installer PASS. Actual Release queue probe preserved local tomorrow 09:00, replaced with 10:00 (one entry) and cancelled. Actual mode/hover test passed 3 right/left/right cycles, no Flutter errors. Source hashes matched the build snapshot; packaged EXE hash matched tested Release.
+
+Root installer `Nex-Windows-Setup-0.12.0-Product-x64.exe` (13,864,597 bytes), SHA-256 `e3dcc180de777e4dc25def6325ae4fdca09f457e01c3be6d7086b3126fb58748`. Build snapshot `C:\Users\zrn_s\AppData\Local\Temp\nex-product-build-20261014-081747`. Logs/probe JSON under `apps/desktop/build/product-*`. Existing installed user instance was not stopped or upgraded. No commit/push.
+
+Next work: durable later recurrences while the process remains fully exited, honest recovery after Windows drops a missed scheduled toast, installation/upgrade plus actual toast click with protocol registration, then the next product/utility pass. Reference brief is not blanket authority or a claim of completion. Preserve prior dirty changes. Native frame callback ownership/warm-up mode fixes remain required. Do not reuse the original stale Windows CMake cache; build the checked source snapshot. See [the current visual comparison](../design/product/README.md).
+
+---
+
+# Agent Handoff: previous panel transition and hover repair — 2026-10-14
+
+Fixed native surface presentation across mode switches with hidden restyling, Flutter shell acknowledgement, a single pending generation-checked engine frame callback, and an offscreen warm-up frame. Mode changes serialize and reset stale panel state. Dock hover now opens its first panel and works while pinned/focused, while held reader/picker interactions remain protected. Auto-close and widget timer ownership were repaired.
+
+Validation: full suite 140 PASS; analysis/hygiene/host guard/whitespace PASS; Release and installer PASS; actual isolated Release runner native mode/hover probe PASS (three right/left/right cycles, exit 0, no Flutter errors). Current root installer is `Nex-Windows-Setup-0.12.0-PanelFix-x64.exe`. See [PANEL_FIX.md](PANEL_FIX.md). Existing installed Nex PID 17792 remained running; installation was not performed. Normal launches retain their singleton identity; only the explicit panel diagnostic entry point uses a separate process and temporary data.
+
+Next verification: installation/upgrade and additional DPI/monitor combinations. The previous reminder engine wiring remains unfinished. All previous source changes remain preserved; no commit or push was made.
+
+---
+
+# Agent Handoff: desktop usability phase — 2026-10-14
+
+Implemented consistent keyboard paste, actual palette note opening and routes in both modes, new-note session reset, debounced library search, stale-response rejection, cached theme/palette, acknowledged Keep Awake state with error handling, and a clock-correct reminder reconciliation query. Installer filename detection and three CI defects were corrected. Shared packages and schema were not changed in this phase.
+
+Validation: full desktop suite 135 PASS; final focused tests 14 PASS; desktop analysis, UI hygiene, whitespace and package-host guard fixtures PASS. The source tree remains dirty with the previous agent/redesign changes preserved. No commit, push, remote workflow run or installation was performed.
+
+See [USABILITY_PHASE.md](USABILITY_PHASE.md) for current changes, measurements and limitations. Next native work: connect the reminder engine to startup/mutations through the store isolate and verify toast delivery; test installation/upgrade and hotkey/tray/clipboard/Keep Awake against the actual Windows runner. The installed Nex was left running. The previous appearance and historical notes follow.
+
+---
+
+# Agent Handoff: desktop appearance phase — 2026-10-09
+
+The owner authorized a substantial redesign of both Windows modes. This phase is implemented; performance and the outstanding legacy quality/CI audit are the next work. The previous work in the checkout was preserved.
+
+Version remains `0.12.0+8`. The root installer is `Nex-Windows-Setup-0.12.0-Redesign-x64.exe`, 13,829,419 bytes. SHA-256: `156a09e0447143b2e8ab7f123b1f66b708f663446cf1cf66b8bfc6418204aa0b`.
+
+See [the redesign report](../design/redesign/README.md) for changes, screenshots, exact scope and validation. Desktop and UI analysis passed; UI hygiene passed; the full 120-test desktop suite passed with normal golden comparisons; Windows Release and Inno Setup compilation passed. Installer launch/upgrade, Narrator and native smoke were not run. The installed Nex process was already open and was left running.
+
+Next: examine real Windows behaviour and performance, complete the old CI/documentation audit, and measure changes before claiming performance improvements. The material below is historical, including its old versions, base references and completion claims; it is not current verification.
+
+---
+
+# Historical handoff retained for reference
+
 # Agent Handoff: Nex for Windows (Version 0.11.0)
 
 Repository cleanup on 2026-10-04 moved handoff, integration and validation notes into `docs/`, archived the original task under `docs/archive/`, and removed the duplicate `upstream-patches/` directory and redundant summary. `patches/` is the single retained transfer-patch location. See [TEST_RESULTS.md](TEST_RESULTS.md) for current checks; the work-package notes below describe the earlier implementation and are not independent proof of upstream alignment or hardware coverage.

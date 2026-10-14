@@ -108,21 +108,9 @@ bool FlutterWindow::OnCreate() {
 
   bridge_->Start();
 
-  flutter_controller_->engine()->SetNextFrameCallback([&]() {
-    // Let the bridge reveal a deferred window-mode launch now that real
-    // content exists (avoids an empty first-frame flash).
-    if (bridge_) bridge_->OnFirstFrame();
-    // In panel mode the bridge owns visibility via passthrough.
-    if (bridge_ && !bridge_->passthrough() && !bridge_->window_mode()) {
-      this->Show();
-    }
-  });
-
-  // Flutter can complete the first frame before the "show window" callback
-  // is registered. The following call ensures a frame is pending to ensure
-  // the window is shown. It is a no-op if the first frame hasn't completed
-  // yet.
-  flutter_controller_->ForceRedraw();
+  // The bridge owns the single frame callback for startup and mode changes.
+  // Dart acknowledges the new shell after layout, then the bridge redraws
+  // and reveals only that generation's completed surface.
 
   return true;
 }

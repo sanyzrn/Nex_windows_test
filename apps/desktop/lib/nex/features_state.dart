@@ -28,8 +28,34 @@ class NexFeatures extends ChangeNotifier {
   final composer = TextEditingController();
   final focus = FocusNode();
   bool checklist = false;
+  int _saving = 0;
+  bool get saving => _saving > 0;
   String? error;
   int libraryRevision = 0;
+  bool reminderDeliveryFailed = false;
+  Future<void> Function()? synchronizeReminders;
+
+  Future<void> remind(String id, DateTime? at, NoteRepeat repeat) async {
+    await store.call('remind', {'id': id, 'at': at, 'repeat': repeat.wireName});
+    libraryRevision++;
+    notify();
+    await synchronizeReminders?.call();
+  }
+
+  Note? _requestedNote;
+
+  /// A palette result may arrive before the library is mounted.
+  void requestNote(Note note) {
+    _requestedNote = note;
+    notifyListeners();
+  }
+
+  Note? takeRequestedNote() {
+    final note = _requestedNote;
+    _requestedNote = null;
+    return note;
+  }
+
   int importedCount = 0;
   bool importing = false, recordingBusy = false;
   VoidCallback? _recordingRelease;
@@ -68,7 +94,14 @@ class NexFeatures extends ChangeNotifier {
 
   void write(String text) {
     // No debounce. Session owns the FIFO, so disposing a panel loses nothing.
-    unawaited(guard(() => session.write(text, checklist: checklist)));
+    _saving++;
+    notify();
+    unawaited(
+      guard(() => session.write(text, checklist: checklist)).whenComplete(() {
+        _saving--;
+        notify();
+      }),
+    );
   }
 
   Future<void> fresh() async {

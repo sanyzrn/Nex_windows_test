@@ -10,17 +10,34 @@ import 'package:path_provider/path_provider.dart';
 import 'nex/features.dart';
 import 'nex/store.dart';
 import 'nex/media_smoke.dart';
+import 'nex/panel_smoke.dart';
+import 'nex/reminder_smoke.dart';
+import 'nex/reminder_coordinator.dart';
+import 'nex/note_activation.dart';
 import 'l10n/app_localizations.dart';
 
 import 'core/controller.dart';
 import 'core/native.dart';
+import 'core/clipboard_smoke.dart';
 import 'ui/shell.dart';
 import 'ui/window_shell.dart';
 
 void main(List<String> arguments) async {
   WidgetsFlutterBinding.ensureInitialized();
+  if (arguments.length == 4 && arguments.first == '--clipboard-smoke') {
+    await clipboardSmoke(arguments);
+    return;
+  }
   if (arguments.length == 4 && arguments.first == '--media-smoke') {
     await mediaSmoke(arguments);
+    return;
+  }
+  if (arguments.length == 2 && arguments.first == '--panel-smoke') {
+    await panelSmoke(arguments[1]);
+    return;
+  }
+  if (arguments.length == 2 && arguments.first == '--reminder-smoke') {
+    await reminderSmoke(arguments[1]);
     return;
   }
   final prefs = await SharedPreferences.getInstance();
@@ -80,6 +97,8 @@ void main(List<String> arguments) async {
   controller.onCapture = () {
     features.fresh();
   };
+  controller.onOpenNote = (uri) =>
+      unawaited(features.guard(() => activateNote(uri, controller, features)));
   controller.beforeShutdown = features.close;
   if (smokeMode) {
     final native = controller.native as WinNativeHost;
@@ -184,11 +203,34 @@ void main(List<String> arguments) async {
       'Vazirmatn',
     ], await rootBundle.loadString('assets/notices/vazirmatn-OFL.txt'));
   });
+  final reminders = ReminderCoordinator(
+    features.store,
+    NativeReminderScheduler(controller.native),
+    onFailureChanged: (failed) {
+      if (features.reminderDeliveryFailed != failed) {
+        features.reminderDeliveryFailed = failed;
+        features.notify();
+      }
+    },
+  );
+  features.synchronizeReminders = () async {
+    final result = await reminders.refresh();
+    if (result.failedCount > 0) throw ReminderDeliveryFailure();
+  };
+  controller.beforeShutdown = () async {
+    await reminders.close();
+    await features.close();
+  };
+  unawaited(reminders.start());
   runApp(RightPanelApp(controller: controller, features: features));
   // A manual launch must immediately present a usable, focused capture
   // surface. Startup launches opt into the unobtrusive background mode;
   // the edge panel stays hidden and the window waits in the tray.
-  if (!arguments.contains('--background')) controller.onTray('capture');
+  if (arguments.length == 2 && arguments.first == '--open-note') {
+    unawaited(activateNote(arguments[1], controller, features));
+  } else if (!arguments.contains('--background')) {
+    controller.onTray('capture');
+  }
 }
 
 class RightPanelApp extends StatelessWidget {
