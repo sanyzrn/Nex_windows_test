@@ -80,11 +80,14 @@ mixin _LibraryKeys on _LibraryStateBase {
     if (isCtrl &&
         event.logicalKey == LogicalKeyboardKey.keyP &&
         selectedNote != null) {
+      final target = selectedNote!;
       store
-          .call(selectedNote!.pinnedAt == null ? 'pin' : 'unpin', {
-            'id': selectedNote!.id,
-          })
-          .then((_) => load());
+          .call(target.pinnedAt == null ? 'pin' : 'unpin', {'id': target.id})
+          .then((_) {
+            // The store round-trip is async; the view can be closed while it
+            // is in flight and load() would setState on a dead element.
+            if (mounted) load();
+          });
       return KeyEventResult.handled;
     }
 

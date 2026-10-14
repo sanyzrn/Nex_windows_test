@@ -148,25 +148,25 @@ class _SettingsCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: scheme.surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(color: scheme.outlineVariant),
       ),
-      padding: EdgeInsets.all(MediaQuery.sizeOf(context).width < 900 ? 16 : 24),
+      padding: EdgeInsets.all(MediaQuery.sizeOf(context).width < 900 ? 14 : 18),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
             children: [
               Container(
-                width: 32,
-                height: 32,
+                width: 28,
+                height: 28,
                 decoration: BoxDecoration(
                   color: iconColor.withValues(alpha: 0.14),
-                  borderRadius: BorderRadius.circular(9),
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(icon, size: 18, color: iconColor),
+                child: Icon(icon, size: 16, color: iconColor),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 10),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -182,7 +182,7 @@ class _SettingsCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
           ...children,
         ],
       ),
@@ -206,7 +206,7 @@ class _SettingRow extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(vertical: 7),
       child: LayoutBuilder(
         builder: (context, constraints) {
           final label = Column(
@@ -215,7 +215,7 @@ class _SettingRow extends StatelessWidget {
               Text(
                 title,
                 style: const TextStyle(
-                  fontSize: 13.5,
+                  fontSize: 13,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -223,7 +223,7 @@ class _SettingRow extends StatelessWidget {
                 Text(
                   subtitle!,
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: 11.5,
                     color: scheme.onSurfaceVariant,
                   ),
                 ),
@@ -234,7 +234,7 @@ class _SettingRow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 label,
-                const SizedBox(height: 12),
+                const SizedBox(height: 10),
                 Align(
                   alignment: AlignmentDirectional.centerStart,
                   child: control,
@@ -245,7 +245,7 @@ class _SettingRow extends StatelessWidget {
           return Row(
             children: [
               Expanded(child: label),
-              const SizedBox(width: 16),
+              const SizedBox(width: 14),
               control,
             ],
           );

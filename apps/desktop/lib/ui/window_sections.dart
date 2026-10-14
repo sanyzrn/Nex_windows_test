@@ -12,10 +12,13 @@ class _SettingsSection extends StatelessWidget {
   const _SettingsSection();
   @override
   Widget build(BuildContext context) => SingleChildScrollView(
-    padding: const EdgeInsets.all(32),
+    padding: const EdgeInsets.all(20),
     child: Center(
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 960),
+        // Narrower than the old 960: a settings row's control sits at the
+        // far end of its line, and past ~760px the label and its control
+        // stopped reading as one thing.
+        constraints: const BoxConstraints(maxWidth: 760),
         child: const NexSettingsView(windowLayout: true),
       ),
     ),

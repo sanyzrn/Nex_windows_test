@@ -305,9 +305,14 @@ abstract class _LibraryStateBase extends State<NexLibraryView> {
                           280.0,
                           constraints.maxWidth - 360.0,
                         );
+                        // Only the live layout follows the pointer; the
+                        // preference write happens once, on drag end — a
+                        // SharedPreferences write per pointer move was I/O on
+                        // the frame path for a value nobody reads mid-drag.
                         setState(() => _paneWidth = newWidth);
-                        _persistPaneWidth(newWidth);
                       },
+                      onHorizontalDragEnd: (_) =>
+                          _persistPaneWidth(_paneWidth),
                       child: const _SplitterHandle(),
                     ),
                   ),

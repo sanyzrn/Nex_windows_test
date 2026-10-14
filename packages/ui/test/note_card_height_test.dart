@@ -213,8 +213,9 @@ void main() {
   ) async {
     // The regression this guards: the preview went to two lines and the card
     // grew to fit both them and a timestamp stacked underneath. Two lines of
-    // bodyLarge come to exactly what the leading glyph already reserved, so
-    // the card's height never had to move.
+    // bodyLarge fit inside what the card's height already reserved — whichever
+    // of the glyph box and the two lines is taller — so the height never has
+    // to move for the second line.
     final height = await heightOf(
       tester,
       note(
@@ -224,15 +225,22 @@ void main() {
     );
 
     expect(height, nexCardHeight + nexCardInsets.vertical);
-    expect(nexCardHeight, nexCardLeadingSize + NexSpacing.cardInset * 2);
+    // The invariant itself: the const and the runtime agree, and the card
+    // reserves room for both its tenants — the leading glyph and the preview
+    // block — whichever is taller.
+    final taller = nexCardLeadingSize >
+            nexCardPreviewLineHeight * nexCardPreviewLines
+        ? nexCardLeadingSize
+        : nexCardPreviewLineHeight * nexCardPreviewLines;
+    expect(nexCardHeight, taller + NexSpacing.cardInset * 2);
   });
 
   testWidgets('a card grows only when larger text actually needs it', (
     tester,
   ) async {
     // The one case where the card must move: someone has turned the text size
-    // up, two preview lines outgrow the glyph, and a fixed box would clip
-    // them. Anything at or below the default is left exactly where it was.
+    // up, two preview lines outgrow their reserved space, and a fixed box
+    // would clip them.
     Future<double> at(double scale) async {
       await tester.pumpWidget(
         MaterialApp(
@@ -249,8 +257,13 @@ void main() {
 
     final normal = await at(1);
     expect(normal, nexCardHeight + nexCardInsets.vertical);
-    // Smaller text does not shrink it below the glyph it still has to hold.
-    expect(await at(0.8), normal);
+    // Smaller text may let the card settle back toward its other tenant — the
+    // leading glyph — but never below what that glyph still needs. The card
+    // follows the taller of the two, whichever it is.
+    final floor = nexCardLeadingSize + NexSpacing.cardInset * 2 +
+        nexCardInsets.vertical;
+    expect(await at(0.8), greaterThanOrEqualTo(floor));
+    expect(await at(0.8), lessThanOrEqualTo(normal));
     expect(await at(1.4), greaterThan(normal));
   });
 }

@@ -12,13 +12,17 @@ mixin CaptureWide on CaptureViewBase {
     final scheme = theme.colorScheme;
     return LayoutBuilder(
       builder: (context, constraints) {
-        final small = constraints.maxWidth < 650 || constraints.maxHeight < 650;
+        final small = constraints.maxWidth < 650;
+        // The footer's right-hand group (count + new-note) needs ~250px of
+        // its own; below ~420 the label gives way to an icon so the row
+        // never has to shove anything off the edge.
+        final cramped = constraints.maxWidth < 420;
         final body = Padding(
-          padding: embedded ? EdgeInsets.zero : EdgeInsets.all(small ? 24 : 32),
+          padding: embedded ? EdgeInsets.zero : EdgeInsets.all(small ? 16 : 24),
           child: Align(
             alignment: Alignment.topCenter,
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 880),
+              constraints: const BoxConstraints(maxWidth: 720),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -28,46 +32,18 @@ mixin CaptureWide on CaptureViewBase {
                       description: l.workspaceCaptureDescription,
                       compact: small,
                     ),
-                  if (!embedded) SizedBox(height: small ? 24 : 32),
+                  if (!embedded) const SizedBox(height: 16),
+                  // One surface, one job: write. The status row, its two
+                  // dividers and the leading "New note" button that used to
+                  // frame the composer are gone — saving is what the app does
+                  // by default, and the affordance to start a new note sits
+                  // in the footer where the last word left off.
                   NexWorkspaceCard(
                     key: const ValueKey('workspace-editor'),
                     padding: EdgeInsets.zero,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Padding(
-                          padding: const EdgeInsetsDirectional.fromSTEB(
-                            24,
-                            12,
-                            16,
-                            12,
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.check_circle_outline,
-                                size: 16,
-                                color: scheme.onSurfaceVariant,
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  f.saving ? l.saving : l.savedLocally,
-                                  style: theme.textTheme.labelSmall?.copyWith(
-                                    color: scheme.onSurfaceVariant,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              TextButton.icon(
-                                onPressed: () => f.fresh(),
-                                icon: const Icon(Icons.add, size: 18),
-                                label: Text(l.newNote),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Divider(height: 1, color: scheme.outlineVariant),
                         CallbackShortcuts(
                           bindings: {
                             const SingleActivator(
@@ -84,22 +60,23 @@ mixin CaptureWide on CaptureViewBase {
                               controller: f.composer,
                               focusNode: f.focus,
                               autofocus: true,
-                              minLines: embedded || constraints.maxHeight < 850
-                                  ? 4
-                                  : 7,
-                              maxLines: small ? 10 : 16,
+                              minLines: 5,
+                              maxLines: small ? 9 : 14,
                               textAlignVertical: TextAlignVertical.top,
                               textDirection: nexDirectionOf(f.composer.text),
+                              keyboardType: TextInputType.multiline,
                               style: theme.textTheme.bodyLarge?.copyWith(
-                                fontSize: 20,
-                                height: 1.65,
+                                fontSize: 16,
+                                height: 1.6,
                               ),
                               decoration: InputDecoration(
                                 hintText: l.captureHint,
-                                hintStyle: theme.textTheme.headlineSmall
-                                    ?.copyWith(color: scheme.onSurfaceVariant),
+                                hintStyle: theme.textTheme.bodyLarge?.copyWith(
+                                  color: scheme.onSurfaceVariant,
+                                  fontSize: 16,
+                                ),
                                 filled: false,
-                                contentPadding: const EdgeInsets.all(28),
+                                contentPadding: const EdgeInsets.all(18),
                                 border: InputBorder.none,
                                 enabledBorder: InputBorder.none,
                                 focusedBorder: InputBorder.none,
@@ -111,13 +88,13 @@ mixin CaptureWide on CaptureViewBase {
                         Divider(height: 1, color: scheme.outlineVariant),
                         Padding(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: 8,
+                            horizontal: 12,
+                            vertical: 6,
                           ),
                           child: Wrap(
                             alignment: WrapAlignment.spaceBetween,
                             crossAxisAlignment: WrapCrossAlignment.center,
-                            spacing: 16,
+                            spacing: 12,
                             runSpacing: 4,
                             children: [
                               Row(
@@ -132,39 +109,75 @@ mixin CaptureWide on CaptureViewBase {
                                           }
                                         : null,
                                   ),
-                                  const SizedBox(width: 4),
+                                  const SizedBox(width: 2),
                                   Text(
                                     l.checklist,
                                     style: theme.textTheme.labelMedium,
                                   ),
                                 ],
                               ),
-                              ListenableBuilder(
-                                listenable: f.composer,
-                                builder: (context, _) {
-                                  final text = f.composer.text;
-                                  return Text(
-                                    nexDigits(
-                                      l.editorCount(
-                                        text.trim().isEmpty
-                                            ? 0
-                                            : text
-                                                  .trim()
-                                                  .split(RegExp(r'\s+'))
-                                                  .length,
-                                        text.length,
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  // The count gives ground first: it is a
+                                  // nicety, and a shrinking row must not push
+                                  // the button off the edge.
+                                  Flexible(
+                                    child: ListenableBuilder(
+                                      listenable: f.composer,
+                                      builder: (context, _) {
+                                        final text = f.composer.text;
+                                        return Text(
+                                          nexDigits(
+                                            l.editorCount(
+                                              text.trim().isEmpty
+                                                  ? 0
+                                                  : text
+                                                        .trim()
+                                                        .split(
+                                                          RegExp(r'\s+'),
+                                                        )
+                                                        .length,
+                                              text.length,
+                                            ),
+                                            persian:
+                                                Localizations.localeOf(
+                                                  context,
+                                                ).languageCode ==
+                                                'fa',
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: theme.textTheme.labelSmall
+                                              ?.copyWith(
+                                                color:
+                                                    scheme.onSurfaceVariant,
+                                              ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  if (cramped)
+                                    IconButton(
+                                      tooltip: l.newNote,
+                                      onPressed: () => f.fresh(),
+                                      icon: const Icon(Icons.add, size: 17),
+                                      visualDensity: VisualDensity.compact,
+                                    )
+                                  else
+                                    TextButton.icon(
+                                      onPressed: () => f.fresh(),
+                                      icon: const Icon(Icons.add, size: 15),
+                                      label: Text(l.newNote),
+                                      style: TextButton.styleFrom(
+                                        visualDensity: VisualDensity.compact,
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                        ),
                                       ),
-                                      persian:
-                                          Localizations.localeOf(
-                                            context,
-                                          ).languageCode ==
-                                          'fa',
                                     ),
-                                    style: theme.textTheme.labelSmall?.copyWith(
-                                      color: scheme.onSurfaceVariant,
-                                    ),
-                                  );
-                                },
+                                ],
                               ),
                             ],
                           ),
@@ -172,36 +185,39 @@ mixin CaptureWide on CaptureViewBase {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 10),
                   _actions(context, f, l, c),
                   if (f.importing || f.recordingBusy)
                     const Padding(
-                      padding: EdgeInsets.only(top: 12),
+                      padding: EdgeInsets.only(top: 8),
                       child: LinearProgressIndicator(),
                     ),
                   if (f.recordingAt != null)
                     Padding(
-                      padding: const EdgeInsets.only(top: 12),
+                      padding: const EdgeInsets.only(top: 8),
                       child: Text(
                         l.recording,
-                        style: TextStyle(color: scheme.error),
+                        style: TextStyle(color: scheme.error, fontSize: 12),
                       ),
                     ),
                   if (f.importedCount > 0 && !f.importing)
                     TextButton.icon(
                       onPressed: () => c?.selectWindowSection('library'),
-                      icon: const Icon(Icons.check_circle_outline, size: 18),
+                      icon: const Icon(Icons.check_circle_outline, size: 15),
                       label: Text(l.mediaAdded(f.importedCount)),
+                      style: TextButton.styleFrom(
+                        visualDensity: VisualDensity.compact,
+                      ),
                     ),
                   if (f.error != null)
                     Padding(
-                      padding: const EdgeInsets.only(top: 12),
+                      padding: const EdgeInsets.only(top: 8),
                       child: Text(
                         '${l.failed}: ${f.error}',
-                        style: TextStyle(color: scheme.error),
+                        style: TextStyle(color: scheme.error, fontSize: 12),
                       ),
                     ),
-                  if (!embedded) const SizedBox(height: 24),
+                  if (!embedded) const SizedBox(height: 16),
                   if (!embedded)
                     Text(
                       l.workspaceCaptureFooter,
@@ -235,24 +251,26 @@ class _CaptureAction extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     return LayoutBuilder(
       builder: (context, constraints) {
-        final columns = constraints.maxWidth >= 740 ? 3 : 2;
+        final columns = constraints.maxWidth >= 680 ? 3 : 2;
         return SizedBox(
           width: (constraints.maxWidth - (columns - 1) * 8) / columns,
           child: OutlinedButton.icon(
             onPressed: onPressed,
-            icon: Icon(icon, size: 19),
+            icon: Icon(icon, size: 15),
             label: Text(
               label,
-              maxLines: 2,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
             ),
             style: OutlinedButton.styleFrom(
               foregroundColor: scheme.onSurface,
               backgroundColor: scheme.surfaceContainerLowest,
-              side: BorderSide(color: scheme.outline),
+              side: BorderSide(color: scheme.outlineVariant),
               alignment: AlignmentDirectional.centerStart,
-              minimumSize: const Size(0, 52),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              visualDensity: VisualDensity.compact,
+              minimumSize: const Size(0, 36),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
             ),
           ),
         );

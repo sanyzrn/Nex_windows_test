@@ -39,7 +39,15 @@ class ToolInfo {
         app: app,
       );
     }
-    final w = kTools[id]!;
+    // Dock/more lists are persisted verbatim, so an id can outlive its tool:
+    // a renamed or removed tool leaves a stale entry behind after an upgrade,
+    // and a null check here took the whole Tools section down with it. The
+    // fallback renders as a ghost the organizer can remove, instead of as a
+    // crash.
+    final w = kTools[id];
+    if (w == null) {
+      return ToolInfo(id: id, name: id, kind: ToolKind.panel);
+    }
     return ToolInfo(
       id: id,
       name: w.name,

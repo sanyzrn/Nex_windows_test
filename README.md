@@ -6,11 +6,11 @@
 
 A local-first notebook and desktop toolkit for Windows, with English and Persian interfaces. Work in a full desktop window or a compact panel at either screen edge.
 
-**Current app version: `0.12.1+9` · Windows 10/11 · x64**
+**Current app version: `0.13.0+10` · Windows 10/11 · x64**
 
 [Download the latest installer](https://github.com/sanyzrn/Nex_windows_test/releases/latest) · [What's new](apps/desktop/CHANGELOG.md) · [Report a bug](https://github.com/sanyzrn/Nex_windows_test/issues/new/choose) · [فارسی](#راهنمای-فارسی)
 
-![Nex Windows notebook with its custom title bar](design/product/0.12.1/window-release.png)
+![Nex Windows notebook with its custom title bar](apps/desktop/test/review_goldens/redesign_window_capture_1600_dark_en.png)
 
 ## What you can do
 
@@ -25,7 +25,7 @@ The recorded shared-code base is [DbsNex](https://github.com/sanyzrn/DbsNex) com
 
 ## Install and update
 
-1. Open [Releases](https://github.com/sanyzrn/Nex_windows_test/releases/latest) and download `Nex-Windows-Setup-0.12.1-x64.exe`.
+1. Open [Releases](https://github.com/sanyzrn/Nex_windows_test/releases/latest) and download `Nex-Windows-Setup-0.13.0-x64.exe`.
 2. Close any running Nex instance using its tray menu before upgrading.
 3. Run the installer. It installs for the current user without administrator privileges and includes the runtime dependencies.
 
@@ -34,7 +34,7 @@ The installer offers Persian/English pages and a dark Nex design. It is currentl
 Verify a download against the `SHA256SUMS` asset from the **same release**:
 
 ```powershell
-Get-FileHash .\Nex-Windows-Setup-0.12.1-x64.exe -Algorithm SHA256
+Get-FileHash .\Nex-Windows-Setup-0.13.0-x64.exe -Algorithm SHA256
 ```
 
 Generated installers belong in GitHub Release assets. Git tracks source, assets, tests and documentation; local SDKs, build caches and installer EXEs are intentionally excluded.
@@ -79,7 +79,7 @@ CI runs version checks, package-host/UI checks, analysis, desktop tests and Wind
 | `docs` | Architecture, validation, release guidance and historical reports |
 | `patches` | Historical upstream transfer patches; already applied here |
 
-[Architecture and data](apps/desktop/README.md) · [Validation for 0.12.1](docs/WINDOWS_0121_REVIEW.md) · [Contributing](CONTRIBUTING.md) · [Upstream integration](docs/INTEGRATION.md)
+[Architecture and data](apps/desktop/README.md) · [Validation for 0.13.0](docs/WINDOWS_0130_REVIEW.md) · [Contributing](CONTRIBUTING.md) · [Upstream integration](docs/INTEGRATION.md)
 
 ## Current limits
 
@@ -87,7 +87,7 @@ Cloud/LAN sync, OCR, assistant/Vault, local LLM and automatic updates are not pa
 
 ## راهنمای فارسی
 
-نکس ویندوز یک دفتر یادداشت محلی با ابزارهای کاربردی ویندوز است. نسخهٔ فعلی **۰٫۱۲٫۱، بیلد ۹** است و دو حالت پنجره و پنل کناری دارد.
+نکس ویندوز یک دفتر یادداشت محلی با ابزارهای کاربردی ویندوز است. نسخهٔ فعلی **۰٫۱۳٫۰، بیلد ۱۰** است و دو حالت پنجره و پنل کناری دارد.
 
 - [آخرین نصاب و فایل بررسی SHA-256](https://github.com/sanyzrn/Nex_windows_test/releases/latest) را از بخش Releases دریافت کنید؛ لینک دانلود داخل گزارش‌های قدیمی، نسخهٔ جاری محسوب نمی‌شود.
 - قبل از ارتقا، برنامهٔ باز را از منوی کنار ساعت ببندید. یادداشت‌ها، رسانه‌ها و تنظیمات در مسیر جدا از فایل‌های نصب نگه‌داری می‌شوند.

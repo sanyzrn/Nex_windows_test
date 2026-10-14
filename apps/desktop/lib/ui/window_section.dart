@@ -73,13 +73,13 @@ class _SectionHeader extends StatelessWidget {
       'settings' => l.settings,
       _ => l.capture,
     };
-    final small = MediaQuery.sizeOf(context).width < 900;
+    final small = MediaQuery.sizeOf(context).width < 760;
     return Container(
       padding: EdgeInsetsDirectional.fromSTEB(
-        small ? 20 : 32,
-        12,
-        small ? 20 : 32,
-        12,
+        small ? 16 : 20,
+        8,
+        small ? 16 : 20,
+        8,
       ),
       decoration: BoxDecoration(
         border: Border(bottom: BorderSide(color: c.outlineVariant)),
@@ -104,12 +104,12 @@ class _SectionHeader extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: Theme.of(
                 context,
-              ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+              ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
             ),
           ),
           if (NexScope.maybeOf(context)?.recordingAt != null)
             RecordStopButton(controller: controller),
-          const SizedBox(width: 12),
+          const SizedBox(width: 8),
           OutlinedButton.icon(
             key: const ValueKey('workspace-command'),
             onPressed: () => showCommandPalette(
@@ -117,14 +117,14 @@ class _SectionHeader extends StatelessWidget {
               controller: controller,
               features: NexScope.maybeOf(context),
             ),
-            icon: const Icon(Icons.search_outlined, size: 18),
+            icon: const Icon(Icons.search_outlined, size: 15),
             label: small
                 ? const NexShortcutHint('Ctrl+K')
                 : Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(l.workspaceSearch),
-                      const SizedBox(width: 24),
+                      const SizedBox(width: 10),
                       const NexShortcutHint('Ctrl+K'),
                     ],
                   ),
@@ -132,7 +132,9 @@ class _SectionHeader extends StatelessWidget {
               backgroundColor: c.surfaceContainerLowest,
               foregroundColor: c.onSurfaceVariant,
               side: BorderSide(color: c.outlineVariant),
-              minimumSize: const Size(0, 40),
+              shape: const StadiumBorder(),
+              minimumSize: const Size(0, 32),
+              padding: const EdgeInsets.symmetric(horizontal: 12),
             ),
           ),
         ],

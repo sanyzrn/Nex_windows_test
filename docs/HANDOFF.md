@@ -1,6 +1,18 @@
-# Current repository status — 2026-10-14
+# Current repository status — 2026-10-15
 
-Current app: **0.12.1+9**. Source is synchronized on GitHub main; installers are Release assets, not tracked source files. Follow [README](../README.md), [release process](RELEASING.md), and [current app validation](WINDOWS_0121_REVIEW.md). The handoffs below are historical; statements such as "no commit/push" describe their original stage and are not current repository status.
+Current app: **0.13.0+10** (the Android-parity redesign). Source is synchronized on GitHub main; installers are Release assets, not tracked source files. Follow [README](../README.md), [release process](RELEASING.md), and [current app validation](WINDOWS_0130_REVIEW.md). The handoffs below are historical; statements such as "no commit/push" describe their original stage and are not current repository status.
+
+---
+
+# Agent Handoff: 0.13.0 Android-parity redesign and repair — 2026-10-15
+
+Owner request: clone and review the project, fix every bug found, improve stability/usability/polish, and redesign the UI to be minimal, compact, refined and professional — consistent with the Android app (DbsNex), whose screenshots were attached as the visual reference.
+
+Design: the classic dark ramp is now the Android deep-sea navy (page #0C141F, card #182230, accent #7CB9FF), the light ramp the matching cool off-white, and every token-contract contrast floor was recomputed and still holds — including the glass-wash presence floor, which needed a navy-tinted dark anchor. The window paints the Android wave motif quietly behind its content (high-contrast skips it). Chrome is compact everywhere: 36px caption, 204/64px rail with no permanent shortcut badges, 32px section header with a capsule Ctrl+K, one-clean-card capture (no status row, 16px composer, 36px actions), one-line home header without the quick-tool buttons, Android-style coloured tool chips with a capsule search in Tools, capsule library search with 34px banner actions, 76px note cards, 14px settings cards, 36px outlined buttons and lighter inputs globally.
+
+Bugs fixed, each with a regression test where testable: stale persisted tool ids crashed the Tools section (ghost fallback now); identical checklist lines toggled each other (index-paired lines); Ctrl+P setState-after-dispose; the reminder picker's deactivated-element use; two RenderFlex overflows below ~420px found by a new narrow-window test; the selection banner's narrow-pane overflow; full-resolution decodes for 32px home thumbnails; per-frame SharedPreferences writes during pane drag; per-note DateTime.now() in the Today strip; the 16-vs-20 selection-ring radius mismatch; null-asserts on a missing panel scope in the workspace home.
+
+Validation observed on Linux (Flutter 3.44.8/Dart 3.12.2): analyze clean; desktop 126 PASS / 7 skipped (Windows-golden tags), shared UI 192 PASS, core 198 PASS, data 199 PASS; version consistency 0.13.0+10 across all six files; UI hygiene clean in kind (the tool-accent colours are tokens in nex_ui, not app literals). Windows-only artefacts — Release build, installer, goldens, review matrix — were not run here; CI regenerates the golden baselines for this release on windows-latest via the new redesign steps in desktop.yml (delete those three steps after committing the refreshed PNGs; see RELEASING.md). Full detail: [WINDOWS_0130_REVIEW](WINDOWS_0130_REVIEW.md).
 
 ---
 

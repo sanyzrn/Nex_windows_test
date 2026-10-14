@@ -19,7 +19,7 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
         if (_selectedIds.isNotEmpty)
           Container(
             margin: const EdgeInsets.fromLTRB(12, 8, 12, 4),
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
             decoration: BoxDecoration(
               color: scheme.primaryContainer,
               borderRadius: BorderRadius.circular(12),
@@ -31,25 +31,34 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
                 ),
               ],
             ),
+            // Compact 34px buttons and a flexible count: the pane can be
+            // clamped to 280px, and full 48px IconButtons (four of them, plus
+            // the count, plus the spacer) overflowed it.
             child: Row(
               children: [
-                IconButton(
-                  icon: const Icon(Icons.close_rounded, size: 20),
+                _BannerIcon(
+                  icon: Icons.close_rounded,
                   tooltip: l.clearSelection,
+                  color: scheme.onPrimaryContainer,
                   onPressed: () => setState(() => _selectedIds.clear()),
                 ),
-                Text(
-                  l.selectedCount(_selectedIds.length),
-                  style: TextStyle(
-                    color: scheme.onPrimaryContainer,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 13,
+                const SizedBox(width: 4),
+                Expanded(
+                  child: Text(
+                    l.selectedCount(_selectedIds.length),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: scheme.onPrimaryContainer,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 12.5,
+                    ),
                   ),
                 ),
-                const Spacer(),
-                IconButton(
-                  icon: const Icon(Icons.push_pin_outlined, size: 20),
+                _BannerIcon(
+                  icon: Icons.push_pin_outlined,
                   tooltip: l.pin,
+                  color: scheme.onPrimaryContainer,
                   onPressed: () async {
                     final features = NexScope.of(context);
                     final chosen = notes
@@ -68,9 +77,10 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
                     await load();
                   },
                 ),
-                IconButton(
-                  icon: const Icon(Icons.copy_rounded, size: 20),
+                _BannerIcon(
+                  icon: Icons.copy_rounded,
                   tooltip: l.copy,
+                  color: scheme.onPrimaryContainer,
                   onPressed: () {
                     final sel = notes.where((n) => _selectedIds.contains(n.id));
                     final text = sel.map(noteCopyText).join('\n\n---\n\n');
@@ -80,9 +90,10 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
                     ).showSnackBar(SnackBar(content: Text(l.copy)));
                   },
                 ),
-                IconButton(
-                  icon: const Icon(Icons.delete_outline_rounded, size: 20),
+                _BannerIcon(
+                  icon: Icons.delete_outline_rounded,
                   tooltip: l.delete,
+                  color: scheme.onPrimaryContainer,
                   onPressed: () async {
                     final features = NexScope.of(context);
                     final messenger = ScaffoldMessenger.of(context);
@@ -128,7 +139,7 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
             ),
           ),
         Padding(
-          padding: const EdgeInsets.fromLTRB(12, 10, 12, 6),
+          padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
           child: Focus(
             onFocusChange: (focused) {
               final c = NexPanelScope.maybeOf(context);
@@ -145,10 +156,25 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
               textDirection: nexDirectionOf(query.text),
               decoration: InputDecoration(
                 hintText: l.search,
-                prefixIcon: const Icon(Icons.search_rounded, size: 20),
+                // The Android app's search fields are capsules; a stadium
+                // here matches it and separates search from the card edges
+                // around it.
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(999),
+                  borderSide: BorderSide(color: scheme.outlineVariant),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(999),
+                  borderSide: BorderSide(
+                    color: scheme.primary,
+                    width: nexFocusRingWidth,
+                  ),
+                ),
+                contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                prefixIcon: const Icon(Icons.search_rounded, size: 18),
                 suffixIcon: query.text.isNotEmpty
                     ? IconButton(
-                        icon: const Icon(Icons.close_rounded, size: 18),
+                        icon: const Icon(Icons.close_rounded, size: 16),
                         onPressed: () {
                           query.clear();
                           load();
@@ -242,7 +268,7 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
           },
           onShortcutsTap: () => showShortcutsDialog(context),
         ),
-        if (!trash && notes.any(_dueToday)) _buildTodayStrip(context, l, fa),
+        if (!trash && notes.any(_isDueToday)) _buildTodayStrip(context, l, fa),
         if (failure != null)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -346,7 +372,10 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
                       duration: const Duration(milliseconds: 180),
                       curve: Curves.easeOutCubic,
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(16),
+                        // The card body inside is NexRadius.lg; the selection
+                        // ring used to be 16, so a selected card's outline
+                        // visibly cut across its own corners.
+                        borderRadius: BorderRadius.circular(NexRadius.lg),
                         color: isCardSelected && _selectedIds.isEmpty
                             ? scheme.primary.withValues(alpha: 0.07)
                             : Colors.transparent,
@@ -476,6 +505,41 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
             ),
           ),
       ],
+    );
+  }
+}
+
+/// A compact 34px square action for the selection banner. The banner sits in
+/// a pane the user can clamp to 280px, so its controls give up the 48px
+/// touch default for a pointer-sized target with the same tooltip and
+/// keyboard focus every other control keeps.
+class _BannerIcon extends StatelessWidget {
+  const _BannerIcon({
+    required this.icon,
+    required this.tooltip,
+    required this.color,
+    required this.onPressed,
+  });
+
+  final IconData icon;
+  final String tooltip;
+  final Color color;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      icon: Icon(icon, size: 17),
+      tooltip: tooltip,
+      color: color,
+      onPressed: onPressed,
+      style: IconButton.styleFrom(
+        minimumSize: const Size(34, 34),
+        maximumSize: const Size(34, 34),
+        padding: EdgeInsets.zero,
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
+      ),
     );
   }
 }

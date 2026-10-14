@@ -545,9 +545,17 @@ class _ChecklistPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Pairs, not bare items: ChecklistItem has value equality, so two
+    // identical lines (same words, same state) used to collapse into one
+    // index — the second line's checkbox toggled the first line's item, and
+    // no number of clicks could ever tick the second one. Carrying the
+    // original index alongside the item is what keeps them apart.
+    final indexed = [
+      for (var i = 0; i < items.length; i++) (i, items[i]),
+    ];
     final ordered = [
-      ...items.where((item) => !item.done),
-      ...items.where((item) => item.done),
+      ...indexed.where((entry) => !entry.$2.done),
+      ...indexed.where((entry) => entry.$2.done),
     ];
     final lines = NexCardDensity.of(context).lines;
     final shown = ordered
@@ -561,15 +569,17 @@ class _ChecklistPreview extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          for (final item in shown)
+          for (var i = 0; i < shown.length; i++)
             _ChecklistLine(
-              item: item,
+              item: shown[i].$2,
               onToggle: onToggle == null
                   ? null
-                  : () => onToggle!(items.indexOf(item)),
+                  : () => onToggle!(shown[i].$1),
               // The last visible line carries the overflow count, so the
-              // card never grows a third row to say "+3 more".
-              trailing: item == shown.last && remaining > 0
+              // card never grows a third row to say "+3 more". Compared by
+              // position, not by equality — a duplicate of the last line
+              // would otherwise take the count for itself.
+              trailing: i == shown.length - 1 && remaining > 0
                   ? '+$remaining'
                   : null,
             ),

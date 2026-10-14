@@ -12,12 +12,22 @@ mixin _LibraryWorkspace on _LibraryStateBase {
 
   /// Whether [n]'s reminder still needs attention today (due later today,
   /// already overdue, or a recurring item whose turn has come round).
-  bool _dueToday(Note n) {
+  ///
+  /// [now] and [endOfToday] are passed in: the strip asks this once per note
+  /// per build, and calling DateTime.now() inside meant a fresh clock read
+  /// per note on a list that grows with every scrolled page.
+  bool _dueToday(Note n, DateTime now, DateTime endOfToday) {
     final due = n.dueAt == null ? null : _effectiveDue(n);
     if (due == null) return false;
+    return due.isBefore(endOfToday);
+  }
+
+  /// A tear-off of [_dueToday] for `notes.any` at build time: one clock read,
+  /// one end-of-day bound, then the same predicate over every note.
+  bool _isDueToday(Note n) {
     final now = DateTime.now();
     final endOfToday = DateTime(now.year, now.month, now.day, 23, 59, 59);
-    return due.isBefore(endOfToday);
+    return _dueToday(n, now, endOfToday);
   }
 
   DateTime _effectiveDue(Note n) =>
@@ -28,9 +38,10 @@ mixin _LibraryWorkspace on _LibraryStateBase {
   /// the note.
   Widget _buildTodayStrip(BuildContext context, AppLocalizations l, bool fa) {
     final scheme = Theme.of(context).colorScheme;
-    final due = notes.where(_dueToday).toList()
-      ..sort((a, b) => _effectiveDue(a).compareTo(_effectiveDue(b)));
     final now = DateTime.now();
+    final endOfToday = DateTime(now.year, now.month, now.day, 23, 59, 59);
+    final due = notes.where((n) => _dueToday(n, now, endOfToday)).toList()
+      ..sort((a, b) => _effectiveDue(a).compareTo(_effectiveDue(b)));
     final overdue = due.where((n) => _effectiveDue(n).isBefore(now)).length;
 
     return Padding(

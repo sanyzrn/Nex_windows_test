@@ -72,7 +72,7 @@ abstract class CaptureViewBase extends StatelessWidget {
         ?.controller;
     if (!compact) return _buildWide(context, f, l, c);
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+      padding: const EdgeInsets.fromLTRB(16, 6, 16, 16),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -80,10 +80,10 @@ abstract class CaptureViewBase extends StatelessWidget {
             children: [
               Icon(
                 Icons.check_circle_outline,
-                size: 14,
+                size: 13,
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 7),
               Expanded(
                 child: Text(
                   f.saving ? l.saving : l.savedLocally,
@@ -93,7 +93,8 @@ abstract class CaptureViewBase extends StatelessWidget {
               IconButton(
                 tooltip: l.newNote,
                 onPressed: () => f.fresh(),
-                icon: const Icon(Icons.add),
+                icon: const Icon(Icons.add, size: 18),
+                visualDensity: VisualDensity.compact,
               ),
             ],
           ),
@@ -117,7 +118,7 @@ abstract class CaptureViewBase extends StatelessWidget {
                 maxLines: 9,
                 style: Theme.of(
                   context,
-                ).textTheme.bodyLarge?.copyWith(fontSize: 18, height: 1.65),
+                ).textTheme.bodyLarge?.copyWith(fontSize: 15, height: 1.6),
                 textDirection: nexDirectionOf(f.composer.text),
                 decoration: InputDecoration(
                   hintText: l.captureHint,
@@ -125,7 +126,7 @@ abstract class CaptureViewBase extends StatelessWidget {
                   fillColor: Theme.of(
                     context,
                   ).colorScheme.surfaceContainerLowest,
-                  contentPadding: const EdgeInsets.all(20),
+                  contentPadding: const EdgeInsets.all(14),
                 ),
                 onChanged: f.write,
               ),
@@ -142,7 +143,7 @@ abstract class CaptureViewBase extends StatelessWidget {
                       }
                     : null,
               ),
-              Text(l.checklist),
+              Text(l.checklist, style: Theme.of(context).textTheme.bodySmall),
             ],
           ),
           _actions(context, f, l, c),

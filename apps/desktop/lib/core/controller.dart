@@ -274,7 +274,7 @@ abstract class PanelStateBase extends ChangeNotifier implements PanelHoldable {
     );
     final scheme = base.colorScheme;
     final outline = OutlineInputBorder(
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: BorderRadius.circular(12),
       borderSide: BorderSide(color: scheme.onSurface.withValues(alpha: .16)),
     );
     return base.copyWith(
@@ -282,8 +282,8 @@ abstract class PanelStateBase extends ChangeNotifier implements PanelHoldable {
         filled: true,
         fillColor: scheme.surfaceContainerLow,
         contentPadding: const EdgeInsets.symmetric(
-          horizontal: 14,
-          vertical: 14,
+          horizontal: 12,
+          vertical: 10,
         ),
         border: outline,
         enabledBorder: outline,
@@ -294,10 +294,10 @@ abstract class PanelStateBase extends ChangeNotifier implements PanelHoldable {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(10),
           ),
           side: BorderSide(color: scheme.outline),
-          minimumSize: const Size(0, 42),
+          minimumSize: const Size(0, 36),
         ),
       ),
       iconButtonTheme: IconButtonThemeData(

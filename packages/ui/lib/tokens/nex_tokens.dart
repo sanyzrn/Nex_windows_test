@@ -29,52 +29,43 @@ import 'nex_contrast.dart';
 /// between 2.99 and 3.03 — which is exactly why the floor has to be checked
 /// rather than judged.
 abstract final class NexColors {
-  /* ------------------------------------------------------------- light */
+  /* -------------------------------------------------------------- light */
 
-  /// The page behind the cards.
-  static const bgPrimaryLight = Color(0xFFF5F6F6);
+  // A cool off-white rather than a neutral one, matching the Android app's
+  // light surface family. The card stays pure white, so the page keeps a
+  // visible tonal step below it.
+  static const bgPrimaryLight = Color(0xFFF2F4F7);
 
   /// A card, a sheet, a dialog: paper on the desk.
   static const bgCardLight = Color(0xFFFFFFFF);
 
   /// Filled containers inside a card — the note type disc, chips at rest.
-  static const bgElevatedLight = Color(0xFFE0E0E0);
+  static const bgElevatedLight = Color(0xFFD9E0E9);
 
-  static const textPrimaryLight = Color(0xFF262626);
-  static const textSecondaryLight = Color(0xFF5C5C5C);
+  static const textPrimaryLight = Color(0xFF212832);
+  static const textSecondaryLight = Color(0xFF586274);
 
   /// Boundaries you can act on. Held to 3:1 against the card.
-  static const borderLight = Color(0xFF959494);
+  static const borderLight = Color(0xFF8E95A3);
 
   /// Dividers between rows of one surface. Never carries a boundary alone.
-  static const borderSoftLight = Color(0xFFF5F6F6);
+  static const borderSoftLight = Color(0xFFD3D9E2);
 
   /* -------------------------------------------------------------- dark */
 
-  // Warmer and a touch lighter than it was (#141414) — moved toward the
-  // Nex_ui Figma redesign's near-black, which reads closer to this than to
-  // pure neutral. Kept comfortably below bgCardDark rather than matching the
-  // Figma screen background exactly (#20201F is close enough to the current
-  // card colour that using it here would read as the card sitting *behind*
-  // the page instead of elevated above it — the Figma file's own card colour
-  // wasn't confirmed before its MCP access hit a rate limit).
-  // Darker than it was, to open the step up to the card above it. The cards
-  // used to carry a shadow, and four values of lightness plus that shadow was
-  // enough of an edge; with the shadow gone the tonal step is the only thing
-  // marking where a card starts, and four values cannot be seen.
-  //
-  // The page moved rather than the card, deliberately. Lightening the card
-  // would have walked it toward `bgElevatedDark` and `borderDark`, and the
-  // scaffold tests caught exactly that — the disc inside a card fell to
-  // 1.21:1 and the boundary token to 2.81:1. Moving the page away costs
-  // nothing on either.
-  static const bgPrimaryDark = Color(0xFF131312);
-  static const bgCardDark = Color(0xFF1E1E1E);
-  static const bgElevatedDark = Color(0xFF323232);
-  static const textPrimaryDark = Color(0xFFF2F2F3);
-  static const textSecondaryDark = Color(0xFFABABAB);
-  static const borderDark = Color(0xFF686965);
-  static const borderSoftDark = Color(0xFF000000);
+  // The deep-sea navy of the Android app (its page is #0B1622, its cards
+  // #1C2733), brought here so both platforms read as one product. The ramp
+  // keeps the app's own relationships: the card is a clear step above the
+  // page, the border still clears 3:1 on the card, and secondary text still
+  // clears 4.5:1 on both — the same floors `scaffold_test.dart` has always
+  // held, now on a blue-grey ramp instead of a warm near-black one.
+  static const bgPrimaryDark = Color(0xFF0C141F);
+  static const bgCardDark = Color(0xFF182230);
+  static const bgElevatedDark = Color(0xFF2A394C);
+  static const textPrimaryDark = Color(0xFFEEF2F7);
+  static const textSecondaryDark = Color(0xFF93A1B3);
+  static const borderDark = Color(0xFF5D7290);
+  static const borderSoftDark = Color(0xFF080E17);
 
   /* ------------------------------------------------------ comfort light */
 
@@ -137,8 +128,11 @@ abstract final class NexColors {
   /// — lightness 0.72 and 0.82, saturation easing back as it climbs — so the
   /// shipped palette and a hand-picked one are the same shape in a different
   /// hue.
-  static const accentDark = Color(0xFF74BCFB);
-  static const accentStrongDark = Color(0xFFA7D4FB);
+  /// The Android app's sky blue (#7CB9FF), which the desktop had as #74BCFB —
+  /// one unit of green apart. Same ramp shape (lightness 0.72/0.82), still
+  /// above 3:1 on every dark ground the app draws it on.
+  static const accentDark = Color(0xFF7CB9FF);
+  static const accentStrongDark = Color(0xFFA8CBFF);
 
   /// The shipped palette, exactly — not run through [nexAccentPaletteFrom],
   /// so nobody who has never touched the accent setting sees so much as a
@@ -150,6 +144,32 @@ abstract final class NexColors {
     dark: accentDark,
     strongDark: accentStrongDark,
   );
+
+  /* ------------------------------------------------------ tool accents */
+
+  /// Per-tool hues for the tools directory's icon containers, taken from the
+  /// Android app's quick-access grid: every tile carries its own muted colour
+  /// so the grid scans by category at a glance. Used as a tint (alpha .14)
+  /// behind a same-hue icon; never as text or boundary colour, so none of
+  /// these needs a contrast floor.
+  static const toolAccents = <String, Color>{
+    'clip': Color(0xFF7DD3FC), // sky
+    'awake': Color(0xFFFCD34D), // amber
+    'calc': Color(0xFFC084FC), // violet
+    'timer': Color(0xFF5EEAD4), // teal
+    'stopwatch': Color(0xFF5EEAD4), // teal
+    'color': Color(0xFFFB7185), // rose
+    'clock': Color(0xFF94A3B8), // slate
+    'pass': Color(0xFFFCD34D), // amber
+    'unit': Color(0xFF86EFAC), // green
+    'emoji': Color(0xFFFCD34D), // amber
+  };
+
+  /// The hue a tool's icon container is tinted with, or the page's own
+  /// secondary text colour for tools without one — so an unmapped tool still
+  /// reads as a member of the grid.
+  static Color toolAccent(String id, Color fallback) =>
+      toolAccents[id] ?? fallback;
 
   /* ---------------------------------------------------------- semantic */
 
@@ -194,7 +214,10 @@ abstract final class NexSpacing {
   static const sm = 8.0;
   static const contentGap = 16.0;
   static const md = 16.0;
-  static const cardInset = 16.0;
+  // 14 rather than 16: the whole list reads denser at one stroke, and the
+  // card keeps a touch more room inside it than the phone layout because a
+  // desktop list pane is narrower than a phone is.
+  static const cardInset = 14.0;
   static const lg = 24.0;
   static const xl = 32.0;
 }
@@ -289,21 +312,20 @@ const nexFocusRingOffset = 2.0;
 /// Shared rather than repeated so the swipe panel behind a card can line up
 /// with the card exactly. The panel used to run to the physical screen edge
 /// while the card stopped short of it, so the two never read as parts of the
-/// same object.
+/// same object. Vertical is 6: cards sit closer together in a desktop list,
+/// where the pointer — not a thumb — does the aiming.
 const nexCardInsets = EdgeInsets.symmetric(
   horizontal: NexSpacing.md,
-  vertical: NexSpacing.sm,
+  vertical: 6,
 );
 
 /// The type glyph's container on a card, and the photo thumbnail's size.
 ///
-/// Smaller than it was — the Nex_ui Figma redesign's icon box scales
-/// noticeably down against the rest of its layout, from the 56dp this used
-/// to be. It is never its own tap target (the whole card is, via the
-/// [InkWell] in `_CardBody`), so nothing here is bound by [nexMinTapTarget].
-/// It is never its own tap target (the whole card is, via the [InkWell] in
-/// `_CardBody`), so nothing here is bound by [nexMinTapTarget].
-const nexCardLeadingSize = 48.0;
+/// Smaller than it was — the Android app's note cards carry a 40–44dp leading
+/// box, and 48 was a phone-phablet number. It is never its own tap target
+/// (the whole card is, via the [InkWell] in `_CardBody`), so nothing here is
+/// bound by [nexMinTapTarget].
+const nexCardLeadingSize = 42.0;
 
 /// How many lines of the note's own words a card shows.
 ///
@@ -328,9 +350,11 @@ const nexCardExpandedMaxLines = 12;
 
 /// One line of the preview, at the theme's bodyLarge line height.
 ///
-/// A constant rather than a measurement, because the card's height has to be
-/// known before its text is laid out. Changing bodyLarge means changing this.
-const _nexCardPreviewLineHeight = 24.0;
+/// Public because the card's height contract — `nexCardHeight` and the tests
+/// that hold it — is stated in terms of it. A constant rather than a
+/// measurement, because the card's height has to be known before its text is
+/// laid out. Changing bodyLarge means changing this.
+const nexCardPreviewLineHeight = 24.0;
 
 /// One height for every card in the timeline, at the default text size.
 ///
@@ -339,22 +363,29 @@ const _nexCardPreviewLineHeight = 24.0;
 /// single line — the list came out ragged, with no relationship between a
 /// card's height and anything the reader cares about.
 ///
-/// Two preview lines cost exactly what the leading glyph already did: 24
-/// twice, against the glyph's 48. So a two-line preview never had to make the
-/// card taller — and briefly did, because the relative time was stacked
-/// *under* the preview and that was the part which would not fit. Moving the
-/// time beside the glyph gave the text its full height back and the card its
-/// original size back.
-const nexCardHeight = nexCardLeadingSize + NexSpacing.cardInset * 2;
+/// The height is whatever the card's two tenants need — the leading glyph and
+/// two preview lines — plus the inset, whichever tenant is taller. It used to
+/// be the glyph's 48; the Android-parity glyph box is 42 and the two lines at
+/// 24 each now set the floor, which leaves the height unchanged while the
+/// card's face gets quieter.
+const nexCardHeight = _nexTaller + NexSpacing.cardInset * 2;
+
+/// [math.max] is not const, so the taller of the glyph and the preview block
+/// is spelled out as the two candidates. Kept private: the public contract is
+/// [nexCardHeight] and [nexCardHeightFor].
+const double _nexTaller =
+    nexCardLeadingSize >
+        nexCardPreviewLineHeight * nexCardPreviewLines
+    ? nexCardLeadingSize
+    : nexCardPreviewLineHeight * nexCardPreviewLines;
 
 /// [nexCardHeight], grown only as far as larger text actually needs.
 ///
-/// At the default scale this is exactly [nexCardHeight] — two preview lines
-/// and the glyph both come to 48. Past that the lines outgrow the glyph and
-/// the card follows them, because the alternative is a fixed box clipping the
-/// text of whoever turned the size up. The app's own UI-scale setting composes
-/// with the system's and clamps at 1.9, so this can be asked for nearly twice
-/// the default.
+/// At the default scale this is exactly [nexCardHeight]. Past that the lines
+/// outgrow their reserved space and the card follows them, because the
+/// alternative is a fixed box clipping the text of whoever turned the size
+/// up. The app's own UI-scale setting composes with the system's and clamps
+/// at 1.9, so this can be asked for nearly twice the default.
 double nexCardHeightFor(BuildContext context) {
   final density = NexCardDensity.of(context);
   final lines = nexCardPreviewLineHeightFor(context) * density.lines;
@@ -367,14 +398,14 @@ double nexCardHeightFor(BuildContext context) {
 /// height. Compact keeps two lines — a link's title and site, a voice note's
 /// words and length, are two rows whatever the density — in smaller type.
 enum NexCardDensity {
-  compact(inset: 10, leading: 40, lines: 2, lineHeight: 20),
+  compact(inset: 9, leading: 34, lines: 2, lineHeight: 20),
   standard(
     inset: NexSpacing.cardInset,
     leading: nexCardLeadingSize,
     lines: nexCardPreviewLines,
-    lineHeight: _nexCardPreviewLineHeight,
+    lineHeight: nexCardPreviewLineHeight,
   ),
-  readable(inset: 18, leading: 52, lines: 3, lineHeight: 24);
+  readable(inset: 16, leading: 48, lines: 3, lineHeight: 24);
 
   const NexCardDensity({
     required this.inset,
@@ -846,7 +877,12 @@ ThemeData _theme({
                   Colors.black.withValues(alpha: 0.60),
                 ],
                 lift: const Color(0xFF222222).withValues(alpha: 0.5),
-                anchor: const Color(0xFF262626).withValues(alpha: 0.30),
+                // Navy-tinted rather than the old neutral #262626: the
+                // classic dark page is deep navy now, and a grey anchor over
+                // it lifted the panel to only 1.077:1 against the page —
+                // under the 1.08 presence floor, i.e. a panel nobody could
+                // see. The same alpha on the ramp's own hue clears 1.14.
+                anchor: const Color(0xFF2E3A48).withValues(alpha: 0.30),
               )
             : NexGlassWash(
                 films: [

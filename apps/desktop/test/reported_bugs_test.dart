@@ -27,6 +27,17 @@ Future<void> _database(WidgetTester t) async {
   }
 }
 
+Future<void> _waitForWidget(WidgetTester t, Finder finder) async {
+  // SQLite runs in another isolate; a fixed delay races a busy Windows runner.
+  for (var i = 0; i < 100 && finder.evaluate().isEmpty; i++) {
+    await t.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 30)),
+    );
+    await t.pump(const Duration(milliseconds: 50));
+  }
+  expect(finder, findsOneWidget);
+}
+
 Future<({NexFeatures f, PanelController c})> _fixture(
   WidgetTester t, {
   double width = 1200,
@@ -232,6 +243,7 @@ void main() {
       await t.enterText(find.byKey(const ValueKey('tag-name')), 'Release QA');
       await t.tap(find.byTooltip('Save'));
       await _database(t);
+      await _waitForWidget(t, find.text('Release QA'));
       expect(
         find.text('Release QA'),
         findsOneWidget,
@@ -248,6 +260,7 @@ void main() {
       );
       await t.enterText(find.byKey(const ValueKey('tag-search')), 'Release');
       await t.pump();
+      await _waitForWidget(t, find.byTooltip('Edit'));
       await t.tap(find.byTooltip('Edit'));
       await t.enterText(
         find.byKey(const ValueKey('tag-name')),
@@ -259,6 +272,13 @@ void main() {
         () => fixture.f.store.call<Note?>('get', {'id': 'checklist'}),
       );
       expect(renamed!.tags.single.name, 'Release plans');
+      await _waitForWidget(
+        t,
+        find.descendant(
+          of: find.byType(AlertDialog),
+          matching: find.byTooltip('Delete'),
+        ),
+      );
       await t.tap(
         find.descendant(
           of: find.byType(AlertDialog),

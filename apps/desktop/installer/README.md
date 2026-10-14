@@ -1,6 +1,6 @@
 # Nex Windows installer
 
-Inno Setup **6.7.3** builds `Nex-Windows-Setup-0.12.1-x64.exe` for app **0.12.1+9** on Windows 10/11 x64. Setup uses a dark title bar, Nex artwork and English/Persian pages. It installs per user into `%LOCALAPPDATA%\Programs\Nex`, adds a Start menu shortcut and optionally a desktop shortcut, and registers its uninstaller. The selected installer language becomes the app/tray language once per installation.
+Inno Setup **6.7.3** builds `Nex-Windows-Setup-0.13.0-x64.exe` for app **0.13.0+10** on Windows 10/11 x64. Setup uses a dark title bar, Nex artwork and English/Persian pages. It installs per user into `%LOCALAPPDATA%\Programs\Nex`, adds a Start menu shortcut and optionally a desktop shortcut, and registers its uninstaller. The selected installer language becomes the app/tray language once per installation.
 
 Close Nex before upgrading or uninstalling; setup uses the application's singleton mutex. User notes, media and settings are stored outside the program directory and retained. Startup is controlled in Nex settings; uninstall removes its startup entry only when it points to this installation.
 

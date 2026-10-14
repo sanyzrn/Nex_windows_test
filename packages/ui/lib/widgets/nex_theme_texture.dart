@@ -20,6 +20,7 @@ class NexTextureBackdrop extends StatelessWidget {
     required this.texture,
     required this.child,
     this.extent = 0.36,
+    this.alpha,
   });
 
   final NexThemeTexture texture;
@@ -28,13 +29,19 @@ class NexTextureBackdrop extends StatelessWidget {
   /// How much of the height, from the bottom, the motif occupies.
   final double extent;
 
+  /// Overrides the motif's strength. Null keeps the theme-picker default
+  /// (13%/10%); the desktop window shell passes a quieter value because its
+  /// motif runs behind working content rather than along the bottom of a
+  /// reading page.
+  final double? alpha;
+
   @override
   Widget build(BuildContext context) {
     if (texture == NexThemeTexture.none) return child;
     final theme = Theme.of(context);
     final dark = theme.brightness == Brightness.dark;
     final ink = theme.colorScheme.onSurface.withValues(
-      alpha: dark ? 0.13 : 0.10,
+      alpha: alpha ?? (dark ? 0.13 : 0.10),
     );
     return Stack(
       fit: StackFit.expand,

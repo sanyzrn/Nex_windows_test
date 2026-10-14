@@ -30,51 +30,60 @@ class _ToolsDirectoryState extends State<_ToolsDirectory> {
     final others = filtered.where((id) => !essentialIds.contains(id)).toList();
     return LayoutBuilder(
       builder: (context, constraints) => ListView(
-        padding: EdgeInsets.all(constraints.maxWidth < 650 ? 24 : 40),
+        padding: EdgeInsets.all(constraints.maxWidth < 650 ? 16 : 24),
         children: [
           NexWorkspaceIntro(
             title: l.workspaceToolsTitle,
             description: l.workspaceToolsDescription,
             compact: constraints.maxWidth < 650,
           ),
-          const SizedBox(height: 28),
+          const SizedBox(height: 14),
           Align(
             alignment: AlignmentDirectional.centerStart,
             child: SizedBox(
-              width: 420,
+              width: 320,
               child: TextField(
                 key: const ValueKey('workspace-tools-search'),
                 decoration: InputDecoration(
                   hintText: l.workspaceToolsSearch,
-                  prefixIcon: const Icon(Icons.search_outlined, size: 20),
+                  prefixIcon: const Icon(Icons.search_outlined, size: 17),
                   fillColor: scheme.surfaceContainerLowest,
+                  // The Android app's search field is a capsule.
+                  border: const OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(999)),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(999),
+                    borderSide: BorderSide(color: scheme.outlineVariant),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(999),
+                    borderSide: BorderSide(
+                      color: scheme.primary,
+                      width: nexFocusRingWidth,
+                    ),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 10),
                 ),
                 onChanged: (value) => setState(() => query = value),
               ),
             ),
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 16),
           if (filtered.isEmpty)
-            Padding(padding: const EdgeInsets.all(32), child: Text(l.empty)),
-          if (essentials.isNotEmpty) ...[
-            Text(
-              l.workspaceEssentials,
-              style: Theme.of(
-                context,
-              ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+            Padding(
+              padding: const EdgeInsets.all(24),
+              child: Text(l.empty),
             ),
-            const SizedBox(height: 16),
+          if (essentials.isNotEmpty) ...[
+            _sectionLabel(l.workspaceEssentials),
+            const SizedBox(height: 10),
             _grid(essentials, c),
-            const SizedBox(height: 32),
+            const SizedBox(height: 20),
           ],
           if (others.isNotEmpty) ...[
-            Text(
-              l.workspaceAllTools,
-              style: Theme.of(
-                context,
-              ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 16),
+            _sectionLabel(l.workspaceAllTools),
+            const SizedBox(height: 10),
             _grid(others, c),
           ],
         ],
@@ -82,17 +91,28 @@ class _ToolsDirectoryState extends State<_ToolsDirectory> {
     );
   }
 
+  Widget _sectionLabel(String text) {
+    final scheme = Theme.of(context).colorScheme;
+    return Text(
+      text,
+      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+        fontWeight: FontWeight.w600,
+        color: scheme.onSurfaceVariant,
+      ),
+    );
+  }
+
   Widget _grid(List<String> ids, PanelController controller) => LayoutBuilder(
     builder: (context, constraints) {
-      final columns = constraints.maxWidth >= 900
+      final columns = constraints.maxWidth >= 860
           ? 3
           : constraints.maxWidth >= 520
           ? 2
           : 1;
-      final width = (constraints.maxWidth - (columns - 1) * 12) / columns;
+      final width = (constraints.maxWidth - (columns - 1) * 10) / columns;
       return Wrap(
-        spacing: 12,
-        runSpacing: 12,
+        spacing: 10,
+        runSpacing: 10,
         children: [
           for (final id in ids)
             SizedBox(
@@ -134,6 +154,10 @@ class _ToolTile extends StatelessWidget {
       'color' => l.workspaceColorHint,
       _ => l.workspaceUtilityHint,
     };
+    // Every tile carries the Android grid's coloured icon chip: a per-tool
+    // hue at a low tint behind a same-hue icon, so the directory scans by
+    // category the way the phone's quick-access grid does.
+    final accent = NexColors.toolAccent(id, c.onSurfaceVariant);
     return TextButton(
       onPressed: id == 'awake' && controller.awakeBusy ? null : _open,
       style:
@@ -142,9 +166,9 @@ class _ToolTile extends StatelessWidget {
             backgroundColor: active
                 ? c.primary.withValues(alpha: .09)
                 : c.surfaceContainerLowest,
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(12),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(18),
+              borderRadius: BorderRadius.circular(14),
             ),
             alignment: AlignmentDirectional.centerStart,
           ).copyWith(
@@ -160,17 +184,17 @@ class _ToolTile extends StatelessWidget {
       child: Row(
         children: [
           Container(
-            width: 44,
-            height: 44,
+            width: 36,
+            height: 36,
             decoration: BoxDecoration(
-              color: c.surfaceContainerLow,
-              borderRadius: BorderRadius.circular(12),
+              color: accent.withValues(alpha: .16),
+              borderRadius: BorderRadius.circular(10),
             ),
             child: Center(
-              child: _ToolIcon(controller: controller, id: id),
+              child: _ToolIcon(controller: controller, id: id, color: accent),
             ),
           ),
-          const SizedBox(width: 14),
+          const SizedBox(width: 11),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -178,33 +202,37 @@ class _ToolTile extends StatelessWidget {
               children: [
                 Text(
                   utilityLabelForText(context, ToolInfo.of(id).name),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                    fontSize: 14,
+                    fontSize: 13,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 3),
                 Text(
                   description,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontSize: 11,
-                    height: 1.5,
+                    height: 1.4,
                     color: c.onSurfaceVariant,
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 6),
           if (id == 'awake' && controller.awakeBusy)
             const SizedBox(
-              width: 16,
-              height: 16,
+              width: 14,
+              height: 14,
               child: CircularProgressIndicator(strokeWidth: 2),
             )
           else
             Icon(
-              active ? Icons.check_circle_outline : Icons.arrow_forward_rounded,
+              active ? Icons.check_circle_outline : Icons.chevron_right_rounded,
               size: 16,
               color: active ? c.primary : c.onSurfaceVariant,
             ),
@@ -215,16 +243,25 @@ class _ToolTile extends StatelessWidget {
 }
 
 /// Icon resolution shared with the dock: core icons, emoji, app icons, SVGs.
+///
+/// [color] tints the directory tile's icon with its per-tool hue; the dock
+/// passes the theme's own icon colour.
 class _ToolIcon extends StatelessWidget {
-  const _ToolIcon({required this.controller, required this.id});
+  const _ToolIcon({
+    required this.controller,
+    required this.id,
+    this.color,
+  });
 
   final PanelController controller;
   final String id;
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final info = ToolInfo.of(id);
+    final tint = color ?? scheme.onSurfaceVariant;
     final coreIcon = switch (id) {
       'clip' => Icons.content_paste_outlined,
       'awake' => Icons.wb_sunny_outlined,
@@ -241,7 +278,7 @@ class _ToolIcon extends StatelessWidget {
       _ => null,
     };
     if (coreIcon != null) {
-      return Icon(coreIcon, size: 23, color: scheme.onSurfaceVariant);
+      return Icon(coreIcon, size: 19, color: tint);
     }
     if (info.emoji != null) {
       return Text(
@@ -249,7 +286,7 @@ class _ToolIcon extends StatelessWidget {
         style: const TextStyle(
           fontFamily: 'Segoe UI Emoji',
           fontFamilyFallback: ['Segoe UI Emoji'],
-          fontSize: 21,
+          fontSize: 18,
         ),
       );
     }
@@ -257,7 +294,7 @@ class _ToolIcon extends StatelessWidget {
       return AppIconImage(dataUri: info.app!.icon!);
     }
     if (info.svg != null) {
-      return SvgIcon(info.svg!, size: 20, color: scheme.onSurfaceVariant);
+      return SvgIcon(info.svg!, size: 18, color: tint);
     }
     return const SizedBox.shrink();
   }
@@ -277,12 +314,12 @@ class _ToolCard extends StatelessWidget {
     return Align(
       alignment: AlignmentDirectional.centerStart,
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(16),
         child: Container(
           constraints: const BoxConstraints(maxWidth: 430),
           decoration: BoxDecoration(
-            color: scheme.surfaceContainerLow,
-            borderRadius: BorderRadius.circular(20),
+            color: scheme.surfaceContainerLowest,
+            borderRadius: BorderRadius.circular(16),
             border: Border.all(color: scheme.onSurface.withValues(alpha: .07)),
             boxShadow: [
               BoxShadow(
@@ -294,7 +331,7 @@ class _ToolCard extends StatelessWidget {
             ],
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(16),
             child: SingleChildScrollView(
               child: buildPanelView(context, controller, toolId),
             ),

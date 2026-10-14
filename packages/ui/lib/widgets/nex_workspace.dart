@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../tokens/nex_tokens.dart';
 
 /// Quiet desktop surfaces, shared by the window and edge panel. All colours
 /// resolve from the active Nex theme, including comfort and high contrast.
@@ -6,8 +7,8 @@ class NexWorkspaceCard extends StatelessWidget {
   const NexWorkspaceCard({
     super.key,
     required this.child,
-    this.padding = const EdgeInsets.all(24),
-    this.radius = 24,
+    this.padding = const EdgeInsets.all(18),
+    this.radius = NexRadius.lg,
   });
   final Widget child;
   final EdgeInsetsGeometry padding;
@@ -24,11 +25,14 @@ class NexWorkspaceCard extends StatelessWidget {
         boxShadow: MediaQuery.highContrastOf(context)
             ? null
             : [
+                // A whisper, not a Material card shadow: on the flat navy
+                // page the tonal step and hairline carry the boundary, and a
+                // heavy drop shadow was making every quiet surface shout.
                 BoxShadow(
-                  color: c.shadow.withValues(alpha: .04),
-                  blurRadius: 32,
-                  offset: const Offset(0, 12),
-                  spreadRadius: -12,
+                  color: c.shadow.withValues(alpha: .03),
+                  blurRadius: 24,
+                  offset: const Offset(0, 8),
+                  spreadRadius: -10,
                 ),
               ],
       ),
@@ -52,25 +56,27 @@ class NexWorkspaceIntro extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    // A page title, not a billboard: 36px was competing with everything on
+    // the page below it. The Android app's headers sit at ~20–22dp.
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
           title,
-          style: theme.textTheme.headlineLarge?.copyWith(
-            fontSize: compact ? 24 : 36,
-            height: 1.25,
-            fontWeight: FontWeight.w600,
-            letterSpacing: -.8,
+          style: theme.textTheme.headlineMedium?.copyWith(
+            fontSize: compact ? 20 : 22,
+            height: 1.3,
+            fontWeight: FontWeight.w700,
+            letterSpacing: -.3,
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 6),
         Text(
           description,
-          style: theme.textTheme.bodyMedium?.copyWith(
+          style: theme.textTheme.bodySmall?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
-            height: 1.6,
+            height: 1.5,
           ),
         ),
       ],
@@ -88,11 +94,11 @@ class NexShortcutHint extends StatelessWidget {
     return Directionality(
       textDirection: TextDirection.ltr,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
         decoration: BoxDecoration(
           color: c.surfaceContainerLow,
           border: Border.all(color: c.outlineVariant),
-          borderRadius: BorderRadius.circular(6),
+          borderRadius: BorderRadius.circular(5),
         ),
         child: Text(
           label,
@@ -140,13 +146,16 @@ class NexWorkspaceDestination extends StatelessWidget {
                 backgroundColor: selected
                     ? c.primary.withValues(alpha: .09)
                     : Colors.transparent,
-                minimumSize: const Size(48, 48),
+                // 40px is the desktop rail convention (WinUINavigationView);
+                // the 8px gap between rows keeps the 48px acquisition pitch
+                // Material asks for, and every item keeps its keyboard ring.
+                minimumSize: const Size(40, 40),
                 padding: EdgeInsets.symmetric(
-                  horizontal: compact ? 0 : 14,
-                  vertical: 12,
+                  horizontal: compact ? 0 : 12,
+                  vertical: 9,
                 ),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(10),
                 ),
               ).copyWith(
                 side: WidgetStateProperty.resolveWith(
@@ -156,11 +165,11 @@ class NexWorkspaceDestination extends StatelessWidget {
                 ),
               ),
           child: compact
-              ? Icon(icon, size: 22)
+              ? Icon(icon, size: 20)
               : Row(
                   children: [
-                    Icon(icon, size: 21),
-                    const SizedBox(width: 12),
+                    Icon(icon, size: 19),
+                    const SizedBox(width: 11),
                     Expanded(
                       child: Text(
                         label,

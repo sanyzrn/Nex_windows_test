@@ -1,42 +1,45 @@
-# Windows CI and release process
+# Windows CI and releases
 
-## Source and binary synchronization
+Current application: **0.13.0+10**, release tag **v0.13.0**. `main` contains
+one current source tree at the repository root. Build caches and installer
+EXEs are excluded from Git; installers belong in Releases.
 
-`main` is the working source branch. Compare local `HEAD` with `origin/main` after fetching, and use `git status --short` to identify pending tracked edits. Build caches, local SDKs and installer EXEs are excluded by `.gitignore`; their absence from the source checkout is intentional. Public installer downloads belong in Releases.
+## Reviewed visual baselines
 
-The application version is currently `0.12.1+9` and its release tag is `v0.12.1`. Windows app versions are independent of the recorded Android upstream version. Older release names and dated validation reports are historical records.
+The 0.13.0 redesign intentionally changes the palette and screen layout.
+Windows baselines were generated locally with Flutter 3.44.8, reviewed and
+committed. The full desktop suite then passed in comparison mode. CI compares
+these images; it must not regenerate expected images before testing. Only
+explicitly listed emoji-grid screenshots permit up to 0.05% Windows emoji-font
+drift; dimensions and other screenshots remain exact.
 
-## CI failure repaired on 2026-10-14
+## Build and publish
 
-[Run 38593007184](https://github.com/sanyzrn/Nex_windows_test/actions/runs/38593007184) failed only on `review_goldens/emoji_panel_right_dark_en.png`: **129 / 326,400 pixels (0.0395%)**, image size **480 × 680**, differing inside two emoji glyphs. Its package-host checks, version checks, UI checks and analysis succeeded.
+1. Update version declarations, changelog and current documentation.
+2. Run analysis, affected checks and desktop/shared-package tests.
+3. Commit and push main; wait for Desktop Windows CI on the exact commit.
+4. Push an annotated version tag on that successful commit.
+5. Run Publish tested Windows release with the tag.
 
-The Windows-specific comparator already allowed at most **0.05%** drift for three emoji-grid snapshots but omitted this review-grid name. The fix adds only this exact filename. All other review views remain exact; larger changes and dimension changes are rejected. Regression tests cover the review filename, threshold, unchanged non-emoji views and image dimensions. Failure artifacts were inspected; baselines were not regenerated to silence CI.
+CI uses pinned actions, Flutter 3.44.8 and SHA-verified Inno Setup 6.7.3.
+It checks package hosts, versions and UI hygiene, runs desktop/shared UI
+suites, builds and packages Windows, and checks optional AI removal.
+The publisher validates tag/version/commit and the successful run's installer
+checksum, and refuses to overwrite an existing release.
 
-## Build artifacts
+## Current artifact and synchronization
 
-`Desktop Windows CI` uses pinned action commits and Flutter **3.44.8**, explicit read-only repository permissions, cancellation of superseded runs and a bounded runtime. It runs desktop and shared UI tests, builds the Windows bundle, installs SHA-verified Inno Setup **6.7.3**, packages the installer, and verifies the desktop still works without its optional AI dependency.
+The initial 0.13.0 installer is the local Windows Release build from the
+supplied redesign source. Promotion adds visual baselines, asynchronous test
+synchronization and documentation corrections; application code is unchanged
+from that installer. Root SHA256SUMS describes this exact published file.
+Compiler/environment differences can change hashes for the same app source;
+use the checksum shipped with the artifact you download.
 
-Successful runs retain:
+Fetch before comparing HEAD with origin/main. Tracked changes must be absent
+and ahead/behind counts must be 0 0. Historical commits and changelog entries
+are retained. Obsolete installer copies, release assets and version tags are
+removed only after the current release is verified.
 
-- `nex-windows-release-<commit>`: complete executable/runtime bundle.
-- `nex-windows-installer-<commit>`: installer and its generated `SHA256SUMS`.
-- Review screenshots; failure images when applicable.
-
-Run status and artifact retention belong to the specific Actions run; a historical failed run is not rewritten or deleted.
-
-## Publish a future version
-
-1. Update the application/version-resource declarations, changelog and current user documentation. Run the version and affected regression checks.
-2. Commit and push `main`; wait for **Desktop Windows CI** to succeed on that exact commit, including packaging and AI-removal verification.
-3. Create and push an annotated tag such as `v0.12.2` on the tested commit.
-4. Run **Publish tested Windows release** from Actions, providing that tag.
-
-The workflow validates tag/version/commit consistency, selects a successful CI run on that exact commit, downloads its installer artifact and checks the checksum before publishing. It refuses to overwrite an existing release or assets. GitHub supplies source ZIP/tar archives from the release tag automatically.
-
-Use the `SHA256SUMS` asset from the same release to verify the corresponding installer. Compiler versions and build environments can affect binary hashes even when app sources are unchanged; the checksum describes a particular published artifact.
-
-## Current 0.12.1 artifact
-
-The initial 0.12.1 installer is the locally tested Windows Release build documented in [WINDOWS_0121_REVIEW](WINDOWS_0121_REVIEW.md). Its app source is unchanged by the CI/docs correction. It is published with its exact original checksum rather than being replaced by a differently built binary with the same filename.
-
-[Latest release](https://github.com/sanyzrn/Nex_windows_test/releases/latest) · [CI](https://github.com/sanyzrn/Nex_windows_test/actions/workflows/desktop.yml)
+[Latest release](https://github.com/sanyzrn/Nex_windows_test/releases/latest)
+· [CI](https://github.com/sanyzrn/Nex_windows_test/actions/workflows/desktop.yml)

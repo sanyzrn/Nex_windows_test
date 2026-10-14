@@ -121,12 +121,17 @@ mixin _LibraryActions on _LibraryStateBase {
         messenger.showSnackBar(SnackBar(content: Text(l.copy)));
       case 'remind':
         if (!mounted) return;
+        // The scope is captured before the picker opens: the dialog outlives
+        // this view on the root navigator, and looking the scope up from the
+        // closure's captured context after the library has unmounted would
+        // assert on a deactivated element.
+        final features = NexScope.of(context);
         await showReminderPicker(
           context,
           note: note,
           onSave: (dueAt, repeat) async {
-            await NexScope.of(context).remind(note.id, dueAt, repeat);
-            await load();
+            await features.remind(note.id, dueAt, repeat);
+            if (mounted) await load();
           },
         );
       case 'delete':

@@ -10,7 +10,7 @@ class NexWindowCaption extends StatelessWidget {
     final l = AppLocalizations.of(context)!;
     final scheme = Theme.of(context).colorScheme;
     return SizedBox(
-      height: 44,
+      height: 36,
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: scheme.surfaceContainerLow,
@@ -32,21 +32,21 @@ class NexWindowCaption extends StatelessWidget {
                       controller.native.windowCommand('maximize'),
                   onSecondaryTap: () => controller.native.windowCommand('menu'),
                   child: Padding(
-                    padding: const EdgeInsets.only(left: 18),
+                    padding: const EdgeInsets.only(left: 14),
                     child: Row(
                       children: [
                         Icon(
                           Icons.edit_note_rounded,
                           color: scheme.primary,
-                          size: 22,
+                          size: 17,
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: 7),
                         Text(
                           l.applicationName,
                           style: const TextStyle(
-                            fontSize: 13,
+                            fontSize: 12.5,
                             fontWeight: FontWeight.w700,
-                            letterSpacing: .4,
+                            letterSpacing: .3,
                           ),
                         ),
                       ],
@@ -95,19 +95,21 @@ class _CaptionButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return SizedBox(
-      width: 46,
-      height: 44,
+      width: 40,
+      height: 36,
       child: IconButton(
         tooltip: label,
         style: IconButton.styleFrom(
           shape: const RoundedRectangleBorder(),
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          visualDensity: VisualDensity.compact,
           hoverColor: close
               ? scheme.errorContainer
               : scheme.surfaceContainerHighest,
           foregroundColor: close ? scheme.error : scheme.onSurfaceVariant,
         ),
         onPressed: onPressed,
-        icon: Icon(icon, size: 17),
+        icon: Icon(icon, size: 15),
       ),
     );
   }

@@ -1,5 +1,57 @@
 # Changelog
 
+## 0.13.0 (2026-10-14)
+
+The Android-parity release: the whole interface was reworked to match the
+phone app's design language, and a review pass fixed every defect found
+along the way.
+
+### Design
+- The dark theme is the Android app's deep-sea navy (page `#0C141F`, cards
+  `#182230`, sky-blue accent `#7CB9FF`); the light theme is the matching cool
+  off-white. Every contrast floor the token tests hold still holds on the new
+  ramp.
+- The window paints the Android app's quiet wave motif behind its content,
+  skipped in high-contrast mode.
+- The capture page lost its kitchen sink: the status row, its dividers and
+  the leading "New note" button are gone. One clean card, the composer, a
+  compact footer, and 36px action buttons instead of 52.
+- The home header is one line — title and three small counters — and the
+  quick-tool buttons moved out (they all live in Tools).
+- Tools tiles carry the Android grid's per-tool coloured icon chips (sky,
+  amber, violet, teal, rose…), a capsule search field and tighter spacing.
+- Library search is a capsule; the selection banner uses compact 34px
+  actions and a flexible count so it never overflows a narrow pane.
+- Everything is smaller and closer together: 36px title bar, 204/64px
+  navigation rail, 40px rail rows, 76px note cards (was 80 + wider gutters),
+  36px outlined buttons and lighter inputs — with every keyboard focus ring
+  and contrast floor kept.
+
+### Fixed
+- A tool removed or renamed across versions crashed the whole Tools section
+  at startup; stale persisted ids now resolve to removable ghost entries.
+- Two identical checklist lines (same words, same state) could not be ticked
+  separately — the second checkbox always toggled the first item.
+- Ctrl+P could call `setState` after the library closed; the reminder picker
+  could use a deactivated element after the view unmounted.
+- The home's stats row and the composer footer overflowed at window widths
+  below ~420px.
+- Note thumbnails on the home shelf decoded full-resolution camera photos;
+  they decode at thumbnail size now.
+- The library pane width preference was written on every drag frame; it is
+  written once, when the drag ends.
+- The selected card's outline no longer cuts across the card's own corners.
+
+### Verified
+- On Windows: 178 desktop tests (including visual baselines), 192 shared-UI
+  tests, 198 core tests and 199 data tests pass; 14 data tests are skipped.
+  Analysis and the UI hygiene gate pass on Flutter 3.44.8.
+- New regression tests cover the stale-tool fallback, the duplicate-checklist
+  toggle, the wave backdrop and the narrow-window overflow fixes.
+- Reviewed Windows visual baselines are committed; CI compares against them
+  without regenerating expected results. Tag-management tests wait for
+  asynchronous database/UI completion rather than relying on a fixed delay.
+
 ## 0.12.1 (2026-10-14)
 
 - Reliable outside-click panel dismissal and hover between readers and tools.

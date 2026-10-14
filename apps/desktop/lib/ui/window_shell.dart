@@ -63,20 +63,34 @@ class _NexWindowShellState extends State<NexWindowShell> {
   Widget build(BuildContext context) {
     final c = widget.controller;
     final scheme = Theme.of(context).colorScheme;
-    Widget buildSurface(BuildContext context, Widget? child) => Column(
-      children: [
-        NexWindowCaption(controller: c),
-        Expanded(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _WindowNavRail(controller: c, features: widget.features),
-              Expanded(child: _WindowSection(controller: c)),
-            ],
+    Widget buildSurface(BuildContext context, Widget? child) {
+      final surface = Column(
+        children: [
+          NexWindowCaption(controller: c),
+          Expanded(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _WindowNavRail(controller: c, features: widget.features),
+                Expanded(child: _WindowSection(controller: c)),
+              ],
+            ),
           ),
-        ),
-      ],
-    );
+        ],
+      );
+      // The Android app's sea-floor motif: long low waves rising through the
+      // lower part of the page. Quiet enough that a card's text never has to
+      // compete with it — the fade keeps it off the working area's top half —
+      // and skipped entirely in high-contrast, where every mark must mean
+      // something.
+      if (MediaQuery.highContrastOf(context)) return surface;
+      return NexTextureBackdrop(
+        texture: NexThemeTexture.waves,
+        extent: 0.62,
+        alpha: 0.05,
+        child: surface,
+      );
+    }
     return Scaffold(
       // transparentScaffold is for the floating edge panel; the desktop
       // window must paint an opaque surface.

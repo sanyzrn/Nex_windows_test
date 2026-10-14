@@ -1,6 +1,6 @@
 # Nex Windows application
 
-Current version: **0.12.1+9**. This repository includes the application's relative package dependencies. [Product overview](../../README.md) · [Release process](../../docs/RELEASING.md) · [0.12.1 validation](../../docs/WINDOWS_0121_REVIEW.md).
+Current version: **0.13.0+10**. This repository includes the application's relative package dependencies. [Product overview](../../README.md) · [Release process](../../docs/RELEASING.md) · [0.13.0 validation](../../docs/WINDOWS_0130_REVIEW.md).
 
 ## Interface modes
 
