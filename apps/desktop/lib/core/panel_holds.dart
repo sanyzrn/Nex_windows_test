@@ -10,7 +10,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 abstract interface class PanelHoldable {
-  VoidCallback holdOpen();
+  VoidCallback holdOpen({bool modal = true});
 }
 
 /// Popup menus and secondary routes can extend beyond the measured flyout.
@@ -47,6 +47,9 @@ class PanelRouteObserver extends NavigatorObserver {
 class PanelHoldsTracker {
   int _textFocusCount = 0;
   int _interactionCount = 0;
+  int _modalCount = 0;
+  bool get modal => _modalCount > 0;
+  void resetFocus() => _textFocusCount = 0;
 
   void focusGained() => _textFocusCount++;
   void focusLost() => _textFocusCount = math.max(0, _textFocusCount - 1);
@@ -54,8 +57,13 @@ class PanelHoldsTracker {
 
   bool get interacting => _interactionCount > 0;
 
-  VoidCallback acquireHold(VoidCallback onFirstHold, VoidCallback onLastRelease) {
+  VoidCallback acquireHold(
+    VoidCallback onFirstHold,
+    VoidCallback onLastRelease, {
+    bool modal = true,
+  }) {
     _interactionCount++;
+    if (modal) _modalCount++;
     if (_interactionCount == 1) {
       onFirstHold();
     }
@@ -64,6 +72,7 @@ class PanelHoldsTracker {
       if (released) return;
       released = true;
       _interactionCount--;
+      if (modal) _modalCount--;
       if (_interactionCount == 0) {
         onLastRelease();
       }

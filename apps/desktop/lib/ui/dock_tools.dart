@@ -257,7 +257,7 @@ class ToolVisualState extends State<ToolVisual> {
         !c.isOpen ||
         c.windowModeChanging ||
         c.dragging ||
-        c.interacting ||
+        c.modalOpen ||
         c.picking) {
       return;
     }

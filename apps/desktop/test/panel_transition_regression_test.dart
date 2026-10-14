@@ -142,14 +142,20 @@ void main() {
         expect(
           (pillCenter - iconCenter).distance,
           lessThan(0.5),
-          reason:
-              'Hover center: icon=$iconCenter pill=$pillCenter',
+          reason: 'Hover center: icon=$iconCenter pill=$pillCenter',
         );
         c.S.panelPinned = true;
         c.focusGained();
         await mouse.moveTo(t.getCenter(_tool('clip')));
         await t.pump();
         expect(c.panel, 'clip');
+        final readerRelease = c.holdOpen(modal: false);
+        await mouse.moveTo(t.getCenter(_tool('note')));
+        await t.pump();
+        expect(c.panel, 'note');
+        readerRelease();
+        await mouse.moveTo(t.getCenter(_tool('clip')));
+        await t.pump();
         final release = c.holdOpen();
         await mouse.moveTo(t.getCenter(_tool('settings')));
         await t.pump();
@@ -183,4 +189,35 @@ void main() {
     expect(c.isOpen, isFalse);
     c.dispose();
   });
+
+  testWidgets(
+    'outside click dismisses a focused sticky reader but protects modal and pin',
+    (t) async {
+      final c = PanelController(nativeHost: _Native());
+      await c.bootstrap(
+        preset: Settings()..windowMode = 'panel',
+        useNative: false,
+      );
+      c.open();
+      c.sticky = true;
+      c.focusGained();
+      final reader = c.holdOpen(modal: false);
+      final modal = c.holdOpen();
+      c.dismissPanel();
+      expect(c.isOpen, isTrue);
+      modal();
+      c.S.panelPinned = true;
+      c.dismissPanel();
+      expect(c.isOpen, isTrue);
+      c.S.panelPinned = false;
+      c.dismissPanel();
+      expect(c.isOpen, isFalse);
+      expect(c.typing, isFalse);
+      reader();
+      reader();
+      expect(c.interacting, isFalse);
+      await t.pump(const Duration(seconds: 1));
+      c.dispose();
+    },
+  );
 }

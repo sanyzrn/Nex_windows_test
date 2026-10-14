@@ -189,7 +189,7 @@ class NexFeatures extends ChangeNotifier {
             path: _recordingPath!,
           );
           recordingAt = DateTime.now();
-          _recordingRelease = panel?.holdOpen();
+          _recordingRelease = panel?.holdOpen(modal: false);
         } else {
           final path = await recorder.stop() ?? _recordingPath;
           final duration = DateTime.now()

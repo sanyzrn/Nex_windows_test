@@ -248,8 +248,7 @@ mixin PanelLifecycle on PanelStateBase {
   void blur() {
     // A desktop window must survive losing focus; only the edge panel
     // auto-hides (the original's WindowEvent::Focused(false) behaviour).
-    if (isWindowMode) return;
-    if (isOpen && !keepOpen && !sticky && !dragging && !picking) close();
+    dismissPanel();
   }
 
   @override

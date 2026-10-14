@@ -295,6 +295,7 @@ class _PanelShellState extends State<PanelShell>
               return KeyEventResult.ignored;
             },
             child: Listener(
+              onPointerDown: (e) => c.dismissPanel(at: e.position),
               onPointerHover: _pointerMove,
               onPointerMove: _pointerMove,
               onPointerUp: (e) => c.handleDragPointer(e),

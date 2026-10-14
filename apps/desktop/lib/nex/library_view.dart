@@ -106,7 +106,7 @@ abstract class _LibraryStateBase extends State<NexLibraryView> {
     final requested = features.takeRequestedNote();
     if (requested != null) {
       _detailRelease?.call();
-      _detailRelease = NexPanelScope.maybeOf(context)?.holdOpen();
+      _detailRelease = NexPanelScope.maybeOf(context)?.holdOpen(modal: false);
       selectedNote = requested;
       _selectedIds.clear();
     }

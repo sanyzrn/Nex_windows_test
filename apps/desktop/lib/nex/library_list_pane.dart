@@ -395,7 +395,7 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
                             } else {
                               _detailRelease = NexPanelScope.maybeOf(
                                 context,
-                              )?.holdOpen();
+                              )?.holdOpen(modal: false);
                               setState(() => selectedNote = note);
                             }
                           },

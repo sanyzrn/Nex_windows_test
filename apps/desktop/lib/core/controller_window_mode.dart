@@ -69,7 +69,7 @@ mixin PanelWindowTransitions on PanelStateBase {
     _lastX = _lastY = -2147483648;
     _dragCandidate = null;
     _dragMoved = false;
-    _textFocusCount = 0;
+    _holdsTracker.resetFocus();
     dragInfo.value = null;
     dropHintOn.value = false;
     openedAt = closedAt = -1e9;

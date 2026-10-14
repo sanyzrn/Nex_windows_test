@@ -30,6 +30,7 @@ part 'controller_lifecycle.dart';
 part 'controller_timers.dart';
 part 'controller_wiring.dart';
 part 'controller_window_mode.dart';
+part 'controller_panel_dismissal.dart';
 
 /// No-op host used when none is injected (tests).
 class _StubNativeHost extends NativeHost {
@@ -89,6 +90,8 @@ abstract class PanelStateBase extends ChangeNotifier implements PanelHoldable {
   void setPickerActive(bool active);
   void iconFor(String id, String icon);
   void disposeTimers();
+  void dismissPanel({Offset? at});
+  void pollPanelPointer();
 
   final Storage storage;
   final clipboard = ClipboardState();
@@ -212,29 +215,19 @@ abstract class PanelStateBase extends ChangeNotifier implements PanelHoldable {
   DragCandidate? _dragCandidate;
   bool _dragMoved = false;
 
-  int _textFocusCount = 0;
-  void focusGained() => _textFocusCount++;
-  void focusLost() => _textFocusCount = math.max(0, _textFocusCount - 1);
-  bool get typing => _textFocusCount > 0;
-
-  int _interactionCount = 0;
-  bool get interacting => _interactionCount > 0;
+  final _holdsTracker = PanelHoldsTracker();
+  void focusGained() => _holdsTracker.focusGained();
+  void focusLost() => _holdsTracker.focusLost();
+  bool get typing => _holdsTracker.typing;
+  bool get interacting => _holdsTracker.interacting;
+  bool get modalOpen => _holdsTracker.modal;
   bool get keepOpen => S.panelPinned || interacting || typing;
 
   /// An owned lease keeps readers, recorders and OS dialogs visible. Releasing
   /// one lease cannot accidentally unlock another overlapping interaction.
   @override
-  VoidCallback holdOpen() {
-    _interactionCount++;
-    cancelClose();
-    var released = false;
-    return () {
-      if (released) return;
-      released = true;
-      _interactionCount--;
-      if (isOpen) sticky = true;
-    };
-  }
+  VoidCallback holdOpen({bool modal = true}) =>
+      _holdsTracker.acquireHold(cancelClose, () {}, modal: modal);
 
   void togglePanelPin() {
     S.panelPinned = !S.panelPinned;
@@ -424,7 +417,12 @@ abstract class PanelStateBase extends ChangeNotifier implements PanelHoldable {
       _near = false;
       return;
     }
-    if (isOpen || picking) {
+    pollPanelPointer();
+    if (isOpen) {
+      _near = false;
+      return;
+    }
+    if (picking) {
       _near = false;
       return;
     }
@@ -495,6 +493,7 @@ class PanelController = PanelStateBase
         PanelLifecycle,
         PanelTimers,
         PanelWiring,
+        PanelDismissal,
         PanelWindowTransitions,
         PanelActions,
         PanelClipboardOps;
