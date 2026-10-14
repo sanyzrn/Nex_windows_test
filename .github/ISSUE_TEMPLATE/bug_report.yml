@@ -1,0 +1,38 @@
+name: Bug report / گزارش باگ
+description: Report a reproducible Windows app problem.
+labels: [bug]
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Nex version
+      description: Find the version under Settings → About.
+      placeholder: 0.12.1+9
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Windows and display setup
+      placeholder: Windows 11, two monitors, 100% / 150% scaling, Persian UI
+    validations:
+      required: true
+  - type: dropdown
+    id: mode
+    attributes:
+      label: Interface mode
+      options: [Window, Edge panel, Both]
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Include the expected result and what actually happened. Persian and English are welcome.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Screenshots or diagnostic details
+      description: Remove private notes and clipboard content before sharing.

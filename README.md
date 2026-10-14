@@ -1,84 +1,60 @@
 # Nex Windows
 
-## اصلاحات نسخهٔ ۰٫۱۲٫۱ (۲۰۲۶/۱۰/۱۴)
+[![Windows CI](https://github.com/sanyzrn/Nex_windows_test/actions/workflows/desktop.yml/badge.svg?branch=main)](https://github.com/sanyzrn/Nex_windows_test/actions/workflows/desktop.yml)
+[![Latest release](https://img.shields.io/github/v/release/sanyzrn/Nex_windows_test)](https://github.com/sanyzrn/Nex_windows_test/releases/latest)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-شماره و انتخاب مانیتور، مدیریت تگ‌ها، پیام حذف، سطل زباله، چک‌لیست و بسته‌شدن/هاور پنل اصلاح شدند. تنظیمات هر دو حالت دسته‌بندی و انتخاب ابزارها کوتاه و قابل جست‌وجو شده؛ پنجره نوار سفارشی و نصاب تم دارک با برند Nex دارد.
+A local-first notebook and desktop toolkit for Windows, with English and Persian interfaces. Work in a full desktop window or a compact panel at either screen edge.
 
-**۱۷۴ تست دسکتاپ و ۱۹۰ تست رابط**، آنالیز و تست واقعی Release پاس شدند. [نصاب ۰٫۱۲٫۱](Nex-Windows-Setup-0.12.1-x64.exe) در روت پوشه قرار دارد. فایل‌های نصاب خروجی محلی هستند و در گیت ذخیره نمی‌شوند. [گزارش تست و محدودیت‌های بررسی](docs/WINDOWS_0121_REVIEW.md).
+**Current app version: `0.12.1+9` · Windows 10/11 · x64**
 
-## کلیپ‌بورد پایدار (۲۰۲۶/۱۰/۱۴)
+[Download the latest installer](https://github.com/sanyzrn/Nex_windows_test/releases/latest) · [What's new](apps/desktop/CHANGELOG.md) · [Report a bug](https://github.com/sanyzrn/Nex_windows_test/issues/new/choose) · [فارسی](#راهنمای-فارسی)
 
-در نسخهٔ جدید، ۵۰ مورد اخیر متن/تصویر روی دیسک می‌مانند؛ موارد تکراری به ابتدای لیست می‌روند و پین‌ها جدا نگه‌داری می‌شوند. حذف و پاک‌کردن تاریخچه هم پس از اجرای دوباره حفظ می‌شود. مهاجرت پین‌های قبلی خودکار است.
+![Nex Windows notebook with its custom title bar](design/product/0.12.1/window-release.png)
 
-**۱۵۹ تست**، آنالیز کد و تست واقعی قطع اجباری/بازیابی نسخهٔ ویندوز پاس شدند. [نصاب جدید کلیپ‌بورد](Nex-Windows-Setup-0.12.0-Clipboard-x64.exe) در روت است؛ پیش از نصب، نکس باز را از کنار ساعت Exit کنید. [جزئیات بررسی](docs/CLIPBOARD_PERSISTENCE.md).
+## What you can do
 
-## دفتر یادداشت و اصلاح ریمایندر (۲۰۲۶/۱۰/۱۴)
+- Capture and search text, checklists, links, images, files and voice notes; edits save locally.
+- Organize notes with tags, threads, pins and reminders. Recently deleted notes can be restored.
+- Keep the last **50 distinct clipboard text/image entries** across restarts, with separate favorites.
+- Use Windows tools such as Keep Awake, screenshots, window pinning, clipboard and app/folder launchers.
+- Switch between the custom desktop window and an edge panel with hover navigation, tray access and a global shortcut.
+- Choose a theme, language and dock layout. Tool selection is searchable and paginated.
 
-خانهٔ جدید، نوشته‌های اخیر و پین‌شده، شمارنده‌های واقعی و ابزارهای سریع ویندوز را کنار ویرایشگر نشان می‌دهد. کتابخانه در نمای بزرگ از اولین یادداشت شروع می‌شود. دکمه‌های کلیپ‌بورد جای مستقل دارند و مرکز کادر فعال داک با آیکون آن یکسان است.
+The recorded shared-code base is [DbsNex](https://github.com/sanyzrn/DbsNex) commit `b00fcddf50ddee90231f6753b4fed7d8b3a9e250` (Android 1.93.3). Windows has its own application version and release history.
 
-ساعت محلی ریمایندر در انتخابگر، کارت، خواندن و فهرست امروز یکسان شده است؛ زمان‌بندی به اجرای واقعی برنامه وصل شده و تغییر/حذف/لغو را دنبال می‌کند. تست واقعی ویندوز، ثبت ساعت ۹، تغییر به ۱۰ و لغو را تأیید کرد. **۱۵۳ تست** و آنالیز کد پاس شدند.
+## Install and update
 
-نصاب جدید در روت: [Nex-Windows-Setup-0.12.0-Product-x64.exe](Nex-Windows-Setup-0.12.0-Product-x64.exe). پیش از نصب، نکس باز را از منوی کنار ساعت Exit کنید. برنامهٔ نصب‌شده خودکار ارتقا داده نشد.
+1. Open [Releases](https://github.com/sanyzrn/Nex_windows_test/releases/latest) and download `Nex-Windows-Setup-0.12.1-x64.exe`.
+2. Close any running Nex instance using its tray menu before upgrading.
+3. Run the installer. It installs for the current user without administrator privileges and includes the runtime dependencies.
 
-[تصاویر قبل و بعد](design/product/README.md) · [گزارش اصلاحات و موارد باقی‌مانده](docs/PRODUCT_ITERATION.md). تکرارهای بعد از خروج کامل از اپ و تست نصب/کلیک واقعی اعلان هنوز نیاز به تکمیل دارند.
+The installer offers Persian/English pages and a dark Nex design. It is currently **unsigned**. User notes, media and settings are stored separately from program files; the installer keeps the existing application identity and data locations.
 
-## اصلاح پنل و هاور (۲۰۲۶/۱۰/۱۴)
+Verify a download against the `SHA256SUMS` asset from the **same release**:
 
-نمای قبلی هنگام سویچ پنجره به پنل پنهان می‌شود و نمایش پنل تا آماده‌شدن فریم تازه منتظر می‌ماند. هاور از همان آیتم اول کار می‌کند؛ پین بودن پنل یا فوکوس کادر متن مانع سویچ ابزارها نمی‌شود. خواندن یادداشت و انتخابگرهای باز همچنان محافظت می‌شوند.
+```powershell
+Get-FileHash .\Nex-Windows-Setup-0.12.1-x64.exe -Algorithm SHA256
+```
 
-**۱۴۰ تست** و اجرای واقعی نسخهٔ Release با موس در سمت چپ و راست پاس شدند. [گزارش بررسی](docs/PANEL_FIX.md) محدودهٔ دقیق تست‌ها را ثبت کرده است.
+Generated installers belong in GitHub Release assets. Git tracks source, assets, tests and documentation; local SDKs, build caches and installer EXEs are intentionally excluded.
 
-نصاب فعلی: [Nex-Windows-Setup-0.12.0-PanelFix-x64.exe](Nex-Windows-Setup-0.12.0-PanelFix-x64.exe). پیش از نصب، نکسِ باز را از منوی کنار ساعت Exit کنید.
+## Getting started
 
-## کارکرد روزمره — مرحلهٔ دوم (۲۰۲۶/۱۰/۱۴)
+| Action | Shortcut / location |
+| --- | --- |
+| Open quick capture | `Ctrl+Alt+N` globally; configurable in Settings |
+| New note / checklist | `Ctrl+N` / `Ctrl+Shift+N` |
+| Search or jump to a note/tool | `Ctrl+K` |
+| Open library / settings | `Ctrl+L` / `Ctrl+,` |
+| Manage tags | Library → **Manage tags** |
+| Switch interface mode | Sidebar or Settings → Display & interface |
+| Choose tools | Settings → Docked tools & apps → Dock / More / Hidden |
+| Keyboard help | `F1` |
 
-Ctrl+V در هر دو نما متن را در محل نشانگر می‌چسباند، Ctrl+N یادداشت تازه می‌سازد و نتیجهٔ Ctrl+K خودِ یادداشت انتخاب‌شده را باز می‌کند. جستجوی سریع پاسخ قدیمی نشان نمی‌دهد؛ تم در هر به‌روزرسانی از نو ساخته نمی‌شود و Keep Awake وضعیت را بعد از پاسخ ویندوز نمایش می‌دهد.
+## Build and test
 
-مجموعهٔ **۱۳۵ تست** پاس شده است. جزئیات تغییرها، اندازه‌گیری‌ها و محدودیت‌های بررسی در [گزارش کارکرد](docs/USABILITY_PHASE.md) آمده است. موتور بازیابی یادآورها اصلاح شده، اما هنوز به چرخهٔ برنامه وصل نیست؛ اعلان واقعی ویندوز در این مرحله تأیید نشده است.
-
-نصاب تازه در روت: [Nex-Windows-Setup-0.12.0-Usability-x64.exe](Nex-Windows-Setup-0.12.0-Usability-x64.exe)، نسخهٔ `0.12.1+9`. نکسِ در حال اجرا را پیش از نصب ببندید. نصب/ارتقا و رفتار واقعی ابزارهای ویندوز هنوز آزمایش نشده‌اند.
-
-## بازطراحی ظاهر — مرحلهٔ اول (۲۰۲۶/۱۰/۰۹)
-
-رابط پنجره و پنل کناری بازطراحی شده است: سایدبار خوانا، سطح نوشتن تازه، فهرست ابزارها با جستجو، تنظیمات دسته‌بندی‌شده و صفحهٔ خواندن یکدست.
-
-نصاب این مرحله در روت: `Nex-Windows-Setup-0.12.0-Redesign-x64.exe`. پیش از نصب، نکسِ در حال اجرا را ببندید. نسخهٔ نصاب `0.12.1+9` است.
-
-سه چیز برای امتحان: ثبت یک یادداشت فارسی در حالت پنجره؛ جستجوی کلیپ‌بورد در بخش ابزارها؛ تغییر پوسته و رفتن به پنل کناری از تنظیمات.
-
-تحلیل کد و مجموعهٔ کامل **۱۲۰ تست** پاس شدند. **۲۸ تصویر قبل** و **۳۸ تصویر بعد** در [گزارش بازطراحی](design/redesign/README.md) هستند. این گزارش مرجع نتایج همین مرحله است؛ ادعاهای دور قبلی در ادامه، به معنای تکمیل همهٔ بندهای فایل کیفیت نیستند.
-
-نسخهٔ ویندوز **0.12.1+9** از Nex برای ویندوز، بر پایهٔ پروژهٔ Flutter دسکتاپ و معماری local-first.
-
-## چه چیزهایی در 0.12.0 تازه است
-
-این نسخه یک «دورِ کیفیت» است: تمرکز بر درست بودن، صداقت مستندات و زیبایی واقعی رابط، نه افزودن فهرست بلند قابلیت‌ها.
-
-- **هم‌ترازی با نکس ۱.۹۳.۳:** پکیج‌های مشترک (`core`، `data`، `ui`، `ai`) با کد بالادستی در نشانی ثبت‌شده `b00fcddf50ddee90231f6753b4fed7d8b3a9e250` جایگزین شده‌اند؛ «کپی حفظ خطوط» در متن چندخطی (NexSelectableLines) و رنگ‌های خودکار برچسب‌ها (دوازده رنگ، کم‌استفاده‌ترین) اکنون مثل اندروید کار می‌کنند. دو پچ اشتراکی از نو تولید شده و روی همان نشانی بی‌خطا اعمال می‌شوند.
-- **پردهٔ طراحی و بازطراحی رابط:** ماتریس کامل اسکرین‌شات (پنل و پنجره، دو زبان، دو پوسته و بیشتر، مقیاس متن ۱٫۰ و ۱٫۵) پیش و پس از تغییرها تولید و بررسی شده است. عنوان دوبارهٔ «تنظیمات»، پرش کارت پنل بین نماها، چیدمان شکستهٔ خواندن، نامرئی بودن دکمه‌های ثبت در پوستهٔ روشن، ایموجی نیمه‌بریده و ناسازگاری داک از جملهٔ ده‌ها عیب رفع‌شده‌اند.
-- **توکن‌های نکس، بدون استثنا:** هیچ رنگ خام `Color(0x…)` و هیچ رشتهٔ انگلیسی هاردکد در `apps/desktop/lib` باقی نمانده؛ هر دو در CI بازرسی می‌شوند. رنگ «سبز زمردی» و رشتهٔ `No store` از جملهٔ حذف‌شده‌هاست.
-- **بازسازی کد برای صداقت:** فایل‌های بالای ۵۰۰ خط به واحدهای منسجم تقسیم شده‌اند؛ این بار ادعای «ماژولار، زیر ۵۰۰ خط» واقعاً درست است و یک آزمون آن را نگه می‌دارد.
-- **CI پاک:** آینهٔ `pub.flutter-io.cn` حذف شد؛ نسخهٔ Flutter با DbsNex هم‌تراز شده و گام‌های «سازگاری نسخه»، «بدون رشتهٔ هاردکد/رنگ خام» و «بارگذاری ماتریس اسکرین‌شات» به آن اضافه شده است.
-- **پایه‌سنجی‌های طلاییِ درست‌تر:** گلدن‌های حالت پنجره (۱۲۰۰ پیکسل، دو زبان، دو پوسته) اضافه شده و مقایسه‌ها با سایهٔ واقعی انجام می‌شود.
-
-## دریافت نسخهٔ آماده
-
-- [نسخه‌های منتشرشده و نصاب ویندوز](https://github.com/sanyzrn/Nex_windows_test/releases)
-- [SHA-256 نصاب](SHA256SUMS)
-
-نصاب شامل تمام وابستگی‌های اجرایی است و برای کاربر جاری نصب می‌شود. پیش از به‌روزرسانی، Nex را ببندید. داده‌های یادداشت‌ها، رسانه‌ها، تنظیمات و یادآورهای زمان‌بندی‌شده با به‌روزرسانی حفظ می‌شوند (شناسهٔ نصاب و `Nex.Desktop.App` و مسیر داده‌ها تغییر نکرده‌اند). این نصاب آزمایشی امضای دیجیتال ندارد.
-
-## سه چیز برای شروع
-
-1. **ثبت سریع با کلید میان‌بر:** `Ctrl+Alt+N` را بزنید — پنل ثبت باز می‌شود، تایپ کنید و ببندید؛ همان لحظه ذخیره شده است.
-2. **حالت پنجره و کتابخانه:** از نوار کناری «کتابخانه» را باز کنید؛ با `↑`/`↓` بین یادداشت‌ها حرکت کنید، با راست‌کلیک هر یادداشت کپی/سنجاق/یادآور/حذف را ببینید و با `Ctrl+K` هر چیزی را جست‌وجو کنید.
-3. **پوسته و زبان:** در «تنظیمات» پوسته‌ای مثل «فیروزهٔ اصفهان» یا «نیمه‌شب» را امتحان کنید و زبان را روی فارسی بگذارید؛ همه‌جا راست‌به‌چپ، با ارقام فارسی و فونت وزیرمتن نمایش داده می‌شود.
-
-## ساخت از سورس
-
-این مخزن مستقل است: `apps/desktop` و هر چهار پکیج موردنیاز Nex در `packages` قرار دارند. تغییرات مشترک backup/theme از قبل اعمال شده‌اند؛ فایل‌های `patches` صرفاً برای تحویل به مخزن اصلی Nex نگه داشته شده‌اند و **در این مخزن نباید دوباره اعمال شوند**.
-
-نیازمندی‌ها: ویندوز x64، Flutter **3.44.8** (همان نسخه‌ای که CI و `DbsNex` استفاده می‌کنند؛ حداقل 3.35.0 / Dart 3.9.0) و Visual Studio با workload توسعهٔ دسکتاپ C++.
+Use Windows x64, **Flutter 3.44.8**, and Visual Studio with the **Desktop development with C++** workload. Use the default `pub.dev` package host. The independent Android checkout may use a different SDK; Windows goldens are validated with this pinned version.
 
 ```powershell
 git clone https://github.com/sanyzrn/Nex_windows_test.git
@@ -89,19 +65,36 @@ flutter test --no-pub
 flutter build windows --release --no-pub
 ```
 
-نکته: از نسخهٔ 0.12.0 دیگر نیازی به تنظیم `PUB_HOSTED_URL`/`FLUTTER_STORAGE_BASE_URL` روی آینهٔ چینی نیست؛ `pub.dev` پیش‌فرض استفاده می‌شود. برای اجرا از سورس: `flutter run -d windows`. خروجی `build/windows/x64/runner/Release` باید به‌صورت کامل توزیع شود. ساخت نصاب با Inno Setup در [راهنمای نصاب](apps/desktop/installer/README.md) توضیح داده شده است.
+Distribute the complete `build/windows/x64/runner/Release` folder, not only its EXE. Packaging uses Inno Setup **6.7.3**: [installer guide](apps/desktop/installer/README.md).
 
-## ساختار و منشأ
+CI runs version checks, package-host/UI checks, analysis, desktop tests and Windows goldens, shared UI tests, the Release build, installer packaging and optional-AI removal verification. Successful runs retain an executable bundle and an installer with checksums. [Release process and CI diagnosis](docs/RELEASING.md).
 
-| مسیر | محتوا |
+## Project layout
+
+| Path | Purpose |
 | --- | --- |
-| `apps/desktop` | سورس Flutter، کد native ویندوز، تست‌ها، فونت‌ها و ابزار ساخت نصاب |
-| `packages/core`, `data`, `ui`, `ai` | پکیج‌های Nex از DbsNex در نشانی ثبت‌شدهٔ 0.12.0 با دو تغییر مشترک اعمال‌شده |
-| `patches` | دو پچ مشترک، از نو تولیدشده روی نشانی ثبت‌شدهٔ بالادستی |
-| `docs` | گزارش تحویل، راهنمای ادغام، نتایج تست و بایگانی |
-| `design` | ماتریس اسکرین‌شات پیش/پس، گزارش ممیزی رابط، ایده‌ها و تصمیم‌های طراحی |
-| `spec` | داده‌های مشترک آزمون انطباق مدل‌ها |
+| `apps/desktop` | Flutter application, Windows C++ bridge, installer and regression tests |
+| `packages/core`, `data`, `ui`, `ai` | Vendored shared Nex packages; the desktop does not import the optional AI package |
+| `design` | Screenshots, design reviews and actual Release probe results |
+| `docs` | Architecture, validation, release guidance and historical reports |
+| `patches` | Historical upstream transfer patches; already applied here |
 
-Nex packages originate from [sanyzrn/DbsNex](https://github.com/sanyzrn/DbsNex), base `b00fcddf50ddee90231f6753b4fed7d8b3a9e250` (Android 1.93.3). The earlier base `cb7b6f5bab5d7c75d256f9abe63b11f078776a34` (1.93.0) is what 0.11.0 actually vendored; 0.12.0 upgraded to `b00fcdd…` and regenerated both shared patches against it. Desktop shell uses the owner's extracted `right_panel_flutter.zip`; the original [raminturne/right-panel](https://github.com/raminturne/right-panel) at `90dcdbde8e33816f08b681c65cd341aa796f81e4` was a read-only reference. No changes were pushed to either upstream repository.
+[Architecture and data](apps/desktop/README.md) · [Validation for 0.12.1](docs/WINDOWS_0121_REVIEW.md) · [Contributing](CONTRIBUTING.md) · [Upstream integration](docs/INTEGRATION.md)
 
-Nex notes/schema/repositories and shared design tokens remain the source of domain behaviour. Windows reminders and backup restore UI are implemented; assistant/Vault and sync/OCR/on-device AI remain absent or out of scope. See [desktop architecture and limitations](apps/desktop/README.md) and the [integration guide](docs/INTEGRATION.md). Third-party attribution is in [THIRD_PARTY_NOTICES.md](apps/desktop/THIRD_PARTY_NOTICES.md); Nex uses the root MIT [LICENSE](LICENSE).
+## Current limits
+
+Cloud/LAN sync, OCR, assistant/Vault, local LLM and automatic updates are not part of this Windows release. Further repeating-reminder occurrences need the app to run again; indefinite recurrence while fully exited is not implemented. Physical dual-monitor mixed-DPI/hot-plug behavior, full installed-notification delivery and clean-machine upgrades remain manual validation areas. See the dated validation reports for what was actually tested.
+
+## راهنمای فارسی
+
+نکس ویندوز یک دفتر یادداشت محلی با ابزارهای کاربردی ویندوز است. نسخهٔ فعلی **۰٫۱۲٫۱، بیلد ۹** است و دو حالت پنجره و پنل کناری دارد.
+
+- [آخرین نصاب و فایل بررسی SHA-256](https://github.com/sanyzrn/Nex_windows_test/releases/latest) را از بخش Releases دریافت کنید؛ لینک دانلود داخل گزارش‌های قدیمی، نسخهٔ جاری محسوب نمی‌شود.
+- قبل از ارتقا، برنامهٔ باز را از منوی کنار ساعت ببندید. یادداشت‌ها، رسانه‌ها و تنظیمات در مسیر جدا از فایل‌های نصب نگه‌داری می‌شوند.
+- مدیریت ساخت، ویرایش و حذف تگ در کتابخانه است. در تنظیمات، انتخاب ابزارها با جست‌وجو و گزینه‌های «داک، بیشتر، پنهان» انجام می‌شود.
+- کلیپ‌بورد ۵۰ مورد اخیر متن/تصویر را نگه می‌دارد و علاقه‌مندی‌ها جدا هستند.
+- [گزارش باگ](https://github.com/sanyzrn/Nex_windows_test/issues/new/choose) را با نسخهٔ برنامه، مشخصات مانیتورها و مراحل بازتولید ثبت کنید؛ فارسی و انگلیسی پذیرفته می‌شوند.
+
+## License and acknowledgements
+
+The standalone Windows project uses the [MIT license](LICENSE). Shared packages and the desktop shell retain their upstream notices. Shell references include [raminturne/right-panel](https://github.com/raminturne/right-panel). Fonts, plugins and upstream attribution are listed in [THIRD_PARTY_NOTICES](apps/desktop/THIRD_PARTY_NOTICES.md).

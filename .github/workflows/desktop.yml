@@ -5,16 +5,25 @@ on:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: desktop-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build-and-test:
     runs-on: windows-latest
+    timeout-minutes: 30
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
 
       - name: Set up Flutter
-        uses: subosito/flutter-action@v2
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
         with:
           channel: 'stable'
           # Desktop SDK used to validate the Windows golden baselines.
@@ -54,10 +63,19 @@ jobs:
         working-directory: apps/desktop
         run: flutter test --no-pub
 
+      - name: Test shared UI package
+        working-directory: packages/ui
+        shell: pwsh
+        run: |
+          flutter pub get --enforce-lockfile
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          flutter test --no-pub
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
       # The full suite above compares this matrix against the current app.
       - name: Upload reviewed screenshot matrix
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: review-screens
           path: apps/desktop/test/review_goldens/
@@ -66,7 +84,7 @@ jobs:
 
       - name: Upload golden failure images
         if: failure()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: windows-golden-failures
           path: apps/desktop/test/failures/
@@ -76,6 +94,35 @@ jobs:
       - name: Build Windows release
         working-directory: apps/desktop
         run: flutter build windows --release --no-pub
+
+      - name: Upload Windows release bundle
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: nex-windows-release-${{ github.sha }}
+          path: apps/desktop/build/windows/x64/runner/Release/
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Install pinned Inno Setup compiler
+        shell: pwsh
+        run: ./apps/desktop/tools/install_inno_ci.ps1
+
+      - name: Build Windows installer and checksums
+        shell: pwsh
+        run: |
+          ./apps/desktop/tools/build_installer.ps1 -ISCC $env:INNO_ISCC
+          $setup = Get-ChildItem -LiteralPath apps/desktop/build/installer/output -Filter 'Nex-Windows-Setup-*-x64.exe'
+          if (@($setup).Count -ne 1) { throw 'Expected exactly one installer.' }
+          $checksum = (Get-FileHash -LiteralPath $setup.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+          "$checksum  $($setup.Name)" | Set-Content -LiteralPath apps/desktop/build/installer/output/SHA256SUMS -Encoding ascii
+
+      - name: Upload verified installer
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: nex-windows-installer-${{ github.sha }}
+          path: apps/desktop/build/installer/output/
+          if-no-files-found: error
+          retention-days: 30
 
       - name: Verify AI is removable (Rule 3)
         working-directory: apps/desktop

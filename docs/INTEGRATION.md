@@ -1,3 +1,5 @@
+> Historical migration guide. The current standalone app is **0.12.1+9**, based on the recorded shared-package snapshot `b00fcddf50ddee90231f6753b4fed7d8b3a9e250`. The SHAs and instructions below document an older transfer plan; do not treat them as current upstream compatibility validation. See [current architecture](../apps/desktop/README.md) and [release guidance](RELEASING.md).
+
 # Integration Guide: Merging Nex Windows Desktop into DbsNex Monorepo
 
 This document describes the exact steps to migrate `apps/desktop` into the primary `DbsNex` upstream monorepo.

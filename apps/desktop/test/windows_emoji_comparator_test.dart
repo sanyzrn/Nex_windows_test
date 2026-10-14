@@ -45,12 +45,20 @@ void main() {
     ]) {
       await comparator.update(Uri.parse('goldens/$name.png'), baseline);
     }
+    await comparator.update(
+      Uri.parse('review_goldens/emoji_panel_right_dark_en.png'),
+      baseline,
+    );
+    await comparator.update(
+      Uri.parse('review_goldens/settings_panel_right_dark_fa.png'),
+      baseline,
+    );
   });
 
   tearDown(() async => root.delete(recursive: true));
 
   test(
-    'accepts up to 0.05% changed pixels only in the three emoji grids',
+    'accepts up to 0.05% changed pixels only in named emoji grids',
     () async {
       final drift = await png(changedPixels: 1); // 1 / 2000 = 0.05%.
       for (final name in ['emoji_panel', 'right_shell', 'left_shell']) {
@@ -59,6 +67,13 @@ void main() {
           isTrue,
         );
       }
+      expect(
+        await comparator.compare(
+          drift,
+          Uri.parse('review_goldens/emoji_panel_right_dark_en.png'),
+        ),
+        isTrue,
+      );
     },
   );
 
@@ -97,4 +112,31 @@ void main() {
       throwsA(isA<FlutterError>()),
     );
   });
+
+  test(
+    'review matrix allowance rejects larger changes and keeps non-emoji views exact',
+    () async {
+      await expectLater(
+        comparator.compare(
+          await png(changedPixels: 2),
+          Uri.parse('review_goldens/emoji_panel_right_dark_en.png'),
+        ),
+        throwsA(isA<FlutterError>()),
+      );
+      await expectLater(
+        comparator.compare(
+          await png(width: 101),
+          Uri.parse('review_goldens/emoji_panel_right_dark_en.png'),
+        ),
+        throwsA(isA<FlutterError>()),
+      );
+      await expectLater(
+        comparator.compare(
+          await png(changedPixels: 1),
+          Uri.parse('review_goldens/settings_panel_right_dark_fa.png'),
+        ),
+        throwsA(isA<FlutterError>()),
+      );
+    },
+  );
 }

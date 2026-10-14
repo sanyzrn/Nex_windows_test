@@ -1,65 +1,49 @@
-# Nex desktop
+# Nex Windows application
 
-Nex for Windows is a Flutter desktop application, version **0.11.0+7**. This standalone repository includes its four relative package dependencies. Shared changes are already applied; do not reapply `patches/` here. See the [root README](../../README.md), [integration guide](../../docs/INTEGRATION.md) and [validation report](../../docs/TEST_RESULTS.md).
+Current version: **0.12.1+9**. This repository includes the application's relative package dependencies. [Product overview](../../README.md) · [Release process](../../docs/RELEASING.md) · [0.12.1 validation](../../docs/WINDOWS_0121_REVIEW.md).
 
 ## Interface modes
 
-- **Window (default):** a resizable desktop window with Capture / Library / Tools / Settings navigation, keyboard shortcuts, note context menus and multi-selection. At widths of at least 900px, the library uses two panes with a persisted draggable divider. Window bounds and maximized state persist and are revalidated against available monitors. Losing focus leaves the window open.
-- **Edge panel (optional):** the spring-animated slide-out shell with edge reveal, dock, flyouts, pinning, tray and global shortcuts. Interaction holds protect editing, reading, menus, recording and native pickers from automatic hiding.
+- **Window:** custom caption with native drag, minimize, maximize/restore, close and system menu; Capture / Library / Tools / Settings navigation. The library uses two panes when its available width is at least 900 logical pixels. Normal bounds and maximize state persist, including when quitting while minimized. Maximized content fits the monitor work area.
+- **Edge panel:** edge reveal, dock, hover navigation, flyouts, pinning, tray and global shortcut. Reader holds suppress automatic hiding but permit hover switching and explicit outside-click dismissal. Explicit pin, active drags, modal menus/dialogs and native pickers remain protected.
 
-Both modes share `PanelController`, `NexFeatures`, the SQLite isolate and preferences. Switching modes restyles the same native host. Background startup waits in the tray. The native smoke probe forces panel mode to validate physical edge placement.
+Both surfaces share the same controller, feature state, database worker and settings. Mode changes wait for the new Flutter frame before revealing the native window. Display labels use the actual Windows device number; a saved device name keeps selection stable when enumeration order changes.
 
-## Architecture and data
+## Architecture and persistence
 
-`lib/core/` contains the controller, panel geometry, interaction holds, shell settings, utilities, springs and native bridge bindings. `lib/ui/` renders window/panel shells. `lib/nex/` contains capture, library, detail, link reading, commitments, reminders and settings views. The C++ runner separates clipboard, hotkeys, notifications, pickers, startup, tray and window management into `native_*.cpp` modules.
+`lib/core` owns shell state, geometry, holds, utilities and native bindings. `lib/ui` renders the two shells. `lib/nex` contains capture, library, detail, tag management, reminders, backups and settings. The C++ runner separates native window/caption, clipboard, hotkeys, tray, notifications, pickers and startup operations.
 
-`DesktopStore` owns one database isolate and a FIFO command stream using `nex_core` and `nex_data`. Every edit submits a durable write without debounce. Notes, revisions, tombstones, FTS, tags and threads use shared Nex repositories. Search folds Arabic/Persian letter variants, digits and joiners using the shared `nexSearchFold` implementation. Cards, Markdown, themes, contrast and direction helpers come from `nex_ui`.
+`DesktopStore` runs the shared Nex SQLite repositories in a dedicated isolate with FIFO commands. Notes, revisions, tags, threads, tombstones and FTS stay in the domain repositories. Saves are submitted without a view-owned debounce and pending work drains before exit. Shared UI includes an optional desktop checklist-preview callback; done-item sorting retains original source indexes.
 
-The application-support directory contains `nex.sqlite`, `media/` and temporary backup archives. Capture sessions survive view closure and pending work drains before exit. Failed imports preserve recoverable recordings. Shell preferences and utility state remain separate in `%APPDATA%\NexDesktopShell`.
+The application-support directory contains `nex.sqlite` and `media/`. Shell preferences and clipboard storage live under `%APPDATA%\NexDesktopShell`. Clipboard persistence stores the most recent 50 distinct text/image entries and separate favorites, with atomic commits and save/retry reporting. Live clipboard preview capture may downscale images; the feature is not a promise to archive the original full-resolution source image.
 
-Desktop text lives in the Persian/English ARBs under `lib/l10n/`. Persian is the default, with bundled Vazirmatn/Inter fonts. After changing ARBs, run:
+## Localization and reminders
 
-```powershell
-python tools/generate_utility_strings.py
-flutter gen-l10n
-dart format lib
-```
+The UI supports English and Persian, bundled Inter/Vazirmatn fonts, Persian-aware search and RTL text. After changing ARBs, run `flutter gen-l10n` here; utility translations are generated with `python tools/generate_utility_strings.py` when that source changes.
 
-The desktop has no imports of `nex_ai`; its optional dependency can be removed without changing app source. Assistant, Vault, cloud/LAN sync, OCR, local LLM and automatic updates are outside this desktop release.
+Reminder times are stored in UTC and edited/displayed in local time using a 24-hour picker. A serial coordinator schedules/cancels Windows toast notifications with `Nex.Desktop.App`, refreshes on startup and mutations, and routes note activation. Native probe testing verified schedule/change/cancel; full installed delivery after exit/reboot remains a separate manual check. Indefinite repeat replenishment while the app is fully exited is not implemented.
 
-## Reminders, backups and links
-
-Reminder reconciliation schedules native WinRT toast notifications using `Nex.Desktop.App`. The installer sets the shortcut identity. Unit tests use a fake scheduler; they do not prove actual Windows notification delivery after exit or reboot. Test that path manually on an installed copy.
-
-Settings exports and restores Nex `.nexbak` and `.nexfull` archives using checked staging and atomic replacement. Full-backup library/media entries are readable; private settings use authenticated WinZip AES-256 and a recovery key. Keep the key separately. There are no Vault or AI credentials to export.
-
-Link metadata reading streams at most 256 KB and recognizes Open Graph metadata. Note opening allows `http`, `https`, `mailto` and `tel`; the web reader accepts HTTP(S).
+Backups support Nex `.nexbak` / `.nexfull` archives, checked staging and atomic replacement. Full-backup private settings use authenticated encryption and a recovery key. Link reading is bounded and note opening permits only supported schemes. Cloud/LAN sync, OCR, assistant/Vault, local LLM and automatic updates are not included.
 
 ## Build and verify
 
-Use Windows x64, Flutter 3.35.0+ / Dart 3.9.0+ and Visual Studio with Desktop development with C++. From `apps/desktop`:
+Use **Flutter 3.44.8**, default `pub.dev`, and Visual Studio with Desktop development with C++. Run from this directory:
 
 ```powershell
-# Hosts recorded in the validated lockfile.
-$env:PUB_HOSTED_URL='https://pub.flutter-io.cn'
-$env:FLUTTER_STORAGE_BASE_URL='https://storage.flutter-io.cn'
-flutter pub get
+flutter pub get --enforce-lockfile
 flutter analyze --no-pub
 flutter test --no-pub
 flutter build windows --release --no-pub
-./tools/windows_smoke.ps1
 ```
 
-Run Flutter commands sequentially within this app: concurrent builds/tests can race when regenerating Windows plugin symlinks. Distribute the entire `build/windows/x64/runner/Release` directory. See the [installer guide](installer/README.md) for Inno Setup packaging. Build outputs and caches are ignored by Git.
+[Installer packaging](installer/README.md) requires Inno Setup **6.7.3**. Distribute the whole Release bundle or the installer. Build outputs and caches are ignored by Git.
 
-Run the shared suites from each package: `dart test` in `packages/core` and `packages/data`; `flutter test --no-pub` in `packages/ui` and `packages/ai`. Run analysis there as well.
+Windows tests compare bundled-font snapshots and the review matrix. Non-emoji views are pixel exact. Four explicitly named emoji grids allow at most **0.05%** pixel drift for Windows 11/Server emoji rasterization; dimensions and larger differences still fail. CI uploads failure images and the reviewed matrix.
 
-Golden comparisons run in the Windows suite and are tagged `golden`; other hosts skip them because fonts/rendering differ. Ten baseline images cover settings, tools, both edges, capture and reading in both languages. `test/flutter_test_config.dart` loads bundled fonts and the host's Segoe UI Emoji. The three emoji grids (`emoji_panel`, `right_shell`, `left_shell`) allow at most 0.05% pixel differences on Windows to accommodate small Windows 11/Server font raster differences; other images remain pixel exact, and dimension changes always fail. CI retains failure images as artifacts for review. Regenerate baselines only after reviewing intentional UI/SDK rendering changes, then compare again without `--update-goldens`.
+The explicit `--panel-smoke <report.json>` probe uses an isolated temporary database and separate instance identity. It tests repeated window/panel transitions, focused/held/pinned hover, native sizing, minimize/maximize/restore and saved bounds. Other probes and their limits are described in the dated validation reports.
 
-`windows_smoke.ps1` validates runtime bundle members, tray creation, registered hotkey/capture delivery, edge reveal, startup restoration, display refresh, single-instance handling, a rendered GUI frame and graceful shutdown. Close other Nex instances first. It uses a temporary database and restores startup/cursor state. It does not validate live clipboard contents, actual toast delivery or interactive hardware behavior.
+Physical mixed-DPI/hot-plug monitors, live microphone/playback, external drag/drop and installed notification/upgrade paths need hardware or clean-machine checks. Automated snapshots and fake-host tests do not establish those behaviors.
 
-## Remaining manual checks
+## Attribution
 
-Review actual toast delivery after shutdown/reboot, live microphone/playback, clipboard image formats, Explorer drag/drop, picker shutdown races, tray recovery after Explorer restart, unavailable network shortcuts, mixed-DPI/hot-plug monitors and moving-shell visual parity. Automated widget snapshots, repository benchmarks and smoke probes do not establish these behaviors.
-
-The original shell was supplied as `right_panel_flutter.zip`, with [raminturne/right-panel](https://github.com/raminturne/right-panel) at `90dcdbde8e33816f08b681c65cd341aa796f81e4` used as a read-only reference. Its notice and font/plugin notices remain in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). Shared package provenance and historical validation are retained in the repository documentation.
+The shared package base and historical transfer patches are documented in [INTEGRATION](../../docs/INTEGRATION.md). Original shell and font/plugin notices are retained in [THIRD_PARTY_NOTICES](THIRD_PARTY_NOTICES.md).

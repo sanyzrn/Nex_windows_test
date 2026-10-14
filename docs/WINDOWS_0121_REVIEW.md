@@ -35,7 +35,7 @@ The host retains native frame styles and handles client sizing/hit testing befor
 
 SHA-256: `e61f5e4e487780b0ed738dda7236e5e51c553b1d57ecd197e544f42abf42cd87`
 
-Installers are generated local artifacts and excluded from Git; their source, assets, regression tests and validation report are committed.
+Installers are generated artifacts and excluded from Git; their source, assets, regression tests and validation report are committed. The tested installer is published in [release v0.12.1](https://github.com/sanyzrn/Nex_windows_test/releases/tag/v0.12.1) with its exact checksum.
 
 ## Limits
 

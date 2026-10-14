@@ -1,15 +1,27 @@
-# Nex Windows test installer
+# Nex Windows installer
 
-Inno Setup 6 produces `Nex-Windows-Setup-0.11.0-x64.exe` for Windows 10/11 x64. It installs for the current user into `%LOCALAPPDATA%\Programs\Nex` without administrator privileges, offers Persian/English installer UI, creates a Start menu shortcut and optionally a desktop shortcut, and registers its uninstaller in Windows Settings. The chosen installer language becomes the app/tray language on the next launch, once per installation. Automatic startup remains controlled by Nex settings. Close Nex before updating or uninstalling; the installer uses the same singleton mutex.
+Inno Setup **6.7.3** builds `Nex-Windows-Setup-0.12.1-x64.exe` for app **0.12.1+9** on Windows 10/11 x64. Setup uses a dark title bar, Nex artwork and English/Persian pages. It installs per user into `%LOCALAPPDATA%\Programs\Nex`, adds a Start menu shortcut and optionally a desktop shortcut, and registers its uninstaller. The selected installer language becomes the app/tray language once per installation.
 
-The complete Flutter Release bundle is included, with app-local x64 Microsoft C++ redistributable DLLs, assets, fonts, SQLite and all plugin DLLs. It needs no runtime download during installation. User notes/media/settings in application-support locations survive uninstall. The optional startup registry value is removed only when it points to this installation's executable.
+Close Nex before upgrading or uninstalling; setup uses the application's singleton mutex. User notes, media and settings are stored outside the program directory and retained. Startup is controlled in Nex settings; uninstall removes its startup entry only when it points to this installation.
 
-Build after `flutter build windows --release`:
+The complete Flutter Release bundle is packaged with app-local x64 Microsoft C++ runtime files, SQLite, plugin DLLs, fonts and assets. Runtime downloads are not needed during installation. The installer is currently **unsigned**.
+
+## Local packaging
+
+After `flutter build windows --release --no-pub`, run from `apps/desktop`:
 
 ```powershell
 ./tools/build_installer.ps1 -ISCC 'C:/path/to/Inno Setup 6/ISCC.exe' -VCRuntime 'C:/path/to/Visual Studio/VC/Redist/MSVC/<version>/x64/Microsoft.VC143.CRT'
 ```
 
-`-VCRuntime` may be omitted when the script can locate an installed Visual Studio redistributable directory. Use the licensed Visual Studio redistributable files; do not copy arbitrary DLLs from System32. Staging and the payload SHA-256 manifest are under `build/installer/`; the default output is `build/installer/output/`. `-Output` selects another output directory. The Inno compiler itself is a build tool, not bundled inside the Nex installer or source ZIP. The resulting Nex installer is unsigned; no signing certificate or update service was supplied.
+The script can discover an installed Visual Studio CRT directory when `-VCRuntime` is omitted. It stages the full bundle, checks required runtime members and writes a payload SHA-256 manifest under `build/installer/`. The default installer output is `build/installer/output/`; `-Output` can override it. Use licensed Visual Studio redistributable files rather than arbitrary System32 DLLs.
 
-Runtime packaging follows [Flutter's Windows distribution guidance](https://docs.flutter.dev/platform-integration/windows/building). Microsoft runtime files remain governed by [Microsoft's redistribution terms](https://learn.microsoft.com/en-us/cpp/windows/redistributing-visual-cpp-files). `Farsi.isl` is the user-contributed translation from the [Inno Setup 6.7.3 source](https://github.com/jrsoftware/issrc/blob/is-6_7_3/Files/Languages/Unofficial/Farsi.isl); its contributor attribution is retained.
+## CI and releases
+
+Desktop Windows CI installs the compiler from the official **6.7.3** release after checking its published SHA-256. It builds setup and attaches the installer plus `SHA256SUMS` as an artifact of the tested source commit. The separate manual release workflow publishes only from a successful CI run on the exact version-tagged commit and refuses to overwrite an existing release.
+
+The current download is in [GitHub Releases](https://github.com/sanyzrn/Nex_windows_test/releases/latest); generated EXEs are intentionally excluded from Git. See [release instructions](../../../docs/RELEASING.md).
+
+Brand PNGs are committed assets; `artwork/generate_brand.py` records their deterministic drawing recipe. They are not regenerated on CI. `Farsi.isl` is the attributed translation from the [Inno Setup 6.7.3 source](https://github.com/jrsoftware/issrc/blob/is-6_7_3/Files/Languages/Unofficial/Farsi.isl).
+
+Packaging follows [Flutter's Windows distribution guidance](https://docs.flutter.dev/platform-integration/windows/building); runtime redistribution follows [Microsoft's terms](https://learn.microsoft.com/en-us/cpp/windows/redistributing-visual-cpp-files).

@@ -1,0 +1,36 @@
+name: Publish tested Windows release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing version tag, for example v0.12.2. Requires successful Desktop Windows CI on its exact commit.'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nex-release-${{ inputs.tag }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      actions: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+      RELEASE_TAG: ${{ inputs.tag }}
+    steps:
+      - name: Checkout release tag
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          ref: ${{ inputs.tag }}
+          fetch-depth: 0
+      - name: Verify source, CI and installer then publish
+        shell: pwsh
+        run: ./apps/desktop/tools/publish_release.ps1

@@ -6,11 +6,12 @@ class WindowsEmojiComparator extends LocalFileComparator {
   WindowsEmojiComparator(super.testFile);
 
   // Windows Server 2025 differed by 125-129 of 326,400 pixels from Windows 11
-  // with the same Flutter SDK. Limit this allowance to the three emoji grids.
+  // with the same Flutter SDK. Limit this allowance to the emoji grid views.
   static const _emojiGoldens = {
     'goldens/emoji_panel.png',
     'goldens/right_shell.png',
     'goldens/left_shell.png',
+    'review_goldens/emoji_panel_right_dark_en.png',
   };
   static const _maxDiffFraction = 0.0005; // 0.05%, not 5%.
 

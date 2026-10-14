@@ -1,4 +1,6 @@
-## 0.12.1
+# Changelog
+
+## 0.12.1 (2026-10-14)
 
 - Reliable outside-click panel dismissal and hover between readers and tools.
 - Windows display labels use the actual display device number.
@@ -7,8 +9,6 @@
 - Interactive checklist previews and refreshed reader state.
 - Categorized compact settings with tool search and placement controls.
 - Custom desktop title bar and a minimal dark installer.
-
-# Changelog
 
 ## 0.12.0 (2026-10-04)
 

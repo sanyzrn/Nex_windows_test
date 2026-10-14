@@ -1,3 +1,9 @@
+# Current repository status — 2026-10-14
+
+Current app: **0.12.1+9**. Source is synchronized on GitHub main; installers are Release assets, not tracked source files. Follow [README](../README.md), [release process](RELEASING.md), and [current app validation](WINDOWS_0121_REVIEW.md). The handoffs below are historical; statements such as "no commit/push" describe their original stage and are not current repository status.
+
+---
+
 # Agent Handoff: persistent clipboard and tool explanations — 2026-10-14
 
 Owner requested durable last-50 clipboard history across Windows shutdown plus a one-line explanation of every tool before choosing removals. Implemented separate SQLite clipboard storage at `%APPDATA%/NexDesktopShell/clipboard.sqlite`, a dedicated isolate, atomic FULL WAL commits, cached immutable keys and incremental image-blob transmission. Retains 50 distinct recent text/image entries, MRU recopy, separate favorites, persisted delete/clear/pin/unpin, one-time legacy pin migration. Loads before native watching and drains before quit. Saving/error/retry are visible; unreadable databases are not silently overwritten. Clearing preserves pins. Old native image preview/downscaling remains unchanged.
