@@ -17,6 +17,7 @@ import 'package:nex_ui/nex_ui.dart';
 import '../l10n/app_localizations.dart';
 import 'features_state.dart';
 import 'note_copy.dart';
+import 'notices.dart';
 import 'note_detail_parts.dart';
 import 'reminder_picker.dart';
 import 'reminder_coordinator.dart' show ReminderDeliveryFailure;
@@ -45,6 +46,16 @@ class _NexNoteDetailState extends State<NexNoteDetail> {
   bool editing = false;
   int editRevision = 0;
   bool _threadsLoaded = false;
+  @override
+  void didUpdateWidget(covariant NexNoteDetail oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    note = widget.note;
+    if (!editing) {
+      editor.text = note.content ?? '';
+      caption.text = note.caption ?? '';
+    }
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -341,28 +352,20 @@ class _NexNoteDetailState extends State<NexNoteDetail> {
                                   await c?.native.launch(note.mediaUri!);
                                 }, rethrowError: true),
                           onDelete: () async {
-                            await run('delete', {});
-                            if (context.mounted && failure == null) {
-                              final features = NexScope.of(context);
-                              if (features.session.id == note.id) {
-                                await features.fresh();
-                              }
-                              if (!context.mounted) return;
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(l.deleted),
-                                  action: SnackBarAction(
-                                    label: l.undo,
-                                    onPressed: () => features.guard(
-                                      () => features.store.call<void>(
-                                        'restore',
-                                        {'id': note.id},
-                                      ),
-                                    ),
-                                  ),
-                                ),
+                            final id = note.id;
+                            final messenger = ScaffoldMessenger.of(context);
+                            try {
+                              await deleteNoteWithUndo(
+                                features,
+                                id,
+                                messenger,
+                                l,
                               );
-                              widget.onClose();
+                              if (mounted) widget.onClose();
+                            } catch (e) {
+                              if (mounted) {
+                                setState(() => failure = e.toString());
+                              }
                             }
                           },
                         ),

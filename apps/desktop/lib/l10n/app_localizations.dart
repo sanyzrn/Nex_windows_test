@@ -2293,6 +2293,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Retry saving'**
   String get clipboardRetry;
+
+  /// No description provided for @applicationName.
+  ///
+  /// In en, this message translates to:
+  /// **'Nex'**
+  String get applicationName;
+
+  /// No description provided for @manageTags.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage tags'**
+  String get manageTags;
+
+  /// No description provided for @tagDeleteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove this tag from all notes? Your notes will be kept.'**
+  String get tagDeleteHint;
+
+  /// No description provided for @tagNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a unique tag name.'**
+  String get tagNameRequired;
+
+  /// No description provided for @toolDock.
+  ///
+  /// In en, this message translates to:
+  /// **'Dock'**
+  String get toolDock;
+
+  /// No description provided for @toolMore.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get toolMore;
+
+  /// No description provided for @toolHidden.
+  ///
+  /// In en, this message translates to:
+  /// **'Hidden'**
+  String get toolHidden;
+
+  /// No description provided for @toolSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Find a tool or shortcut'**
+  String get toolSearch;
+
+  /// No description provided for @minimizeWindow.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimize'**
+  String get minimizeWindow;
+
+  /// No description provided for @maximizeWindow.
+  ///
+  /// In en, this message translates to:
+  /// **'Maximize / Restore'**
+  String get maximizeWindow;
+
+  /// No description provided for @closeWindow.
+  ///
+  /// In en, this message translates to:
+  /// **'Close window'**
+  String get closeWindow;
 }
 
 class _AppLocalizationsDelegate

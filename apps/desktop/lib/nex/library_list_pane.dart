@@ -94,6 +94,8 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
+                          persist: false,
+                          showCloseIcon: true,
                           content: Text(l.deleted),
                           action: SnackBarAction(
                             label: l.undo,
@@ -173,6 +175,22 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
             ),
           ),
         ),
+        Align(
+          alignment: AlignmentDirectional.centerEnd,
+          child: TextButton.icon(
+            key: const ValueKey('manage-tags'),
+            icon: const Icon(Icons.sell_outlined, size: 16),
+            label: Text(l.manageTags),
+            onPressed: () async {
+              await showTagManager(context, NexScope.of(context));
+              if (!mounted) return;
+              final all = await store.call<List<Tag>>('tags');
+              if (!mounted) return;
+              if (tag != null && !all.any((t) => t.id == tag)) tag = null;
+              await load();
+            },
+          ),
+        ),
         _FilterBar(
           type: type,
           tag: tag,
@@ -193,7 +211,13 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
             load();
           },
           onTrashToggled: () {
-            trash = !trash;
+            _detailRelease?.call();
+            _detailRelease = null;
+            setState(() {
+              trash = !trash;
+              selectedNote = null;
+              _selectedIds.clear();
+            });
             load();
           },
           onClearAll: () {
@@ -321,11 +345,28 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
                         ),
                       ),
                       child: GestureDetector(
-                        onSecondaryTapDown: (details) =>
-                            _showCardContextMenu(details.globalPosition, note),
+                        onSecondaryTapDown: trash
+                            ? null
+                            : (details) => _showCardContextMenu(
+                                details.globalPosition,
+                                note,
+                              ),
                         child: NoteCard(
-                          note: note,
-                          showDue: true,
+                          note: trash
+                              ? note.copyWith(clearPinnedAt: true)
+                              : note,
+                          showDue: !trash,
+                          onChecklistToggle: trash
+                              ? null
+                              : (itemIndex) async {
+                                  await NexScope.of(context).guard(
+                                    () => store.call<void>('check', {
+                                      'id': note.id,
+                                      'index': itemIndex,
+                                    }),
+                                  );
+                                  if (mounted) await load();
+                                },
                           selected: _selectedIds.isNotEmpty
                               ? isCardSelected
                               : null,
@@ -378,27 +419,33 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
                               return '$formattedDate $formattedTime$repeatText';
                             },
                           ),
-                          onTap: () {
-                            final isCtrl =
-                                HardwareKeyboard.instance.isControlPressed;
-                            final isShift =
-                                HardwareKeyboard.instance.isShiftPressed;
+                          onTap: trash
+                              ? null
+                              : () {
+                                  final isCtrl = HardwareKeyboard
+                                      .instance
+                                      .isControlPressed;
+                                  final isShift =
+                                      HardwareKeyboard.instance.isShiftPressed;
 
-                            if (isCtrl || isShift || _selectedIds.isNotEmpty) {
-                              setState(() {
-                                if (_selectedIds.contains(note.id)) {
-                                  _selectedIds.remove(note.id);
-                                } else {
-                                  _selectedIds.add(note.id);
-                                }
-                              });
-                            } else {
-                              _detailRelease = NexPanelScope.maybeOf(
-                                context,
-                              )?.holdOpen(modal: false);
-                              setState(() => selectedNote = note);
-                            }
-                          },
+                                  if (isCtrl ||
+                                      isShift ||
+                                      _selectedIds.isNotEmpty) {
+                                    setState(() {
+                                      if (_selectedIds.contains(note.id)) {
+                                        _selectedIds.remove(note.id);
+                                      } else {
+                                        _selectedIds.add(note.id);
+                                      }
+                                    });
+                                  } else {
+                                    _detailRelease?.call();
+                                    _detailRelease = NexPanelScope.maybeOf(
+                                      context,
+                                    )?.holdOpen(modal: false);
+                                    setState(() => selectedNote = note);
+                                  }
+                                },
                         ),
                       ),
                     ),

@@ -389,5 +389,16 @@
   "workspaceMedia": "پیوست",
   "saving": "در حال ذخیره…",
   "clipboardSaveFailed": "ذخیرهٔ تاریخچهٔ کلیپ‌بورد انجام نشد. این تغییرها هنوز پس از اجرای دوباره محفوظ نیستند.",
-  "clipboardRetry": "تلاش دوباره برای ذخیره"
+  "clipboardRetry": "تلاش دوباره برای ذخیره",
+  "applicationName": "Nex",
+  "manageTags": "مدیریت تگ‌ها",
+  "tagDeleteHint": "این تگ از همهٔ یادداشت‌ها حذف شود؟ یادداشت‌ها حفظ می‌شوند.",
+  "tagNameRequired": "یک نام غیرتکراری برای تگ وارد کن.",
+  "toolDock": "داک",
+  "toolMore": "بیشتر",
+  "toolHidden": "پنهان",
+  "toolSearch": "جست‌وجوی ابزار یا میان‌بر",
+  "minimizeWindow": "کوچک کردن",
+  "maximizeWindow": "بزرگ کردن / بازگرداندن",
+  "closeWindow": "بستن پنجره"
 }

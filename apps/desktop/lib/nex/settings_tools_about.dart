@@ -20,42 +20,19 @@ mixin _SettingsToolsAbout on _SettingsStateBase {
         iconColor: scheme.primary,
         title: l.settingsTools,
         children: [
-          for (final tool in kTools.values.where(
-            (t) => !t.fixed && t.id != 'more',
-          ))
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      utilityLabelForText(context, tool.name),
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                  Switch(
-                    value: c.S.dock!.contains(tool.id),
-                    onChanged: (v) {
-                      c.moveWidget(tool.id, v ? 'dock' : 'more', 0);
-                    },
-                  ),
-                ],
-              ),
-            ),
+          NexToolOrganizer(controller: c),
           const Divider(height: 1),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8),
-            child: Row(
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
               children: [
                 OutlinedButton.icon(
                   onPressed: () => c.native.pickApp(),
                   icon: const Icon(Icons.add, size: 16),
                   label: Text(l.addApp),
                 ),
-                const SizedBox(width: 8),
                 OutlinedButton.icon(
                   onPressed: () => c.native.pickApp(folder: true),
                   icon: const Icon(Icons.create_new_folder_outlined, size: 16),
@@ -64,26 +41,6 @@ mixin _SettingsToolsAbout on _SettingsStateBase {
               ],
             ),
           ),
-          for (final app in c.S.apps)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      app.name,
-                      textDirection: nexDirectionOf(app.name),
-                      style: const TextStyle(fontSize: 13),
-                    ),
-                  ),
-                  IconButton(
-                    tooltip: l.remove,
-                    icon: const Icon(Icons.close, size: 18),
-                    onPressed: () => c.removeApp(app.id),
-                  ),
-                ],
-              ),
-            ),
         ],
       ),
 

@@ -1,11 +1,11 @@
-import '../l10n/utility_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:nex_ui/nex_ui.dart';
 import '../core/app_meta.dart';
+import '../core/display_identity.dart';
 import '../core/panel_settings.dart';
-import '../core/registry.dart';
+import 'tool_organizer.dart';
 import '../ui/widgets.dart';
 import '../l10n/app_localizations.dart';
 import 'features.dart';
@@ -89,8 +89,21 @@ abstract class _SettingsStateBase extends State<NexSettingsView> {
               ),
               const SizedBox(height: 8),
               cards[category],
-            ] else
-              ...cards,
+            ] else ...[
+              DropdownButtonFormField<int>(
+                key: const ValueKey('settings-category'),
+                initialValue: category,
+                isExpanded: true,
+                items: [
+                  for (var i = 0; i < names.length; i++)
+                    DropdownMenuItem(value: i, child: Text(names[i])),
+                ],
+                onChanged: (v) {
+                  if (v != null) setState(() => category = v);
+                },
+              ),
+              cards[category],
+            ],
 
             if (f?.error != null)
               Padding(

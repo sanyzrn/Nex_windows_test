@@ -81,6 +81,7 @@ class NoteCard extends StatelessWidget {
     super.key,
     required this.note,
     this.onTap,
+    this.onChecklistToggle,
     this.previewOverride,
     this.strings = NexCardStrings.fallback,
     this.showDue = true,
@@ -89,6 +90,7 @@ class NoteCard extends StatelessWidget {
   });
   final Note note;
   final VoidCallback? onTap;
+  final ValueChanged<int>? onChecklistToggle;
   final Widget? previewOverride;
   final NexCardStrings strings;
 
@@ -150,6 +152,7 @@ class NoteCard extends StatelessWidget {
             showDue: showDue,
             expanded: expanded,
             selected: selected,
+            onChecklistToggle: onChecklistToggle,
           ),
         ),
       ),
@@ -180,11 +183,13 @@ class _CardBody extends StatelessWidget {
     required this.showDue,
     required this.expanded,
     required this.selected,
+    required this.onChecklistToggle,
   });
 
   final Note note;
   final VoidCallback? onTap;
   final Widget? previewOverride;
+  final ValueChanged<int>? onChecklistToggle;
   final NexCardStrings strings;
   final bool showDue;
   final bool expanded;
@@ -256,7 +261,12 @@ class _CardBody extends StatelessWidget {
               Expanded(
                 child:
                     previewOverride ??
-                    _Preview(note: note, expanded: expanded, strings: strings),
+                    _Preview(
+                      note: note,
+                      expanded: expanded,
+                      strings: strings,
+                      onChecklistToggle: onChecklistToggle,
+                    ),
               ),
             ],
           ),
@@ -425,20 +435,23 @@ class _Preview extends StatelessWidget {
     required this.note,
     required this.expanded,
     required this.strings,
+    this.onChecklistToggle,
   });
   final NexCardStrings strings;
+  final ValueChanged<int>? onChecklistToggle;
 
   final Note note;
   final bool expanded;
 
   @override
   Widget build(BuildContext context) {
-    // A checklist and a link both have a shape worth showing at a glance, and
-    // both fit the same two lines every other card gets. Neither is
-    // interactive here: the card's own tap opens the note, and a checkbox
-    // inside a tappable card is a target inside a target.
+    // Checklist ticks keep their source index even when done items move below.
     if (note.type == NoteType.checklist && note.checklistItems.isNotEmpty) {
-      return _ChecklistPreview(items: note.checklistItems, expanded: expanded);
+      return _ChecklistPreview(
+        items: note.checklistItems,
+        expanded: expanded,
+        onToggle: onChecklistToggle,
+      );
     }
     if (note.type == NoteType.link) return _LinkPreview(note: note);
 
@@ -520,9 +533,14 @@ class _Preview extends StatelessWidget {
 /// other, so a hundred-item shopping list carries "+88" on its last line
 /// rather than swallowing the timeline.
 class _ChecklistPreview extends StatelessWidget {
-  const _ChecklistPreview({required this.items, required this.expanded});
+  const _ChecklistPreview({
+    required this.items,
+    required this.expanded,
+    this.onToggle,
+  });
 
   final List<ChecklistItem> items;
+  final ValueChanged<int>? onToggle;
   final bool expanded;
 
   @override
@@ -546,6 +564,9 @@ class _ChecklistPreview extends StatelessWidget {
           for (final item in shown)
             _ChecklistLine(
               item: item,
+              onToggle: onToggle == null
+                  ? null
+                  : () => onToggle!(items.indexOf(item)),
               // The last visible line carries the overflow count, so the
               // card never grows a third row to say "+3 more".
               trailing: item == shown.last && remaining > 0
@@ -566,9 +587,10 @@ class _ChecklistPreview extends StatelessWidget {
 }
 
 class _ChecklistLine extends StatelessWidget {
-  const _ChecklistLine({required this.item, this.trailing});
+  const _ChecklistLine({required this.item, this.trailing, this.onToggle});
 
   final ChecklistItem item;
+  final VoidCallback? onToggle;
   final String? trailing;
 
   @override
@@ -582,12 +604,24 @@ class _ChecklistLine extends StatelessWidget {
       height: nexCardPreviewLineHeightFor(context),
       child: Row(
         children: [
-          Icon(
-            item.done
-                ? Icons.check_box_outlined
-                : Icons.check_box_outline_blank,
-            size: 16,
-            color: item.done ? scheme.primary : scheme.onSurfaceVariant,
+          Semantics(
+            checked: item.done,
+            button: onToggle != null,
+            label: item.text,
+            child: InkResponse(
+              onTap: onToggle,
+              radius: 20,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                child: Icon(
+                  item.done
+                      ? Icons.check_box_outlined
+                      : Icons.check_box_outline_blank,
+                  size: 16,
+                  color: item.done ? scheme.primary : scheme.onSurfaceVariant,
+                ),
+              ),
+            ),
           ),
           const SizedBox(width: NexSpacing.sm),
           Expanded(

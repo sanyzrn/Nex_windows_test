@@ -10,7 +10,7 @@ part of 'library_view.dart';
 /// movement, undo, delete, pin and copy (F1, Ctrl+F, Ctrl+Z, Ctrl+P, Ctrl+C).
 mixin _LibraryKeys on _LibraryStateBase {
   void _moveSelection(int delta) {
-    if (notes.isEmpty) return;
+    if (notes.isEmpty || trash) return;
     int currentIndex = selectedNote == null
         ? -1
         : notes.indexWhere((n) => n.id == selectedNote!.id);

@@ -1166,4 +1166,38 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get clipboardRetry => 'تلاش دوباره برای ذخیره';
+
+  @override
+  String get applicationName => 'Nex';
+
+  @override
+  String get manageTags => 'مدیریت تگ‌ها';
+
+  @override
+  String get tagDeleteHint =>
+      'این تگ از همهٔ یادداشت‌ها حذف شود؟ یادداشت‌ها حفظ می‌شوند.';
+
+  @override
+  String get tagNameRequired => 'یک نام غیرتکراری برای تگ وارد کن.';
+
+  @override
+  String get toolDock => 'داک';
+
+  @override
+  String get toolMore => 'بیشتر';
+
+  @override
+  String get toolHidden => 'پنهان';
+
+  @override
+  String get toolSearch => 'جست‌وجوی ابزار یا میان‌بر';
+
+  @override
+  String get minimizeWindow => 'کوچک کردن';
+
+  @override
+  String get maximizeWindow => 'بزرگ کردن / بازگرداندن';
+
+  @override
+  String get closeWindow => 'بستن پنجره';
 }

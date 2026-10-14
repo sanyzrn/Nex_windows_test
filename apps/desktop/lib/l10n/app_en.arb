@@ -410,5 +410,16 @@
   "workspaceMedia": "Attachments",
   "saving": "Saving…",
   "clipboardSaveFailed": "Clipboard history could not be saved. These changes are not yet safe after restart.",
-  "clipboardRetry": "Retry saving"
+  "clipboardRetry": "Retry saving",
+  "applicationName": "Nex",
+  "manageTags": "Manage tags",
+  "tagDeleteHint": "Remove this tag from all notes? Your notes will be kept.",
+  "tagNameRequired": "Enter a unique tag name.",
+  "toolDock": "Dock",
+  "toolMore": "More",
+  "toolHidden": "Hidden",
+  "toolSearch": "Find a tool or shortcut",
+  "minimizeWindow": "Minimize",
+  "maximizeWindow": "Maximize / Restore",
+  "closeWindow": "Close window"
 }

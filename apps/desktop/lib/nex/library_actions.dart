@@ -13,6 +13,7 @@ mixin _LibraryActions on _LibraryStateBase {
     final id = note.id;
     _lastDeletedId = id;
     await store.call('delete', {'id': id});
+    if (!mounted) return;
     setState(() {
       if (selectedNote?.id == id) selectedNote = null;
       _selectedIds.remove(id);
@@ -20,10 +21,15 @@ mixin _LibraryActions on _LibraryStateBase {
     await load();
     if (mounted) {
       final l = AppLocalizations.of(context)!;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(l.deleted),
-          action: SnackBarAction(label: l.undo, onPressed: _undoLastDelete),
+      showNexNotice(
+        ScaffoldMessenger.of(context),
+        l.deleted,
+        action: SnackBarAction(
+          label: l.undo,
+          onPressed: () async {
+            await store.call<void>('restore', {'id': id});
+            if (mounted) await load();
+          },
         ),
       );
     }
@@ -40,6 +46,7 @@ mixin _LibraryActions on _LibraryStateBase {
 
   @override
   void _showCardContextMenu(Offset globalPosition, Note note) async {
+    if (trash) return;
     final l = AppLocalizations.of(context)!;
     final messenger = ScaffoldMessenger.of(context);
     final dangerColor = Theme.of(context).colorScheme.error;

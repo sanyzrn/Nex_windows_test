@@ -83,6 +83,7 @@ mixin PanelClipboardOps on PanelStateBase {
   }
 
   void removeApp(String id) {
+    S.hidden.remove(id);
     S.apps = S.apps.where((x) => x.id != id).toList();
     S.dock = S.dock!.where((x) => x != id).toList();
     S.more = S.more!.where((x) => x != id).toList();

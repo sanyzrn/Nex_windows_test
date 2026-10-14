@@ -205,6 +205,23 @@ class DesktopStore {
                 result = null;
               case 'tags':
                 result = notes.listTags();
+              case 'createTag':
+                notes.upsertTag(name: a['name'] as String);
+                result = null;
+              case 'renameTag':
+                final name = (a['name'] as String).trim();
+                if (notes.listTags().any(
+                  (t) =>
+                      t.id != a['tag'] &&
+                      t.name.toLowerCase() == name.toLowerCase(),
+                )) {
+                  throw ArgumentError('Tag name already exists');
+                }
+                maintenance.renameTag(a['tag'] as String, name);
+                result = null;
+              case 'deleteTag':
+                maintenance.deleteTag(a['tag'] as String);
+                result = null;
               case 'tag':
                 result = TagService(
                   notes,

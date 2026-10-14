@@ -72,7 +72,9 @@ mixin _SettingsDisplayAppearance on _SettingsStateBase {
                     for (var i = 0; i < c.screens.length; i++)
                       DropdownMenuItem(
                         value: i,
-                        child: Text('${l.monitor} ${i + 1}'),
+                        child: Text(
+                          '${l.monitor} ${displayNumber(c.screens[i], i)}',
+                        ),
                       ),
                   ],
                   onChanged: (v) async {

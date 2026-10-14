@@ -1162,4 +1162,38 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get clipboardRetry => 'Retry saving';
+
+  @override
+  String get applicationName => 'Nex';
+
+  @override
+  String get manageTags => 'Manage tags';
+
+  @override
+  String get tagDeleteHint =>
+      'Remove this tag from all notes? Your notes will be kept.';
+
+  @override
+  String get tagNameRequired => 'Enter a unique tag name.';
+
+  @override
+  String get toolDock => 'Dock';
+
+  @override
+  String get toolMore => 'More';
+
+  @override
+  String get toolHidden => 'Hidden';
+
+  @override
+  String get toolSearch => 'Find a tool or shortcut';
+
+  @override
+  String get minimizeWindow => 'Minimize';
+
+  @override
+  String get maximizeWindow => 'Maximize / Restore';
+
+  @override
+  String get closeWindow => 'Close window';
 }

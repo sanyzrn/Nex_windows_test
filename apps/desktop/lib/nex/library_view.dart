@@ -21,11 +21,13 @@ import '../l10n/app_localizations.dart';
 import '../ui/widgets.dart';
 import 'features_state.dart';
 import 'note_copy.dart';
+import 'notices.dart';
 import 'note_detail_view.dart';
 import 'reminder_picker.dart';
 import 'reminder_policy.dart';
 import 'shortcuts_dialog.dart';
 import 'store.dart';
+import 'tag_manager.dart';
 
 part 'library_actions.dart';
 part 'library_filter_widgets.dart';
@@ -165,6 +167,10 @@ abstract class _LibraryStateBase extends State<NexLibraryView> {
         if (!mounted || token != generation) return;
         if (selectedNote?.id == outside.id) {
           selectedNote = current?.deletedAt == null ? current : null;
+          if (selectedNote == null) {
+            _detailRelease?.call();
+            _detailRelease = null;
+          }
         }
       }
       setState(() {
@@ -194,7 +200,10 @@ abstract class _LibraryStateBase extends State<NexLibraryView> {
             selectedNote = null;
           }
         }
-        if (selectedNote == null && _layoutWidth >= 900 && notes.isNotEmpty) {
+        if (!trash &&
+            selectedNote == null &&
+            _layoutWidth >= 900 &&
+            notes.isNotEmpty) {
           selectedNote = notes.first;
         }
       });
@@ -249,6 +258,7 @@ abstract class _LibraryStateBase extends State<NexLibraryView> {
                 return SizedBox(
                   height: height,
                   child: NexNoteDetail(
+                    key: ValueKey(selectedNote!.id),
                     note: selectedNote!,
                     onClose: () {
                       _detailRelease?.call();
