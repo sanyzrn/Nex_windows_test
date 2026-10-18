@@ -6,12 +6,14 @@ import 'package:nex_ui/nex_ui.dart';
 
 import '../l10n/app_localizations.dart';
 import '../l10n/utility_strings.dart';
+import '../l10n/intelligence_strings.dart';
 import '../core/controller.dart';
 import '../core/registry.dart';
 import '../nex/command_palette.dart';
 import '../nex/features.dart';
 import '../nex/workspace_home.dart';
 import '../nex/settings.dart';
+import '../nex/intelligence/workspace.dart';
 import '../nex/shortcuts_dialog.dart';
 import 'dock.dart' show AppIconImage;
 import 'flyout.dart' show buildPanelView;

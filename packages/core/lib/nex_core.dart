@@ -75,3 +75,5 @@ export 'models/note_attachment.dart';
 export 'models/scheduled_note.dart';
 export 'files/file_names.dart';
 export 'models/portable_preferences.dart';
+
+export 'ai/note_embedder.dart';

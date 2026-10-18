@@ -126,6 +126,15 @@ class _WindowNavRail extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     NexWorkspaceDestination(
+                      icon: Icons.auto_awesome_outlined,
+                      label: AiStrings.of(context).t('ai'),
+                      selected: section == 'assistant',
+                      compact: !wide,
+                      onPressed: () =>
+                          controller.selectWindowSection('assistant'),
+                    ),
+                    const SizedBox(height: 4),
+                    NexWorkspaceDestination(
                       icon: Icons.grid_view_outlined,
                       label: l.navTools,
                       selected: section == 'tools',

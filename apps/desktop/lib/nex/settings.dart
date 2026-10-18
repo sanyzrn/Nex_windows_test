@@ -10,6 +10,8 @@ import 'tool_organizer.dart';
 import '../ui/widgets.dart';
 import '../l10n/app_localizations.dart';
 import 'features.dart';
+import '../l10n/intelligence_strings.dart';
+import 'intelligence/settings.dart';
 
 part 'settings_display_appearance.dart';
 part 'settings_shortcuts_backup.dart';
@@ -45,6 +47,13 @@ abstract class _SettingsStateBase extends State<NexSettingsView> {
       ..._buildDisplayAppearance(context),
       ..._buildShortcutsBackup(context),
       ..._buildToolsAbout(context),
+      if (f != null)
+        _SettingsCard(
+          icon: Icons.auto_awesome_outlined,
+          iconColor: scheme.primary,
+          title: AiStrings.of(context).t('ai'),
+          children: const [DesktopIntelligenceSettings()],
+        ),
     ];
     final names = [
       l.settingsDisplay,
@@ -53,6 +62,7 @@ abstract class _SettingsStateBase extends State<NexSettingsView> {
       l.settingsBackup,
       l.settingsTools,
       l.settingsAbout,
+      if (f != null) AiStrings.of(context).t('ai'),
     ];
 
     return Material(

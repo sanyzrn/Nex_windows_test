@@ -103,40 +103,43 @@ void main() {
       '$edge physical edge survives Persian RTL; flyout is inward',
       tags: 'golden',
       (t) async {
-      final c = await boot(t, edge);
-      c.setPanel('emoji');
-      await frames(t);
-      final dock = t.getRect(find.byType(Dock));
-      final fly = c.flyRect!;
-      if (edge == 'right') {
-        expect(dock.right, closeTo(480, .1));
-        expect(fly.right, lessThan(dock.left));
-      } else {
-        expect(dock.left, closeTo(0, .1));
-        expect(fly.left, greaterThan(dock.right));
-      }
-      final transform = t
-          .widgetList<Transform>(
-            find.descendant(
-              of: find.byType(Flyout),
-              matching: find.byType(Transform),
-            ),
-          )
-          .firstWhere((e) => e.alignment != null);
-      expect(
-        transform.alignment,
-        edge == 'left' ? Alignment.centerLeft : Alignment.centerRight,
-      );
-      await expectLater(
-        find.byType(Scaffold),
-        matchesGoldenFile('goldens/${edge}_shell.png'),
-      );
-      c.dropHintOn.value = true;
-      await frames(t);
-      final hint = t.getRect(find.byKey(const ValueKey('capture-drop-hint')));
-      expect(hint.left, closeTo(edge == 'left' ? 90 : 170, .1));
-      expect(hint.width, 220);
-    });
+        final c = await boot(t, edge);
+        c.setPanel('emoji');
+        await frames(t);
+        final dock = t.getRect(find.byType(Dock));
+        final fly = c.flyRect!;
+        if (edge == 'right') {
+          expect(dock.right, closeTo(480, .1));
+          expect(fly.right, lessThan(dock.left));
+        } else {
+          expect(dock.left, closeTo(0, .1));
+          expect(fly.left, greaterThan(dock.right));
+        }
+        final transform = t
+            .widgetList<Transform>(
+              find.descendant(
+                of: find.byType(Flyout),
+                matching: find.byType(Transform),
+              ),
+            )
+            .firstWhere((e) => e.alignment != null);
+        expect(
+          transform.alignment,
+          edge == 'left' ? Alignment.centerLeft : Alignment.centerRight,
+        );
+        await expectLater(
+          find.byType(Scaffold),
+          matchesGoldenFile(
+            '${const String.fromEnvironment('NEX_GOLDEN_DIRECTORY', defaultValue: 'goldens')}/${edge}_shell.png',
+          ),
+        );
+        c.dropHintOn.value = true;
+        await frames(t);
+        final hint = t.getRect(find.byKey(const ValueKey('capture-drop-hint')));
+        expect(hint.left, closeTo(edge == 'left' ? 90 : 170, .1));
+        expect(hint.width, 220);
+      },
+    );
   }
   testWidgets(
     'real flyout height anchors and clamps different content heights',
@@ -158,7 +161,9 @@ void main() {
       await frames(t);
       await expectLater(
         find.byType(Scaffold),
-        matchesGoldenFile('goldens/calculator_height.png'),
+        matchesGoldenFile(
+          '${const String.fromEnvironment('NEX_GOLDEN_DIRECTORY', defaultValue: 'goldens')}/calculator_height.png',
+        ),
       );
     },
   );

@@ -7,6 +7,7 @@ import 'package:nex_ui/nex_ui.dart';
 import '../l10n/app_localizations.dart';
 import 'capture_view.dart';
 import 'features_state.dart';
+import 'intelligence/brief.dart';
 
 class NexWorkspaceHome extends StatefulWidget {
   const NexWorkspaceHome({super.key});
@@ -231,6 +232,8 @@ class _NexWorkspaceHomeState extends State<NexWorkspaceHome> {
                     const SizedBox(height: 20),
                     shelf,
                   ],
+                  const SizedBox(height: 20),
+                  const IntelligenceBrief(),
                   const SizedBox(height: 28),
                   Row(
                     children: [
@@ -411,9 +414,11 @@ class _NotePreview extends StatelessWidget {
       style: TextButton.styleFrom(
         alignment: AlignmentDirectional.centerStart,
         foregroundColor: scheme.onSurface,
-        backgroundColor: quiet
-            ? scheme.primary.withValues(alpha: .035)
-            : scheme.surfaceContainerLowest,
+        backgroundColor: nexNoteCardColor(
+          note,
+          Theme.of(context),
+          highContrast: MediaQuery.highContrastOf(context),
+        ),
         padding: EdgeInsets.all(quiet ? 10 : 16),
         minimumSize: const Size(0, 40),
         shape: RoundedRectangleBorder(

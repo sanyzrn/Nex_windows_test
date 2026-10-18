@@ -15,6 +15,7 @@ void main() {
     Duration age = Duration.zero,
     Duration? due,
     DateTime? deletedAt,
+    List<String> tags = const [],
   }) {
     final written = now.subtract(age);
     return Note(
@@ -28,14 +29,68 @@ void main() {
       rev: 1,
       syncState: SyncState.pending,
       dueAt: due == null ? null : now.add(due),
+      tags: [
+        for (final name in tags) Tag(id: name, name: name, createdAt: now),
+      ],
     );
   }
 
-  List<String> linesOf(List<Note> notes, {int limit = 20}) =>
-      nexRecapSource(notes, now: now, limit: limit)
-          .split('\n')
-          .where((line) => line.isNotEmpty)
-          .toList();
+  List<String> linesOf(List<Note> notes, {int limit = 20}) => nexRecapSource(
+    notes,
+    now: now,
+    limit: limit,
+  ).split('\n').where((line) => line.isNotEmpty).toList();
+
+  test(
+    'cache input ignores relative ages but tracks content, tags and due status',
+    () {
+      final notes = [
+        note(id: 'a', content: 'read this', due: const Duration(hours: 6)),
+      ];
+      String signature(List<Note> value, DateTime time) =>
+          nexRecapSource(value, now: time, forFingerprint: true);
+      expect(
+        signature(notes, now),
+        signature(notes, now.add(const Duration(hours: 2))),
+      );
+      // The text the model reads says the day and the clock, so two hours
+      // later it is the same text; the next morning it is not.
+      expect(
+        nexRecapSource(notes, now: now),
+        nexRecapSource(notes, now: now.add(const Duration(hours: 2))),
+      );
+      expect(
+        nexRecapSource(notes, now: now.subtract(const Duration(days: 1))),
+        isNot(nexRecapSource(notes, now: now)),
+      );
+      expect(
+        signature(notes, now),
+        isNot(signature(notes, now.add(const Duration(hours: 7)))),
+      );
+      expect(
+        signature(notes, now),
+        isNot(signature([note(id: 'a', content: 'edited')], now)),
+      );
+      expect(
+        signature(notes, now),
+        isNot(
+          signature([
+            note(id: 'a', content: 'read this', tags: ['work']),
+          ], now),
+        ),
+      );
+      expect(
+        signature([
+          note(id: 'b', content: 'same'),
+          note(id: 'c', content: 'other'),
+        ], now),
+        signature([
+          note(id: 'c', content: 'other'),
+          note(id: 'b', content: 'same'),
+        ], now),
+      );
+    },
+  );
 
   test('a note that is due is first, however old it is', () {
     // The case the old source could not represent at all. A reminder set last
@@ -43,7 +98,11 @@ void main() {
     // a library, and "the twenty newest notes" would never have included it.
     final notes = [
       for (var i = 0; i < 25; i++)
-        note(id: 'recent$i', content: 'something $i', age: Duration(hours: i)),
+        note(
+          id: 'recent$i',
+          content: 'something $i',
+          age: Duration(hours: i),
+        ),
       note(
         id: 'appointment',
         content: 'pick up the prescription',
@@ -53,12 +112,16 @@ void main() {
     ];
 
     final lines = linesOf(notes);
-    expect(lines.first, 'DUE in 6h | text | pick up the prescription');
+    expect(lines.first, 'DUE today 15:00 | text | pick up the prescription');
   });
 
   test('overdue comes before merely due, and both before the rest', () {
     final lines = linesOf([
-      note(id: 'later', content: 'water the plants', due: const Duration(days: 3)),
+      note(
+        id: 'later',
+        content: 'water the plants',
+        due: const Duration(days: 3),
+      ),
       note(id: 'fresh', content: 'written this morning'),
       note(
         id: 'missed',
@@ -67,9 +130,77 @@ void main() {
       ),
     ]);
 
-    expect(lines[0], 'DUE overdue 2d | text | call the plumber back');
-    expect(lines[1], 'DUE in 3d | text | water the plants');
+    expect(
+      lines[0],
+      'DUE overdue 2 days, was Sunday 09:00 | text | call the plumber back',
+    );
+    expect(lines[1], 'DUE Friday 09:00, in 3 days | text | water the plants');
     expect(lines[2], 'today | text | written this morning');
+  });
+
+  test('days are counted by the calendar, with the day and the clock', () {
+    // 2.1.6. Friday evening, a reminder for Wednesday at 9: four days and
+    // fifteen hours by the clock, five by the calendar. The brief said "four
+    // days", and with only a span to go on it also called the reminder a
+    // deadline. Local time, the way the app calls it.
+    final friday = DateTime(2026, 10, 16, 18);
+    Note at(String id, String text, {DateTime? due, DateTime? written}) => Note(
+      id: id,
+      type: NoteType.text,
+      content: text,
+      createdAt: written ?? friday,
+      updatedAt: written ?? friday,
+      deviceId: 'test',
+      rev: 1,
+      syncState: SyncState.pending,
+      dueAt: due,
+    );
+    final lines = nexRecapSource([
+      at('tax', 'edit the tax file', due: DateTime(2026, 10, 21, 9)),
+      at('call', 'call the plumber', due: DateTime(2026, 10, 17, 9)),
+      at('booth', 'booth overtime', due: DateTime(2026, 10, 16, 21, 30)),
+      at('week', 'renew the lease', due: DateTime(2026, 10, 23, 8)),
+      at(
+        'late',
+        'written last night: tomorrow at 5',
+        written: DateTime(2026, 10, 15, 23),
+      ),
+    ], now: friday).split('\n');
+
+    expect(lines, [
+      'DUE today 21:30 | text | booth overtime',
+      'DUE tomorrow 09:00 | text | call the plumber',
+      'DUE Wednesday 09:00, in 5 days | text | edit the tax file',
+      'DUE next Friday 08:00, in 7 days | text | renew the lease',
+      // Calendar days for when a note was written as well: the "tomorrow" in
+      // a note from eleven last night is today.
+      'yesterday | text | written last night: tomorrow at 5',
+    ]);
+  });
+
+  test('a brief with something due is written again when the day turns', () {
+    // "Tomorrow at 9" in a cached brief is wrong after midnight, so the
+    // calendar day of what is waiting is part of the cache identity, and
+    // nothing else about the clock is.
+    final evening = DateTime(2026, 10, 16, 22);
+    final morning = DateTime(2026, 10, 17, 1);
+    String signature(List<Note> notes, DateTime time) =>
+        nexRecapSource(notes, now: time, forFingerprint: true);
+    Note at(String id, {DateTime? due}) => Note(
+      id: id,
+      type: NoteType.text,
+      content: id,
+      createdAt: evening,
+      updatedAt: evening,
+      deviceId: 'test',
+      rev: 1,
+      syncState: SyncState.pending,
+      dueAt: due,
+    );
+    final waiting = [at('dentist', due: DateTime(2026, 10, 17, 9))];
+    expect(signature(waiting, evening), isNot(signature(waiting, morning)));
+    final quiet = [at('a thought')];
+    expect(signature(quiet, evening), signature(quiet, morning));
   });
 
   test('a reminder far enough out is not something waiting', () {
@@ -90,7 +221,12 @@ void main() {
     // prompt tells the model every DUE line comes first, so a DUE line that
     // is not first would be the source contradicting its own instructions.
     expect(lines.first, 'today | text | the boiler man is coming');
-    expect(lines[1], '3d ago | text | renew the passport');
+    // Not DUE, but the reminder is said: without it the brief advised
+    // setting one that was already set.
+    expect(
+      lines[1],
+      '3 days ago · reminder in 90 days | text | renew the passport',
+    );
   });
 
   test('an unfinished checklist says how much of it is left', () {
@@ -106,7 +242,10 @@ void main() {
       ),
     ]);
 
-    expect(lines.first, '2d ago | checklist 2/3 left | milk · bread · call the plumber');
+    expect(
+      lines.first,
+      '2 days ago | checklist 2/3 left | milk · bread · call the plumber',
+    );
     expect(lines[1], 'today | text | a thought');
   });
 
@@ -122,7 +261,7 @@ void main() {
     ]);
 
     expect(lines.first, 'today | text | a thought');
-    expect(lines[1], '2d ago | checklist done | milk · bread');
+    expect(lines[1], '2 days ago | checklist done | milk · bread');
   });
 
   test('a deleted note is not part of anything', () {
@@ -147,7 +286,11 @@ void main() {
     final lines = linesOf([
       note(id: 'long', content: long),
       for (var i = 0; i < 40; i++)
-        note(id: 'n$i', content: 'note $i', age: Duration(hours: i + 1)),
+        note(
+          id: 'n$i',
+          content: 'note $i',
+          age: Duration(hours: i + 1),
+        ),
     ], limit: 20);
 
     expect(lines, hasLength(20));
@@ -164,6 +307,66 @@ void main() {
     ]);
 
     expect(lines, ['today | text | something']);
+  });
+
+  test('what was just written still gets lines on a busy morning', () {
+    // Thirty reminders due this week used to take every line, and the plan
+    // written an hour ago never reached the recap at all.
+    final lines = linesOf([
+      for (var i = 0; i < 30; i++)
+        note(
+          id: 'due$i',
+          content: 'errand $i',
+          due: Duration(hours: i + 1),
+        ),
+      note(
+        id: 'idea',
+        content: 'book the hall for Sara on the 14th',
+        age: const Duration(hours: 1),
+      ),
+      note(id: 'old', content: 'an old thought', age: const Duration(days: 9)),
+    ]);
+
+    expect(lines, hasLength(20));
+    expect(lines.first, 'DUE today 10:00 | text | errand 0');
+    expect(
+      lines,
+      contains('today | text | book the hall for Sara on the 14th'),
+    );
+    // Kept for the recent ones only: an old note does not displace a
+    // reminder.
+    expect(lines.where((l) => l.contains('an old thought')), isEmpty);
+  });
+
+  test('no lines are held back when nothing is recent', () {
+    final lines = linesOf([
+      for (var i = 0; i < 30; i++)
+        note(
+          id: 'due$i',
+          content: 'errand $i',
+          due: Duration(hours: i + 1),
+        ),
+      note(id: 'old', content: 'an old thought', age: const Duration(days: 9)),
+    ]);
+
+    expect(lines, hasLength(20));
+    expect(lines.every((l) => l.startsWith('DUE')), isTrue);
+  });
+
+  test("a note's tags ride in the middle column", () {
+    final lines = linesOf([
+      note(
+        id: 'tickets',
+        content: 'the plane tickets',
+        tags: ['trip', 'summer plans'],
+      ),
+      note(id: 'plain', content: 'no tags here', age: const Duration(hours: 1)),
+    ]);
+
+    expect(lines, [
+      'today | text #trip #summer_plans | the plane tickets',
+      'today | text | no tags here',
+    ]);
   });
 
   group('the standing commitments', () {
@@ -193,10 +396,12 @@ void main() {
     );
 
     List<String> withCommitments(List<NexCommitment> all, {int limit = 20}) =>
-        nexRecapSource(const [], commitments: all, now: now, limit: limit)
-            .split('\n')
-            .where((line) => line.isNotEmpty)
-            .toList();
+        nexRecapSource(
+          const [],
+          commitments: all,
+          now: now,
+          limit: limit,
+        ).split('\n').where((line) => line.isNotEmpty).toList();
 
     test('only the ones close enough to matter are sent', () {
       // The whole reason a commitment carries a lead time. An insurance
@@ -259,7 +464,7 @@ void main() {
             until: const Duration(hours: 20),
           ),
         ]).single,
-        'DUE in 20h | every month | rent',
+        'DUE tomorrow 05:00 | every month | rent',
       );
       expect(
         withCommitments([
@@ -270,7 +475,7 @@ void main() {
             lead: const Duration(days: 7),
           ),
         ]).single,
-        'DUE in 3d | every year | insurance',
+        'DUE Friday 09:00, in 3 days | every year | insurance',
       );
     });
 
@@ -303,7 +508,7 @@ void main() {
             until: const Duration(days: -2),
           ),
         ]).single,
-        'DUE overdue 2d | every month | rent',
+        'DUE overdue 2 days, was Sunday 09:00 | every month | rent',
       );
     });
   });

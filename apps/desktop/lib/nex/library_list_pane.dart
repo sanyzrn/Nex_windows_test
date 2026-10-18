@@ -214,21 +214,36 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
             ),
           ),
         ),
-        Align(
-          alignment: AlignmentDirectional.centerEnd,
-          child: TextButton.icon(
-            key: const ValueKey('manage-tags'),
-            icon: const Icon(Icons.sell_outlined, size: 16),
-            label: Text(l.manageTags),
-            onPressed: () async {
-              await showTagManager(context, NexScope.of(context));
-              if (!mounted) return;
-              final all = await store.call<List<Tag>>('tags');
-              if (!mounted) return;
-              if (tag != null && !all.any((t) => t.id == tag)) tag = null;
-              await load();
-            },
-          ),
+        Row(
+          children: [
+            const SizedBox(width: 12),
+            IconButton(
+              tooltip: AiStrings.of(context).t('board'),
+              isSelected: board,
+              onPressed: () => setState(() => board = true),
+              icon: const Icon(Icons.grid_view_outlined),
+            ),
+            IconButton(
+              tooltip: AiStrings.of(context).t('list'),
+              isSelected: !board,
+              onPressed: () => setState(() => board = false),
+              icon: const Icon(Icons.view_agenda_outlined),
+            ),
+            const Spacer(),
+            TextButton.icon(
+              key: const ValueKey('manage-tags'),
+              icon: const Icon(Icons.sell_outlined, size: 16),
+              label: Text(l.manageTags),
+              onPressed: () async {
+                await showTagManager(context, NexScope.of(context));
+                if (!mounted) return;
+                final all = await store.call<List<Tag>>('tags');
+                if (!mounted) return;
+                if (tag != null && !all.any((t) => t.id == tag)) tag = null;
+                await load();
+              },
+            ),
+          ],
         ),
         _FilterBar(
           type: type,
@@ -311,180 +326,292 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
           )
         else
           Expanded(
-            child: ListView.builder(
-              controller: scroll,
-              padding: const EdgeInsets.fromLTRB(12, 6, 12, 16),
-              itemCount: notes.length + (loading ? 1 : 0),
-              itemBuilder: (context, index) {
-                if (index == notes.length) {
-                  return const Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(16),
-                      child: CircularProgressIndicator(),
-                    ),
+            child: LayoutBuilder(
+              builder: (context, box) {
+                final grid = board && !trash && box.maxWidth >= 640;
+                Widget itemBuilder(BuildContext context, int index) {
+                  if (index == notes.length) {
+                    return const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(16),
+                        child: CircularProgressIndicator(),
+                      ),
+                    );
+                  }
+                  final note = notes[index];
+                  final date = nexDisplayDate(
+                    note.createdAt,
+                    solar:
+                        NexPanelScope.maybeOf(context)?.S.solarCalendar ?? fa,
+                    persian: fa,
                   );
-                }
-                final note = notes[index];
-                final date = nexDisplayDate(
-                  note.createdAt,
-                  solar: NexPanelScope.maybeOf(context)?.S.solarCalendar ?? fa,
-                  persian: fa,
-                );
-                final prior = index == 0
-                    ? null
-                    : nexDisplayDate(
-                        notes[index - 1].createdAt,
-                        solar: NexPanelScope.maybeOf(context)?.S.solarCalendar ?? fa,
-                        persian: fa,
-                      );
-                final isCardSelected = _selectedIds.isNotEmpty
-                    ? _selectedIds.contains(note.id)
-                    : (selectedNote?.id == note.id);
+                  final prior = index == 0
+                      ? null
+                      : nexDisplayDate(
+                          notes[index - 1].createdAt,
+                          solar:
+                              NexPanelScope.maybeOf(context)?.S.solarCalendar ??
+                              fa,
+                          persian: fa,
+                        );
+                  final isCardSelected = _selectedIds.isNotEmpty
+                      ? _selectedIds.contains(note.id)
+                      : (selectedNote?.id == note.id);
 
-                return Column(
-                  children: [
-                    if (date != prior)
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(6, 14, 6, 8),
-                        child: Row(
-                          children: [
-                            Text(
-                              date,
-                              style: theme.textTheme.labelSmall?.copyWith(
-                                fontWeight: FontWeight.w700,
-                                color: scheme.onSurfaceVariant,
-                                letterSpacing: 0.4,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Divider(
-                                height: 1,
-                                color: scheme.outlineVariant.withValues(
-                                  alpha: 0.35,
+                  return Column(
+                    children: [
+                      if (!grid && date != prior)
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(6, 14, 6, 8),
+                          child: Row(
+                            children: [
+                              Text(
+                                date,
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                  color: scheme.onSurfaceVariant,
+                                  letterSpacing: 0.4,
                                 ),
                               ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Divider(
+                                  height: 1,
+                                  color: scheme.outlineVariant.withValues(
+                                    alpha: 0.35,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      Padding(
+                        padding: EdgeInsets.zero,
+                        child: GestureDetector(
+                          onSecondaryTapDown: trash
+                              ? null
+                              : (details) => _showCardContextMenu(
+                                  details.globalPosition,
+                                  note,
+                                ),
+                          child: NoteCard(
+                            board: grid,
+                            active: isCardSelected && _selectedIds.isEmpty,
+                            note: trash
+                                ? note.copyWith(clearPinnedAt: true)
+                                : note,
+                            showDue: !trash,
+                            onChecklistToggle: trash
+                                ? null
+                                : (itemIndex) async {
+                                    await NexScope.of(context).guard(
+                                      () => store.call<void>('check', {
+                                        'id': note.id,
+                                        'index': itemIndex,
+                                      }),
+                                    );
+                                    if (mounted) await load();
+                                  },
+                            selected: _selectedIds.isNotEmpty
+                                ? isCardSelected
+                                : null,
+                            strings: NexCardStrings(
+                              noteOfType: (t) =>
+                                  '${l.note}: ${noteTypeLabel(l, NoteType.values.firstWhere((x) => x.name == t, orElse: () => NoteType.text))}',
+                              tagList: (tags) => '${l.tags}: $tags',
+                              accentColor: l.accent,
+                              durationLabel: (ms) => nexDigits(
+                                '${ms ~/ 60000}:${((ms ~/ 1000) % 60).toString().padLeft(2, '0')}',
+                                persian: fa,
+                              ),
+                              relativeTime: (time) => switch (time.unit) {
+                                NexRelativeUnit.now => l.justNow,
+                                NexRelativeUnit.minutes => l.minutesAgo(
+                                  time.count,
+                                ),
+                                NexRelativeUnit.hours => l.hoursAgo(time.count),
+                                NexRelativeUnit.days => l.daysAgo(time.count),
+                                NexRelativeUnit.weeks => l.weeksAgo(time.count),
+                                NexRelativeUnit.months => l.monthsAgo(
+                                  time.count,
+                                ),
+                                NexRelativeUnit.years => l.yearsAgo(time.count),
+                              },
+                              dueLabel: (due, repeat) {
+                                due = nextReminderOccurrence(
+                                  due,
+                                  repeat,
+                                  DateTime.now(),
+                                ).toLocal();
+                                final now = DateTime.now();
+                                final isOverdue = due.isBefore(now);
+                                final repeatText = switch (repeat) {
+                                  NoteRepeat.daily => ' (${l.repeatDaily})',
+                                  NoteRepeat.weekly => ' (${l.repeatWeekly})',
+                                  _ => '',
+                                };
+                                if (isOverdue && repeat == NoteRepeat.once) {
+                                  return l.overdue;
+                                }
+                                final timeStr =
+                                    '${due.hour.toString().padLeft(2, '0')}:${due.minute.toString().padLeft(2, '0')}';
+                                final formattedTime = fa
+                                    ? nexDigits(timeStr, persian: true)
+                                    : timeStr;
+                                final formattedDate = nexDisplayDate(
+                                  due,
+                                  solar:
+                                      NexPanelScope.maybeOf(
+                                        context,
+                                      )?.S.solarCalendar ??
+                                      fa,
+                                  persian: fa,
+                                );
+                                return '$formattedDate $formattedTime$repeatText';
+                              },
                             ),
+                            onTap: trash
+                                ? null
+                                : () {
+                                    final isCtrl = HardwareKeyboard
+                                        .instance
+                                        .isControlPressed;
+                                    final isShift = HardwareKeyboard
+                                        .instance
+                                        .isShiftPressed;
+
+                                    if (isCtrl ||
+                                        isShift ||
+                                        _selectedIds.isNotEmpty) {
+                                      setState(() {
+                                        if (_selectedIds.contains(note.id)) {
+                                          _selectedIds.remove(note.id);
+                                        } else {
+                                          _selectedIds.add(note.id);
+                                        }
+                                      });
+                                    } else {
+                                      _detailRelease?.call();
+                                      _detailRelease = NexPanelScope.maybeOf(
+                                        context,
+                                      )?.holdOpen(modal: false);
+                                      setState(() => selectedNote = note);
+                                    }
+                                  },
+                          ),
+                        ),
+                      ),
+                      if (trash)
+                        TextButton(
+                          onPressed: () async {
+                            await store.call<void>('restore', {'id': note.id});
+                            if (mounted) await load();
+                          },
+                          child: Text(l.restore),
+                        ),
+                    ],
+                  );
+                }
+
+                if (grid) {
+                  final pinned = [
+                    for (var i = 0; i < notes.length; i++)
+                      if (notes[i].pinnedAt != null) i,
+                  ];
+                  final rest = [
+                    for (var i = 0; i < notes.length; i++)
+                      if (notes[i].pinnedAt == null) i,
+                  ];
+                  final delegate = SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: (box.maxWidth / 310).floor().clamp(2, 5),
+                    mainAxisExtent: nexBoardCardHeight(context),
+                    crossAxisSpacing: 14,
+                    mainAxisSpacing: 14,
+                  );
+                  List<Widget> section(
+                    String label,
+                    List<int> indices,
+                    IconData icon,
+                  ) => indices.isEmpty
+                      ? []
+                      : [
+                          SliverToBoxAdapter(
+                            child: Padding(
+                              padding: const EdgeInsets.only(
+                                bottom: 12,
+                                top: 6,
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    icon,
+                                    size: 15,
+                                    color: scheme.onSurfaceVariant,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    label,
+                                    style: theme.textTheme.labelLarge?.copyWith(
+                                      color: scheme.onSurfaceVariant,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: Divider(
+                                      color: scheme.outlineVariant,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          SliverPadding(
+                            padding: const EdgeInsets.only(bottom: 22),
+                            sliver: SliverGrid.builder(
+                              gridDelegate: delegate,
+                              itemCount: indices.length,
+                              itemBuilder: (context, i) =>
+                                  itemBuilder(context, indices[i]),
+                            ),
+                          ),
+                        ];
+                  return CustomScrollView(
+                    controller: scroll,
+                    slivers: [
+                      SliverPadding(
+                        padding: const EdgeInsets.all(20),
+                        sliver: SliverMainAxisGroup(
+                          slivers: [
+                            ...section(
+                              l.workspacePinned,
+                              pinned,
+                              Icons.push_pin_outlined,
+                            ),
+                            ...section(
+                              AiStrings.of(context).t('gallery'),
+                              rest,
+                              Icons.palette_outlined,
+                            ),
+                            if (loading)
+                              const SliverToBoxAdapter(
+                                child: Center(
+                                  child: Padding(
+                                    padding: EdgeInsets.all(16),
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                ),
+                              ),
                           ],
                         ),
                       ),
-                    Padding(
-                      padding: EdgeInsets.zero,
-                      child: GestureDetector(
-                        onSecondaryTapDown: trash
-                            ? null
-                            : (details) => _showCardContextMenu(
-                                details.globalPosition,
-                                note,
-                              ),
-                        child: NoteCard(
-                          active: isCardSelected && _selectedIds.isEmpty,
-                          note: trash
-                              ? note.copyWith(clearPinnedAt: true)
-                              : note,
-                          showDue: !trash,
-                          onChecklistToggle: trash
-                              ? null
-                              : (itemIndex) async {
-                                  await NexScope.of(context).guard(
-                                    () => store.call<void>('check', {
-                                      'id': note.id,
-                                      'index': itemIndex,
-                                    }),
-                                  );
-                                  if (mounted) await load();
-                                },
-                          selected: _selectedIds.isNotEmpty
-                              ? isCardSelected
-                              : null,
-                          strings: NexCardStrings(
-                            noteOfType: (t) =>
-                                '${l.note}: ${noteTypeLabel(l, NoteType.values.firstWhere((x) => x.name == t, orElse: () => NoteType.text))}',
-                            tagList: (tags) => '${l.tags}: $tags',
-                            accentColor: l.accent,
-                            durationLabel: (ms) => nexDigits(
-                              '${ms ~/ 60000}:${((ms ~/ 1000) % 60).toString().padLeft(2, '0')}',
-                              persian: fa,
-                            ),
-                            relativeTime: (time) => switch (time.unit) {
-                              NexRelativeUnit.now => l.justNow,
-                              NexRelativeUnit.minutes => l.minutesAgo(
-                                time.count,
-                              ),
-                              NexRelativeUnit.hours => l.hoursAgo(time.count),
-                              NexRelativeUnit.days => l.daysAgo(time.count),
-                              NexRelativeUnit.weeks => l.weeksAgo(time.count),
-                              NexRelativeUnit.months => l.monthsAgo(time.count),
-                              NexRelativeUnit.years => l.yearsAgo(time.count),
-                            },
-                            dueLabel: (due, repeat) {
-                              due = nextReminderOccurrence(
-                                due,
-                                repeat,
-                                DateTime.now(),
-                              ).toLocal();
-                              final now = DateTime.now();
-                              final isOverdue = due.isBefore(now);
-                              final repeatText = switch (repeat) {
-                                NoteRepeat.daily => ' (${l.repeatDaily})',
-                                NoteRepeat.weekly => ' (${l.repeatWeekly})',
-                                _ => '',
-                              };
-                              if (isOverdue && repeat == NoteRepeat.once) {
-                                return l.overdue;
-                              }
-                              final timeStr =
-                                  '${due.hour.toString().padLeft(2, '0')}:${due.minute.toString().padLeft(2, '0')}';
-                              final formattedTime = fa
-                                  ? nexDigits(timeStr, persian: true)
-                                  : timeStr;
-                              final formattedDate = nexDisplayDate(
-                                due,
-                                solar: NexPanelScope.maybeOf(context)?.S.solarCalendar ?? fa,
-                                persian: fa,
-                              );
-                              return '$formattedDate $formattedTime$repeatText';
-                            },
-                          ),
-                          onTap: trash
-                              ? null
-                              : () {
-                                  final isCtrl = HardwareKeyboard
-                                      .instance
-                                      .isControlPressed;
-                                  final isShift =
-                                      HardwareKeyboard.instance.isShiftPressed;
-
-                                  if (isCtrl ||
-                                      isShift ||
-                                      _selectedIds.isNotEmpty) {
-                                    setState(() {
-                                      if (_selectedIds.contains(note.id)) {
-                                        _selectedIds.remove(note.id);
-                                      } else {
-                                        _selectedIds.add(note.id);
-                                      }
-                                    });
-                                  } else {
-                                    _detailRelease?.call();
-                                    _detailRelease = NexPanelScope.maybeOf(
-                                      context,
-                                    )?.holdOpen(modal: false);
-                                    setState(() => selectedNote = note);
-                                  }
-                                },
-                        ),
-                      ),
-                    ),
-                    if (trash)
-                      TextButton(
-                        onPressed: () async {
-                          await store.call<void>('restore', {'id': note.id});
-                          if (mounted) await load();
-                        },
-                        child: Text(l.restore),
-                      ),
-                  ],
+                    ],
+                  );
+                }
+                return ListView.builder(
+                  controller: scroll,
+                  padding: const EdgeInsets.fromLTRB(12, 6, 12, 16),
+                  itemCount: notes.length + (loading ? 1 : 0),
+                  itemBuilder: itemBuilder,
                 );
               },
             ),

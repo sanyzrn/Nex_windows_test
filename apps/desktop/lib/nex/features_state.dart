@@ -19,9 +19,19 @@ import '../core/models.dart' show ClipImage;
 import '../core/controller.dart';
 import '../l10n/app_localizations.dart';
 import 'store.dart';
+import 'intelligence/controller.dart';
 
 class NexFeatures extends ChangeNotifier {
-  NexFeatures(this.store, {this.pickFiles}) : session = CaptureSession(store) {
+  DesktopIntelligence? _intelligence;
+  final DesktopIntelligence Function(DesktopStore)? _intelligenceFactory;
+  DesktopIntelligence get intelligence => _intelligence ??=
+      _intelligenceFactory?.call(store) ?? DesktopIntelligence(store);
+  NexFeatures(
+    this.store, {
+    this.pickFiles,
+    DesktopIntelligence Function(DesktopStore)? intelligenceFactory,
+  }) : _intelligenceFactory = intelligenceFactory,
+       session = CaptureSession(store) {
     _libraryChanges = store.libraryChanges.listen((_) {
       libraryRevision++;
       notify();
@@ -283,6 +293,7 @@ class NexFeatures extends ChangeNotifier {
   }
 
   Future<void> close() async {
+    await _intelligence?.close();
     await _libraryChanges?.cancel();
     while (_pending.isNotEmpty) {
       await Future.wait(_pending.toList());

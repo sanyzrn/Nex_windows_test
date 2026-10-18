@@ -1,6 +1,9 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:isolate';
+import 'dart:convert';
+import 'package:nex_ai/cloud.dart';
+import 'intelligence/worker.dart';
 import 'package:nex_core/nex_core.dart';
 import 'package:nex_data/nex_data.dart';
 import 'package:path/path.dart' as p;
@@ -162,6 +165,56 @@ class DesktopStore {
             }
             final dynamic result;
             switch (cmd) {
+              case 'aiActions':
+                result = executeDesktopAiActions(
+                  db,
+                  device,
+                  (a['actions'] as List).cast<AssistantAction>(),
+                );
+                reply.send([-2, true, null]);
+              case 'aiEnrich':
+                final noteId = a['id'] as String;
+                if (notes.getById(noteId) == null) {
+                  throw StateError('Note is unavailable');
+                }
+                switch (a['field']) {
+                  case 'summary':
+                    notes.setSummaryText(noteId, a['text'] as String);
+                  case 'ocr':
+                    notes.setOcrText(noteId, a['text'] as String);
+                  case 'transcribe':
+                    notes.setTranscriptText(noteId, a['text'] as String);
+                  default:
+                    throw ArgumentError('Unsupported enrichment');
+                }
+                result = null;
+                reply.send([-2, true, null]);
+              case 'aiEmbedding':
+                notes.setEmbeddingSpace(a['space'] as String);
+                notes.setEmbedding(
+                  a['id'] as String,
+                  (a['values'] as List).cast<double>(),
+                );
+                result = null;
+              case 'aiNearest':
+                notes.setEmbeddingSpace(a['space'] as String);
+                result = notes
+                    .nearestEmbeddings(
+                      (a['values'] as List).cast<double>(),
+                      minScore: .25,
+                    )
+                    .map((r) => notes.getById(r.noteId))
+                    .whereType<Note>()
+                    .toList();
+              case 'aiCycleContext':
+                result = jsonEncode({
+                  'periods': db.db
+                      .select(
+                        'SELECT * FROM cycle_periods ORDER BY start_day DESC LIMIT 36',
+                      )
+                      .map((r) => Map<String, dynamic>.from(r))
+                      .toList(),
+                });
               case 'capture':
                 final text = a['text'] as String;
                 final oldId = a['id'] as String?;
@@ -205,7 +258,7 @@ class DesktopStore {
                 }
               case 'timeline':
                 result = notes.listTimeline(
-                  limit: 50,
+                  limit: (a['limit'] as int? ?? 50).clamp(1, 200),
                   offset: a['offset'] as int? ?? 0,
                 );
               case 'search':
@@ -353,12 +406,14 @@ class DesktopStore {
                 result = {
                   'total': totals['total'] ?? 0,
                   'pinned': totals['pinned'] ?? 0,
-                  'media': (totals['media'] as int? ?? 0) +
+                  'media':
+                      (totals['media'] as int? ?? 0) +
                       (notes.db.select('''SELECT COUNT(*) AS count
                         FROM note_attachments a
                         JOIN notes n ON n.id = a.note_id
                         WHERE a.deleted_at IS NULL
-                          AND n.deleted_at IS NULL''').single['count'] as int),
+                          AND n.deleted_at IS NULL''').single['count']
+                          as int),
                   'scheduled': scheduled.pending().length,
                   'recent': previews('updated_at DESC, id DESC', '', 8),
                   'pins': previews(

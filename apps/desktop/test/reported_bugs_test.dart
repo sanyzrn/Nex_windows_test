@@ -33,9 +33,8 @@ Future<void> _waitForWidget(
   bool absent = false,
 }) async {
   // SQLite runs in another isolate; a fixed delay races a busy Windows runner.
-  bool pending() => absent
-      ? finder.evaluate().isNotEmpty
-      : finder.evaluate().isEmpty;
+  bool pending() =>
+      absent ? finder.evaluate().isNotEmpty : finder.evaluate().isEmpty;
   for (var i = 0; i < 100 && pending(); i++) {
     await t.runAsync(
       () => Future<void>.delayed(const Duration(milliseconds: 30)),
@@ -308,6 +307,8 @@ void main() {
     t,
   ) async {
     final fixture = await _fixture(t);
+    await t.tap(find.byType(NoteCard).first);
+    await t.pump();
     final action = find.widgetWithText(OutlinedButton, 'Delete');
     await t.ensureVisible(action);
     await t.tap(action);
@@ -317,7 +318,9 @@ void main() {
       () => fixture.f.store.call<Note?>('get', {'id': 'checklist'}),
     );
     expect(deleted, isNull);
-    final trash = await t.runAsync(() => fixture.f.store.call<List<Note>>('trash'));
+    final trash = await t.runAsync(
+      () => fixture.f.store.call<List<Note>>('trash'),
+    );
     expect(trash!.any((n) => n.id == 'checklist'), isTrue);
     await _waitForWidget(t, find.text('Undo'));
     await t.tap(find.text('Undo'));

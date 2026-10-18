@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.20.0 — 2026-10-18
+
+- Bring Android 2.1.6 cloud adapters and action protocol to Windows: Anthropic,
+  OpenAI, Gemini, OpenRouter and custom OpenAI-compatible endpoints. Keep
+  separate model, image, audio and embedding settings for each provider.
+- Add an Intelligence workspace with conversations, note context, image
+  attachments, voice questions, source links, semantic search and a daily brief.
+- Add note summaries, translation, six rewrite styles, tag suggestions, image
+  OCR and audio transcription. Preview outputs before saving or replacing text.
+- Keep AI off until explicitly enabled with cloud consent. Encrypt API keys in
+  Windows secure storage; verify the exact configuration before activating it.
+  Separate note-read, write-proposal and private-cycle permissions. Review all
+  proposed changes before execution; database batches validate and commit together.
+- Introduce a tag-colored card gallery with separate pinned and recent shelves,
+  responsive list/reader modes, light/dark colors and large-text support. Color
+  selection is stable and secondary text retains accessible contrast.
+- Include an honest on-device-model placeholder for future runtime/model work.
+  Local inference and live device synchronization are not enabled in this release.
+- Expand CI with shared cloud-adapter and desktop AI regression tests. Continue
+  automatic publication of the exact tested Windows installer and SHA256SUMS.
+
 ## 0.15.0 — 2026-10-18
 
 - Align the portable note/attachment schema with Android 2.1.4, retaining tags,

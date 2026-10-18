@@ -11,6 +11,7 @@ class _WindowSection extends StatelessWidget {
         valueListenable: controller.windowTool,
         builder: (context, tool, _) {
           final body = switch (section) {
+            'assistant' => const DesktopAssistant(),
             'library' =>
               NexScope.maybeOf(context) == null
                   ? const Center(child: _MissingStoreNotice())
@@ -65,6 +66,7 @@ class _SectionHeader extends StatelessWidget {
     final l = AppLocalizations.of(context)!;
     final c = Theme.of(context).colorScheme;
     final title = switch (section) {
+      'assistant' => AiStrings.of(context).t('ai'),
       'library' => l.library,
       'tools' =>
         tool == null

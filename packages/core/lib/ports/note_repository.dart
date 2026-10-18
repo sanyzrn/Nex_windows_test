@@ -62,6 +62,7 @@ abstract interface class NoteRepository {
     int limit,
     double minScore,
     String? excludeNoteId,
+    bool standout,
   });
 
   /// Notes with text and no embedding yet, newest first.
