@@ -499,7 +499,7 @@ class DesktopStore {
                 final settings = supplied.containsKey('version')
                     ? supplied
                     : <String, dynamic>{
-                        'version': 1,
+                        'version': PortablePreferences.settingsVersion,
                         'scope': 'shared',
                         'preferences': <String, dynamic>{},
                         'credentials': <String, String>{},
@@ -554,7 +554,9 @@ class DesktopStore {
                     // Validate appearance before replacing any live library.
                     final prefs = unpacked['preferences'];
                     validateBackupShell(unpacked['desktopShell']);
-                    if (prefs != null && unpacked['version'] != 1 ||
+                    if (prefs != null &&
+                            unpacked['scope'] != 'shared' &&
+                            unpacked['version'] != 1 ||
                         unpacked.containsKey('scope') &&
                             unpacked['scope'] != 'shared') {
                       throw const FormatException(

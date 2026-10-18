@@ -26,7 +26,7 @@ the same Git blob hashes as local reference commit `846f41e5`.
 
 | Contract | Before this revision | Required behavior |
 | --- | --- | --- |
-| Full backup settings | Windows only wrote `desktopShell`, rejected by Android | Android-valid version-1 envelope with shared preference scope |
+| Full backup settings | Windows only wrote `desktopShell`, rejected by Android | Version-2 shared settings envelope; older receivers reject it safely |
 | Appearance | Android preferences ignored by Windows | Read the shared theme, palette, seed, locale, density and recent colors |
 | Model-bearing backup | Desktop passed an empty model digest and rejected it | Restore the portable library without installing a mobile model |
 | Container recognition | File suffix determined full backup handling | Recognize container entries, including renamed downloads |
@@ -63,12 +63,15 @@ fixtures and retain the same portable keys rather than inventing another format.
 | Windows placement, shortcuts and native tool settings | No | Windows section only | Device local |
 | Android vault, credentials and mobile model | No | Remain mobile-only | Not implemented |
 
-A desktop full backup has `version: 1`, `scope: shared`, the supported
+A desktop full backup has settings `version: 2`, `scope: shared`, the supported
 `appearance.*` preferences, empty credentials, optional cleared preference keys
 and a separate `desktopShell`. The companion Android receiver merges this scope
 instead of clearing preferences absent from it. Existing Android 2.1.4/2.1.5
-binaries lack that scope handling: use the updated receiver build for appearance
-transfer, or use a library-only backup. The original mobile full backup remains
+binaries reject that settings version before replacing the library. Use the
+updated receiver build for appearance transfer, or use a library-only backup.
+The outer full-backup container remains format version 1; only the scoped
+settings semantics use version 2. This prevents old receivers from mistaking a
+partial appearance transfer for a complete mobile preference replacement. The original mobile full backup remains
 the recovery copy for mobile vault/model/credentials; Windows neither installs
 nor retains those secrets in its own settings.
 
@@ -91,8 +94,16 @@ rotates the capture only after success.
   archives restore with attachment bytes, tags, reminders and private tables.
 - Android: scoped-restore tests preserve device ID, credentials and private
   preferences, and reject hostile shared keys; full-backup regression tests pass.
-- Both apps' static analysis is clean. Native Windows screenshots/build/installer
-  gate and exact source commits are recorded after the final CI run.
+- Both apps' static analysis is clean. All 54 updated Windows visual baselines
+  were rendered by the native Windows runner and reviewed, including Persian,
+  enlarged text, the reader and backup/settings screens. No image comparison
+  tolerance was relaxed.
+- Final source, checks and native installer evidence are attached to
+  [Windows PR #4](https://github.com/sanyzrn/Nex_windows_test/pull/4) and its
+  [Windows release-gate runs](https://github.com/sanyzrn/Nex_windows_test/actions).
+  The scoped mobile receiver is tracked in
+  [Android PR #365](https://github.com/sanyzrn/DbsNex/pull/365); an updated Android
+  binary is required for shared appearance restore.
 
 Future iOS must use the same schema stamp, UTC instants, note type names, color
 hex values and preference keys. Its sandbox paths must be rebuilt on restore,

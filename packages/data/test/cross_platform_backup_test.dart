@@ -131,7 +131,7 @@ void main() {
         'circuit',
       );
       const shared = <String, dynamic>{
-        'version': 1,
+        'version': PortablePreferences.settingsVersion,
         'scope': 'shared',
         'preferences': {'appearance.theme_preset': 'circuit'},
         'credentials': <String, String>{},

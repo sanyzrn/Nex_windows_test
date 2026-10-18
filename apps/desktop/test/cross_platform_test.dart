@@ -164,7 +164,7 @@ void main() {
         output: full,
         key: key,
         settings: {
-          'version': 1,
+          'version': PortablePreferences.settingsVersion,
           'scope': 'shared',
           'preferences': <String, dynamic>{},
           'credentials': <String, dynamic>{},

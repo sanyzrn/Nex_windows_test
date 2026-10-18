@@ -188,7 +188,7 @@ class Settings {
   };
 
   Map<String, dynamic> backupSettings() => {
-    'version': 1,
+    'version': PortablePreferences.settingsVersion,
     'scope': 'shared',
     'preferences': sharedPreferences(),
     'credentials': <String, String>{},
