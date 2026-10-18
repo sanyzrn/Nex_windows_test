@@ -68,6 +68,15 @@ class _AssistantState extends State<DesktopAssistant> {
   AudioRecorder? _recorder;
   Directory? _voiceDir;
   bool _recording = false, _voiceBusy = false;
+  static Future<void> _removeVoiceDirectory(Directory? directory) async {
+    if (directory == null) return;
+    try {
+      if (await directory.exists()) await directory.delete(recursive: true);
+    } on FileSystemException {
+      /* A closing recorder may still own its temp file. */
+    }
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -78,12 +87,15 @@ class _AssistantState extends State<DesktopAssistant> {
   @override
   void dispose() {
     final recorder = _recorder, directory = _voiceDir;
-    unawaited(() async {
-      await recorder?.dispose();
-      if (directory != null && await directory.exists()) {
-        await directory.delete(recursive: true);
-      }
-    }());
+    unawaited(
+      () async {
+        try {
+          await recorder?.dispose();
+        } finally {
+          await _removeVoiceDirectory(directory);
+        }
+      }().catchError((Object _) {}),
+    );
     _input.dispose();
     _scroll.dispose();
     super.dispose();
@@ -119,12 +131,13 @@ class _AssistantState extends State<DesktopAssistant> {
             );
           }
         }
-        if (_voiceDir != null && await _voiceDir!.exists()) {
-          await _voiceDir!.delete(recursive: true);
-        }
-        _voiceDir = null;
       }
     } finally {
+      if (!_recording) {
+        final directory = _voiceDir;
+        _voiceDir = null;
+        await _removeVoiceDirectory(directory);
+      }
       if (mounted) setState(() => _voiceBusy = false);
     }
   }

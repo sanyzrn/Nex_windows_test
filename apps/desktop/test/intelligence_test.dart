@@ -26,6 +26,28 @@ class _Secrets implements AiSecrets {
   Future<void> delete(String key) async => values.remove(key);
 }
 
+class _DelayedTimeline implements DesktopStore {
+  _DelayedTimeline(this.delegate);
+  final DesktopStore delegate;
+  final entered = Completer<void>(), release = Completer<void>();
+  @override
+  String get mediaDir => delegate.mediaDir;
+  @override
+  Future<T> call<T>(
+    String command, [
+    Map<String, dynamic> args = const {},
+  ]) async {
+    if (command == 'timeline') {
+      if (!entered.isCompleted) entered.complete();
+      await release.future;
+    }
+    return delegate.call<T>(command, args);
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => throw UnimplementedError();
+}
+
 http.Response _answer(String text) => http.Response(
   jsonEncode({
     'choices': [
@@ -256,6 +278,67 @@ void main() {
       await ai.refreshBrief(manual: true);
       expect(ai.brief, 'A newer plan');
       expect(seen.length, count + 1);
+    },
+  );
+  test('manual brief refreshes coalesce while notes are loading', () async {
+    await store.call<Note>('capture', {'text': 'A real plan'});
+    await enable();
+    await ai.close();
+    final delayed = _DelayedTimeline(store);
+    ai = DesktopIntelligence(
+      delayed,
+      secrets: secrets,
+      clientFactory: () => MockClient((r) async {
+        seen.add(r);
+        return _answer('Plan');
+      }),
+    );
+    await ai.initialize();
+    final first = ai.refreshBrief(manual: true);
+    await delayed.entered.future;
+    final second = ai.refreshBrief(manual: true);
+    delayed.release.complete();
+    await Future.wait([first, second]);
+    expect(seen, hasLength(1));
+  });
+  test(
+    'revoked consent prevents a brief from sending after its database read',
+    () async {
+      await store.call<Note>('capture', {'text': 'PRIVATE_CONTEXT'});
+      await enable();
+      await ai.close();
+      final delayed = _DelayedTimeline(store);
+      ai = DesktopIntelligence(
+        delayed,
+        secrets: secrets,
+        clientFactory: () => MockClient((r) async {
+          seen.add(r);
+          return _answer('No');
+        }),
+      );
+      await ai.initialize();
+      final task = ai.refreshBrief(manual: true);
+      await delayed.entered.future;
+      await ai.setValue('ai.cloud_opt_in', false);
+      delayed.release.complete();
+      await task;
+      expect(seen, isEmpty);
+      expect(ai.brief, isEmpty);
+    },
+  );
+  test(
+    'cancelled voice input never starts an upload after reading the file',
+    () async {
+      await enable();
+      final file = File('${root.path}/question.wav');
+      await file.writeAsBytes([1, 2, 3]);
+      final task = ai.transcribeQuestion(file.path);
+      while (!ai.busy) {
+        await Future<void>.delayed(Duration.zero);
+      }
+      ai.cancel();
+      await expectLater(task, throwsStateError);
+      expect(seen, isEmpty);
     },
   );
   test('semantic spaces never mix after switching embedding models', () async {

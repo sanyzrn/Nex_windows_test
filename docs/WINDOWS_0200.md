@@ -61,7 +61,23 @@ The release is gated on desktop tests and Windows screenshot comparisons,
 shared UI/core/data/cloud-AI tests, native smoke, a Windows release build,
 installer packaging and checksum verification. The removable-runtime proof
 removes the on-device binding and LiteRT dependency while retaining functional
-cloud adapters. Current-run evidence is recorded after CI completes.
+cloud adapters.
+
+Reviewed 59 Windows candidate screenshots from PR CI run `39175393627`, source
+`248f4df98c7eee5593df9e5f27ae367a574f2581`, including light/dark, English/Persian,
+200% text, the gallery, assistant and AI settings. Candidate ZIP SHA256:
+`7b8094dbe162cc9f914c599bbbedd7542036c8ed49b22001383d080d5b7923fe`.
+The strict comparison baselines were updated only after this visual review;
+comparison tolerances are unchanged. That run's 31 failures were screenshot
+comparisons; all 187 other desktop tests passed and candidate rendering passed
+all 57 tests.
+
+After the final privacy guardrails, local analysis reports no issues, all 20
+assistant/controller tests and all four new gallery/contrast tests pass. These
+cover coalesced brief refreshes, failed-attempt recovery, permission revocation
+before outbound requests, named-note body context, actionable checklists and
+200% RTL layout. Final Windows CI must pass comparisons, build, smoke, installer
+and runtime-removal checks before merge and automatic publication.
 
 Physical microphone quality, real provider-account quotas/billing, clean-machine
 installation and a future local runtime require validation on their respective

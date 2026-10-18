@@ -123,6 +123,11 @@ class DesktopIntelligence extends ChangeNotifier {
           'ai.cloud_opt_in',
           'ai.readNotes',
           'ai.allowActions',
+          'ai.summary',
+          'ai.ocr',
+          'ai.transcription',
+          'ai.tags',
+          'ai.semantic',
           'cycle.assistant_access',
         }.contains(key)) {
       cancel();
@@ -827,9 +832,12 @@ class DesktopIntelligence extends ChangeNotifier {
       if (await file.length() > 24 * 1024 * 1024) {
         throw StateError('Audio exceeds 24 MB');
       }
+      final bytes = await file.readAsBytes();
+      if (generation != _generation) throw StateError('Cancelled');
+      _require('ai.transcription');
       final transcript =
           await (_adapter().transcribe(
-                AudioRef(mediaUri: path, bytes: await file.readAsBytes()),
+                AudioRef(mediaUri: path, bytes: bytes),
               ) ??
               Future.value(null));
       if (generation != _generation ||
@@ -850,31 +858,48 @@ class DesktopIntelligence extends ChangeNotifier {
   Future<void> refreshBrief({bool manual = false}) async {
     await initialize();
     if (!enabled || !canRead || !flag('ai.summary', true) || busy) return;
-    final notes = await store.call<List<Note>>('timeline');
-    final fingerprint =
-        '${config.provider.wireName}|${config.resolvedModel}|${string('ai.outputLanguage')}|${notes.take(30).map((n) => '${n.id}:${n.updatedAt.toIso8601String()}').join('|')}';
-    final now = DateTime.now();
-    final success = DateTime.tryParse(string('ai.windows.brief.success'));
-    final attempt = DateTime.tryParse(string('ai.windows.brief.attempt'));
-    if (!manual &&
-        (fingerprint == string('ai.windows.brief.fingerprint') ||
-            success != null &&
-                now.difference(success) < const Duration(hours: 1) ||
-            attempt != null &&
-                now.difference(attempt) < const Duration(minutes: 15))) {
-      return;
-    }
     final generation = ++_generation;
     busy = true;
     _notify();
-    await _prefs!.setString('ai.windows.brief.attempt', now.toIso8601String());
     try {
+      final notes = await store.call<List<Note>>('timeline');
+      if (generation != _generation ||
+          _closed ||
+          !enabled ||
+          !canRead ||
+          !flag('ai.summary', true)) {
+        return;
+      }
+      final fingerprint =
+          '${config.provider.wireName}|${config.resolvedModel}|${string('ai.outputLanguage')}|${notes.take(30).map((n) => '${n.id}:${n.updatedAt.toIso8601String()}').join('|')}';
+      final now = DateTime.now();
+      final success = DateTime.tryParse(string('ai.windows.brief.success'));
+      final attempt = DateTime.tryParse(string('ai.windows.brief.attempt'));
+      if (!manual &&
+          (fingerprint == string('ai.windows.brief.fingerprint') ||
+              success != null &&
+                  now.difference(success) < const Duration(hours: 1) ||
+              attempt != null &&
+                  now.difference(attempt) < const Duration(minutes: 15))) {
+        return;
+      }
+      if (!await _prefs!.setString(
+        'ai.windows.brief.attempt',
+        now.toIso8601String(),
+      )) {
+        throw StateError('Could not save refresh state');
+      }
+      if (generation != _generation ||
+          _closed ||
+          !enabled ||
+          !canRead ||
+          !flag('ai.summary', true)) {
+        return;
+      }
       final answer = await _adapter().digest(
         notes.take(30).map(contextLine).join('\n'),
       );
-      if (generation != _generation ||
-          answer == null ||
-          answer.trim().isEmpty) {
+      if (generation != _generation || answer == null || answer.trim().isEmpty) {
         return;
       }
       brief = answer;
