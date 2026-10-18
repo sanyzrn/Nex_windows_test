@@ -145,7 +145,11 @@ class _NoteIntelligenceState extends State<NoteIntelligencePanel> {
                   label: Text(s.t('configure')),
                 );
               }
-              final text = widget.note.displayText?.trim().isNotEmpty == true;
+              final text =
+                  (widget.note.aiSourceText ?? widget.note.caption)
+                      ?.trim()
+                      .isNotEmpty ==
+                  true;
               Widget tool(String task, IconData icon, bool available) =>
                   OutlinedButton.icon(
                     onPressed: ai.busy || !available

@@ -270,18 +270,29 @@ class DesktopIntelligence extends ChangeNotifier {
     }
   }
 
-  String contextLine(Note n) => jsonEncode({
-    'id': n.id,
-    'type': n.type.wireName,
-    'text': (n.displayText ?? '').substring(
-      0,
-      (n.displayText ?? '').length.clamp(0, 1400),
-    ),
-    'tags': n.tags.map((t) => t.name).toList(),
-    if (n.dueAt != null) 'reminder': n.dueAt!.toIso8601String(),
-    'repeat': n.dueRepeat.wireName,
-    'pinned': n.pinnedAt != null,
-  });
+  String contextLine(Note n) {
+    final text = <String>{
+      for (final part in [
+        n.title,
+        n.content,
+        n.caption,
+        n.ocrText,
+        n.transcriptText,
+        n.linkExcerpt,
+      ])
+        if (part != null && part.trim().isNotEmpty) part.trim(),
+    }.join('\n');
+    return jsonEncode({
+      'id': n.id,
+      'type': n.type.wireName,
+      'text': text.substring(0, text.length.clamp(0, 1400)),
+      'tags': n.tags.map((t) => t.name).toList(),
+      if (n.dueAt != null) 'reminder': n.dueAt!.toIso8601String(),
+      'repeat': n.dueRepeat.wireName,
+      'pinned': n.pinnedAt != null,
+    });
+  }
+
   Future<String> _context(String question) async {
     if (!canRead) return '';
     if (focusedNote != null) {
@@ -680,7 +691,7 @@ class DesktopIntelligence extends ChangeNotifier {
       final adapter = _adapter();
       for (final note in notes.take(200)) {
         if (generation != _generation) return;
-        final text = note.displayText ?? '';
+        final text = note.searchableDerivedText ?? note.aiSourceText ?? '';
         if (text.trim().isEmpty) continue;
         final vector =
             await (adapter.embed(
@@ -728,7 +739,9 @@ class DesktopIntelligence extends ChangeNotifier {
     _notify();
     try {
       final adapter = _adapter();
-      final text = note.displayText ?? '';
+      final text = note.type == NoteType.checklist
+          ? note.content ?? ''
+          : note.aiSourceText ?? note.caption ?? '';
       final String? output;
       switch (task) {
         case 'summary':

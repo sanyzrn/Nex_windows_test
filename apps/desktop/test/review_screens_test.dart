@@ -390,7 +390,10 @@ Future<PanelController> _boot(WidgetTester t, _Shot spec, _Store store) async {
   await t.pumpWidget(
     RepaintBoundary(
       key: const ValueKey('review-surface'),
-      child: RightPanelApp(controller: c, features: store.features),
+      child: NexCardTimeScope(
+        now: DateTime(2026, 10, 18, 12),
+        child: RightPanelApp(controller: c, features: store.features),
+      ),
     ),
   );
   await _frames(t);

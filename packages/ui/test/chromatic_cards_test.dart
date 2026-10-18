@@ -34,7 +34,9 @@ void main() {
           '#B4A1DC',
           '#8FC5EC',
         ]) {
-          final n = note([Tag(createdAt: DateTime(2026), id: 't', name: 'Ideas', color: seed)]);
+          final n = note([
+            Tag(createdAt: DateTime(2026), id: 't', name: 'Ideas', color: seed),
+          ]);
           final background = nexNoteCardColor(n, theme);
           expect(
             nexContrastRatio(theme.colorScheme.onSurfaceVariant, background),
@@ -51,8 +53,18 @@ void main() {
   });
   test('primary card color is stable across tag ordering and renames', () {
     final theme = ThemeData();
-    final a = Tag(createdAt: DateTime(2026), id: 'oldest', name: 'Work', color: '#8ECFB8'),
-        b = Tag(createdAt: DateTime(2026), id: 'recent', name: 'Ideas', color: '#F2C572');
+    final a = Tag(
+          createdAt: DateTime(2026),
+          id: 'oldest',
+          name: 'Work',
+          color: '#8ECFB8',
+        ),
+        b = Tag(
+          createdAt: DateTime(2026),
+          id: 'recent',
+          name: 'Ideas',
+          color: '#F2C572',
+        );
     expect(
       nexNoteCardColor(note([a, b]), theme),
       nexNoteCardColor(note([b, a]), theme),
@@ -62,10 +74,66 @@ void main() {
       theme.colorScheme.surfaceContainerLowest,
     );
   });
+  testWidgets(
+    'named cards keep their body and checklist actions stay interactive',
+    (t) async {
+      final base = note([]);
+      await t.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SizedBox(
+              width: 310,
+              child: NoteCard(
+                note: base.copyWith(title: 'Named idea'),
+                board: true,
+              ),
+            ),
+          ),
+        ),
+      );
+      expect(find.text('Named idea'), findsOneWidget);
+      expect(find.textContaining('A colorful idea'), findsOneWidget);
+      var toggled = -1;
+      final checklist = Note(
+        id: 'c',
+        type: NoteType.checklist,
+        content: '- [ ] Milk\n- [x] Bread',
+        createdAt: DateTime(2026),
+        updatedAt: DateTime(2026),
+        deviceId: 'test',
+        rev: 1,
+        syncState: SyncState.pending,
+      );
+      await t.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SizedBox(
+              width: 310,
+              child: NoteCard(
+                note: checklist,
+                board: true,
+                onChecklistToggle: (index) => toggled = index,
+              ),
+            ),
+          ),
+        ),
+      );
+      await t.tap(find.byType(Checkbox).first);
+      expect(toggled, 0);
+      expect(t.takeException(), isNull);
+    },
+  );
   testWidgets('gallery cards retain readable content at 200 percent in RTL', (
     t,
   ) async {
-    final n = note([Tag(createdAt: DateTime(2026), id: 'a', name: 'ایده‌های من', color: '#F2C572')]);
+    final n = note([
+      Tag(
+        createdAt: DateTime(2026),
+        id: 'a',
+        name: 'ایده‌های من',
+        color: '#F2C572',
+      ),
+    ]);
     await t.pumpWidget(
       MaterialApp(
         home: MediaQuery(

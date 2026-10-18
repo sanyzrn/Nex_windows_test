@@ -154,6 +154,28 @@ void main() {
       expect(ai.turns.length, 2);
     },
   );
+  test('named notes expose their body to chat and writing tools', () async {
+    final original = await store.call<Note>('capture', {
+      'text': 'SUBSTANTIVE_BODY_CONTENT',
+    });
+    await store.call<List<String>>('aiActions', {
+      'actions': [
+        AssistantAction(
+          kind: AssistantActionKind.title,
+          noteId: original.id,
+          text: 'A short title',
+        ),
+      ],
+    });
+    final named = (await store.call<Note?>('get', {'id': original.id}))!;
+    expect(named.displayText, 'A short title');
+    await enable();
+    ai.newConversation(note: named);
+    await ai.send('Explain the note');
+    expect(seen.last.body, contains('SUBSTANTIVE_BODY_CONTENT'));
+    await ai.process(named, 'rewrite');
+    expect(seen.last.body, contains('SUBSTANTIVE_BODY_CONTENT'));
+  });
   test('a proposed write changes nothing until confirmation', () async {
     await enable();
     reply =

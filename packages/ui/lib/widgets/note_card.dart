@@ -6,6 +6,17 @@ import '../tokens/nex_relative_time.dart';
 import '../tokens/nex_text_direction.dart';
 import '../tokens/nex_tokens.dart';
 
+/// A stable reference time for deterministic previews. The application omits
+/// this scope and relative timestamps follow the device clock.
+class NexCardTimeScope extends InheritedWidget {
+  const NexCardTimeScope({super.key, required this.now, required super.child});
+  final DateTime now;
+  static DateTime? maybeOf(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<NexCardTimeScope>()?.now;
+  @override
+  bool updateShouldNotify(NexCardTimeScope oldWidget) => oldWidget.now != now;
+}
+
 /// The oldest colored tag owns the card, so renaming a tag cannot reshuffle
 /// the color. Alpha blending bounds arbitrary imported colors in both modes.
 Color nexNoteCardColor(
@@ -176,7 +187,7 @@ class NoteCard extends StatelessWidget {
         child: Semantics(
           button: onTap != null,
           selected: selected ?? (active ? true : null),
-          label: _label(),
+          label: _label(context),
           // Not `excludeSemantics`. That collapsed the whole card into one
           // string, so a screen-reader user could not reach the date, an
           // individual tag, or the preview separately — a long undifferentiated
@@ -190,6 +201,7 @@ class NoteCard extends StatelessWidget {
                   selected: selected,
                   active: active,
                   showDue: showDue,
+                  onChecklistToggle: onChecklistToggle,
                 )
               : _CardBody(
                   note: note,
@@ -212,13 +224,15 @@ class NoteCard extends StatelessWidget {
   /// The tags are deliberately not here. They are announced by the dots, which
   /// is the node a screen-reader user can actually navigate to — repeating them
   /// on the parent would read the tag list twice on the way past.
-  String _label() => [
+  String _label(BuildContext context) => [
     strings.noteOfType(note.type.name),
     // Stripped for the same reason the preview below is: a screen reader
     // reading "asterisk asterisk done asterisk asterisk" is the audible
     // version of the card showing its own source.
     NexMarkdownText.preview(note.displayText ?? ''),
-    strings.relativeTime(nexRelativeTimeOf(note.createdAt)),
+    strings.relativeTime(
+      nexRelativeTimeOf(note.createdAt, now: NexCardTimeScope.maybeOf(context)),
+    ),
   ].where((value) => value.isNotEmpty).join('. ');
 }
 
@@ -230,26 +244,33 @@ class _BoardBody extends StatelessWidget {
     required this.selected,
     required this.active,
     required this.showDue,
+    required this.onChecklistToggle,
   });
   final Note note;
   final VoidCallback? onTap;
   final NexCardStrings strings;
   final bool? selected;
   final bool active, showDue;
+  final ValueChanged<int>? onChecklistToggle;
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context), c = theme.colorScheme;
     final highContrast = MediaQuery.highContrastOf(context);
     final color = nexNoteCardColor(note, theme, highContrast: highContrast);
     final picked = selected == true || active;
-    final lines = (note.displayText ?? '')
-        .split('\n')
-        .map(NexMarkdownText.preview)
-        .where((s) => s.trim().isNotEmpty)
-        .toList();
+    final lines =
+        (note.type == NoteType.text || note.type == NoteType.checklist
+                ? note.content ?? ''
+                : note.aiSourceText ?? note.caption ?? note.displayText ?? '')
+            .split('\n')
+            .map(NexMarkdownText.preview)
+            .where((s) => s.trim().isNotEmpty)
+            .toList();
     final text = lines.join('\n');
     final title = note.title?.trim().isNotEmpty == true
         ? note.title!
+        : note.type == NoteType.checklist
+        ? strings.noteOfType(note.type.name)
         : lines.firstOrNull ?? '';
     final body = note.title?.trim().isNotEmpty == true
         ? text
@@ -294,7 +315,12 @@ class _BoardBody extends StatelessWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      strings.relativeTime(nexRelativeTimeOf(note.createdAt)),
+                      strings.relativeTime(
+                        nexRelativeTimeOf(
+                          note.createdAt,
+                          now: NexCardTimeScope.maybeOf(context),
+                        ),
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.labelSmall?.copyWith(
@@ -356,7 +382,78 @@ class _BoardBody extends StatelessWidget {
                             height: 1.5,
                           ),
                         ),
-                        if (body.isNotEmpty) ...[
+                        if (note.type == NoteType.checklist) ...[
+                          const SizedBox(height: 8),
+                          Flexible(
+                            child: LayoutBuilder(
+                              builder: (context, box) {
+                                final lineHeight =
+                                    (theme.textTheme.bodyMedium?.fontSize ??
+                                        14) *
+                                    MediaQuery.textScalerOf(context).scale(1) *
+                                    1.6;
+                                final rowHeight = lineHeight < 30
+                                    ? 30.0
+                                    : lineHeight;
+                                final count = (box.maxHeight / rowHeight)
+                                    .floor()
+                                    .clamp(
+                                      0,
+                                      note.checklistItems.length.clamp(0, 3),
+                                    );
+                                return Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    for (var i = 0; i < count; i++)
+                                      SizedBox(
+                                        height: rowHeight,
+                                        child: Row(
+                                          children: [
+                                            SizedBox(
+                                              width: 28,
+                                              height: 30,
+                                              child: Checkbox(
+                                                value:
+                                                    note.checklistItems[i].done,
+                                                onChanged:
+                                                    onChecklistToggle == null
+                                                    ? null
+                                                    : (_) =>
+                                                          onChecklistToggle!(i),
+                                                visualDensity:
+                                                    VisualDensity.compact,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 5),
+                                            Expanded(
+                                              child: Text(
+                                                note.checklistItems[i].text,
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: theme
+                                                    .textTheme
+                                                    .bodyMedium
+                                                    ?.copyWith(
+                                                      color: c.onSurfaceVariant,
+                                                      decoration:
+                                                          note
+                                                              .checklistItems[i]
+                                                              .done
+                                                          ? TextDecoration
+                                                                .lineThrough
+                                                          : null,
+                                                    ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                  ],
+                                );
+                              },
+                            ),
+                          ),
+                        ] else if (body.isNotEmpty) ...[
                           const SizedBox(height: 10),
                           Flexible(
                             child: Text(
