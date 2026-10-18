@@ -26,7 +26,7 @@ panels and enlarged text remain supported without new runtime dependencies.
 | Empty library | Write/Tools used panel-only routing in window mode | Route to the matching desktop section |
 | Filters | Null-valued All items were interpreted as menu dismissal | Use an explicit non-null menu choice and clear the filter |
 | Keyboard | Parent library shortcuts could intercept editor keys | Text editing retains arrows, Delete, copy and undo |
-| Tools | Hidden tools remained in the desktop directory | Apply the persisted visibility setting |
+| Tools | Hidden tools remained in the desktop directory and home shortcuts | Apply the persisted visibility setting to both surfaces |
 | Store | Calls submitted after close could wait forever | Reject calls once the terminal FIFO command is queued |
 | Store | Worker errors/exits could leave pending futures unresolved | Observe isolate errors/exits and finish pending calls |
 | Preferences | Interrupted direct writes could lose shell settings | Stage writes and keep a readable previous snapshot |
@@ -75,7 +75,8 @@ were downloaded, their archive checksum verified, visually inspected, and used
 to refresh those exact baselines. Strict comparison remains enabled.
 
 Final Windows comparison, Release build, native smoke results and installer
-artifacts are linked from [pull request #3](https://github.com/sanyzrn/Nex_windows_test/pull/3).
+artifacts are available in the [main Windows workflow](https://github.com/sanyzrn/Nex_windows_test/actions/workflows/desktop.yml?query=branch%3Amain).
+The design review is retained in [pull request #3](https://github.com/sanyzrn/Nex_windows_test/pull/3).
 Use the successful run for its exact head commit; the run is the authoritative
 release gate, rather than the earlier baseline-refresh run.
 

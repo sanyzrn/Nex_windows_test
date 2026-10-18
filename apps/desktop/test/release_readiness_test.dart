@@ -187,6 +187,8 @@ void main() {
         useNative: false,
       );
       await t.pumpWidget(RightPanelApp(controller: c, features: f));
+      await t.pump();
+      expect(find.widgetWithText(ActionChip, 'Calculator'), findsNothing);
       c.selectWindowSection('library');
       await _settleDatabase(t);
       expect(find.byType(NoteCard), findsNWidgets(2));

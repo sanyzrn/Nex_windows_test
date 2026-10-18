@@ -122,6 +122,11 @@ class _NexWorkspaceHomeState extends State<NexWorkspaceHome> {
             ),
           ],
         );
+        final quickTools = <(String, IconData, String)>[
+          ('clip', Icons.content_paste_rounded, l.clipboard),
+          ('timer', Icons.timer_outlined, l.workspaceFocus),
+          ('calc', Icons.calculate_outlined, l.workspaceCalculate),
+        ].where((entry) => !(c?.S.hidden.contains(entry.$1) ?? false)).toList();
         final shelf = NexWorkspaceCard(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -145,35 +150,33 @@ class _NexWorkspaceHomeState extends State<NexWorkspaceHome> {
                   padding: const EdgeInsets.only(bottom: 8),
                   child: _NotePreview(note: note, quiet: true),
                 ),
-              const SizedBox(height: 12),
-              Divider(height: 1, color: scheme.outlineVariant),
-              const SizedBox(height: 16),
-              _ShelfHeading(
-                icon: Icons.bolt_outlined,
-                title: l.workspaceEssentials,
-              ),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 6,
-                runSpacing: 6,
-                children: [
-                  for (final entry in <(String, IconData, String)>[
-                    ('clip', Icons.content_paste_rounded, l.clipboard),
-                    ('timer', Icons.timer_outlined, l.workspaceFocus),
-                    ('calc', Icons.calculate_outlined, l.workspaceCalculate),
-                  ])
-                    ActionChip(
-                      avatar: Icon(entry.$2, size: 16),
-                      label: Text(entry.$3),
-                      onPressed: c == null
-                          ? null
-                          : () => c.openWindowTool(entry.$1),
-                      visualDensity: VisualDensity.compact,
-                      side: BorderSide.none,
-                      backgroundColor: scheme.primary.withValues(alpha: .07),
-                    ),
-                ],
-              ),
+              if (quickTools.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                Divider(height: 1, color: scheme.outlineVariant),
+                const SizedBox(height: 16),
+                _ShelfHeading(
+                  icon: Icons.bolt_outlined,
+                  title: l.workspaceEssentials,
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: [
+                    for (final entry in quickTools)
+                      ActionChip(
+                        avatar: Icon(entry.$2, size: 16),
+                        label: Text(entry.$3),
+                        onPressed: c == null
+                            ? null
+                            : () => c.openWindowTool(entry.$1),
+                        visualDensity: VisualDensity.compact,
+                        side: BorderSide.none,
+                        backgroundColor: scheme.primary.withValues(alpha: .07),
+                      ),
+                  ],
+                ),
+              ],
             ],
           ),
         );
