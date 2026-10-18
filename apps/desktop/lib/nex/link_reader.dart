@@ -23,6 +23,7 @@ class LinkReader {
   static Future<LinkMetadata?> readFromStream(
     Stream<List<int>> stream, {
     String? contentType,
+    Duration budget = timeout,
   }) async {
     if (contentType != null &&
         !contentType.contains('text/html') &&
@@ -31,8 +32,16 @@ class LinkReader {
     }
 
     final bytes = <int>[];
+    final iterator = StreamIterator<List<int>>(stream);
+    final clock = Stopwatch()..start();
     try {
-      await for (final chunk in stream.timeout(timeout)) {
+      while (bytes.length < maxBytes) {
+        final remainingTime = budget - clock.elapsed;
+        if (remainingTime <= Duration.zero ||
+            !await iterator.moveNext().timeout(remainingTime)) {
+          break;
+        }
+        final chunk = iterator.current;
         final remaining = maxBytes - bytes.length;
         if (remaining <= 0) break;
         if (chunk.length <= remaining) {
@@ -46,6 +55,8 @@ class LinkReader {
       // Partial read before timeout is still parsed
     } catch (_) {
       if (bytes.isEmpty) return null;
+    } finally {
+      await iterator.cancel();
     }
 
     if (bytes.isEmpty) return null;
@@ -99,13 +110,18 @@ class LinkReader {
     }
 
     // 3. Fallback <title>
-    final titleRegex = RegExp(r'<title[^>]*>([^<]+)</title>', caseSensitive: false);
+    final titleRegex = RegExp(
+      r'<title[^>]*>([^<]+)</title>',
+      caseSensitive: false,
+    );
     final titleMatch = titleRegex.firstMatch(html);
     if (titleMatch != null) {
       fallbackTitle = _unescapeHtml(titleMatch.group(1)?.trim());
     }
 
-    final title = (ogTitle != null && ogTitle.isNotEmpty) ? ogTitle : fallbackTitle;
+    final title = (ogTitle != null && ogTitle.isNotEmpty)
+        ? ogTitle
+        : fallbackTitle;
     final excerpt = (ogDesc != null && ogDesc.isNotEmpty) ? ogDesc : null;
 
     if (title == null && excerpt == null) return null;
@@ -118,14 +134,19 @@ class LinkReader {
     try {
       final request = await http.getUrl(uri).timeout(timeout);
       request.headers.set(HttpHeaders.userAgentHeader, 'Nex/1.0');
-      request.headers.set(HttpHeaders.acceptHeader, 'text/html,application/xhtml+xml');
+      request.headers.set(
+        HttpHeaders.acceptHeader,
+        'text/html,application/xhtml+xml',
+      );
       final response = await request.close().timeout(timeout);
 
       final contentType = response.headers.contentType?.mimeType;
-      if (contentType != null &&
-          contentType != 'text/html' &&
-          contentType != 'application/xhtml+xml') {
-        await response.drain();
+      if (response.statusCode < 200 ||
+          response.statusCode >= 300 ||
+          contentType != null &&
+              contentType != 'text/html' &&
+              contentType != 'application/xhtml+xml') {
+        await response.listen((_) {}).cancel();
         return null;
       }
 

@@ -298,7 +298,9 @@ abstract class CaptureViewBase extends StatelessWidget {
     final clip = await Clipboard.getData(Clipboard.kTextPlain);
     if (clip?.text?.isNotEmpty != true) return;
     final trimmed = clip!.text!.trim();
-    if (!await f.fresh()) return;
+    if (!await f.fresh()) {
+      throw StateError(f.error ?? 'Capture flush failed');
+    }
     if (_bareUrl.hasMatch(trimmed)) {
       // A quick-pasted link is an independent capture. Keeping its ID in an
       // empty composer made the next typed thought overwrite that link.

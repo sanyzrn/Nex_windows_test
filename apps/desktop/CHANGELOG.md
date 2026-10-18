@@ -14,6 +14,8 @@
   editor keyboard ownership, pending calls during store shutdown and worker exits.
 - Countdown timers catch up after Windows sleep; shell preferences keep a
   recoverable last-valid snapshot. Failed full-backup unpacking cleans staging.
+- Link previews have a total read deadline, canceling continuously streaming
+  responses instead of allowing each chunk to restart an idle timeout.
 - Added focused data-loss, restore, navigation, filter and timer regressions.
 - Release evidence and remaining native checks: `docs/WINDOWS_0140_REVIEW.md`.
 

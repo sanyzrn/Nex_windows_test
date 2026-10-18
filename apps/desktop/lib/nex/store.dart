@@ -502,9 +502,11 @@ class CaptureSession {
   CaptureSession(this.store);
   final DesktopStore store;
   String? id;
+  int revision = 0;
   Future<void> _tail = Future.value();
   Object? _error;
   Future<void> write(String text, {bool checklist = false}) {
+    revision++;
     final task = _tail.then((_) async {
       final note = await store.call<Note?>('capture', {
         'id': id,

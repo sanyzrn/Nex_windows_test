@@ -10,7 +10,9 @@ import 'package:nex_desktop/nex/link_reader.dart';
 
 void main() {
   test('caps stream at 256 KB on infinite streams', () async {
-    final titleChunk = utf8.encode('<html><head><title>Streaming Test</title></head><body>');
+    final titleChunk = utf8.encode(
+      '<html><head><title>Streaming Test</title></head><body>',
+    );
     final bigChunk = utf8.encode('x' * (32 * 1024)); // 32 KB chunk
     // 15 chunks * 32 KB = 480 KB > 256 KB
     final stream = Stream<List<int>>.fromIterable([
@@ -25,6 +27,38 @@ void main() {
 
     expect(meta?.title, 'Streaming Test');
   });
+
+  test(
+    'the whole preview has a deadline even while chunks keep arriving',
+    () async {
+      Timer? ticker;
+      var cancelled = false;
+      late StreamController<List<int>> stream;
+      stream = StreamController<List<int>>(
+        onListen: () {
+          stream.add(utf8.encode('<title>Partial preview</title>'));
+          ticker = Timer.periodic(
+            const Duration(milliseconds: 2),
+            (_) => stream.add([32]),
+          );
+        },
+        onCancel: () {
+          ticker?.cancel();
+          cancelled = true;
+        },
+      );
+      final clock = Stopwatch()..start();
+      final meta = await LinkReader.readFromStream(
+        stream.stream,
+        contentType: 'text/html',
+        budget: const Duration(milliseconds: 50),
+      );
+      expect(meta?.title, 'Partial preview');
+      expect(cancelled, isTrue);
+      expect(clock.elapsed, lessThan(const Duration(seconds: 1)));
+      await stream.close();
+    },
+  );
 
   test('Open Graph title and description outrank fallback title', () {
     const html = '''

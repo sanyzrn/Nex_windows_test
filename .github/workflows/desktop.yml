@@ -112,6 +112,19 @@ jobs:
         working-directory: apps/desktop
         run: flutter build windows --release --no-pub
 
+      - name: Exercise native Windows release
+        shell: pwsh
+        run: ./apps/desktop/tools/windows_smoke.ps1 -Output "$env:RUNNER_TEMP/nex-windows-smoke.json"
+
+      - name: Upload native smoke report
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: nex-native-smoke-${{ github.sha }}
+          path: ${{ runner.temp }}/nex-windows-smoke*.json
+          if-no-files-found: ignore
+          retention-days: 30
+
       - name: Upload Windows release bundle
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:

@@ -16,12 +16,19 @@ class _Native extends NativeHost {
 }
 
 Future<void> _settleDatabase(WidgetTester t) async {
-  for (var i = 0; i < 5; i++) {
+  // Bound the wait by rendered loading state rather than SQLite timing on
+  // a particular host. The first frame mounts the destination and starts I/O.
+  await t.pump();
+  for (var i = 0; i < 60; i++) {
     await t.runAsync(
       () => Future<void>.delayed(const Duration(milliseconds: 40)),
     );
     await t.pump();
+    if (find.byType(CircularProgressIndicator).evaluate().isEmpty && i >= 2) {
+      return;
+    }
   }
+  fail('The library did not finish loading within the bounded wait.');
 }
 
 void main() {
@@ -44,7 +51,9 @@ void main() {
       f.write('first');
       final rotate = f.fresh();
       f.composer.text = 'the final text';
-      f.write('the final text');
+      // Ctrl+V also writes directly through the session's FIFO.
+      final latePaste = f.session.write('the final text');
+      await latePaste;
       expect(await rotate, isTrue);
       expect(f.composer.text, isEmpty);
       final rows = await f.store.call<List<Note>>('timeline');

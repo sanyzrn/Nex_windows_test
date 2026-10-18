@@ -23,11 +23,11 @@ A local-first notebook and desktop toolkit for Windows, with English and Persian
 
 The recorded shared-code base is [DbsNex](https://github.com/sanyzrn/DbsNex) commit `b00fcddf50ddee90231f6753b4fed7d8b3a9e250` (Android 1.93.3). Windows has its own application version and release history.
 
-The 0.14.0 source is being validated for release; use the latest published installer until its Windows CI and packaging checks complete.
+For the 0.14.0 candidate, use the installer artifact from its successful [Windows CI run](https://github.com/sanyzrn/Nex_windows_test/actions/workflows/desktop.yml). The Releases link always points to the latest publicly published version.
 
 ## Install and update
 
-1. Open [Releases](https://github.com/sanyzrn/Nex_windows_test/releases/latest) and download `Nex-Windows-Setup-0.14.0-x64.exe`.
+1. Open [Releases](https://github.com/sanyzrn/Nex_windows_test/releases/latest) and download the installer belonging to that release.
 2. Close any running Nex instance using its tray menu before upgrading.
 3. Run the installer. It installs for the current user without administrator privileges and includes the runtime dependencies.
 
@@ -36,7 +36,7 @@ The installer offers Persian/English pages and a dark Nex design. It is currentl
 Verify a download against the `SHA256SUMS` asset from the **same release**:
 
 ```powershell
-Get-FileHash .\Nex-Windows-Setup-0.14.0-x64.exe -Algorithm SHA256
+Get-FileHash .\Nex-Windows-Setup-*-x64.exe -Algorithm SHA256
 ```
 
 Generated installers belong in GitHub Release assets. Git tracks source, assets, tests and documentation; local SDKs, build caches and installer EXEs are intentionally excluded.

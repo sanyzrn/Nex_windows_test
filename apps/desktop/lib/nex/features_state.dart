@@ -30,7 +30,6 @@ class NexFeatures extends ChangeNotifier {
   bool checklist = false;
   Future<bool>? _freshTask;
   bool get startingNewNote => _freshTask != null;
-  int _writeRevision = 0;
   int _saving = 0;
   bool get saving => _saving > 0;
   String? error;
@@ -98,7 +97,6 @@ class NexFeatures extends ChangeNotifier {
   void write(String text) {
     // No debounce. Session owns the FIFO, so disposing a panel loses nothing.
     _saving++;
-    _writeRevision++;
     notify();
     unawaited(
       guard(() => session.write(text, checklist: checklist)).whenComplete(() {
@@ -125,9 +123,9 @@ class NexFeatures extends ChangeNotifier {
     try {
       int revision;
       do {
-        revision = _writeRevision;
+        revision = session.revision;
         await session.flushed;
-      } while (revision != _writeRevision);
+      } while (revision != session.revision);
     } catch (e) {
       error = e.toString();
       notify();

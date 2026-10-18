@@ -34,6 +34,7 @@ panels and enlarged text remain supported without new runtime dependencies.
 | Timer | Countdown counted callbacks rather than elapsed time | Calculate against a deadline, including after Windows sleep |
 | Restore cleanup | Failed decryption/unpack left temporary directories | Clean staging on authentication and extraction failures |
 | Restored preferences | Widget mode could disagree with the native host | Apply the mode transition, hotkey, startup and panel placement |
+| Link previews | A continuously streaming response could evade the idle timeout | Bound the whole read and cancel the stream at its deadline |
 | Home | Recent notes were ordered only by creation | Order by last edit with a stable ID tiebreaker |
 
 Existing database schema, app identity, installation directory and notification
@@ -46,18 +47,21 @@ Dependencies resolved from committed lockfiles using the default pub.dev host.
 
 - Desktop and shared UI static analysis: clean.
 - Core and data static analysis: clean.
-- Desktop behavior suite: 136 passing.
+- Desktop behavior suite: 137 passing.
 - Shared UI: 192 passing.
 - Core: 198 passing.
 - Data: 199 passing, 14 existing skips.
 - Added focused regressions for capture rotation/failure/recovery, valid/invalid
   restore, reader-to-composer consistency, store closing, empty navigation,
-  All-type filtering, hidden tools, preference recovery and missed timer ticks.
+  All-type filtering, hidden tools, preference recovery missed timer ticks and a continuously streaming link preview.
 - Twelve actual-widget previews generated and inspected: home, tools, settings,
   command palette and reader, including Persian at 2× text scale and 700px width.
   Linux previews are not used to overwrite the Windows font baselines.
 - Existing 10,000-note library benchmark exercises persistence and bilingual search.
-- CI now also analyzes shared UI and analyzes/tests core and data.
+- CI now also analyzes shared UI and analyzes/tests core and data, then runs the
+  existing native release smoke harness (tray, hotkey, single instance, placement
+  and orderly shutdown). The optional AI package is not imported by the desktop
+  application; its removability remains a separate CI gate.
 
 ## Windows release gate
 
@@ -65,7 +69,15 @@ Windows screenshot comparison, Release compilation and Inno Setup packaging
 must pass on the exact release source. Changed UI requires intentionally
 reviewed Windows baselines; comparison is not disabled or given a broad tolerance.
 
-Status: pending Windows CI. A source review alone is not an installer validation.
+The first Windows run passed analysis and behavior checks; 35 intended visual
+changes were compared against the previous release. Actual Windows test images
+were downloaded, their archive checksum verified, visually inspected, and used
+to refresh those exact baselines. Strict comparison remains enabled.
+
+Final Windows comparison, Release build, native smoke results and installer
+artifacts are linked from [pull request #3](https://github.com/sanyzrn/Nex_windows_test/pull/3).
+Use the successful run for its exact head commit; the run is the authoritative
+release gate, rather than the earlier baseline-refresh run.
 
 ## Remaining physical checks
 
