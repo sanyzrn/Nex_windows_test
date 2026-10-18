@@ -5,6 +5,7 @@
 /// Reminder picker dialog with Android parity quick choices and repeat options.
 library;
 
+import 'features_state.dart';
 import 'package:flutter/material.dart';
 import 'package:nex_core/nex_core.dart';
 
@@ -150,7 +151,7 @@ class _ReminderPickerDialogState extends State<_ReminderPickerDialog> {
     final theme = Theme.of(context);
 
     String formatDue(DateTime dt) {
-      final dateStr = nexDisplayDate(dt, solar: fa, persian: fa);
+      final dateStr = nexDisplayDate(dt, solar: NexPanelScope.maybeOf(context)?.S.solarCalendar ?? fa, persian: fa);
       final timeStr =
           '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
       final formattedTime = fa ? nexDigits(timeStr, persian: true) : timeStr;

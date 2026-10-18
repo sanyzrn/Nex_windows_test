@@ -10,6 +10,22 @@ import 'package:path/path.dart' as p;
 /// authenticated WinZip AES-256 with a generated 256-bit recovery key (not a
 /// human password, for which ZIP's inexpensive KDF would be insufficient).
 abstract final class FullBackup {
+  /// File providers can rename downloads; the entries identify the container.
+  static bool isFullBackup(String source) {
+    InputFileStream? input;
+    try {
+      input = InputFileStream(source);
+      final archive = ZipDecoder().decodeStream(input);
+      return archive.findFile('format.json') != null &&
+          archive.findFile('settings.aes.zip') != null &&
+          archive.findFile('library.nexbak') != null;
+    } catch (_) {
+      return false;
+    } finally {
+      input?.closeSync();
+    }
+  }
+
   static String newKey() =>
       base64Url.encode(List.generate(32, (_) => Random.secure().nextInt(256)));
 
@@ -63,6 +79,7 @@ abstract final class FullBackup {
     String key, {
     required String modelHash,
     required int modelBytes,
+    bool includeModel = true,
   }) {
     if (base64Url.decode(key.trim()).length != 32) {
       throw const FormatException('Recovery key');
@@ -109,13 +126,14 @@ abstract final class FullBackup {
           jsonDecode(utf8.decode(privateZip.first.content))
               as Map<String, dynamic>;
       final model = archive.findFile('model.litertlm');
-      if (model != null &&
+      if (includeModel &&
+          model != null &&
           (format['modelSha256'] != modelHash || model.size != modelBytes)) {
         throw const FormatException('Unsupported model');
       }
       Directory(directory).createSync(recursive: true);
       extractCheckedZipFile(library, p.join(directory, 'library.nexbak'));
-      if (model != null) {
+      if (includeModel && model != null) {
         final path = p.join(directory, 'model.litertlm');
         extractCheckedZipFile(model, path);
         final file = File(path).openSync();

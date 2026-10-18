@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.15.0 — 2026-10-18
+
+- Align the portable note/attachment schema with Android 2.1.4, retaining tags,
+  reminders, pins, scheduled notes and private module tables in database backups.
+- Restore Android full backups even when renamed or carrying a mobile-only AI
+  model; export an Android-valid shared-appearance envelope. Device IDs, OS
+  permissions, clipboard integration and mobile credentials remain local.
+- Match all 14 theme IDs, seeds, surfaces, base colors and motifs. Add shared
+  custom accent, system theme/language, text scale and calendar preferences.
+- Read and add attachments in the desktop note reader; include their text in
+  search and protect their files from orphan cleanup and purge of shared media.
+- Normalize Windows/POSIX paths when importing portable media. Reject newer
+  schema versions and malformed shell settings before replacing the live library.
+- Add Android-produced archive fixtures and independent Android-reader checks,
+  plus a versioned portable contract for future iOS implementations.
+- Live multi-device synchronization is not enabled by backup compatibility.
+  See `docs/CROSS_PLATFORM_0150.md` for supported and unimplemented boundaries.
+
 ## 0.14.0 — 2026-10-18
 
 - Rebuilt the notebook workspace with a balanced writing/pinned layout, recently

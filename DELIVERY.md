@@ -1,6 +1,13 @@
-# Nex Windows 0.14.0+11
+# Nex Windows 0.15.0+12
 
-Desktop workspace redesign and release-hardening update over 0.13.0+10.
+Notes, attachment storage, backup interchange and all 14 palettes are aligned
+with Android 2.1.4. [Compatibility contract, evidence and limitations](docs/CROSS_PLATFORM_0150.md).
+The Android companion change adds scoped appearance restore without resetting
+mobile credentials or private preferences. Use a build containing that change
+for complete Windows-to-Android appearance transfer; library-only `.nexbak`
+restore remains compatible with the referenced Android release.
+
+Cross-platform compatibility update over Windows 0.14.0+11.
 
 - Phased plan: [docs/WINDOWS_0140_PLAN.md](docs/WINDOWS_0140_PLAN.md).
 - Defects, validation and remaining physical checks:

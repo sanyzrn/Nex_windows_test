@@ -2413,6 +2413,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Clipboard'**
   String get workspaceClipboard;
+
+  /// No description provided for @followSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get followSystem;
+
+  /// No description provided for @followTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme default'**
+  String get followTheme;
+
+  /// No description provided for @customAccent.
+  ///
+  /// In en, this message translates to:
+  /// **'Accent color'**
+  String get customAccent;
+
+  /// No description provided for @textScale.
+  ///
+  /// In en, this message translates to:
+  /// **'Text size'**
+  String get textScale;
+
+  /// No description provided for @solarCalendar.
+  ///
+  /// In en, this message translates to:
+  /// **'Solar calendar'**
+  String get solarCalendar;
+
+  /// No description provided for @noteAttachments.
+  ///
+  /// In en, this message translates to:
+  /// **'Attachments'**
+  String get noteAttachments;
+
+  /// No description provided for @backupCompatibility.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer notes, attachments and appearance between Nex apps. Clipboard, device settings, mobile vault and AI credentials stay on their own device.'**
+  String get backupCompatibility;
+
+  /// No description provided for @scheduledNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Scheduled notes'**
+  String get scheduledNotes;
+
+  /// No description provided for @releaseNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Deliver now'**
+  String get releaseNow;
+
+  /// No description provided for @portableLibraryBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'Portable library backup · all Nex apps'**
+  String get portableLibraryBackup;
+
+  /// No description provided for @importBackupConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'This is a Nex export. Its notes and attachments will be added to your library. Existing notes remain unchanged.'**
+  String get importBackupConfirm;
+
+  /// No description provided for @importNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Import notes'**
+  String get importNotes;
+
+  /// No description provided for @importNotesDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes and attachments imported'**
+  String get importNotesDone;
+
+  /// No description provided for @themePalette.
+  ///
+  /// In en, this message translates to:
+  /// **'App theme'**
+  String get themePalette;
+
+  /// No description provided for @hexColor.
+  ///
+  /// In en, this message translates to:
+  /// **'HEX color'**
+  String get hexColor;
+
+  /// No description provided for @backupSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup saved'**
+  String get backupSaved;
 }
 
 class _AppLocalizationsDelegate

@@ -6,7 +6,7 @@
 
 A local-first notebook and desktop toolkit for Windows, with English and Persian interfaces. Work in a full desktop window or a compact panel at either screen edge.
 
-**Current app version: `0.14.0+11` · Windows 10/11 · x64**
+**Current app version: `0.15.0+12` · Windows 10/11 · x64**
 
 [Download the latest installer](https://github.com/sanyzrn/Nex_windows_test/releases/latest) · [What's new](apps/desktop/CHANGELOG.md) · [Report a bug](https://github.com/sanyzrn/Nex_windows_test/issues/new/choose) · [فارسی](#راهنمای-فارسی)
 
@@ -21,9 +21,9 @@ A local-first notebook and desktop toolkit for Windows, with English and Persian
 - Switch between the custom desktop window and an edge panel with hover navigation, tray access and a global shortcut.
 - Choose a theme, language and dock layout. Tool selection is searchable and paginated.
 
-The recorded shared-code base is [DbsNex](https://github.com/sanyzrn/DbsNex) commit `b00fcddf50ddee90231f6753b4fed7d8b3a9e250` (Android 1.93.3). Windows has its own application version and release history.
+The note schema, attachment and backup handling, and 14 palette identities are aligned with [DbsNex Android 2.1.4](https://github.com/sanyzrn/DbsNex/tree/34514226260dc8b1d3da35f91082dbfa9ce46b93). [Cross-platform contract and validation](docs/CROSS_PLATFORM_0150.md). Windows keeps its own version and native integrations.
 
-For the 0.14.0 candidate, use the installer artifact from its successful [Windows CI run](https://github.com/sanyzrn/Nex_windows_test/actions/workflows/desktop.yml). The Releases link always points to the latest publicly published version.
+For the 0.15.0 candidate, use the installer artifact from its successful [Windows CI run](https://github.com/sanyzrn/Nex_windows_test/actions/workflows/desktop.yml). The Releases link always points to the latest publicly published version.
 
 ## Install and update
 
@@ -81,7 +81,7 @@ CI runs version checks, package-host/UI checks, analysis, desktop tests and Wind
 | `docs` | Architecture, validation, release guidance and historical reports |
 | `patches` | Historical upstream transfer patches; already applied here |
 
-[Architecture and data](apps/desktop/README.md) · [Validation for 0.14.0](docs/WINDOWS_0140_REVIEW.md) · [Contributing](CONTRIBUTING.md) · [Upstream integration](docs/INTEGRATION.md)
+[Architecture and data](apps/desktop/README.md) · [Compatibility validation for 0.15.0](docs/CROSS_PLATFORM_0150.md) · [Contributing](CONTRIBUTING.md) · [Upstream integration](docs/INTEGRATION.md)
 
 ## Current limits
 

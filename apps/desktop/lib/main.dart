@@ -247,17 +247,25 @@ class RightPanelApp extends StatelessWidget {
         title: 'Nex',
         debugShowCheckedModeBanner: false,
         navigatorObservers: [controller.routeObserver],
-        locale: Locale(controller.S.language),
+        locale: Locale(controller.resolvedLanguage),
         supportedLocales: AppLocalizations.supportedLocales,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         theme: controller.appTheme,
-        builder: (context, child) => NexPanelScope(
-          controller: controller,
-          child: NativeLocaleLabels(
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            textScaler: _SharedTextScaler(
+              MediaQuery.textScalerOf(context),
+              controller.S.uiScale,
+            ),
+          ),
+          child: NexPanelScope(
             controller: controller,
-            child: features == null
-                ? child!
-                : NexScope(features: features!, child: child!),
+            child: NativeLocaleLabels(
+              controller: controller,
+              child: features == null
+                  ? child!
+                  : NexScope(features: features!, child: child!),
+            ),
           ),
         ),
         home: NexPanelScope(
@@ -286,7 +294,25 @@ class NativeLocaleLabels extends StatefulWidget {
   State<NativeLocaleLabels> createState() => _NativeLocaleLabelsState();
 }
 
-class _NativeLocaleLabelsState extends State<NativeLocaleLabels> {
+class _NativeLocaleLabelsState extends State<NativeLocaleLabels>
+    with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangePlatformBrightness() => widget.controller.refresh();
+
+  @override
+  void didChangeLocales(List<Locale>? locales) => widget.controller.refresh();
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -305,4 +331,14 @@ class _NativeLocaleLabelsState extends State<NativeLocaleLabels> {
 
   @override
   Widget build(BuildContext context) => widget.child;
+}
+
+class _SharedTextScaler extends TextScaler {
+  const _SharedTextScaler(this.system, this.multiplier);
+  final TextScaler system;
+  final double multiplier;
+  @override
+  double scale(double fontSize) => system.scale(fontSize) * multiplier;
+  @override
+  double get textScaleFactor => scale(14) / 14;
 }

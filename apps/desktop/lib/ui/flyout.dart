@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:nex_ui/nex_ui.dart';
 
 import '../core/controller.dart';
 import 'views/clipboard_view.dart';
@@ -113,9 +114,30 @@ class Flyout extends StatelessWidget {
                         maxHeight: (MediaQuery.sizeOf(context).height - 20)
                             .clamp(0, double.infinity),
                       ),
-                      child: _FlyScrollArea(
-                        controller: controller,
-                        child: child,
+                      child: CustomPaint(
+                        painter: MediaQuery.highContrastOf(context)
+                            ? null
+                            : NexTexturePainter(
+                                texture: nexThemeTexture(controller.S.preset),
+                                ink:
+                                    (nexTextureUsesAccent(
+                                              nexThemeTexture(
+                                                controller.S.preset,
+                                              ),
+                                            )
+                                            ? Theme.of(
+                                                context,
+                                              ).colorScheme.primary
+                                            : Theme.of(
+                                                context,
+                                              ).colorScheme.onSurface)
+                                        .withValues(alpha: .035),
+                                extent: .4,
+                              ),
+                        child: _FlyScrollArea(
+                          controller: controller,
+                          child: child,
+                        ),
                       ),
                     ),
                   ),

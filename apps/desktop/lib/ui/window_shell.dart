@@ -78,14 +78,11 @@ class _NexWindowShellState extends State<NexWindowShell> {
           ),
         ],
       );
-      // The Android app's sea-floor motif: long low waves rising through the
-      // lower part of the page. Quiet enough that a card's text never has to
-      // compete with it — the fade keeps it off the working area's top half —
-      // and skipped entirely in high-contrast, where every mark must mean
-      // something.
+      // The selected palette owns its motif on every platform. The desktop
+      // uses a quieter strength behind its dense working content.
       if (MediaQuery.highContrastOf(context)) return surface;
       return NexTextureBackdrop(
-        texture: NexThemeTexture.waves,
+        texture: nexThemeTexture(c.S.preset),
         extent: 0.4,
         alpha: 0.018,
         child: surface,

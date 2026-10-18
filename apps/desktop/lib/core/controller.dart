@@ -240,9 +240,21 @@ abstract class PanelStateBase extends ChangeNotifier implements PanelHoldable {
   /// Public notify for views (ChangeNotifier.notifyListeners is protected).
   void refresh() => notifyListeners();
 
-  (String, String, String)? _themeKey;
+  (String, String, String, String?, Brightness)? _themeKey;
   ThemeData? _cachedTheme;
   LiquidPalette? _cachedPalette;
+
+  String get resolvedLanguage => S.language == 'system'
+      ? (WidgetsBinding.instance.platformDispatcher.locale.languageCode == 'fa'
+            ? 'fa'
+            : 'en')
+      : S.language;
+
+  Brightness get resolvedBrightness => switch (S.theme) {
+    'system' => WidgetsBinding.instance.platformDispatcher.platformBrightness,
+    'light' || 'sky' => Brightness.light,
+    _ => Brightness.dark,
+  };
 
   LiquidPalette get palette {
     final theme = appTheme;
@@ -250,7 +262,13 @@ abstract class PanelStateBase extends ChangeNotifier implements PanelHoldable {
   }
 
   ThemeData get appTheme {
-    final key = (S.theme, S.preset, S.language);
+    final key = (
+      S.theme,
+      S.preset,
+      resolvedLanguage,
+      S.accentSeed,
+      resolvedBrightness,
+    );
     if (_themeKey == key && _cachedTheme != null) return _cachedTheme!;
     final theme = _buildAppTheme();
     _themeKey = key;
@@ -259,18 +277,21 @@ abstract class PanelStateBase extends ChangeNotifier implements PanelHoldable {
   }
 
   ThemeData _buildAppTheme() {
+    final seed = S.accentSeed == null ? null : _parseHex(S.accentSeed!);
     final base = nexApplyThemePreset(
-      S.theme == 'light' || S.theme == 'sky'
+      resolvedBrightness == Brightness.light
           ? nexLightTheme(
               transparentScaffold: true,
-              fontFamily: nexFontFor(Locale(S.language)),
+              fontFamily: nexFontFor(Locale(resolvedLanguage)),
+              accentSeed: seed,
             )
           : nexDarkTheme(
               transparentScaffold: true,
-              fontFamily: nexFontFor(Locale(S.language)),
+              fontFamily: nexFontFor(Locale(resolvedLanguage)),
+              accentSeed: seed,
             ),
       S.preset,
-      nexThemePresetSeed(S.preset),
+      seed ?? nexThemePresetSeed(S.preset),
     );
     final scheme = base.colorScheme;
     final outline = OutlineInputBorder(
@@ -346,7 +367,7 @@ abstract class PanelStateBase extends ChangeNotifier implements PanelHoldable {
   final ValueNotifier<bool> dropHintOn = ValueNotifier(false);
 
   String message(String text, Map<String, String> values) {
-    var result = utilityForLocale(S.language, text);
+    var result = utilityForLocale(resolvedLanguage, text);
     for (final e in values.entries) {
       result = result.replaceAll('{${e.key}}', e.value);
     }
@@ -354,7 +375,7 @@ abstract class PanelStateBase extends ChangeNotifier implements PanelHoldable {
   }
 
   void toast(String msg) {
-    msg = utilityForLocale(S.language, msg);
+    msg = utilityForLocale(resolvedLanguage, msg);
     _toastSeq++;
     toastMsg.value = '$msg\x00$_toastSeq';
     _toastT?.cancel();

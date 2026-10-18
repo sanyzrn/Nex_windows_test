@@ -107,6 +107,13 @@ mixin _SettingsShortcutsBackup on _SettingsStateBase {
         title: l.settingsBackup,
         children: [
           Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Text(
+              l.backupCompatibility,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ),
+          Padding(
             padding: const EdgeInsets.symmetric(vertical: 4),
             child: Row(
               children: [
@@ -130,10 +137,11 @@ mixin _SettingsShortcutsBackup on _SettingsStateBase {
                             if (path == null) return;
                             await f.guard(() async {
                               await f.session.flushed;
-                              final recovery = await f.store.call<String>(
-                                'fullBackup',
-                                {'output': path.path, 'settings': c.S.toMap()},
-                              );
+                              final recovery = await f.store
+                                  .call<String>('fullBackup', {
+                                    'output': path.path,
+                                    'settings': c.S.backupSettings(),
+                                  });
                               if (mounted) {
                                 setState(() => recoveryKey = recovery);
                               }
@@ -166,6 +174,8 @@ mixin _SettingsShortcutsBackup on _SettingsStateBase {
                                       'sqlite',
                                       'nexfull',
                                       'fullbak',
+                                      'zip',
+                                      'bin',
                                     ],
                                   ),
                                 ],
@@ -174,15 +184,24 @@ mixin _SettingsShortcutsBackup on _SettingsStateBase {
                             if (file == null || !context.mounted) return;
 
                             String? enteredKey;
-                            if (file.path.endsWith('.nexfull') ||
-                                file.path.endsWith('.fullbak')) {
-                              final keyController = TextEditingController();
+                            NexBackupKind? kind;
+                            await f.guard(() async {
+                              kind = await f.store.call<NexBackupKind>(
+                                'backupKind',
+                                {'file': file.path},
+                              );
+                            });
+                            if (kind == null) return;
+                            if (!context.mounted) return;
+                            if (kind == NexBackupKind.full) {
                               final confirmed = await showDialog<bool>(
                                 context: context,
                                 builder: (ctx) => AlertDialog(
                                   title: Text(l.recoveryKey),
                                   content: TextField(
-                                    controller: keyController,
+                                    textDirection: TextDirection.ltr,
+                                    autocorrect: false,
+                                    onChanged: (v) => enteredKey = v.trim(),
                                     decoration: InputDecoration(
                                       hintText: l.recoveryKey,
                                     ),
@@ -201,7 +220,6 @@ mixin _SettingsShortcutsBackup on _SettingsStateBase {
                                 ),
                               );
                               if (confirmed != true) return;
-                              enteredKey = keyController.text.trim();
                             }
 
                             if (!context.mounted) return;
@@ -209,7 +227,11 @@ mixin _SettingsShortcutsBackup on _SettingsStateBase {
                               context: context,
                               builder: (ctx) => AlertDialog(
                                 title: Text(l.restore),
-                                content: Text(l.restoreConfirmBody),
+                                content: Text(
+                                  kind == NexBackupKind.export
+                                      ? l.importBackupConfirm
+                                      : l.restoreConfirmBody,
+                                ),
                                 actions: [
                                   TextButton(
                                     onPressed: () => Navigator.pop(ctx, false),
@@ -217,7 +239,11 @@ mixin _SettingsShortcutsBackup on _SettingsStateBase {
                                   ),
                                   TextButton(
                                     onPressed: () => Navigator.pop(ctx, true),
-                                    child: Text(l.restore),
+                                    child: Text(
+                                      kind == NexBackupKind.export
+                                          ? l.importNotes
+                                          : l.restore,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -233,8 +259,9 @@ mixin _SettingsShortcutsBackup on _SettingsStateBase {
                                 enteredKey,
                               );
                               if (restoredSettings != null) {
-                                final restored = Settings.fromMap(
+                                final restored = Settings.fromBackup(
                                   restoredSettings,
+                                  c.S,
                                 );
                                 final mode = restored.windowMode;
                                 final oldHotkey = c.S.hotkey;
@@ -259,7 +286,13 @@ mixin _SettingsShortcutsBackup on _SettingsStateBase {
                               }
                               if (mounted) {
                                 messenger.showSnackBar(
-                                  SnackBar(content: Text(l.restored)),
+                                  SnackBar(
+                                    content: Text(
+                                      kind == NexBackupKind.export
+                                          ? l.importNotesDone
+                                          : l.restored,
+                                    ),
+                                  ),
                                 );
                               }
                             });
@@ -269,6 +302,35 @@ mixin _SettingsShortcutsBackup on _SettingsStateBase {
                   ),
                 ),
               ],
+            ),
+          ),
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: TextButton.icon(
+              icon: const Icon(Icons.devices_outlined, size: 18),
+              label: Text(l.portableLibraryBackup),
+              onPressed: f == null
+                  ? null
+                  : () async {
+                      final output = await withPanelHold(
+                        context,
+                        () => getSaveLocation(
+                          suggestedName: 'nex-library.nexbak',
+                        ),
+                      );
+                      if (output == null) return;
+                      await f.guard(() async {
+                        await f.session.flushed;
+                        await f.store.call<String>('portableBackup', {
+                          'output': output.path,
+                        });
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(l.backupSaved)),
+                          );
+                        }
+                      });
+                    },
             ),
           ),
           if (recoveryKey != null) ...[

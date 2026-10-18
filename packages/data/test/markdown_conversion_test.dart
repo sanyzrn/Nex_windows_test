@@ -27,7 +27,7 @@ void main() {
       repo.convertMarkdown(note.id, note.content!, '/media/note.md', 'hash');
       final file = repo.getById(note.id)!;
       expect(file.type, NoteType.file);
-      expect(file.originalFilename, 'note.md');
+      expect(file.originalFilename, 'فارسی Generator.md');
       expect(file.ocrText, note.content);
       expect(file.title, 'Keep title');
       expect(file.pinnedAt, isNotNull);

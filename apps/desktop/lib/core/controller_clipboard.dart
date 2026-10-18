@@ -66,7 +66,7 @@ mixin PanelClipboardOps on PanelStateBase {
     if (list == 'dock' && panel == 'more') {
       toast(
         message('{value} → dock', {
-          'value': utilityForLocale(S.language, ToolInfo.of(id).name),
+          'value': utilityForLocale(resolvedLanguage, ToolInfo.of(id).name),
         }),
       );
     }

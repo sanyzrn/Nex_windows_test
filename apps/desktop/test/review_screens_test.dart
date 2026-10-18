@@ -421,7 +421,9 @@ void main() {
       try {
         await expectLater(
           find.byKey(const ValueKey('review-surface')),
-          matchesGoldenFile('review_goldens/${spec.name}.png'),
+          matchesGoldenFile(
+            '${const String.fromEnvironment('NEX_REVIEW_DIRECTORY', defaultValue: 'review_goldens')}/${spec.name}.png',
+          ),
         );
       } finally {
         debugDisableShadows = true;

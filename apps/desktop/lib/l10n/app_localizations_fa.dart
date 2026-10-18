@@ -1227,4 +1227,55 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get workspaceClipboard => 'کلیپ‌بورد';
+
+  @override
+  String get followSystem => 'سیستم';
+
+  @override
+  String get followTheme => 'پیش‌فرض تم';
+
+  @override
+  String get customAccent => 'رنگ تأکید دلخواه';
+
+  @override
+  String get textScale => 'اندازهٔ متن';
+
+  @override
+  String get solarCalendar => 'تقویم شمسی';
+
+  @override
+  String get noteAttachments => 'پیوست‌ها';
+
+  @override
+  String get backupCompatibility =>
+      'یادداشت‌ها، پیوست‌ها و ظاهر بین نسخه‌های نکس منتقل می‌شوند. کلیپ‌بورد، تنظیمات دستگاه، خزانهٔ موبایل و کلیدهای هوش روی دستگاه خود می‌مانند.';
+
+  @override
+  String get scheduledNotes => 'یادداشت‌های زمان‌بندی‌شده';
+
+  @override
+  String get releaseNow => 'نمایش همین حالا';
+
+  @override
+  String get portableLibraryBackup =>
+      'بکاپ قابل انتقال کتابخانه · تمام نسخه‌های نکس';
+
+  @override
+  String get importBackupConfirm =>
+      'این فایل خروجی نکس است. یادداشت‌ها و پیوست‌های آن به کتابخانه اضافه می‌شوند و یادداشت‌های فعلی حفظ می‌شوند.';
+
+  @override
+  String get importNotes => 'ورود یادداشت‌ها';
+
+  @override
+  String get importNotesDone => 'یادداشت‌ها و پیوست‌ها وارد شدند';
+
+  @override
+  String get themePalette => 'تم برنامه';
+
+  @override
+  String get hexColor => 'کد HEX رنگ';
+
+  @override
+  String get backupSaved => 'بکاپ ذخیره شد';
 }

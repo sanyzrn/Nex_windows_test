@@ -409,5 +409,21 @@
   "workspaceToolsSystem": "دسکتاپ و ابزارها",
   "retry": "تلاش دوباره",
   "workspaceLoading": "در حال خواندن یادداشت‌ها…",
-  "workspaceClipboard": "کلیپ‌بورد"
+  "workspaceClipboard": "کلیپ‌بورد",
+  "followSystem": "سیستم",
+  "followTheme": "پیش‌فرض تم",
+  "customAccent": "رنگ تأکید دلخواه",
+  "textScale": "اندازهٔ متن",
+  "solarCalendar": "تقویم شمسی",
+  "noteAttachments": "پیوست‌ها",
+  "backupCompatibility": "یادداشت‌ها، پیوست‌ها و ظاهر بین نسخه‌های نکس منتقل می‌شوند. کلیپ‌بورد، تنظیمات دستگاه، خزانهٔ موبایل و کلیدهای هوش روی دستگاه خود می‌مانند.",
+  "scheduledNotes": "یادداشت‌های زمان‌بندی‌شده",
+  "releaseNow": "نمایش همین حالا",
+  "portableLibraryBackup": "بکاپ قابل انتقال کتابخانه · تمام نسخه‌های نکس",
+  "importBackupConfirm": "این فایل خروجی نکس است. یادداشت‌ها و پیوست‌های آن به کتابخانه اضافه می‌شوند و یادداشت‌های فعلی حفظ می‌شوند.",
+  "importNotes": "ورود یادداشت‌ها",
+  "importNotesDone": "یادداشت‌ها و پیوست‌ها وارد شدند",
+  "themePalette": "تم برنامه",
+  "hexColor": "کد HEX رنگ",
+  "backupSaved": "بکاپ ذخیره شد"
 }
