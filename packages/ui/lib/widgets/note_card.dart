@@ -27,8 +27,9 @@ Color nexNoteCardColor(
   final tags =
       note.tags.where((t) => nexParseTagColor(t.color) != null).toList()
         ..sort((a, b) => a.id.compareTo(b.id));
-  if (tags.isEmpty || highContrast)
+  if (tags.isEmpty || highContrast) {
     return theme.colorScheme.surfaceContainerLowest;
+  }
   final seed = nexParseTagColor(tags.first.color)!;
   var alpha = theme.brightness == Brightness.dark ? .23 : .19;
   Color blend() => Color.alphaBlend(
@@ -362,7 +363,7 @@ class _BoardBody extends StatelessWidget {
                               File(note.mediaUri!),
                               fit: BoxFit.cover,
                               cacheWidth: 480,
-                              errorBuilder: (_, __, ___) => Icon(
+                              errorBuilder: (_, _, _) => Icon(
                                 Icons.image_not_supported_outlined,
                                 color: c.onSurfaceVariant,
                               ),
