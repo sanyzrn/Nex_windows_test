@@ -1,10 +1,14 @@
 name: Publish tested Windows release
 
 on:
+  workflow_run:
+    workflows: ['Desktop Windows CI']
+    branches: [main, master]
+    types: [completed]
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Existing version tag, for example v0.12.2. Requires successful Desktop Windows CI on its exact commit.'
+        description: 'Existing tag to retry manually. New versions publish automatically after successful main-branch CI.'
         required: true
         type: string
 
@@ -12,11 +16,16 @@ permissions:
   contents: read
 
 concurrency:
-  group: nex-release-${{ inputs.tag }}
+  group: nex-windows-release
   cancel-in-progress: false
 
 jobs:
   publish:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push' &&
+       github.event.workflow_run.head_repository.full_name == github.repository)
     runs-on: windows-latest
     timeout-minutes: 10
     permissions:
@@ -25,12 +34,18 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
       RELEASE_TAG: ${{ inputs.tag }}
+      RELEASE_AUTOMATIC: ${{ github.event_name == 'workflow_run' }}
+      RELEASE_SHA: ${{ github.event.workflow_run.head_sha }}
+      RELEASE_RUN_ID: ${{ github.event.workflow_run.id }}
+      RELEASE_BRANCH: ${{ github.event.workflow_run.head_branch }}
     steps:
-      - name: Checkout release tag
+      # An older completed run is skipped before publication if main moved on.
+      - name: Checkout trusted release source
         uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
-          ref: ${{ inputs.tag }}
+          ref: ${{ github.event.workflow_run.head_branch || inputs.tag }}
           fetch-depth: 0
+          persist-credentials: false
       - name: Verify source, CI and installer then publish
         shell: pwsh
         run: ./apps/desktop/tools/publish_release.ps1

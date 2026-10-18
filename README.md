@@ -23,7 +23,7 @@ A local-first notebook and desktop toolkit for Windows, with English and Persian
 
 The note schema, attachment and backup handling, and 14 palette identities are aligned with [DbsNex Android 2.1.4](https://github.com/sanyzrn/DbsNex/tree/34514226260dc8b1d3da35f91082dbfa9ce46b93). [Cross-platform contract and validation](docs/CROSS_PLATFORM_0150.md). Windows keeps its own version and native integrations.
 
-For the 0.15.0 candidate, use the installer artifact from its successful [Windows CI run](https://github.com/sanyzrn/Nex_windows_test/actions/workflows/desktop.yml). The Releases link always points to the latest publicly published version.
+New versions publish automatically to [Releases](https://github.com/sanyzrn/Nex_windows_test/releases/latest) after the full main-branch [Windows CI run](https://github.com/sanyzrn/Nex_windows_test/actions/workflows/desktop.yml) passes. The release contains the verified installer and matching `SHA256SUMS`. While CI is running, Releases continues to show the previous public version.
 
 ## Install and update
 

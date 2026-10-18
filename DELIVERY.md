@@ -20,5 +20,9 @@ Do not distribute a lone EXE from the application bundle. Before upgrading,
 close the current app through its tray menu. App identity and user-data paths
 are unchanged.
 
-Public release publication is separate from source preparation. Release CI
-refuses to publish without successful Windows CI for the tagged commit.
+Every new source version publishes automatically to GitHub Releases after the
+complete main-branch Windows CI succeeds. The publisher verifies that exact
+commit's installer and SHA256SUMS, creates its version tag, and attaches both
+files. Failed/stale CI cannot publish. Published versions are never overwritten;
+increase the source version for the next update. Manual dispatch remains a retry
+path for an existing version tag. See [release guidance](docs/RELEASING.md).

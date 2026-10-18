@@ -19,6 +19,8 @@
   plus a versioned portable contract for future iOS implementations.
 - Live multi-device synchronization is not enabled by backup compatibility.
   See `docs/CROSS_PLATFORM_0150.md` for supported and unimplemented boundaries.
+- New Windows versions publish their verified installer and checksum to GitHub
+  Releases automatically after the complete main-branch CI succeeds.
 
 ## 0.14.0 — 2026-10-18
 

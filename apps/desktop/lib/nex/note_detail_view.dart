@@ -236,7 +236,6 @@ class _NexNoteDetailState extends State<NexNoteDetail> {
                         ],
                         if ((note.type != NoteType.text &&
                                 note.type != NoteType.checklist) ||
-                            editing ||
                             note.caption?.trim().isNotEmpty == true) ...[
                           const SizedBox(height: 12),
                           TextField(
