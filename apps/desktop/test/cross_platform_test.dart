@@ -72,6 +72,8 @@ void main() {
       expect(File(attachments.single.mediaUri).existsSync(), isTrue);
       final addedFile = File('${root.path}/from-windows.txt')
         ..writeAsStringSync('new shared attachment');
+      final workspaceBefore = await features.store.call<Map>('workspace');
+      expect(workspaceBefore['media'], 4);
       final added = await features.store.call<NoteAttachment>('attachMedia', {
         'path': addedFile.path,
         'noteId': note.id,
@@ -83,6 +85,15 @@ void main() {
         })).attachmentCount,
         2,
       );
+      expect((await features.store.call<Map>('workspace'))['media'], 5);
+      await features.store.call<void>('removeAttachment', {'id': added.id});
+      expect((await features.store.call<Map>('workspace'))['media'], 4);
+      await features.store.call<bool>('restoreAttachment', {'id': added.id});
+      expect((await features.store.call<Map>('workspace'))['media'], 5);
+      await features.store.call<void>('delete', {'id': note.id});
+      expect((await features.store.call<Map>('workspace'))['media'], 3);
+      await features.store.call<void>('restore', {'id': note.id});
+      expect((await features.store.call<Map>('workspace'))['media'], 5);
 
       final captured = await features.store.call<Note>('capture', {
         'text': 'from Windows',
@@ -232,9 +243,15 @@ void main() {
   );
 
   testWidgets(
-    'restored Android attachments are visible in the desktop reader',
+    'restored Android attachments and legacy captions remain readable and editable',
     (tester) async {
       await tester.runAsync(restoreMobile);
+      await tester.runAsync(
+        () => features.store.call<void>('caption', {
+          'id': 'android-text',
+          'text': 'توضیح یادداشت قدیمی',
+        }),
+      );
       final note = (await tester.runAsync(
         () => features.store.call<Note>('get', {'id': 'android-text'}),
       ))!;
@@ -261,6 +278,17 @@ void main() {
       expect(find.text('invoice.txt'), findsOneWidget);
       expect(find.text('پیوست قابل جستجو'), findsOneWidget);
       expect(find.text('Attach files'), findsOneWidget);
+      final captionField = find.byWidgetPredicate(
+        (widget) => widget is TextField &&
+            widget.controller?.text == 'توضیح یادداشت قدیمی',
+      );
+      expect(captionField, findsOneWidget);
+      await tester.enterText(captionField, 'توضیح ویرایش‌شده در ویندوز');
+      final edited = await tester.runAsync(
+        () => features.store.call<Note>('get', {'id': note.id}),
+      );
+      expect(edited!.caption, 'توضیح ویرایش‌شده در ویندوز');
+      expect(edited.content, note.content);
       expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox());
     },

@@ -353,7 +353,12 @@ class DesktopStore {
                 result = {
                   'total': totals['total'] ?? 0,
                   'pinned': totals['pinned'] ?? 0,
-                  'media': totals['media'] ?? 0,
+                  'media': (totals['media'] as int? ?? 0) +
+                      (notes.db.select('''SELECT COUNT(*) AS count
+                        FROM note_attachments a
+                        JOIN notes n ON n.id = a.note_id
+                        WHERE a.deleted_at IS NULL
+                          AND n.deleted_at IS NULL''').single['count'] as int),
                   'scheduled': scheduled.pending().length,
                   'recent': previews('updated_at DESC, id DESC', '', 8),
                   'pins': previews(

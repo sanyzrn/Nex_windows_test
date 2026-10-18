@@ -88,6 +88,8 @@ rotates the capture only after success.
 
 - Windows desktop behavior: 144 passing, including encrypted mobile restore,
   independent Android container decode, local device identity and reader access.
+  The compatibility cases also cover visible/editable legacy text captions and
+  media totals across attachment add, remove and Undo.
 - Shared UI: 192 existing tests passing, plus a 14-palette/40-color contract gate.
 - Core: 198 existing tests passing, with the shared wire-contract gate added.
 - Data: 204 passing, 14 existing skips; Android-created library/full/export

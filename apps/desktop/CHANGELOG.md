@@ -11,6 +11,8 @@
   custom accent, system theme/language, text scale and calendar preferences.
 - Read and add attachments in the desktop note reader; include their text in
   search and protect their files from orphan cleanup and purge of shared media.
+- Show and edit legacy text/checklist captions from Android. Include live extra
+  attachments in the workspace file count, respecting removal, Undo and trash.
 - Normalize Windows/POSIX paths when importing portable media. Reject newer
   schema versions and malformed shell settings before replacing the live library.
 - Add Android-produced archive fixtures and independent Android-reader checks,
