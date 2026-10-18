@@ -31,3 +31,7 @@ Nex is MIT licensed, copyright (c) 2026 Nex contributors. Its licence text is in
 The Inter and Vazirmatn assets are the existing Nex font files. They are licensed under SIL Open Font License 1.1; complete original notices are in `assets/notices/inter-OFL.txt` and `assets/notices/vazirmatn-OFL.txt`, also exposed in the app. Original licence sources: https://github.com/rsms/inter/blob/master/LICENSE.txt and https://github.com/rastikerdar/vazirmatn/blob/master/OFL.txt.
 
 The normal Flutter licences page also displays dependency notices. Windows Segoe UI Emoji is used from the host OS for rendering/tests; its font file is not redistributed.
+
+## Windows intelligence storage
+
+Cloud adapters and pure-Dart AI contracts follow DbsNex Android 2.1.6 at `67930daa7230273055107ac210faa8b86167e540`. The desktop uses `flutter_secure_storage` (10.3.4 in the lockfile) and its Windows implementation (4.2.2) for account-bound credential protection. Their original dependency licenses are included through the Flutter license registry. No provider key or local inference model is distributed.

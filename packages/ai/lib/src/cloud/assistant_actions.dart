@@ -72,6 +72,24 @@ enum AssistantActionKind {
   /// Reads: the library's threads, by name, with how many notes each holds.
   /// Like [search], carried out on arrival.
   threads,
+
+  /// Reads: a summary of «Cycle», the menstrual cycle assistant — answered
+  /// only when the person has allowed the assistant to read it, and
+  /// otherwise with a line saying it is not shared.
+  cycle,
+
+  /// Reads: every tag, with how many notes wear it — so "tag it like the
+  /// others" or "which tags do I have" is answered from the real list.
+  tags,
+
+  /// Reads: the recurring items, each with how often and when it is next
+  /// due. The assistant could create, tick off and delete them, and had no
+  /// way to see them.
+  commitments,
+
+  /// Reads: what is in Recently Deleted, with ids, which is what `restore`
+  /// needs and could not be given.
+  deleted,
 }
 
 /// One thing the assistant has asked to do, already parsed and validated.
@@ -176,7 +194,12 @@ class AssistantAction {
   /// not, so it is carried out as soon as it arrives; everything else waits
   /// for the user.
   bool get isRead =>
-      kind == AssistantActionKind.search || kind == AssistantActionKind.threads;
+      kind == AssistantActionKind.search ||
+      kind == AssistantActionKind.threads ||
+      kind == AssistantActionKind.cycle ||
+      kind == AssistantActionKind.tags ||
+      kind == AssistantActionKind.commitments ||
+      kind == AssistantActionKind.deleted;
 }
 
 /// The settings the assistant is allowed to change.
@@ -358,13 +381,39 @@ answer from what comes back:
 {"action": "search", "thread": "Trip"}
 ```
 
-To see which threads exist:
+To see which threads exist, which tags there are, the recurring items with
+when each is next due, or what is in Recently Deleted (the ids `restore`
+needs):
 
 ```nex
 {"action": "threads"}
 ```
+```nex
+{"action": "tags"}
+```
+```nex
+{"action": "commitments"}
+```
+```nex
+{"action": "deleted"}
+```
 
-Searches and the thread list are carried out at once and need no
+How a note is listed below: `[id] type #tags (pinned; reminder set: …;
+in thread "…"; written YYYY-MM-DD): text` — the marks it does not have are
+left out. A note marked "reminder set" already has that
+reminder — never offer one it already has, and `remind` on it replaces it.
+"pinned" means it is already pinned. A checklist lists its items numbered
+`#0`, `#1`, … in their real order; `check` takes that number as `index`.
+
+When the user asks about their period or menstrual cycle, read their Cycle
+summary first and answer from it — it may say they have not shared it, in
+which case tell them it can be allowed in Cycle's settings:
+
+```nex
+{"action": "cycle"}
+```
+
+Searches and these lookups are carried out at once and need no
 confirmation; everything else waits for the user.
 
 Rules: nothing outside the block — no words, no emoji, no leading bullet,
@@ -378,6 +427,49 @@ one. If you are not certain which note is meant, ask instead of
 guessing. For anything that is a question rather than a request to change
 something, answer normally and use no block at all.''';
 
+/// [assistantActionPrompt] for the on-device model, whose whole window is
+/// 4,096 tokens: every action and setting the parser accepts, in the same
+/// JSON shapes, with the explanations cut to a line. The full version alone
+/// is about a third of that window, and the notes and the conversation have
+/// to fit beside it — see `LocalBudget`.
+const assistantActionPromptCompact = '''
+You can act on the user's notes. When they ask you to, reply with nothing but
+fenced blocks tagged `nex`, one JSON object each, for example:
+```nex
+{"action": "create", "text": "buy oat milk"}
+```
+```nex
+{"action": "tag", "ids": ["<id>", "<id>"], "add": ["work"]}
+```
+Each action below is written as name {fields}; send it as JSON like the
+examples, with "action" set to the name. `id` comes from the notes below or
+a search; never invent one.
+create {text | items[], at?, repeat?} · edit {id, text} · delete {id}
+tag {id, add[], remove[]} · merge {ids[], text} · to_checklist {id}
+check {id, index, done} · remind {id, at "YYYY-MM-DDTHH:MM" local, future;
+repeat once|daily|weekly; no at = cancel} · pin {id, pinned} · title {id, text}
+A note marked "reminder set" already has it (remind replaces it); "pinned"
+is pinned; "in thread" names its thread; check's index is the item's #number.
+restore {id} · rename_tag {tag, name} · tag_color {tag, color "#RRGGBB"}
+commitment {name, every, unit hours|days|weeks|months|years, at}
+commitment_met {name} · commitment_delete {name} · thread {ids[], name}
+setting {key, value}: theme light|dark|system, language en|fa|system,
+ai_language auto|en|fa, text_size small|default|large|larger, palette,
+accent "#RRGGBB"|default, haptics on|off, show_greeting|show_digest|
+show_search|show_tags on|off, daily_nudge on|off, daily_nudge_time "HH:MM".
+delete, tag, pin, remind, restore, to_checklist and title take `ids` for
+several notes.
+Look things up first, and wait for the result: search {query} | {tag} |
+{thread}; threads {}; tags {}; commitments {}; deleted {}.
+For any question about their period, cycle, ovulation or pregnancy, send
+only this, unless their Cycle summary is already below:
+```nex
+{"action": "cycle"}
+```
+Lookups run at once; everything else waits for the user to confirm.
+Rules: nothing outside the blocks. If unsure which note is meant, ask. For
+a question, answer normally with no block.''';
+
 /// The fenced block, wherever in the reply it landed.
 ///
 /// Models put fences after a preamble, in the wrong case, or with a trailing
@@ -388,11 +480,44 @@ something, answer normally and use no block at all.''';
 /// when it quotes something — a note asked to be shown, a snippet — and a
 /// quoted note that happened to hold protocol JSON used to run as if the
 /// model had proposed it.
+///
+/// The small on-device model writes the tag its own way as often as not —
+/// `[nex]` inside the fence, or on a line of its own above an untagged one —
+/// and that block then appeared in the chat as raw JSON. Both still name the
+/// protocol, so both count; an untagged fence alone still does not.
+///
+/// Two of those shapes are also how a quote looks (AI-02): a `json` fence,
+/// and a `[nex]` label over an untagged one. They count only when nothing
+/// follows them. A model asking for an action ends its reply with the block
+/// ("Sure, here you go:" before it is common); a quoted note is shown and
+/// then talked about. `nex` in the fence counts wherever it is.
 final _blockPattern = RegExp(
-  r'```[ \t]*(?:nex|json)[ \t]*\r?\n(.*?)```',
+  r'```[ \t]*\[?nex\]?[ \t]*\r?\n(.*?)```',
   dotAll: true,
   caseSensitive: false,
 );
+
+final _looseBlockPattern = RegExp(
+  r'(?:\[nex\][ \t]*\r?\n\s*```[^\n]*|```[ \t]*json[ \t]*)\r?\n(.*?)```',
+  dotAll: true,
+  caseSensitive: false,
+);
+
+/// [_looseBlockPattern]'s blocks, when nothing but them ends the reply.
+Iterable<RegExpMatch> _looseBlocks(String reply) {
+  final matches = _looseBlockPattern.allMatches(reply).toList();
+  if (matches.isEmpty) return const [];
+  final after = reply.substring(matches.last.end);
+  final between = [
+    for (var i = 1; i < matches.length; i++)
+      reply.substring(matches[i - 1].end, matches[i].start),
+  ];
+  final quiet = [
+    after,
+    ...between,
+  ].every((text) => _withoutStrayMarks(text).isEmpty);
+  return quiet ? matches : const [];
+}
 
 /// Any fenced block, tagged or not: quoted material, never read for bare
 /// action objects.
@@ -417,6 +542,7 @@ AssistantAction? parseAssistantAction(String reply) {
 List<AssistantAction> parseAssistantActions(String reply) {
   final bodies = [
     for (final match in _blockPattern.allMatches(reply)) match.group(1)!.trim(),
+    for (final match in _looseBlocks(reply)) match.group(1)!.trim(),
   ];
   // A reply with no fence at all. Models do this when the prompt has been in
   // context a while, and refusing it would mean the feature works for the
@@ -442,7 +568,15 @@ List<AssistantAction> parseAssistantActions(String reply) {
     try {
       decoded = jsonDecode(body);
     } catch (_) {
-      continue;
+      // A stray brace after the object, which a small model leaves behind:
+      // the objects inside the block are still what it meant.
+      final objects = _objectsIn(body);
+      if (objects.isEmpty) continue;
+      try {
+        decoded = [for (final object in objects) jsonDecode(object)];
+      } catch (_) {
+        continue;
+      }
     }
     for (final entry in decoded is List ? decoded : [decoded]) {
       if (entry is! Map) continue;
@@ -566,6 +700,12 @@ AssistantAction? _action(Map<Object?, Object?> decoded) {
         threadName: _string(decoded['thread']),
       ),
     'threads' => const AssistantAction(kind: AssistantActionKind.threads),
+    'cycle' => const AssistantAction(kind: AssistantActionKind.cycle),
+    'tags' => const AssistantAction(kind: AssistantActionKind.tags),
+    'commitments' => const AssistantAction(
+      kind: AssistantActionKind.commitments,
+    ),
+    'deleted' => const AssistantAction(kind: AssistantActionKind.deleted),
     'thread'
         when _strings(decoded['ids']).isNotEmpty &&
             _string(decoded['name']) != null =>
@@ -850,5 +990,32 @@ List<String> _strings(Object? value) {
 ///
 /// Used when a reply carries both, which the prompt forbids and models do
 /// anyway. The prose is worth showing; the JSON never is.
-String withoutActionBlock(String reply) =>
-    reply.replaceAll(_blockPattern, '').trim();
+String withoutActionBlock(String reply) {
+  final loose = _looseBlocks(reply).isNotEmpty;
+  final stripped = loose
+      ? reply.replaceAll(_blockPattern, '').replaceAll(_looseBlockPattern, '')
+      : reply.replaceAll(_blockPattern, '');
+  if (stripped.length != reply.length) return _withoutStrayMarks(stripped);
+  // No fence: the parser read bare objects out of the prose, so those are
+  // what come out of it (AI-01) — only the ones that are actions, so JSON a
+  // reply is genuinely about stays. Shown otherwise, the user got the
+  // protocol in the bubble and a confirmation card for it underneath.
+  var out = reply;
+  for (final object in _objectsIn(reply.replaceAll(_anyFence, ''))) {
+    if (parseAssistantActions(object).isNotEmpty) {
+      out = out.replaceFirst(object, '');
+    }
+  }
+  return out.length == reply.length ? reply.trim() : _withoutStrayMarks(out);
+}
+
+/// What a small model leaves around a block it wrote loosely: a `[nex]`
+/// label on a line of its own, a lone closing brace.
+String _withoutStrayMarks(String text) => text
+    .split('\n')
+    .where((line) {
+      final t = line.trim().toLowerCase();
+      return t != '[nex]' && t != 'nex' && t != '}';
+    })
+    .join('\n')
+    .trim();

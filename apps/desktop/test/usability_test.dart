@@ -345,7 +345,9 @@ void main() {
         await frames(t, 180);
         await expectLater(
           find.byType(Scaffold),
-          matchesGoldenFile('goldens/capture_$locale.png'),
+          matchesGoldenFile(
+            '${const String.fromEnvironment('NEX_GOLDEN_DIRECTORY', defaultValue: 'goldens')}/capture_$locale.png',
+          ),
         );
         c.openWidget('timeline');
         await t.pump();
@@ -375,7 +377,9 @@ void main() {
         expect(c.modalOpen, false);
         await expectLater(
           find.byType(Scaffold),
-          matchesGoldenFile('goldens/reader_$locale.png'),
+          matchesGoldenFile(
+            '${const String.fromEnvironment('NEX_GOLDEN_DIRECTORY', defaultValue: 'goldens')}/reader_$locale.png',
+          ),
         );
         final mouse = await t.createGesture(kind: PointerDeviceKind.mouse);
         await mouse.addPointer(location: Offset.zero);

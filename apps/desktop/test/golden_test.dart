@@ -48,7 +48,9 @@ void main() {
     await _pumpSecs(tester, 1.0);
     await expectLater(
       find.byType(Scaffold),
-      matchesGoldenFile('goldens/emoji_panel.png'),
+      matchesGoldenFile(
+        '${const String.fromEnvironment('NEX_GOLDEN_DIRECTORY', defaultValue: 'goldens')}/emoji_panel.png',
+      ),
     );
   });
 
@@ -59,7 +61,9 @@ void main() {
     await _pumpSecs(tester, 1.0);
     await expectLater(
       find.byType(Scaffold),
-      matchesGoldenFile('goldens/more_panel.png'),
+      matchesGoldenFile(
+        '${const String.fromEnvironment('NEX_GOLDEN_DIRECTORY', defaultValue: 'goldens')}/more_panel.png',
+      ),
     );
   });
 
@@ -77,7 +81,9 @@ void main() {
     );
     await expectLater(
       find.byType(Scaffold),
-      matchesGoldenFile('goldens/settings_light.png'),
+      matchesGoldenFile(
+        '${const String.fromEnvironment('NEX_GOLDEN_DIRECTORY', defaultValue: 'goldens')}/settings_light.png',
+      ),
     );
   });
 }

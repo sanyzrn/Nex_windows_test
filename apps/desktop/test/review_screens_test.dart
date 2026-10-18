@@ -74,6 +74,14 @@ Future<_Store> _openStore(String name, {int count = 0}) async {
   for (var i = 0; i < count; i++) {
     repo.insert(_note(i));
     if (i % 7 == 0) repo.pinNote('review-$i');
+    final tag = repo.upsertTag(
+      name: ['Ideas', 'Work', 'Personal', 'Study'][i % 4],
+    );
+    repo.setTagColor(
+      tagId: tag.id,
+      color: ['#F2C572', '#8ECFB8', '#B4A1DC', '#8FC5EC'][i % 4],
+    );
+    repo.attachTag(noteId: 'review-$i', tagId: tag.id);
   }
   db.close();
   final features = NexFeatures(await DesktopStore.open(root.path, name));
@@ -106,6 +114,43 @@ class _Shot {
 }
 
 const _matrix = <_Shot>[
+  _Shot(
+    'intelligence_1200_light_en',
+    mode: 'window',
+    target: 'assistant',
+    size: Size(1200, 900),
+  ),
+  _Shot(
+    'intelligence_1200_dark_fa',
+    mode: 'window',
+    target: 'assistant',
+    theme: 'dark',
+    locale: 'fa',
+    size: Size(1200, 900),
+  ),
+  _Shot(
+    'intelligence_settings_1200_light_en',
+    mode: 'window',
+    target: 'aiSettings',
+    size: Size(1200, 1000),
+  ),
+  _Shot(
+    'intelligence_settings_700_dark_fa_scale2',
+    mode: 'window',
+    target: 'aiSettings',
+    theme: 'dark',
+    locale: 'fa',
+    textScale: 2,
+    size: Size(700, 1000),
+  ),
+  _Shot(
+    'chromatic_gallery_1200_light_en_scale2',
+    mode: 'window',
+    target: 'timeline',
+    notes: 30,
+    textScale: 2,
+    size: Size(1200, 1000),
+  ),
   _Shot(
     'settings_tools_panel_dark_fa',
     locale: 'fa',
@@ -356,6 +401,10 @@ Future<PanelController> _boot(WidgetTester t, _Shot spec, _Store store) async {
 Future<void> _go(WidgetTester t, PanelController c, _Shot spec) async {
   final window = spec.mode == 'window';
   switch (spec.target) {
+    case 'assistant':
+      c.selectWindowSection('assistant');
+    case 'aiSettings':
+      c.selectWindowSection('settings');
     case 'timeline' || 'reader':
       window ? c.selectWindowSection('library') : c.openWidget('timeline');
     case 'settings' || 'appearance' || 'backup' || 'toolsSettings':
@@ -366,6 +415,11 @@ Future<void> _go(WidgetTester t, PanelController c, _Shot spec) async {
       c.openWidget(spec.target == 'palette' ? 'note' : spec.target);
   }
   await _frames(t, 90);
+  if (spec.target == 'aiSettings') {
+    final fa = spec.locale == 'fa';
+    await t.tap(find.text(fa ? 'هوش نکس' : 'Intelligence').last);
+    await _frames(t, 60);
+  }
   if (spec.target == 'toolsSettings') {
     final l = AppLocalizations.of(t.element(find.byType(Scaffold)))!;
     if (!window) {

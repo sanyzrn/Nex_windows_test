@@ -1,7 +1,7 @@
 name: nex_desktop
 description: "Nex for Windows desktop application."
 publish_to: "none"
-version: 0.15.0+12
+version: 0.20.0+13
 
 environment:
   sdk: ^3.9.0
@@ -23,6 +23,8 @@ dependencies:
     path: ../../packages/ui
   nex_ai:
     path: ../../packages/ai
+  flutter_secure_storage: ^10.3.1
+  http: ^1.2.2
   file_selector: ^1.0.3
   path_provider: ^2.1.5
   shared_preferences: ^2.3.3

@@ -23,6 +23,7 @@ import 'reminder_picker.dart';
 import 'reminder_coordinator.dart' show ReminderDeliveryFailure;
 import 'reminder_policy.dart';
 import 'note_attachments.dart';
+import 'intelligence/note_panel.dart';
 
 class NexNoteDetail extends StatefulWidget {
   const NexNoteDetail({super.key, required this.note, required this.onClose});
@@ -185,6 +186,20 @@ class _NexNoteDetailState extends State<NexNoteDetail> {
                               setState(() => editing = !editing),
                         ),
                         NoteMetadataLine(note: note),
+                        NoteIntelligencePanel(
+                          key: ValueKey('ai-${note.id}'),
+                          note: note,
+                          onChanged: () async {
+                            final fresh = await features.store.call<Note?>(
+                              'get',
+                              {'id': note.id},
+                            );
+                            if (mounted && fresh != null) {
+                              features.reflectReaderEdit(fresh);
+                              setState(() => note = fresh);
+                            }
+                          },
+                        ),
                         const SizedBox(height: 10),
                         if (editing &&
                             (note.type == NoteType.text ||

@@ -18,6 +18,7 @@ import 'package:nex_ui/nex_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../l10n/app_localizations.dart';
+import '../l10n/intelligence_strings.dart';
 import '../ui/widgets.dart';
 import 'features_state.dart';
 import 'note_copy.dart';
@@ -63,14 +64,13 @@ abstract class _LibraryStateBase extends State<NexLibraryView> {
   String? tag;
   String? thread;
   String? failure;
-  bool trash = false, loading = false, more = true;
+  bool trash = false, loading = false, more = true, board = true;
   Note? selectedNote;
   VoidCallback? _detailRelease;
   int generation = 0;
   Timer? _searchDebounce;
   int _libraryRevision = -1;
   double _paneWidth = 380.0;
-  double _layoutWidth = 0;
   String? _lastDeletedId;
 
   DesktopStore get store => NexScope.of(context).store;
@@ -200,12 +200,6 @@ abstract class _LibraryStateBase extends State<NexLibraryView> {
             selectedNote = null;
           }
         }
-        if (!trash &&
-            selectedNote == null &&
-            _layoutWidth >= 900 &&
-            notes.isNotEmpty) {
-          selectedNote = notes.first;
-        }
       });
     } catch (e) {
       if (mounted && token == generation) {
@@ -246,8 +240,8 @@ abstract class _LibraryStateBase extends State<NexLibraryView> {
         onKeyEvent: _handleKeyEvent,
         child: LayoutBuilder(
           builder: (context, constraints) {
-            _layoutWidth = constraints.maxWidth;
-            final isTwoPane = constraints.maxWidth >= 900.0;
+            final isTwoPane =
+                constraints.maxWidth >= 900.0 && selectedNote != null;
             final height = constraints.maxHeight.isFinite
                 ? constraints.maxHeight
                 : 530.0;

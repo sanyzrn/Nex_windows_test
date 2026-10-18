@@ -60,7 +60,9 @@ void main() {
     });
   });
 
-  testWidgets('library renders two panes at width >= 900px', (tester) async {
+  testWidgets('wide library opens as a gallery and selects a reader on click', (
+    tester,
+  ) async {
     tester.view.physicalSize = const Size(1200, 700);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(() {
@@ -106,6 +108,9 @@ void main() {
       );
       await tester.pump();
     }
+    expect(find.byType(NexNoteDetail), findsNothing);
+    await tester.tap(find.text('Two-pane note test').first);
+    await tester.pump();
     expect(find.byType(NexNoteDetail), findsOneWidget);
     expect(find.text('Two-pane note test'), findsWidgets);
     expect(find.text('No note selected'), findsNothing);

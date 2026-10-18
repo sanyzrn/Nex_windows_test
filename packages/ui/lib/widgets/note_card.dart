@@ -6,6 +6,36 @@ import '../tokens/nex_relative_time.dart';
 import '../tokens/nex_text_direction.dart';
 import '../tokens/nex_tokens.dart';
 
+/// The oldest colored tag owns the card, so renaming a tag cannot reshuffle
+/// the color. Alpha blending bounds arbitrary imported colors in both modes.
+Color nexNoteCardColor(
+  Note note,
+  ThemeData theme, {
+  bool highContrast = false,
+}) {
+  final tags =
+      note.tags.where((t) => nexParseTagColor(t.color) != null).toList()
+        ..sort((a, b) => a.id.compareTo(b.id));
+  if (tags.isEmpty || highContrast)
+    return theme.colorScheme.surfaceContainerLowest;
+  final seed = nexParseTagColor(tags.first.color)!;
+  var alpha = theme.brightness == Brightness.dark ? .23 : .19;
+  Color blend() => Color.alphaBlend(
+    seed.withValues(alpha: alpha),
+    theme.colorScheme.surfaceContainerLowest,
+  );
+  while (alpha > .01 &&
+      nexContrastRatio(theme.colorScheme.onSurfaceVariant, blend()) < 4.5) {
+    alpha = (alpha - .02).clamp(0, 1);
+  }
+  return blend();
+}
+
+double nexBoardCardHeight(BuildContext context) =>
+    252 +
+    (NexCardDensity.of(context).inset - 12) * 4 +
+    125 * (MediaQuery.textScalerOf(context).scale(1) - 1).clamp(0, 2);
+
 /// The words a screen reader needs, in the language the user chose.
 ///
 /// This package deliberately carries no localisations of its own — the same
@@ -88,6 +118,7 @@ class NoteCard extends StatelessWidget {
     this.expanded = false,
     this.selected,
     this.active = false,
+    this.board = false,
   });
   final Note note;
   final VoidCallback? onTap;
@@ -123,11 +154,12 @@ class NoteCard extends StatelessWidget {
 
   /// The note open in a desktop reader, without a multi-select checkbox.
   final bool active;
+  final bool board;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: nexCardInsets,
+      padding: board ? EdgeInsets.zero : nexCardInsets,
       child: ConstrainedBox(
         // Every card, the same height. See [nexCardHeightFor] — which is
         // [nexCardHeight] at the default text size, and only grows if someone
@@ -136,7 +168,9 @@ class NoteCard extends StatelessWidget {
         // An expanded card turns that into a floor: it grows to whatever its
         // note needs, and still never sits shorter than the row every other
         // card keeps.
-        constraints: expanded
+        constraints: board
+            ? BoxConstraints.tightFor(height: nexBoardCardHeight(context))
+            : expanded
             ? BoxConstraints(minHeight: nexCardHeightFor(context))
             : BoxConstraints.tightFor(height: nexCardHeightFor(context)),
         child: Semantics(
@@ -148,17 +182,26 @@ class NoteCard extends StatelessWidget {
           // individual tag, or the preview separately — a long undifferentiated
           // announcement with nothing inside it to navigate to.
           explicitChildNodes: true,
-          child: _CardBody(
-            note: note,
-            onTap: onTap,
-            previewOverride: previewOverride,
-            strings: strings,
-            showDue: showDue,
-            expanded: expanded,
-            selected: selected,
-            active: active,
-            onChecklistToggle: onChecklistToggle,
-          ),
+          child: board
+              ? _BoardBody(
+                  note: note,
+                  onTap: onTap,
+                  strings: strings,
+                  selected: selected,
+                  active: active,
+                  showDue: showDue,
+                )
+              : _CardBody(
+                  note: note,
+                  onTap: onTap,
+                  previewOverride: previewOverride,
+                  strings: strings,
+                  showDue: showDue,
+                  expanded: expanded,
+                  selected: selected,
+                  active: active,
+                  onChecklistToggle: onChecklistToggle,
+                ),
         ),
       ),
     );
@@ -177,6 +220,227 @@ class NoteCard extends StatelessWidget {
     NexMarkdownText.preview(note.displayText ?? ''),
     strings.relativeTime(nexRelativeTimeOf(note.createdAt)),
   ].where((value) => value.isNotEmpty).join('. ');
+}
+
+class _BoardBody extends StatelessWidget {
+  const _BoardBody({
+    required this.note,
+    required this.onTap,
+    required this.strings,
+    required this.selected,
+    required this.active,
+    required this.showDue,
+  });
+  final Note note;
+  final VoidCallback? onTap;
+  final NexCardStrings strings;
+  final bool? selected;
+  final bool active, showDue;
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context), c = theme.colorScheme;
+    final highContrast = MediaQuery.highContrastOf(context);
+    final color = nexNoteCardColor(note, theme, highContrast: highContrast);
+    final picked = selected == true || active;
+    final lines = (note.displayText ?? '')
+        .split('\n')
+        .map(NexMarkdownText.preview)
+        .where((s) => s.trim().isNotEmpty)
+        .toList();
+    final text = lines.join('\n');
+    final title = note.title?.trim().isNotEmpty == true
+        ? note.title!
+        : lines.firstOrNull ?? '';
+    final body = note.title?.trim().isNotEmpty == true
+        ? text
+        : lines.skip(1).join('\n');
+    return Material(
+      color: color,
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(
+          color: picked
+              ? c.primary
+              : highContrast
+              ? c.outline
+              : c.onSurface.withValues(alpha: .12),
+          width: picked || highContrast ? 2 : 1,
+        ),
+      ),
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(18),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  if (selected != null)
+                    Icon(
+                      selected!
+                          ? Icons.check_circle
+                          : Icons.radio_button_unchecked,
+                      size: 18,
+                      color: c.primary,
+                    )
+                  else
+                    Icon(
+                      nexNoteTypeIcon(note.type.wireName),
+                      size: 18,
+                      color: c.onSurfaceVariant,
+                    ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      strings.relativeTime(nexRelativeTimeOf(note.createdAt)),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: c.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                  if (note.pinnedAt != null)
+                    Icon(
+                      Icons.push_pin_outlined,
+                      size: 16,
+                      color: c.onSurfaceVariant,
+                    ),
+                  if (note.attachmentCount > 0) ...[
+                    const SizedBox(width: 6),
+                    Icon(
+                      Icons.attach_file,
+                      size: 15,
+                      color: c.onSurfaceVariant,
+                    ),
+                    Text(
+                      '${note.attachmentCount}',
+                      style: theme.textTheme.labelSmall,
+                    ),
+                  ],
+                ],
+              ),
+              const SizedBox(height: 16),
+              Expanded(
+                child: ClipRect(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      if (note.type == NoteType.photo && note.mediaUri != null)
+                        Expanded(
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: Image.file(
+                              File(note.mediaUri!),
+                              fit: BoxFit.cover,
+                              cacheWidth: 480,
+                              errorBuilder: (_, __, ___) => Icon(
+                                Icons.image_not_supported_outlined,
+                                color: c.onSurfaceVariant,
+                              ),
+                            ),
+                          ),
+                        )
+                      else ...[
+                        Text(
+                          title.isEmpty
+                              ? strings.noteOfType(note.type.name)
+                              : title,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          textDirection: nexDirectionOf(title),
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            height: 1.5,
+                          ),
+                        ),
+                        if (body.isNotEmpty) ...[
+                          const SizedBox(height: 10),
+                          Flexible(
+                            child: Text(
+                              body,
+                              maxLines: 5,
+                              overflow: TextOverflow.ellipsis,
+                              textDirection: nexDirectionOf(body),
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: c.onSurfaceVariant,
+                                height: 1.65,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+              if (showDue && note.dueAt != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.notifications_none,
+                        size: 14,
+                        color: c.onSurfaceVariant,
+                      ),
+                      const SizedBox(width: 5),
+                      Expanded(
+                        child: Text(
+                          strings.dueLabel?.call(note.dueAt!, note.dueRepeat) ??
+                              '',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.labelSmall,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              if (note.tags.isNotEmpty) ...[
+                const SizedBox(height: 14),
+                Divider(height: 1, color: c.onSurface.withValues(alpha: .08)),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    for (final tag in note.tags.take(2))
+                      Flexible(
+                        child: Padding(
+                          padding: const EdgeInsetsDirectional.only(end: 6),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 9,
+                              vertical: 3,
+                            ),
+                            decoration: BoxDecoration(
+                              color: c.surface.withValues(alpha: .65),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              strings.tagName?.call(tag) ?? tag.name,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.labelSmall,
+                            ),
+                          ),
+                        ),
+                      ),
+                    if (note.tags.length > 2)
+                      Text(
+                        '+${note.tags.length - 2}',
+                        style: theme.textTheme.labelSmall,
+                      ),
+                  ],
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class _CardBody extends StatelessWidget {
@@ -213,9 +477,9 @@ class _CardBody extends StatelessWidget {
       color: picked
           ? Color.alphaBlend(
               theme.colorScheme.primaryContainer.withValues(alpha: 0.45),
-              theme.colorScheme.surfaceContainerLowest,
+              nexNoteCardColor(note, theme),
             )
-          : theme.colorScheme.surfaceContainerLowest,
+          : nexNoteCardColor(note, theme),
       // A quiet hairline separates the target from low-contrast backgrounds.
       // High-contrast mode uses the full outline and a thicker edge.
       elevation: 0,
@@ -267,7 +531,10 @@ class _CardBody extends StatelessWidget {
                 const SizedBox(width: NexSpacing.contentGap),
               if (note.attachmentCount > 0) ...[
                 const Icon(Icons.attach_file, size: 14),
-                Text('+${note.attachmentCount}', style: theme.textTheme.labelSmall),
+                Text(
+                  '+${note.attachmentCount}',
+                  style: theme.textTheme.labelSmall,
+                ),
                 const SizedBox(width: NexSpacing.sm),
               ],
               Expanded(

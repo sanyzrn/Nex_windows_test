@@ -6,7 +6,7 @@
 
 A local-first notebook and desktop toolkit for Windows, with English and Persian interfaces. Work in a full desktop window or a compact panel at either screen edge.
 
-**Current app version: `0.15.0+12` · Windows 10/11 · x64**
+**Current app version: `0.20.0+13` · Windows 10/11 · x64**
 
 [Download the latest installer](https://github.com/sanyzrn/Nex_windows_test/releases/latest) · [What's new](apps/desktop/CHANGELOG.md) · [Report a bug](https://github.com/sanyzrn/Nex_windows_test/issues/new/choose) · [فارسی](#راهنمای-فارسی)
 
@@ -69,23 +69,23 @@ flutter build windows --release --no-pub
 
 Distribute the complete `build/windows/x64/runner/Release` folder, not only its EXE. Packaging uses Inno Setup **6.7.3**: [installer guide](apps/desktop/installer/README.md).
 
-CI runs version checks, package-host/UI checks, analysis, desktop tests and Windows goldens, shared UI tests, the Release build, installer packaging and optional-AI removal verification. Successful runs retain an executable bundle and an installer with checksums. [Release process and CI diagnosis](docs/RELEASING.md).
+CI runs version checks, package-host/UI checks, analysis, desktop tests and Windows goldens, shared UI tests, the Release build, installer packaging and on-device runtime removal verification. Successful runs retain an executable bundle and an installer with checksums. [Release process and CI diagnosis](docs/RELEASING.md).
 
 ## Project layout
 
 | Path | Purpose |
 | --- | --- |
 | `apps/desktop` | Flutter application, Windows C++ bridge, installer and regression tests |
-| `packages/core`, `data`, `ui`, `ai` | Vendored shared Nex packages; the desktop does not import the optional AI package |
+| `packages/core`, `data`, `ui`, `ai` | Vendored shared Nex packages; Android-compatible cloud AI; the on-device runtime stays removable |
 | `design` | Screenshots, design reviews and actual Release probe results |
 | `docs` | Architecture, validation, release guidance and historical reports |
 | `patches` | Historical upstream transfer patches; already applied here |
 
-[Architecture and data](apps/desktop/README.md) · [Compatibility validation for 0.15.0](docs/CROSS_PLATFORM_0150.md) · [Contributing](CONTRIBUTING.md) · [Upstream integration](docs/INTEGRATION.md)
+[0.20 intelligence and design](docs/WINDOWS_0200.md) · [Architecture and data](apps/desktop/README.md) · [Compatibility validation for 0.15.0](docs/CROSS_PLATFORM_0150.md) · [Contributing](CONTRIBUTING.md) · [Upstream integration](docs/INTEGRATION.md)
 
 ## Current limits
 
-Cloud/LAN sync, OCR, assistant/Vault, local LLM and automatic updates are not part of this Windows release. Further repeating-reminder occurrences need the app to run again; indefinite recurrence while fully exited is not implemented. Physical dual-monitor mixed-DPI/hot-plug behavior, full installed-notification delivery and clean-machine upgrades remain manual validation areas. See the dated validation reports for what was actually tested.
+The Intelligence workspace supports five cloud providers, conversation history, note actions with review, OCR, transcription, translation, rewriting, summaries and semantic search. AI is off by default, uses your own provider credentials, and stores keys in Windows secure storage. Local models have a clearly marked placeholder. Cloud/LAN sync, Vault, local inference and automatic app updates are not enabled. Further repeating-reminder occurrences need the app to run again; indefinite recurrence while fully exited is not implemented. Physical dual-monitor mixed-DPI/hot-plug behavior, full installed-notification delivery and clean-machine upgrades remain manual validation areas. See the dated validation reports for what was actually tested.
 
 ## راهنمای فارسی
 
