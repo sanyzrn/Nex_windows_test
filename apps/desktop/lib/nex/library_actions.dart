@@ -34,7 +34,9 @@ mixin _LibraryActions on _LibraryStateBase {
     if (_lastDeletedId == null) return;
     final id = _lastDeletedId!;
     _lastDeletedId = null;
-    await store.call('restore', {'id': id});
+    await NexScope.of(
+      context,
+    ).guard(() => store.call<void>('restore', {'id': id}));
     if (mounted) await load();
   }
 
@@ -111,10 +113,12 @@ mixin _LibraryActions on _LibraryStateBase {
       case 'open':
         setState(() => selectedNote = note);
       case 'pin':
-        await store.call(note.pinnedAt == null ? 'pin' : 'unpin', {
-          'id': note.id,
-        });
-        await load();
+        await NexScope.of(context).guard(
+          () => store.call<void>(note.pinnedAt == null ? 'pin' : 'unpin', {
+            'id': note.id,
+          }),
+        );
+        if (mounted) await load();
       case 'copy':
         Clipboard.setData(ClipboardData(text: noteCopyText(note)));
         if (!mounted) return;

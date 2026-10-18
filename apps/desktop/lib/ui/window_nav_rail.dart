@@ -58,9 +58,7 @@ class _WindowNavRail extends StatelessWidget {
                           const SizedBox(width: 10),
                           Text(
                             l.workspaceBrand,
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleMedium
+                            style: Theme.of(context).textTheme.titleMedium
                                 ?.copyWith(
                                   fontSize: 19,
                                   fontWeight: FontWeight.w700,
@@ -70,7 +68,43 @@ class _WindowNavRail extends StatelessWidget {
                         ],
                       ],
                     ),
-                    const SizedBox(height: 18),
+                    const SizedBox(height: 24),
+                    FilledButton(
+                      key: const ValueKey('workspace-new-note'),
+                      onPressed: () {
+                        controller.selectWindowSection('capture');
+                        unawaited(features?.fresh());
+                      },
+                      style: FilledButton.styleFrom(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: wide ? 12 : 0,
+                          vertical: 12,
+                        ),
+                        minimumSize: const Size(40, 42),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: wide
+                          ? Row(
+                              children: [
+                                const Icon(Icons.add_rounded, size: 19),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    l.newNote,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            )
+                          : Tooltip(
+                              message: l.newNote,
+                              child: const Icon(Icons.add_rounded, size: 20),
+                            ),
+                    ),
+                    const SizedBox(height: 16),
                     NexWorkspaceDestination(
                       icon: Icons.edit_note_outlined,
                       label: l.navCapture,
@@ -120,6 +154,32 @@ class _WindowNavRail extends StatelessWidget {
               compact: !wide,
               onPressed: () => controller.setWindowMode('panel'),
             ),
+            if (wide)
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 12,
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.shield_outlined,
+                      size: 14,
+                      color: c.onSurfaceVariant,
+                    ),
+                    const SizedBox(width: 7),
+                    Expanded(
+                      child: Text(
+                        l.workspaceLocal,
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: c.onSurfaceVariant,
+                          height: 1.5,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             const SizedBox(height: 8),
             Divider(color: c.outlineVariant, height: 1),
             const SizedBox(height: 4),
@@ -194,9 +254,7 @@ class _RailIcon extends StatelessWidget {
         maximumSize: const Size(34, 34),
         padding: EdgeInsets.zero,
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
       icon: Icon(icon, size: 17),
     );

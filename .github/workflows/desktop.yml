@@ -69,8 +69,25 @@ jobs:
         run: |
           flutter pub get --enforce-lockfile
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          flutter analyze --no-pub
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           flutter test --no-pub
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Analyze and test core and data packages
+        shell: pwsh
+        run: |
+          foreach ($package in @('core', 'data')) {
+            Push-Location "packages/$package"
+            try {
+              dart pub get --enforce-lockfile
+              if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+              dart analyze
+              if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+              dart test
+              if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            } finally { Pop-Location }
+          }
 
       # The full suite above compares this matrix against the current app.
       - name: Upload reviewed screenshot matrix

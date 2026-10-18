@@ -16,6 +16,7 @@ class DesktopStore {
   final Map<int, Completer<dynamic>> _pending = {};
   int _sequence = 0;
   bool _closed = false;
+  Future<void>? _closing;
   final _reminderChanges = StreamController<void>.broadcast();
   Stream<void> get reminderChanges => _reminderChanges.stream;
 
@@ -24,6 +25,16 @@ class DesktopStore {
     final ready = Completer<SendPort>();
     DesktopStore? store;
     replies.listen((dynamic message) {
+      // Isolate errors and exits must finish callers instead of leaving a
+      // permanent spinner (including a worker that fails before its handshake).
+      if (message == null || (message is List && message.length == 2)) {
+        final error = StateError(
+          message == null ? 'Storage worker stopped' : '${message[0]}',
+        );
+        if (!ready.isCompleted) ready.completeError(error);
+        store?._failPending(error);
+        return;
+      }
       if (message is SendPort) {
         ready.complete(message);
         return;
@@ -40,11 +51,12 @@ class DesktopStore {
         task?.completeError(StateError(parts[2] as String));
       }
     });
-    final isolate = await Isolate.spawn(_worker, [
-      replies.sendPort,
-      root,
-      deviceId,
-    ]);
+    final isolate = await Isolate.spawn(
+      _worker,
+      [replies.sendPort, root, deviceId],
+      onError: replies.sendPort,
+      onExit: replies.sendPort,
+    );
     try {
       final commands = await ready.future;
       store = DesktopStore._(commands, isolate, replies, p.join(root, 'media'));
@@ -75,13 +87,24 @@ class DesktopStore {
     });
   }
 
-  Future<void> close() async {
-    if (_closed) return;
-    await call<void>('close'); // FIFO: commits all earlier captures first.
+  void _failPending(Object error) {
     _closed = true;
-    await _reminderChanges.close();
-    _replies.close();
-    _isolate.kill();
+    for (final task in _pending.values) {
+      task.completeError(error);
+    }
+    _pending.clear();
+  }
+
+  Future<void> close() {
+    if (_closing != null) return _closing!;
+    final drained = _closed ? Future<void>.value() : call<void>('close');
+    // Reject new commands as soon as the FIFO's terminal command is queued.
+    _closed = true;
+    return _closing = drained.whenComplete(() async {
+      await _reminderChanges.close();
+      _replies.close();
+      _isolate.kill();
+    });
   }
 
   static void _worker(List<dynamic> config) {
@@ -118,6 +141,10 @@ class DesktopStore {
                 final text = a['text'] as String;
                 final oldId = a['id'] as String?;
                 if (oldId != null) {
+                  final current = notes.getById(oldId);
+                  if (current == null || current.deletedAt != null) {
+                    throw StateError('Capture note is no longer available');
+                  }
                   notes.updateContent(
                     oldId,
                     a['checklist'] == true
@@ -276,7 +303,7 @@ class DesktopStore {
                   'total': totals['total'] ?? 0,
                   'pinned': totals['pinned'] ?? 0,
                   'media': totals['media'] ?? 0,
-                  'recent': previews('created_at DESC', '', 6),
+                  'recent': previews('updated_at DESC, id DESC', '', 8),
                   'pins': previews(
                     'pinned_at DESC',
                     'AND pinned_at IS NOT NULL',
@@ -401,56 +428,59 @@ class DesktopStore {
                 String libraryPath = backupPath;
                 Map<String, dynamic>? restoredSettings;
                 Directory? unpackStaging;
-                if (backupPath.endsWith('.nexfull') ||
-                    backupPath.endsWith('.fullbak')) {
-                  if (key == null || key.trim().isEmpty) {
-                    throw ArgumentError('Recovery key required');
-                  }
-                  unpackStaging = Directory(
-                    p.join(root, '.unpack-${newUuidV7()}'),
-                  )..createSync(recursive: true);
-                  final unpacked = FullBackup.unpack(
-                    backupPath,
-                    unpackStaging.path,
-                    key.trim(),
-                    modelHash: '',
-                    modelBytes: 0,
-                  );
-                  libraryPath = p.join(unpackStaging.path, 'library.nexbak');
-                  restoredSettings =
-                      unpacked['desktopShell'] as Map<String, dynamic>?;
-                }
-                db.close();
                 try {
-                  NexBackupArchive.restore(
-                    liveDbPath: p.join(root, 'nex.sqlite'),
-                    mediaDir: p.join(root, 'media'),
-                    backupFile: libraryPath,
-                  );
+                  if (backupPath.toLowerCase().endsWith('.nexfull') ||
+                      backupPath.toLowerCase().endsWith('.fullbak')) {
+                    if (key == null || key.trim().isEmpty) {
+                      throw ArgumentError('Recovery key required');
+                    }
+                    unpackStaging = Directory(
+                      p.join(root, '.unpack-${newUuidV7()}'),
+                    )..createSync(recursive: true);
+                    final unpacked = FullBackup.unpack(
+                      backupPath,
+                      unpackStaging.path,
+                      key.trim(),
+                      modelHash: '',
+                      modelBytes: 0,
+                    );
+                    libraryPath = p.join(unpackStaging.path, 'library.nexbak');
+                    restoredSettings =
+                        unpacked['desktopShell'] as Map<String, dynamic>?;
+                  }
+                  db.close();
+                  try {
+                    NexBackupArchive.restore(
+                      liveDbPath: p.join(root, 'nex.sqlite'),
+                      mediaDir: p.join(root, 'media'),
+                      backupFile: libraryPath,
+                    );
+                  } finally {
+                    db = NexDatabase.open(p.join(root, 'nex.sqlite'));
+                    notes = SqliteNoteRepository(db, localDeviceId: device);
+                    capture = CaptureService(notes, deviceId: device);
+                    threads = SqliteThreadRepository(
+                      db,
+                      notes,
+                      localDeviceId: device,
+                    );
+                    commitments = SqliteCommitmentRepository(
+                      db,
+                      localDeviceId: device,
+                    );
+                    maintenance = LibraryMaintenance(
+                      notes,
+                      mediaRoot: p.join(root, 'media'),
+                    );
+                  }
+                  result = restoredSettings;
                 } finally {
                   if (unpackStaging?.existsSync() == true) {
                     try {
                       unpackStaging!.deleteSync(recursive: true);
                     } catch (_) {}
                   }
-                  db = NexDatabase.open(p.join(root, 'nex.sqlite'));
-                  notes = SqliteNoteRepository(db, localDeviceId: device);
-                  capture = CaptureService(notes, deviceId: device);
-                  threads = SqliteThreadRepository(
-                    db,
-                    notes,
-                    localDeviceId: device,
-                  );
-                  commitments = SqliteCommitmentRepository(
-                    db,
-                    localDeviceId: device,
-                  );
-                  maintenance = LibraryMaintenance(
-                    notes,
-                    mediaRoot: p.join(root, 'media'),
-                  );
                 }
-                result = restoredSettings;
               case 'close':
                 db.close();
                 commands.close();

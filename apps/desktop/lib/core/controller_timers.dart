@@ -8,25 +8,39 @@ mixin PanelTimers on PanelStateBase {
   int tTotal = 300;
   int tLeft = 300;
   Timer? tRun;
+  DateTime Function() timerNow = DateTime.now;
+  DateTime? _timerDeadline;
+
+  int _remainingTimerSeconds() => _timerDeadline == null
+      ? tLeft
+      : ((_timerDeadline!.difference(timerNow()).inMilliseconds + 999) ~/ 1000)
+            .clamp(0, tTotal);
 
   void timerPreset(int minutes) {
     tRun?.cancel();
     tRun = null;
+    _timerDeadline = null;
     tTotal = tLeft = minutes * 60;
     notifyListeners();
   }
 
   void timerToggle() {
     if (tRun != null) {
+      tLeft = _remainingTimerSeconds();
       tRun?.cancel();
       tRun = null;
+      _timerDeadline = null;
     } else {
       if (tLeft == 0) tLeft = tTotal;
+      _timerDeadline = timerNow().add(Duration(seconds: tLeft));
       tRun = Timer.periodic(const Duration(seconds: 1), (_) {
-        tLeft--;
+        // A sleeping or suspended Windows process misses ticks. The deadline
+        // remains authoritative when the event loop resumes.
+        tLeft = _remainingTimerSeconds();
         if (tLeft <= 0) {
           tRun?.cancel();
           tRun = null;
+          _timerDeadline = null;
           tLeft = 0;
           unawaited(native.beep().catchError((_) {}));
           sticky = true;
@@ -44,6 +58,7 @@ mixin PanelTimers on PanelStateBase {
     tRun?.cancel();
     tRun = null;
     tLeft = tTotal;
+    _timerDeadline = null;
     notifyListeners();
   }
 

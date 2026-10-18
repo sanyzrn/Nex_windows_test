@@ -1067,14 +1067,14 @@ class AppLocalizationsFa extends AppLocalizations {
       'یک فکر، یک فهرست، یک یادآوری کوچک. بنویسید؛ نکس نگهش می‌دارد.';
 
   @override
-  String get workspaceCaptureFooter => 'فقط بنویسید؛ ذخیره خودکار است.';
+  String get workspaceCaptureFooter => 'ذخیره روی همین دستگاه؛ همیشه در دسترس.';
 
   @override
-  String get workspaceToolsTitle => 'ابزارهای کوچک،\nکارهای آسان‌تر.';
+  String get workspaceToolsTitle => 'جعبه‌ابزار روزمرهٔ تو';
 
   @override
   String get workspaceToolsDescription =>
-      'چیزهای کاربردی، همیشه نزدیک شما. برای کارهای روزمره در ویندوز.';
+      'ابزارهای کاربردی ویندوز، یک‌جا و در دسترس.';
 
   @override
   String get workspaceEssentials => 'دم‌دست';
@@ -1132,7 +1132,7 @@ class AppLocalizationsFa extends AppLocalizations {
   String get workspaceNotebook => 'دفتر یادداشت شما';
 
   @override
-  String get workspaceRecent => 'یادداشت‌های اخیر';
+  String get workspaceRecent => 'آخرین تغییرات';
 
   @override
   String get workspacePinned => 'پین‌شده‌ها';
@@ -1200,4 +1200,31 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get closeWindow => 'بستن پنجره';
+
+  @override
+  String get workspaceFocus => 'تایمر تمرکز';
+
+  @override
+  String get workspaceCalculate => 'ماشین‌حساب';
+
+  @override
+  String get workspaceCreate => 'یادداشت جدید';
+
+  @override
+  String get workspaceToolsWork => 'نوشتن و ساختن';
+
+  @override
+  String get workspaceToolsTime => 'زمان و تمرکز';
+
+  @override
+  String get workspaceToolsSystem => 'دسکتاپ و ابزارها';
+
+  @override
+  String get retry => 'تلاش دوباره';
+
+  @override
+  String get workspaceLoading => 'در حال خواندن یادداشت‌ها…';
+
+  @override
+  String get workspaceClipboard => 'کلیپ‌بورد';
 }

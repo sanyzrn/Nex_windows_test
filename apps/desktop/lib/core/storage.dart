@@ -31,18 +31,37 @@ class Storage {
   }
 
   Map<String, dynamic> loadSettings() {
-    try {
-      final text = _settingsFile.readAsStringSync();
-      final v = jsonDecode(text);
-      if (v is Map<String, dynamic>) return v;
-    } catch (_) {}
+    for (final file in [_settingsFile, File('${_settingsFile.path}.bak')]) {
+      try {
+        final v = jsonDecode(file.readAsStringSync());
+        if (v is Map<String, dynamic>) return v;
+      } catch (_) {}
+    }
     return <String, dynamic>{};
   }
 
   void saveSettings(Map<String, dynamic> settings) {
+    final target = _settingsFile;
+    final staging = File('${target.path}.tmp');
+    final backup = File('${target.path}.bak');
     try {
-      _settingsFile.writeAsStringSync(jsonEncode(settings));
-    } catch (_) {}
+      staging.writeAsStringSync(jsonEncode(settings), flush: true);
+      if (target.existsSync()) {
+        // Preserve the last readable file, including when startup recovered
+        // from a truncated primary. Windows cannot rename over an open file.
+        try {
+          final previous = jsonDecode(target.readAsStringSync());
+          if (previous is Map<String, dynamic>) {
+            backup.writeAsStringSync(jsonEncode(previous), flush: true);
+          }
+        } catch (_) {}
+      }
+      staging.renameSync(target.path);
+    } catch (_) {
+      try {
+        if (staging.existsSync()) staging.deleteSync();
+      } catch (_) {}
+    }
   }
 
   /// Restores pinned clipboard images (same .bin format as the original:

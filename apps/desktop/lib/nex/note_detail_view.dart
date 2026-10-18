@@ -36,6 +36,7 @@ class _NexNoteDetailState extends State<NexNoteDetail> {
   late final editor = TextEditingController(text: note.content ?? '');
   final tag = TextEditingController(), thread = TextEditingController();
   late final caption = TextEditingController(text: note.caption ?? '');
+  final captionFocus = FocusNode();
   List<NoteThread> memberships = [], availableThreads = [];
   AudioPlayer? _player;
   // Windows has no mobile audio-session activation; let its media backend own
@@ -49,9 +50,12 @@ class _NexNoteDetailState extends State<NexNoteDetail> {
   @override
   void didUpdateWidget(covariant NexNoteDetail oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (widget.note.rev < note.rev) return;
     note = widget.note;
     if (!editing) {
-      editor.text = note.content ?? '';
+      if (editor.text != (note.content ?? '')) editor.text = note.content ?? '';
+    }
+    if (!captionFocus.hasFocus && caption.text != (note.caption ?? '')) {
       caption.text = note.caption ?? '';
     }
   }
@@ -91,6 +95,7 @@ class _NexNoteDetailState extends State<NexNoteDetail> {
     final revision = ++editRevision;
     try {
       final store = NexScope.of(context).store;
+      final features = NexScope.of(context);
       if (command == 'remind') {
         await NexScope.of(context).remind(
           note.id,
@@ -108,6 +113,7 @@ class _NexNoteDetailState extends State<NexNoteDetail> {
       }
       final refreshed = await store.call<Note?>('get', {'id': note.id});
       if (mounted && refreshed != null && revision == editRevision) {
+        if (command == 'capture') features.reflectReaderEdit(refreshed);
         setState(() {
           note = refreshed;
           failure = null;
@@ -132,6 +138,7 @@ class _NexNoteDetailState extends State<NexNoteDetail> {
     tag.dispose();
     thread.dispose();
     caption.dispose();
+    captionFocus.dispose();
     super.dispose();
   }
 
@@ -228,6 +235,7 @@ class _NexNoteDetailState extends State<NexNoteDetail> {
                           const SizedBox(height: 12),
                           TextField(
                             controller: caption,
+                            focusNode: captionFocus,
                             textDirection: nexDirectionOf(caption.text),
                             decoration: InputDecoration(hintText: l.caption),
                             onChanged: (text) => run('caption', {'text': text}),

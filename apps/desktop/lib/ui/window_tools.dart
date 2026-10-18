@@ -7,17 +7,24 @@ class _ToolsDirectory extends StatefulWidget {
 }
 
 class _ToolsDirectoryState extends State<_ToolsDirectory> {
+  final search = TextEditingController();
   String query = '';
+  @override
+  void dispose() {
+    search.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final c = NexPanelScope.maybeOf(context) ?? LiquidScope.panelOf(context);
     final l = AppLocalizations.of(context)!;
     final scheme = Theme.of(context).colorScheme;
     const reserved = {'more', 'settings', 'note', 'timeline'};
-    final ids = [
-      ...?c.S.dock,
-      ...?c.S.more,
-    ].where((id) => !reserved.contains(id)).toSet().toList();
+    final ids = [...?c.S.dock, ...?c.S.more]
+        .where((id) => !reserved.contains(id) && !c.S.hidden.contains(id))
+        .toSet()
+        .toList();
     final filtered = ids
         .where(
           (id) => nexFoldText(
@@ -28,6 +35,15 @@ class _ToolsDirectoryState extends State<_ToolsDirectory> {
     const essentialIds = ['clip', 'awake', 'calc', 'timer', 'color'];
     final essentials = essentialIds.where(filtered.contains).toList();
     final others = filtered.where((id) => !essentialIds.contains(id)).toList();
+    final groups = <(String, Set<String>)>[
+      (
+        l.workspaceToolsWork,
+        {'text', 'snippets', 'gen', 'pass', 'emoji', 'color'},
+      ),
+      (l.workspaceToolsTime, {'timer', 'stopwatch', 'clock', 'awake'}),
+      (l.workspaceToolsSystem, {}),
+    ];
+    final grouped = <String>{};
     return LayoutBuilder(
       builder: (context, constraints) => ListView(
         padding: EdgeInsets.all(constraints.maxWidth < 650 ? 16 : 24),
@@ -44,9 +60,20 @@ class _ToolsDirectoryState extends State<_ToolsDirectory> {
               width: 320,
               child: TextField(
                 key: const ValueKey('workspace-tools-search'),
+                controller: search,
                 decoration: InputDecoration(
                   hintText: l.workspaceToolsSearch,
                   prefixIcon: const Icon(Icons.search_outlined, size: 17),
+                  suffixIcon: query.isEmpty
+                      ? null
+                      : IconButton(
+                          tooltip: l.clearSelection,
+                          icon: const Icon(Icons.close_rounded, size: 17),
+                          onPressed: () {
+                            search.clear();
+                            setState(() => query = '');
+                          },
+                        ),
                   fillColor: scheme.surfaceContainerLowest,
                   // The Android app's search field is a capsule.
                   border: const OutlineInputBorder(
@@ -71,21 +98,33 @@ class _ToolsDirectoryState extends State<_ToolsDirectory> {
           ),
           const SizedBox(height: 16),
           if (filtered.isEmpty)
-            Padding(
-              padding: const EdgeInsets.all(24),
-              child: Text(l.empty),
-            ),
+            Padding(padding: const EdgeInsets.all(24), child: Text(l.empty)),
           if (essentials.isNotEmpty) ...[
             _sectionLabel(l.workspaceEssentials),
             const SizedBox(height: 10),
             _grid(essentials, c),
             const SizedBox(height: 20),
           ],
-          if (others.isNotEmpty) ...[
-            _sectionLabel(l.workspaceAllTools),
-            const SizedBox(height: 10),
-            _grid(others, c),
-          ],
+          for (final group in groups)
+            if (others.any(
+              (id) => group.$2.isEmpty
+                  ? !grouped.contains(id)
+                  : group.$2.contains(id),
+            )) ...[
+              _sectionLabel(group.$1),
+              const SizedBox(height: 10),
+              _grid(
+                others.where((id) {
+                  final included = group.$2.isEmpty
+                      ? !grouped.contains(id)
+                      : group.$2.contains(id);
+                  if (included) grouped.add(id);
+                  return included;
+                }).toList(),
+                c,
+              ),
+              const SizedBox(height: 20),
+            ],
         ],
       ),
     );
@@ -104,9 +143,11 @@ class _ToolsDirectoryState extends State<_ToolsDirectory> {
 
   Widget _grid(List<String> ids, PanelController controller) => LayoutBuilder(
     builder: (context, constraints) {
-      final columns = constraints.maxWidth >= 860
+      final scaledWidth =
+          constraints.maxWidth / MediaQuery.textScalerOf(context).scale(1);
+      final columns = scaledWidth >= 860
           ? 3
-          : constraints.maxWidth >= 520
+          : scaledWidth >= 520
           ? 2
           : 1;
       final width = (constraints.maxWidth - (columns - 1) * 10) / columns;
@@ -166,7 +207,7 @@ class _ToolTile extends StatelessWidget {
             backgroundColor: active
                 ? c.primary.withValues(alpha: .09)
                 : c.surfaceContainerLowest,
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(18),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(14),
             ),
@@ -184,8 +225,8 @@ class _ToolTile extends StatelessWidget {
       child: Row(
         children: [
           Container(
-            width: 36,
-            height: 36,
+            width: 42,
+            height: 42,
             decoration: BoxDecoration(
               color: accent.withValues(alpha: .16),
               borderRadius: BorderRadius.circular(10),
@@ -205,7 +246,7 @@ class _ToolTile extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                    fontSize: 13,
+                    fontSize: 14,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -215,7 +256,7 @@ class _ToolTile extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    fontSize: 11,
+                    fontSize: 12,
                     height: 1.4,
                     color: c.onSurfaceVariant,
                   ),
@@ -247,11 +288,7 @@ class _ToolTile extends StatelessWidget {
 /// [color] tints the directory tile's icon with its per-tool hue; the dock
 /// passes the theme's own icon colour.
 class _ToolIcon extends StatelessWidget {
-  const _ToolIcon({
-    required this.controller,
-    required this.id,
-    this.color,
-  });
+  const _ToolIcon({required this.controller, required this.id, this.color});
 
   final PanelController controller;
   final String id;

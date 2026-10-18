@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.14.0 — 2026-10-18
+
+- Rebuilt the notebook workspace with a balanced writing/pinned layout, recently
+  updated note grid, useful tool shortcuts and visible local-save feedback.
+- Refined navigation, desktop-size capture controls, categorized searchable
+  tools, a focused reader surface and one clear active-note outline.
+- Preserve unsaved text after a failed flush; drain late input before rotating
+  a capture. Restoring a backup resets the active capture only after success.
+- Reader edits stay in sync with the active composer; caption updates preserve
+  the caret. Quick-pasted links cannot be overwritten by the next thought.
+- Fixed first-run navigation, All filter menu choices, hidden-tool visibility,
+  editor keyboard ownership, pending calls during store shutdown and worker exits.
+- Countdown timers catch up after Windows sleep; shell preferences keep a
+  recoverable last-valid snapshot. Failed full-backup unpacking cleans staging.
+- Added focused data-loss, restore, navigation, filter and timer regressions.
+- Release evidence and remaining native checks: `docs/WINDOWS_0140_REVIEW.md`.
+
 ## 0.13.0 (2026-10-14)
 
 The Android-parity release: the whole interface was reworked to match the

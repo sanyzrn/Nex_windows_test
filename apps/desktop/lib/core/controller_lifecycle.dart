@@ -18,7 +18,12 @@ mixin PanelLifecycle on PanelStateBase {
     bool forcePanelMode = false,
   }) async {
     _persistSettings = preset == null;
-    S = preset ?? Settings.fromMap(storage.loadSettings());
+    try {
+      S = preset ?? Settings.fromMap(storage.loadSettings());
+    } catch (_) {
+      // Damaged shell preferences must not make the user's library unusable.
+      S = Settings();
+    }
     _wireNative();
     // The native smoke probe exercises edge-panel placement/reveal; it must
     // run in the panel mode regardless of the saved preference.

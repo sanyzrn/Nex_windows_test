@@ -166,13 +166,21 @@ mixin _LibraryWorkspace on _LibraryStateBase {
           ),
           const SizedBox(height: 20),
           FilledButton.icon(
-            onPressed: c == null ? null : () => c.show('capture'),
+            onPressed: c == null
+                ? null
+                : () => c.isWindowMode
+                      ? c.selectWindowSection('capture')
+                      : c.show('note'),
             icon: const Icon(Icons.add_rounded, size: 18),
             label: Text(l.emptyLibraryWrite),
           ),
           const SizedBox(height: 8),
           OutlinedButton.icon(
-            onPressed: c == null ? null : () => c.show('more'),
+            onPressed: c == null
+                ? null
+                : () => c.isWindowMode
+                      ? c.selectWindowSection('tools')
+                      : c.show('more'),
             icon: const Icon(Icons.widgets_outlined, size: 18),
             label: Text(l.emptyLibraryTools),
           ),

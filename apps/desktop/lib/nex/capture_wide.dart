@@ -44,6 +44,52 @@ mixin CaptureWide on CaptureViewBase {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
+                        Padding(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
+                            18,
+                            14,
+                            12,
+                            0,
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                f.checklist
+                                    ? Icons.checklist_rounded
+                                    : Icons.edit_note_rounded,
+                                size: 19,
+                                color: scheme.primary,
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  f.checklist ? l.checklist : l.workspaceCreate,
+                                  style: theme.textTheme.titleSmall?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                              Tooltip(
+                                message: f.error != null
+                                    ? l.failed
+                                    : f.saving
+                                    ? l.saving
+                                    : l.savedLocally,
+                                child: Icon(
+                                  f.error != null
+                                      ? Icons.error_outline_rounded
+                                      : f.saving
+                                      ? Icons.more_horiz_rounded
+                                      : Icons.check_circle_outline_rounded,
+                                  size: 17,
+                                  color: f.error != null
+                                      ? scheme.error
+                                      : scheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                         CallbackShortcuts(
                           bindings: {
                             const SingleActivator(
@@ -60,8 +106,8 @@ mixin CaptureWide on CaptureViewBase {
                               controller: f.composer,
                               focusNode: f.focus,
                               autofocus: true,
-                              minLines: 5,
-                              maxLines: small ? 9 : 14,
+                              minLines: 6,
+                              maxLines: small ? 12 : 16,
                               textAlignVertical: TextAlignVertical.top,
                               textDirection: nexDirectionOf(f.composer.text),
                               keyboardType: TextInputType.multiline,
@@ -102,7 +148,7 @@ mixin CaptureWide on CaptureViewBase {
                                 children: [
                                   Switch(
                                     value: f.checklist,
-                                    onChanged: f.session.id == null
+                                    onChanged: f.session.id == null && !f.saving
                                         ? (v) {
                                             f.checklist = v;
                                             f.notify();
@@ -134,9 +180,7 @@ mixin CaptureWide on CaptureViewBase {
                                                   ? 0
                                                   : text
                                                         .trim()
-                                                        .split(
-                                                          RegExp(r'\s+'),
-                                                        )
+                                                        .split(RegExp(r'\s+'))
                                                         .length,
                                               text.length,
                                             ),
@@ -150,8 +194,7 @@ mixin CaptureWide on CaptureViewBase {
                                           overflow: TextOverflow.ellipsis,
                                           style: theme.textTheme.labelSmall
                                               ?.copyWith(
-                                                color:
-                                                    scheme.onSurfaceVariant,
+                                                color: scheme.onSurfaceVariant,
                                               ),
                                         );
                                       },
@@ -161,17 +204,21 @@ mixin CaptureWide on CaptureViewBase {
                                   if (cramped)
                                     IconButton(
                                       tooltip: l.newNote,
-                                      onPressed: () => f.fresh(),
+                                      onPressed: f.startingNewNote
+                                          ? null
+                                          : () => f.fresh(),
                                       icon: const Icon(Icons.add, size: 17),
                                       visualDensity: VisualDensity.compact,
                                     )
                                   else
-                                    TextButton.icon(
-                                      onPressed: () => f.fresh(),
+                                    FilledButton.icon(
+                                      onPressed: f.startingNewNote
+                                          ? null
+                                          : () => f.fresh(),
                                       icon: const Icon(Icons.add, size: 15),
                                       label: Text(l.newNote),
-                                      style: TextButton.styleFrom(
-                                        visualDensity: VisualDensity.compact,
+                                      style: FilledButton.styleFrom(
+                                        visualDensity: VisualDensity.standard,
                                         padding: const EdgeInsets.symmetric(
                                           horizontal: 8,
                                         ),
@@ -212,9 +259,22 @@ mixin CaptureWide on CaptureViewBase {
                   if (f.error != null)
                     Padding(
                       padding: const EdgeInsets.only(top: 8),
-                      child: Text(
-                        '${l.failed}: ${f.error}',
-                        style: TextStyle(color: scheme.error, fontSize: 12),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              '${l.failed}: ${f.error}',
+                              style: TextStyle(
+                                color: scheme.error,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () => f.write(f.composer.text),
+                            child: Text(l.retry),
+                          ),
+                        ],
                       ),
                     ),
                   if (!embedded) const SizedBox(height: 16),
@@ -261,15 +321,15 @@ class _CaptureAction extends StatelessWidget {
               label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
             ),
             style: OutlinedButton.styleFrom(
               foregroundColor: scheme.onSurface,
               backgroundColor: scheme.surfaceContainerLowest,
               side: BorderSide(color: scheme.outlineVariant),
               alignment: AlignmentDirectional.centerStart,
-              visualDensity: VisualDensity.compact,
-              minimumSize: const Size(0, 36),
+              visualDensity: VisualDensity.standard,
+              minimumSize: const Size(0, 44),
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
             ),
           ),

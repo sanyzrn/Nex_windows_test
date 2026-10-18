@@ -311,25 +311,42 @@ abstract class _LibraryStateBase extends State<NexLibraryView> {
                         // the frame path for a value nobody reads mid-drag.
                         setState(() => _paneWidth = newWidth);
                       },
-                      onHorizontalDragEnd: (_) =>
-                          _persistPaneWidth(_paneWidth),
+                      onHorizontalDragEnd: (_) => _persistPaneWidth(_paneWidth),
                       child: const _SplitterHandle(),
                     ),
                   ),
                   // Right pane: reader or editor
                   Expanded(
-                    child: selectedNote != null
-                        ? NexNoteDetail(
-                            key: ValueKey(selectedNote!.id),
-                            note: selectedNote!,
-                            onClose: () {
-                              _detailRelease?.call();
-                              _detailRelease = null;
-                              setState(() => selectedNote = null);
-                              load();
-                            },
-                          )
-                        : const _LibraryReaderEmpty(),
+                    child: Container(
+                      margin: const EdgeInsetsDirectional.fromSTEB(
+                        8,
+                        16,
+                        16,
+                        16,
+                      ),
+                      clipBehavior: Clip.antiAlias,
+                      decoration: BoxDecoration(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.surfaceContainerLowest,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: Theme.of(context).colorScheme.outlineVariant,
+                        ),
+                      ),
+                      child: selectedNote != null
+                          ? NexNoteDetail(
+                              key: ValueKey(selectedNote!.id),
+                              note: selectedNote!,
+                              onClose: () {
+                                _detailRelease?.call();
+                                _detailRelease = null;
+                                setState(() => selectedNote = null);
+                                load();
+                              },
+                            )
+                          : const _LibraryReaderEmpty(),
+                    ),
                   ),
                 ],
               ),

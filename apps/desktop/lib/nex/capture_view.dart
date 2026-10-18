@@ -136,7 +136,7 @@ abstract class CaptureViewBase extends StatelessWidget {
             children: [
               Checkbox(
                 value: f.checklist,
-                onChanged: f.session.id == null
+                onChanged: f.session.id == null && !f.saving
                     ? (v) {
                         f.checklist = v!;
                         f.notify();
@@ -298,9 +298,11 @@ abstract class CaptureViewBase extends StatelessWidget {
     final clip = await Clipboard.getData(Clipboard.kTextPlain);
     if (clip?.text?.isNotEmpty != true) return;
     final trimmed = clip!.text!.trim();
-    await f.fresh();
+    if (!await f.fresh()) return;
     if (_bareUrl.hasMatch(trimmed)) {
-      f.write(trimmed);
+      // A quick-pasted link is an independent capture. Keeping its ID in an
+      // empty composer made the next typed thought overwrite that link.
+      await f.store.call<dynamic>('capture', {'text': trimmed});
       return;
     }
     f.composer.text = clip.text!;

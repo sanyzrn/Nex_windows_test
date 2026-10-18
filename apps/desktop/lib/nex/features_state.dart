@@ -28,6 +28,9 @@ class NexFeatures extends ChangeNotifier {
   final composer = TextEditingController();
   final focus = FocusNode();
   bool checklist = false;
+  Future<bool>? _freshTask;
+  bool get startingNewNote => _freshTask != null;
+  int _writeRevision = 0;
   int _saving = 0;
   bool get saving => _saving > 0;
   String? error;
@@ -95,6 +98,7 @@ class NexFeatures extends ChangeNotifier {
   void write(String text) {
     // No debounce. Session owns the FIFO, so disposing a panel loses nothing.
     _saving++;
+    _writeRevision++;
     notify();
     unawaited(
       guard(() => session.write(text, checklist: checklist)).whenComplete(() {
@@ -104,22 +108,69 @@ class NexFeatures extends ChangeNotifier {
     );
   }
 
-  Future<void> fresh() async {
-    // A failed write on the previous session must not break the next one;
-    // drain and move on with a visible error instead of an async crash.
+  Future<bool> fresh({bool? asChecklist}) {
+    if (_freshTask != null) return _freshTask!;
+    final task = _startFresh(asChecklist);
+    _freshTask = task;
+    notify();
+    return task.whenComplete(() {
+      _freshTask = null;
+      notify();
+    });
+  }
+
+  Future<bool> _startFresh(bool? asChecklist) async {
+    // A flush is a snapshot of the FIFO. Drain again if input arrived while
+    // waiting, and never erase the recoverable text after a failed write.
     try {
-      await session.flushed;
+      int revision;
+      do {
+        revision = _writeRevision;
+        await session.flushed;
+      } while (revision != _writeRevision);
     } catch (e) {
       error = e.toString();
+      notify();
+      return false;
     }
     session = CaptureSession(store);
+    if (asChecklist != null) checklist = asChecklist;
     composer.clear();
+    error = null;
     notifyListeners();
     // The hotkey can arrive before the capture field's first layout. Opening
     // its input connection sooner reads an unlaid-out RenderEditable.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (focus.context != null) focus.requestFocus();
     });
+    return true;
+  }
+
+  /// A restore replaces the library, so the old capture ID must never be
+  /// reused against that replacement. Reset only after a successful restore.
+  Future<Map<String, dynamic>?> restoreBackup(String file, String? key) async {
+    await session.flushed;
+    if (recordingAt != null || recordingBusy || importing) {
+      throw StateError('Finish recording or importing before restoring');
+    }
+    final restored = await store.call<Map<String, dynamic>?>('restoreBackup', {
+      'file': file,
+      'key': key,
+    });
+    session = CaptureSession(store);
+    composer.clear();
+    importedCount = 0;
+    libraryRevision++;
+    notify();
+    return restored;
+  }
+
+  void reflectReaderEdit(Note note) {
+    if (session.id != note.id) return;
+    final text = note.type == NoteType.checklist
+        ? parseChecklist(note.content ?? '').map((item) => item.text).join('\n')
+        : note.content ?? '';
+    if (composer.text != text) composer.text = text;
   }
 
   Future<void> importPaths(

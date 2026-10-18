@@ -368,24 +368,8 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
                           ],
                         ),
                       ),
-                    AnimatedContainer(
-                      duration: const Duration(milliseconds: 180),
-                      curve: Curves.easeOutCubic,
-                      decoration: BoxDecoration(
-                        // The card body inside is NexRadius.lg; the selection
-                        // ring used to be 16, so a selected card's outline
-                        // visibly cut across its own corners.
-                        borderRadius: BorderRadius.circular(NexRadius.lg),
-                        color: isCardSelected && _selectedIds.isEmpty
-                            ? scheme.primary.withValues(alpha: 0.07)
-                            : Colors.transparent,
-                        border: Border.all(
-                          color: isCardSelected && _selectedIds.isEmpty
-                              ? scheme.primary.withValues(alpha: 0.35)
-                              : Colors.transparent,
-                          width: 1.5,
-                        ),
-                      ),
+                    Padding(
+                      padding: EdgeInsets.zero,
                       child: GestureDetector(
                         onSecondaryTapDown: trash
                             ? null
@@ -394,6 +378,7 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
                                 note,
                               ),
                         child: NoteCard(
+                          active: isCardSelected && _selectedIds.isEmpty,
                           note: trash
                               ? note.copyWith(clearPinnedAt: true)
                               : note,

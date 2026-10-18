@@ -1065,14 +1065,15 @@ class AppLocalizationsEn extends AppLocalizations {
       'A thought, a list, a little reminder. Start typing; Nex keeps it.';
 
   @override
-  String get workspaceCaptureFooter => 'No save button. Just your thoughts.';
+  String get workspaceCaptureFooter =>
+      'Saved on this device. Always within reach.';
 
   @override
-  String get workspaceToolsTitle => 'Small tools.\nLess friction.';
+  String get workspaceToolsTitle => 'Your everyday toolkit';
 
   @override
   String get workspaceToolsDescription =>
-      'The useful things, a little closer. Built for your desktop.';
+      'Useful desktop tools, all in one place.';
 
   @override
   String get workspaceEssentials => 'Within reach';
@@ -1129,7 +1130,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get workspaceNotebook => 'Your notebook';
 
   @override
-  String get workspaceRecent => 'Recent notes';
+  String get workspaceRecent => 'Recently updated';
 
   @override
   String get workspacePinned => 'Pinned';
@@ -1196,4 +1197,31 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get closeWindow => 'Close window';
+
+  @override
+  String get workspaceFocus => 'Focus timer';
+
+  @override
+  String get workspaceCalculate => 'Calculator';
+
+  @override
+  String get workspaceCreate => 'New note';
+
+  @override
+  String get workspaceToolsWork => 'Write & create';
+
+  @override
+  String get workspaceToolsTime => 'Time & focus';
+
+  @override
+  String get workspaceToolsSystem => 'Desktop & utilities';
+
+  @override
+  String get retry => 'Try again';
+
+  @override
+  String get workspaceLoading => 'Loading your notes…';
+
+  @override
+  String get workspaceClipboard => 'Clipboard';
 }

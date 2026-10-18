@@ -87,6 +87,7 @@ class NoteCard extends StatelessWidget {
     this.showDue = true,
     this.expanded = false,
     this.selected,
+    this.active = false,
   });
   final Note note;
   final VoidCallback? onTap;
@@ -120,6 +121,9 @@ class NoteCard extends StatelessWidget {
   /// accent.
   final bool? selected;
 
+  /// The note open in a desktop reader, without a multi-select checkbox.
+  final bool active;
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -137,7 +141,7 @@ class NoteCard extends StatelessWidget {
             : BoxConstraints.tightFor(height: nexCardHeightFor(context)),
         child: Semantics(
           button: onTap != null,
-          selected: selected,
+          selected: selected ?? (active ? true : null),
           label: _label(),
           // Not `excludeSemantics`. That collapsed the whole card into one
           // string, so a screen-reader user could not reach the date, an
@@ -152,6 +156,7 @@ class NoteCard extends StatelessWidget {
             showDue: showDue,
             expanded: expanded,
             selected: selected,
+            active: active,
             onChecklistToggle: onChecklistToggle,
           ),
         ),
@@ -183,6 +188,7 @@ class _CardBody extends StatelessWidget {
     required this.showDue,
     required this.expanded,
     required this.selected,
+    required this.active,
     required this.onChecklistToggle,
   });
 
@@ -194,11 +200,12 @@ class _CardBody extends StatelessWidget {
   final bool showDue;
   final bool expanded;
   final bool? selected;
+  final bool active;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final picked = selected ?? false;
+    final picked = (selected ?? false) || active;
     return Material(
       // The card's own fill, not the page's. They used to be the same
       // colour, which left a 1.2:1 hairline as the only thing marking the
@@ -550,9 +557,7 @@ class _ChecklistPreview extends StatelessWidget {
     // index — the second line's checkbox toggled the first line's item, and
     // no number of clicks could ever tick the second one. Carrying the
     // original index alongside the item is what keeps them apart.
-    final indexed = [
-      for (var i = 0; i < items.length; i++) (i, items[i]),
-    ];
+    final indexed = [for (var i = 0; i < items.length; i++) (i, items[i])];
     final ordered = [
       ...indexed.where((entry) => !entry.$2.done),
       ...indexed.where((entry) => entry.$2.done),
@@ -572,9 +577,7 @@ class _ChecklistPreview extends StatelessWidget {
           for (var i = 0; i < shown.length; i++)
             _ChecklistLine(
               item: shown[i].$2,
-              onToggle: onToggle == null
-                  ? null
-                  : () => onToggle!(shown[i].$1),
+              onToggle: onToggle == null ? null : () => onToggle!(shown[i].$1),
               // The last visible line carries the overflow count, so the
               // card never grows a third row to say "+3 more". Compared by
               // position, not by equality — a duplicate of the last line

@@ -40,6 +40,15 @@ mixin _LibraryKeys on _LibraryStateBase {
       return KeyEventResult.handled;
     }
 
+    // Text editing owns arrows, Delete, copy and undo. The library's parent
+    // Focus must never turn an unhandled editor key into a note mutation.
+    final focused = FocusManager.instance.primaryFocus?.context;
+    if (focused != null &&
+        (focused.widget is EditableText ||
+            focused.findAncestorWidgetOfExactType<EditableText>() != null)) {
+      return KeyEventResult.ignored;
+    }
+
     if (isCtrl && event.logicalKey == LogicalKeyboardKey.keyZ) {
       _undoLastDelete();
       return KeyEventResult.handled;

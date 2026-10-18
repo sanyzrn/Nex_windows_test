@@ -183,10 +183,6 @@ class NexWorkspaceDestination extends StatelessWidget {
                         ),
                       ),
                     ),
-                    if (shortcut != null) ...[
-                      const SizedBox(width: 4),
-                      NexShortcutHint(shortcut!),
-                    ],
                   ],
                 ),
         ),

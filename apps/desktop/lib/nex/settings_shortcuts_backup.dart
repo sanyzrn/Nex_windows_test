@@ -129,6 +129,7 @@ mixin _SettingsShortcutsBackup on _SettingsStateBase {
                             );
                             if (path == null) return;
                             await f.guard(() async {
+                              await f.session.flushed;
                               final recovery = await f.store.call<String>(
                                 'fullBackup',
                                 {'output': path.path, 'settings': c.S.toMap()},
@@ -227,15 +228,34 @@ mixin _SettingsShortcutsBackup on _SettingsStateBase {
 
                             final messenger = ScaffoldMessenger.of(context);
                             await f.guard(() async {
-                              final restoredSettings = await f.store
-                                  .call<Map<String, dynamic>?>(
-                                    'restoreBackup',
-                                    {'file': file.path, 'key': enteredKey},
-                                  );
+                              final restoredSettings = await f.restoreBackup(
+                                file.path,
+                                enteredKey,
+                              );
                               if (restoredSettings != null) {
-                                c.S = Settings.fromMap(restoredSettings);
+                                final restored = Settings.fromMap(
+                                  restoredSettings,
+                                );
+                                final mode = restored.windowMode;
+                                final oldHotkey = c.S.hotkey;
+                                restored.windowMode = c.S.windowMode;
+                                if (!await c.native.configureHotkey(
+                                  restored.hotkey,
+                                )) {
+                                  restored.hotkey = oldHotkey;
+                                  c.toast(l.hotkeyInUse);
+                                }
+                                await c.native.setStartup(restored.startup);
+                                restored.startup = await c.native
+                                    .startupEnabled();
+                                c.S = restored;
+                                c.normalize();
                                 c.save();
                                 c.refresh();
+                                await c.setWindowMode(mode);
+                                if (!c.isWindowMode) {
+                                  await c.applyPlacement(c.S.edge, c.S.monitor);
+                                }
                               }
                               if (mounted) {
                                 messenger.showSnackBar(

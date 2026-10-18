@@ -86,11 +86,12 @@ class _NexWindowShellState extends State<NexWindowShell> {
       if (MediaQuery.highContrastOf(context)) return surface;
       return NexTextureBackdrop(
         texture: NexThemeTexture.waves,
-        extent: 0.62,
-        alpha: 0.05,
+        extent: 0.4,
+        alpha: 0.018,
         child: surface,
       );
     }
+
     return Scaffold(
       // transparentScaffold is for the floating edge panel; the desktop
       // window must paint an opaque surface.
@@ -136,8 +137,7 @@ class _NexWindowShellState extends State<NexWindowShell> {
               if (isCtrl && event.logicalKey == LogicalKeyboardKey.keyN) {
                 c.selectWindowSection('capture');
                 if (widget.features != null) {
-                  widget.features!.checklist = isShift;
-                  unawaited(widget.features!.fresh());
+                  unawaited(widget.features!.fresh(asChecklist: isShift));
                 }
                 return KeyEventResult.handled;
               }

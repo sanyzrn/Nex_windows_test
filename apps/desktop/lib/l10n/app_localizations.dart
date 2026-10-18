@@ -2111,19 +2111,19 @@ abstract class AppLocalizations {
   /// No description provided for @workspaceCaptureFooter.
   ///
   /// In en, this message translates to:
-  /// **'No save button. Just your thoughts.'**
+  /// **'Saved on this device. Always within reach.'**
   String get workspaceCaptureFooter;
 
   /// No description provided for @workspaceToolsTitle.
   ///
   /// In en, this message translates to:
-  /// **'Small tools.\nLess friction.'**
+  /// **'Your everyday toolkit'**
   String get workspaceToolsTitle;
 
   /// No description provided for @workspaceToolsDescription.
   ///
   /// In en, this message translates to:
-  /// **'The useful things, a little closer. Built for your desktop.'**
+  /// **'Useful desktop tools, all in one place.'**
   String get workspaceToolsDescription;
 
   /// No description provided for @workspaceEssentials.
@@ -2231,7 +2231,7 @@ abstract class AppLocalizations {
   /// No description provided for @workspaceRecent.
   ///
   /// In en, this message translates to:
-  /// **'Recent notes'**
+  /// **'Recently updated'**
   String get workspaceRecent;
 
   /// No description provided for @workspacePinned.
@@ -2359,6 +2359,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Close window'**
   String get closeWindow;
+
+  /// No description provided for @workspaceFocus.
+  ///
+  /// In en, this message translates to:
+  /// **'Focus timer'**
+  String get workspaceFocus;
+
+  /// No description provided for @workspaceCalculate.
+  ///
+  /// In en, this message translates to:
+  /// **'Calculator'**
+  String get workspaceCalculate;
+
+  /// No description provided for @workspaceCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'New note'**
+  String get workspaceCreate;
+
+  /// No description provided for @workspaceToolsWork.
+  ///
+  /// In en, this message translates to:
+  /// **'Write & create'**
+  String get workspaceToolsWork;
+
+  /// No description provided for @workspaceToolsTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Time & focus'**
+  String get workspaceToolsTime;
+
+  /// No description provided for @workspaceToolsSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'Desktop & utilities'**
+  String get workspaceToolsSystem;
+
+  /// No description provided for @retry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get retry;
+
+  /// No description provided for @workspaceLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading your notes…'**
+  String get workspaceLoading;
+
+  /// No description provided for @workspaceClipboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Clipboard'**
+  String get workspaceClipboard;
 }
 
 class _AppLocalizationsDelegate
