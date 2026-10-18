@@ -10,6 +10,7 @@ import 'package:sqlite3/sqlite3.dart';
 
 import '../schema/backup_archive.dart';
 import '../schema/database.dart';
+import 'attachment_repository.dart';
 import '../schema/write_lock.dart';
 import '../search/vector_index.dart';
 import '../schema/zip_file_writer.dart';
@@ -129,8 +130,17 @@ class SqliteNoteRepository implements NoteRepository {
         return note;
       }
       final capture = CaptureService(this, deviceId: localDeviceId!);
-      final Note? note = switch (payload['type']) {
-        'shared_text' => capture.submitTextCapture(payload['text'] ?? ''),
+      var note = switch (payload['type']) {
+        // A browser shares a page as text. A share that is a link is
+        // captured as a link note, with any words around it as its caption.
+        // Not a recovered draft (`draft-`), which is text the person typed
+        // into a text note and stays one.
+        'shared_text' => switch (requestId.startsWith('draft-')
+            ? null
+            : sharedLink(payload['text'] ?? '')) {
+          final link? => _sharedLinkNote(capture, link.url, link.words),
+          null => capture.submitTextCapture(payload['text'] ?? ''),
+        },
         'shared_photo' => capture.submitPhotoCapture(
           mediaUri: payload['mediaUri']!,
           mediaHash: payload['mediaHash']!,
@@ -143,6 +153,17 @@ class SqliteNoteRepository implements NoteRepository {
         ),
         _ => throw ArgumentError('Unsupported shared capture'),
       };
+      // The words another app sent with the file — Telegram's or WhatsApp's
+      // caption under a video or a photo — are the note's caption, in the
+      // same transaction, so the note never exists without them.
+      final words = payload['caption']?.trim();
+      if (note != null &&
+          words != null &&
+          words.isNotEmpty &&
+          payload['type'] != 'shared_text') {
+        setCaption(note.id, words);
+        note = getById(note.id);
+      }
       if (note == null) {
         if (requestId.startsWith('draft-')) {
           db.execute('COMMIT');
@@ -160,6 +181,25 @@ class SqliteNoteRepository implements NoteRepository {
       db.execute('ROLLBACK');
       rethrow;
     }
+  }
+
+  /// The note a share request already became, or null when it has not
+  /// committed. A capture whose answer was lost — the window closed, a step
+  /// after the commit failed — is a saved capture, not a failed one.
+  Note? capturedFor(String requestId) {
+    final receipt = db.select(
+      'SELECT note_id FROM capture_receipts WHERE request_id = ?',
+      [requestId],
+    );
+    if (receipt.isEmpty) return null;
+    return getById(receipt.first['note_id'] as String);
+  }
+
+  Note? _sharedLinkNote(CaptureService capture, String url, String? words) {
+    final note = capture.submitLinkCapture(url);
+    if (note == null || words == null) return note;
+    setCaption(note.id, words);
+    return getById(note.id);
   }
 
   @override
@@ -245,7 +285,7 @@ WHERE id = ? AND deleted_at IS NULL
 """,
         [
           toFile ? 'file' : 'text',
-          toFile ? 'note.md' : text,
+          toFile ? markdownFileNameFor(text) : text,
           uri,
           hash,
           toFile ? 'text/markdown' : null,
@@ -417,7 +457,11 @@ WHERE id = ?
       [id],
     );
     if (rows.isEmpty) return null;
-    return Note.fromRow(rows.first, tags: tagsForNote(id));
+    return Note.fromRow(
+      rows.first,
+      tags: tagsForNote(id),
+      attachmentCount: attachmentCounts([id])[id] ?? 0,
+    );
   }
 
   /// Timeline page, most recently touched first (FR-2.2 / FR-2.5).
@@ -489,11 +533,38 @@ LIMIT ? OFFSET ?
   /// note (PERF-06). The batch keeps each note's tags in the same order
   /// [tagsForNote] gives them.
   List<Note> _withTags(ResultSet rows) {
-    final tags = tagsForNotes([for (final r in rows) r['id']! as String]);
+    final ids = [for (final r in rows) r['id']! as String];
+    final tags = tagsForNotes(ids);
+    final attached = attachmentCounts(ids);
     return [
       for (final r in rows)
-        Note.fromRow(r, tags: tags[r['id']! as String] ?? const []),
+        Note.fromRow(
+          r,
+          tags: tags[r['id']! as String] ?? const [],
+          attachmentCount: attached[r['id']! as String] ?? 0,
+        ),
     ];
+  }
+
+  /// How many live attachments each of [noteIds] has, in one query per 500.
+  /// Notes with none are left out.
+  Map<String, int> attachmentCounts(List<String> noteIds) {
+    final out = <String, int>{};
+    for (var at = 0; at < noteIds.length; at += 500) {
+      final chunk = noteIds.sublist(
+        at,
+        at + 500 > noteIds.length ? noteIds.length : at + 500,
+      );
+      final placeholders = List.filled(chunk.length, '?').join(',');
+      for (final row in db.select('''
+SELECT note_id, COUNT(*) AS n FROM note_attachments
+WHERE deleted_at IS NULL AND note_id IN ($placeholders)
+GROUP BY note_id
+''', chunk)) {
+        out[row['note_id']! as String] = row['n']! as int;
+      }
+    }
+    return out;
   }
 
   /// The tags of every note in [noteIds], in one query rather than one each.
@@ -991,6 +1062,37 @@ WHERE id = ?
     ]);
   }
 
+  /// Appends explicitly accepted AI output using the current stored caption.
+  /// Reading and writing together prevents a concurrent edit being overwritten.
+  bool appendCaption(String noteId, String text) => db.together(() {
+    final note = getById(noteId);
+    final addition = text.trim();
+    if (note == null || addition.isEmpty) return false;
+    final before = note.caption?.trim() ?? '';
+    if (before == addition || before.endsWith('\n\n$addition')) return true;
+    setCaption(noteId, before.isEmpty ? addition : '$before\n\n$addition');
+    return true;
+  });
+
+  /// Replaces only the caption the person actually approved replacing.
+  /// The comparison and write share a transaction, so a later edit is kept.
+  bool replaceCaption(
+    String noteId,
+    String text, {
+    required String? expectedCaption,
+  }) => db.together(() {
+    final note = getById(noteId);
+    final replacement = text.trim();
+    if (note == null ||
+        replacement.isEmpty ||
+        note.caption != expectedCaption) {
+      return false;
+    }
+    if (note.caption == replacement) return true;
+    setCaption(noteId, replacement);
+    return true;
+  });
+
   /// Optional post-capture caption on photo/voice/file (distinct from OCR/transcript).
   void setCaption(String noteId, String? caption) {
     db.together(() {
@@ -1081,13 +1183,41 @@ WHERE id = ? AND deleted_at IS NULL
   /// Re-derives this note's search row from whatever it now holds.
   void _reindex(String noteId) {
     final note = getById(noteId);
-    final searchable = note?.searchableDerivedText;
-    if (searchable != null && searchable.isNotEmpty) {
+    // A word in the third photo finds the note: each attachment's caption,
+    // OCR and transcript ride on the note's own row (docs/14-attachments.md).
+    final searchable = [
+      note?.searchableDerivedText,
+      if (note != null) _attachmentSearchText(noteId),
+    ].whereType<String>().where((s) => s.isNotEmpty).join('\n');
+    if (note != null && searchable.isNotEmpty) {
       _upsertFts(noteId, searchable);
     } else {
       db.execute('DELETE FROM notes_fts WHERE note_id = ?', [noteId]);
     }
   }
+
+  String _attachmentSearchText(String noteId) => [
+    for (final row in db.select(
+      'SELECT caption, ocr_text, transcript_text FROM note_attachments '
+      'WHERE note_id = ? AND deleted_at IS NULL ORDER BY position',
+      [noteId],
+    ))
+      for (final key in const ['caption', 'ocr_text', 'transcript_text'])
+        if (row[key] case final String text when text.trim().isNotEmpty) text,
+  ].join('\n');
+
+  /// For [SqliteAttachmentRepository]: a note's attachments changed, so its
+  /// search row is re-derived and it is marked as edited, for sync and for
+  /// "edited" order.
+  void attachmentsChanged(String noteId) {
+    _bumpNote(noteId);
+    _reindex(noteId);
+  }
+
+  /// An attachment's derived words arrived — text read in a photo. Search
+  /// learns them; the note is not edited, any more than its own text being
+  /// read edits it.
+  void attachmentTextRead(String noteId) => _reindex(noteId);
 
   /// Repairs the search index's *membership*: FTS rows for notes that are
   /// gone (purged, deleted) are removed, and live notes with searchable text
@@ -1099,32 +1229,59 @@ WHERE id = ? AND deleted_at IS NULL
   /// queries return nothing and the cost is two set lookups; on a damaged
   /// one it is the difference between a note that is findable and one that
   /// silently is not until the next time it is edited.
+  static const searchTextVersion = 1;
+
+  /// Synchronous entry point for maintenance/tests.
   void repairSearchIndex() {
-    // Stale rows: the note row is gone, or it is in the trash. Search never
-    // reads past `deleted_at IS NULL`, but a trashed note's row would come
-    // back wrong on restore if this list were allowed to stand in for one.
+    for (final _ in _repairSearchIndexSteps()) {}
+  }
+
+  /// Startup repair yields between transactions so large libraries don't
+  /// monopolize the database isolate. The version is committed only at the end.
+  Future<void> repairSearchIndexInBatches() async {
+    for (final _ in _repairSearchIndexSteps()) {
+      await Future<void>.delayed(Duration.zero);
+    }
+  }
+
+  Iterable<int> _repairSearchIndexSteps() sync* {
     db.execute('''
-DELETE FROM notes_fts
-WHERE note_id IN (
-  SELECT f.note_id FROM notes_fts f
-  LEFT JOIN notes n ON n.id = f.note_id AND n.deleted_at IS NULL
-  WHERE n.id IS NULL
+DELETE FROM notes_fts WHERE note_id IN (
+ SELECT f.note_id FROM notes_fts f LEFT JOIN notes n
+ ON n.id = f.note_id AND n.deleted_at IS NULL WHERE n.id IS NULL
 )
 ''');
-
-    // Missing rows: re-derive in Dart, where the same [Note.searchableDerivedText]
-    // every writer uses decides what belongs in the index. Notes with nothing
-    // searchable (a photo with no caption or OCR yet) correctly stay out.
-    final missing = db
-        .select('''
-SELECT id FROM notes
-WHERE deleted_at IS NULL
-  AND id NOT IN (SELECT note_id FROM notes_fts)
-''')
-        .map((row) => row['id']! as String)
-        .toList();
-    for (final id in missing) {
-      _reindex(id);
+    final version = db.select(
+      "SELECT value FROM nex_meta WHERE key = 'search_text_version'",
+    );
+    final rebuild =
+        version.isEmpty ||
+        (int.tryParse('${version.first['value']}') ?? 0) < searchTextVersion;
+    var cursor = '';
+    while (true) {
+      final ids = db
+          .select(
+            'SELECT id FROM notes WHERE deleted_at IS NULL AND id > ? '
+            "${rebuild ? '' : 'AND id NOT IN (SELECT note_id FROM notes_fts) '}"
+            'ORDER BY id LIMIT 200',
+            [cursor],
+          )
+          .map((row) => row['id']! as String)
+          .toList();
+      if (ids.isEmpty) break;
+      db.together(() {
+        for (final id in ids) {
+          _reindex(id);
+        }
+      });
+      cursor = ids.last;
+      yield ids.length;
+    }
+    if (rebuild) {
+      db.execute(
+        "INSERT OR REPLACE INTO nex_meta (key, value) VALUES ('search_text_version', ?)",
+        ['$searchTextVersion'],
+      );
     }
   }
 
@@ -1188,6 +1345,10 @@ ON CONFLICT(note_id) DO UPDATE SET
   }
 
   /// Drops one note's vector, and keeps the index in step.
+  /// Drops [noteId]'s vector, so the next backfill embeds it again — for a
+  /// change to what the note means that is not an edit of its words.
+  void forgetEmbedding(String noteId) => _forgetEmbedding(noteId);
+
   void _forgetEmbedding(String noteId) {
     db.execute('DELETE FROM note_embeddings WHERE note_id = ?', [noteId]);
     final index = _vectors;
@@ -1231,21 +1392,61 @@ ON CONFLICT(note_id) DO UPDATE SET
   /// candidates is far more than that can reorder past.
   static const _vectorCandidates = 200;
 
+  /// How far above the usual floor a plain match has to be to be shown when
+  /// nothing stands out, and how many such matches at most.
+  static const strongMargin = 0.1;
+  static const strongFallback = 3;
+
   @override
   List<({String noteId, double score})> nearestEmbeddings(
     List<double> query, {
     int limit = 20,
     double minScore = 0,
     String? excludeNoteId,
+    bool standout = false,
   }) {
     final unit = VectorCodec.unit(query);
     if (unit == null || limit <= 0) return const [];
     final index = _freshVectors();
     if (index == null || index.dims != unit.length) return const [];
+    final exclude = excludeNoteId == null ? null : {excludeNoteId};
+    if (standout && index.length >= VectorIndex.standoutMinRows) {
+      final standing = _standoutEmbeddings(
+        index,
+        unit,
+        limit,
+        minScore,
+        exclude,
+      );
+      if (standing.isNotEmpty) return standing;
+      // Nothing stood out — and after 1.99.82 that was, on the owner's
+      // phone, every search: meaning search went silent. A note that is
+      // plainly close is still a match: held to a higher floor than usual,
+      // which the generic notes the standout test is for sit just under,
+      // and only the closest few.
+      return _plainEmbeddings(
+        index,
+        unit,
+        limit < strongFallback ? limit : strongFallback,
+        minScore + strongMargin,
+        exclude,
+      );
+    }
+    return _plainEmbeddings(index, unit, limit, minScore, exclude);
+  }
+
+  /// The nearest by plain similarity, at least [minScore], best first.
+  List<({String noteId, double score})> _plainEmbeddings(
+    VectorIndex index,
+    Float32List unit,
+    int limit,
+    double minScore,
+    Set<String>? exclude,
+  ) {
     final candidates = index.nearest(
       unit,
       limit > _vectorCandidates ? limit : _vectorCandidates,
-      exclude: excludeNoteId == null ? null : {excludeNoteId},
+      exclude: exclude,
     );
     if (candidates.isEmpty) return const [];
     final placeholders = List.filled(candidates.length, '?').join(',');
@@ -1270,6 +1471,43 @@ WHERE n.deleted_at IS NULL AND e.note_id IN ($placeholders)
     }
     scored.sort((a, b) => b.score.compareTo(a.score));
     return scored.length > limit ? scored.sublist(0, limit) : scored;
+  }
+
+  /// [nearestEmbeddings] for a search: the notes that stand out for the
+  /// query against the rest of the library ([VectorIndex.standout]), still
+  /// held to [minScore] by their plain similarity, best first.
+  List<({String noteId, double score})> _standoutEmbeddings(
+    VectorIndex index,
+    Float32List unit,
+    int limit,
+    double minScore,
+    Set<String>? exclude,
+  ) {
+    final picked = index.standout(unit, limit, exclude: exclude);
+    if (picked.isEmpty) return const [];
+    final placeholders = List.filled(picked.length, '?').join(',');
+    final plain = <String, double>{};
+    for (final row in db.select(
+      '''
+SELECT e.note_id, e.vec FROM note_embeddings e
+JOIN notes n ON n.id = e.note_id
+WHERE n.deleted_at IS NULL AND e.note_id IN ($placeholders)
+''',
+      [for (final p in picked) p.id],
+    )) {
+      final vec = VectorCodec.decode(row['vec']! as Uint8List);
+      if (vec.length != unit.length) continue;
+      var dot = 0.0;
+      for (var i = 0; i < vec.length; i++) {
+        dot += vec[i] * unit[i];
+      }
+      plain[row['note_id']! as String] = dot;
+    }
+    return [
+      for (final p in picked)
+        if ((plain[p.id] ?? double.negativeInfinity) >= minScore)
+          (noteId: p.id, score: p.score),
+    ];
   }
 
   /// Which model's vector space the stored embeddings belong to.
@@ -1378,7 +1616,10 @@ LIMIT ?
 SELECT n.* FROM notes n
 LEFT JOIN note_embeddings e ON e.note_id = n.id
 WHERE n.deleted_at IS NULL
-  AND e.note_id IS NULL
+  -- No vector yet, or one older than the note's last change (DATA-01): an
+  -- edit, a caption, a transcript or a title written since it was embedded
+  -- left the vector describing what the note used to say.
+  AND (e.note_id IS NULL OR e.updated_at < n.updated_at)
   AND (
     COALESCE(TRIM(n.content), '') <> ''
     OR COALESCE(TRIM(n.transcript_text), '') <> ''
@@ -1443,7 +1684,11 @@ LIMIT ?
 SELECT n.* FROM notes n
 WHERE ${where.join(' AND ')}
 ORDER BY n.created_at DESC, n.rowid DESC
-${unnarrowed ? 'LIMIT $rankedLimit' : ''}
+${filters.pageSize != null
+            ? 'LIMIT ${filters.pageSize!.clamp(1, 500)} OFFSET ${filters.offset < 0 ? 0 : filters.offset}'
+            : unnarrowed
+            ? 'LIMIT $rankedLimit'
+            : ''}
 ''';
     return _withTags(db.select(sql, args));
   }
@@ -1624,8 +1869,16 @@ LIMIT ?
     final partial = File('$outputPath.partial');
     final encoder = ZipFileEncoder()..create(partial.path);
     try {
+      final attachments = SqliteAttachmentRepository(
+        this,
+        localDeviceId: localDeviceId ?? 'export',
+      ).allLive();
       final jsonPayload = jsonEncode({
-        'version': 2,
+        // Version 3 (1.99.70): the files a note carries after its own
+        // (docs/14-attachments.md). An older build reads a v3 archive as it
+        // read v2: every note with its own file, and the attachments left
+        // out.
+        'version': 3,
         'exported_at': DateTime.now().toUtc().toIso8601String(),
         // Reminders ride on each note; [Note.toJson] leaves them out because
         // the sync wire does, and an archive is not the sync wire. The app
@@ -1648,6 +1901,11 @@ LIMIT ?
           'SELECT * FROM commitments WHERE deleted_at IS NULL',
         ),
         'threads': _rowsOf('SELECT * FROM threads WHERE deleted_at IS NULL'),
+        // Notes written now and held back until later (DATA-03): not in
+        // `notes` until they are released, so an export without them lost
+        // them on the way to a new phone.
+        'scheduled': _rowsOf('SELECT * FROM scheduled_notes'),
+        'attachments': [for (final a in attachments) a.toJson()],
         'note_threads': _rowsOf('''
 SELECT nt.* FROM note_threads nt
 JOIN notes n ON n.id = nt.note_id AND n.deleted_at IS NULL
@@ -1675,12 +1933,24 @@ JOIN threads t ON t.id = nt.thread_id AND t.deleted_at IS NULL
             // the archive looked complete and had one fewer photo in it.
             // On a collision the note's id goes in front, which is unique by
             // construction; the importer knows to look for both spellings.
-            final name = p.basename(note.mediaUri!);
+            final name = nexPortableBasename(note.mediaUri!);
             final firstUse = usedMediaNames.add(name);
             final entryName = firstUse ? name : '${note.id}-$name';
             addBoundedZipFile(encoder, src, 'media/$entryName');
           }
         }
+      }
+
+      // An attachment's file: under its own name when that is free, else
+      // with the attachment's id in front — the same rule as the notes'
+      // own files, and the importer looks for both spellings in that order.
+      for (final attachment in attachments) {
+        final src = File(attachment.mediaUri);
+        if (!src.existsSync()) continue;
+        final name = nexPortableBasename(attachment.mediaUri);
+        final firstUse = usedMediaNames.add(name);
+        final entryName = firstUse ? name : '${attachment.id}-$name';
+        addBoundedZipFile(encoder, src, 'media/$entryName');
       }
 
       encoder.closeSync();
@@ -1755,7 +2025,7 @@ JOIN threads t ON t.id = nt.thread_id AND t.deleted_at IS NULL
 
           String? mediaUri;
           if (note.mediaUri != null) {
-            final name = p.basename(note.mediaUri!);
+            final name = nexPortableBasename(note.mediaUri!);
             // The id-prefixed spelling first, and that order is the fix. The
             // exporter writes it *only* when the bare name was already taken by
             // another note — so a note that has an id-prefixed entry is exactly
@@ -1830,6 +2100,7 @@ JOIN threads t ON t.id = nt.thread_id AND t.deleted_at IS NULL
         // a row whose id is already here is left as it is.
         _insertRowsIfAbsent('commitments', payload['commitments']);
         _insertRowsIfAbsent('threads', payload['threads']);
+        _insertRowsIfAbsent('scheduled_notes', payload['scheduled']);
         for (final raw in (payload['note_threads'] as List? ?? const [])) {
           final row = raw as Map<String, dynamic>;
           db.execute(
@@ -1847,6 +2118,52 @@ WHERE EXISTS (SELECT 1 FROM notes WHERE id = ?)
               row['thread_id'],
             ],
           );
+        }
+        // Attachments (v3), with the additive rule: one whose id is here
+        // already, or whose note is not, is left out. Each file gets a fresh
+        // name under the media root, as a note's own does.
+        final attachmentRepo = SqliteAttachmentRepository(
+          this,
+          localDeviceId: localDeviceId ?? 'import',
+        );
+        final touched = <String>{};
+        for (final raw in (payload['attachments'] as List? ?? const [])) {
+          final json = raw as Map<String, dynamic>;
+          final attachment = NoteAttachment.fromRow(json);
+          final name = nexPortableBasename(attachment.mediaUri);
+          var entry = archive.findFile('media/${attachment.id}-$name');
+          entry ??= archive.findFile('media/$name');
+          if (entry == null) continue;
+          final extension = p.extension(name);
+          final suffix = RegExp(r'^\.[a-zA-Z0-9]{1,10}$').hasMatch(extension)
+              ? extension
+              : '';
+          final target = File(p.join(mediaRoot, '${newUuidV7()}$suffix'));
+          final placed = NoteAttachment(
+            id: attachment.id,
+            noteId: attachment.noteId,
+            position: attachment.position,
+            kind: attachment.kind,
+            mediaUri: target.path,
+            mediaHash: attachment.mediaHash,
+            name: attachment.name,
+            mimeType: attachment.mimeType,
+            durationMs: attachment.durationMs,
+            caption: attachment.caption,
+            ocrText: attachment.ocrText,
+            transcriptText: attachment.transcriptText,
+            createdAt: attachment.createdAt,
+            updatedAt: attachment.updatedAt,
+            deviceId: attachment.deviceId,
+            rev: attachment.rev,
+          );
+          if (!attachmentRepo.insertIfAbsent(placed)) continue;
+          target.parent.createSync(recursive: true);
+          extractCheckedZipFile(entry, target.path);
+          touched.add(attachment.noteId);
+        }
+        for (final noteId in touched) {
+          _reindex(noteId);
         }
         db.execute('COMMIT');
       } catch (_) {
@@ -2041,7 +2358,7 @@ WHERE id = ?
           buffer.writeln('Duration: ${note.durationMs} ms');
         }
         if (note.mediaUri != null) {
-          buffer.writeln('Media: ${p.basename(note.mediaUri!)}');
+          buffer.writeln('Media: ${nexPortableBasename(note.mediaUri!)}');
         }
         if (note.transcriptText != null) {
           buffer.writeln('Transcript: ${note.transcriptText}');
@@ -2049,7 +2366,7 @@ WHERE id = ?
       case NoteType.photo:
         buffer.writeln('_Photo note_');
         if (note.mediaUri != null) {
-          buffer.writeln('![photo](../media/${p.basename(note.mediaUri!)})');
+          buffer.writeln('![photo](../media/${nexPortableBasename(note.mediaUri!)})');
         }
         if (note.ocrText != null) {
           buffer.writeln('OCR: ${note.ocrText}');
@@ -2057,7 +2374,7 @@ WHERE id = ?
       case NoteType.file:
         buffer.writeln('_File attachment_');
         if (note.mediaUri != null) {
-          buffer.writeln('File: ${p.basename(note.mediaUri!)}');
+          buffer.writeln('File: ${nexPortableBasename(note.mediaUri!)}');
         }
       // Written out as the markdown task list it already is, so an exported
       // checklist opens as a working checklist in any markdown editor rather

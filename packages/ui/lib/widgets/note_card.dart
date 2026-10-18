@@ -265,6 +265,11 @@ class _CardBody extends StatelessWidget {
                 ),
               if (showDue && note.dueAt != null)
                 const SizedBox(width: NexSpacing.contentGap),
+              if (note.attachmentCount > 0) ...[
+                const Icon(Icons.attach_file, size: 14),
+                Text('+${note.attachmentCount}', style: theme.textTheme.labelSmall),
+                const SizedBox(width: NexSpacing.sm),
+              ],
               Expanded(
                 child:
                     previewOverride ??

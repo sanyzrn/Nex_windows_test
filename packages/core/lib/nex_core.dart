@@ -70,3 +70,8 @@ export 'capture/capture_service.dart';
 export 'sync/field_aware_merger.dart';
 
 export 'models/calendar_date.dart';
+
+export 'models/note_attachment.dart';
+export 'models/scheduled_note.dart';
+export 'files/file_names.dart';
+export 'models/portable_preferences.dart';

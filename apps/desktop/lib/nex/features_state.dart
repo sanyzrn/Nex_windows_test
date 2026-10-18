@@ -21,7 +21,13 @@ import '../l10n/app_localizations.dart';
 import 'store.dart';
 
 class NexFeatures extends ChangeNotifier {
-  NexFeatures(this.store, {this.pickFiles}) : session = CaptureSession(store);
+  NexFeatures(this.store, {this.pickFiles}) : session = CaptureSession(store) {
+    _libraryChanges = store.libraryChanges.listen((_) {
+      libraryRevision++;
+      notify();
+    });
+  }
+  StreamSubscription<void>? _libraryChanges;
   final DesktopStore store;
   final Future<List<XFile>> Function(List<XTypeGroup>)? pickFiles;
   CaptureSession session;
@@ -151,16 +157,18 @@ class NexFeatures extends ChangeNotifier {
     if (recordingAt != null || recordingBusy || importing) {
       throw StateError('Finish recording or importing before restoring');
     }
-    final restored = await store.call<Map<String, dynamic>?>('restoreBackup', {
+    final restored = await store.call<DesktopRestoreResult>('restoreBackup', {
       'file': file,
       'key': key,
     });
-    session = CaptureSession(store);
-    composer.clear();
-    importedCount = 0;
+    if (restored.replacesLibrary) {
+      session = CaptureSession(store);
+      composer.clear();
+      importedCount = 0;
+    }
     libraryRevision++;
     notify();
-    return restored;
+    return restored.settings;
   }
 
   void reflectReaderEdit(Note note) {
@@ -275,6 +283,7 @@ class NexFeatures extends ChangeNotifier {
   }
 
   Future<void> close() async {
+    await _libraryChanges?.cancel();
     while (_pending.isNotEmpty) {
       await Future.wait(_pending.toList());
     }

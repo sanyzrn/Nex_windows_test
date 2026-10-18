@@ -327,14 +327,14 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
                 final note = notes[index];
                 final date = nexDisplayDate(
                   note.createdAt,
-                  solar: fa,
+                  solar: NexPanelScope.maybeOf(context)?.S.solarCalendar ?? fa,
                   persian: fa,
                 );
                 final prior = index == 0
                     ? null
                     : nexDisplayDate(
                         notes[index - 1].createdAt,
-                        solar: fa,
+                        solar: NexPanelScope.maybeOf(context)?.S.solarCalendar ?? fa,
                         persian: fa,
                       );
                 final isCardSelected = _selectedIds.isNotEmpty
@@ -440,7 +440,7 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
                                   : timeStr;
                               final formattedDate = nexDisplayDate(
                                 due,
-                                solar: fa,
+                                solar: NexPanelScope.maybeOf(context)?.S.solarCalendar ?? fa,
                                 persian: fa,
                               );
                               return '$formattedDate $formattedTime$repeatText';

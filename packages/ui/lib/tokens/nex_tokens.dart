@@ -29,43 +29,52 @@ import 'nex_contrast.dart';
 /// between 2.99 and 3.03 — which is exactly why the floor has to be checked
 /// rather than judged.
 abstract final class NexColors {
-  /* -------------------------------------------------------------- light */
+  /* ------------------------------------------------------------- light */
 
-  // A cool off-white rather than a neutral one, matching the Android app's
-  // light surface family. The card stays pure white, so the page keeps a
-  // visible tonal step below it.
-  static const bgPrimaryLight = Color(0xFFF2F4F7);
+  /// The page behind the cards.
+  static const bgPrimaryLight = Color(0xFFF5F6F6);
 
   /// A card, a sheet, a dialog: paper on the desk.
   static const bgCardLight = Color(0xFFFFFFFF);
 
   /// Filled containers inside a card — the note type disc, chips at rest.
-  static const bgElevatedLight = Color(0xFFD9E0E9);
+  static const bgElevatedLight = Color(0xFFE0E0E0);
 
-  static const textPrimaryLight = Color(0xFF212832);
-  static const textSecondaryLight = Color(0xFF586274);
+  static const textPrimaryLight = Color(0xFF262626);
+  static const textSecondaryLight = Color(0xFF5C5C5C);
 
   /// Boundaries you can act on. Held to 3:1 against the card.
-  static const borderLight = Color(0xFF8E95A3);
+  static const borderLight = Color(0xFF959494);
 
   /// Dividers between rows of one surface. Never carries a boundary alone.
-  static const borderSoftLight = Color(0xFFD3D9E2);
+  static const borderSoftLight = Color(0xFFF5F6F6);
 
   /* -------------------------------------------------------------- dark */
 
-  // The deep-sea navy of the Android app (its page is #0B1622, its cards
-  // #1C2733), brought here so both platforms read as one product. The ramp
-  // keeps the app's own relationships: the card is a clear step above the
-  // page, the border still clears 3:1 on the card, and secondary text still
-  // clears 4.5:1 on both — the same floors `scaffold_test.dart` has always
-  // held, now on a blue-grey ramp instead of a warm near-black one.
-  static const bgPrimaryDark = Color(0xFF0C141F);
-  static const bgCardDark = Color(0xFF182230);
-  static const bgElevatedDark = Color(0xFF2A394C);
-  static const textPrimaryDark = Color(0xFFEEF2F7);
-  static const textSecondaryDark = Color(0xFF93A1B3);
-  static const borderDark = Color(0xFF5D7290);
-  static const borderSoftDark = Color(0xFF080E17);
+  // Warmer and a touch lighter than it was (#141414) — moved toward the
+  // Nex_ui Figma redesign's near-black, which reads closer to this than to
+  // pure neutral. Kept comfortably below bgCardDark rather than matching the
+  // Figma screen background exactly (#20201F is close enough to the current
+  // card colour that using it here would read as the card sitting *behind*
+  // the page instead of elevated above it — the Figma file's own card colour
+  // wasn't confirmed before its MCP access hit a rate limit).
+  // Darker than it was, to open the step up to the card above it. The cards
+  // used to carry a shadow, and four values of lightness plus that shadow was
+  // enough of an edge; with the shadow gone the tonal step is the only thing
+  // marking where a card starts, and four values cannot be seen.
+  //
+  // The page moved rather than the card, deliberately. Lightening the card
+  // would have walked it toward `bgElevatedDark` and `borderDark`, and the
+  // scaffold tests caught exactly that — the disc inside a card fell to
+  // 1.21:1 and the boundary token to 2.81:1. Moving the page away costs
+  // nothing on either.
+  static const bgPrimaryDark = Color(0xFF131312);
+  static const bgCardDark = Color(0xFF1E1E1E);
+  static const bgElevatedDark = Color(0xFF323232);
+  static const textPrimaryDark = Color(0xFFF2F2F3);
+  static const textSecondaryDark = Color(0xFFABABAB);
+  static const borderDark = Color(0xFF686965);
+  static const borderSoftDark = Color(0xFF000000);
 
   /* ------------------------------------------------------ comfort light */
 
@@ -128,11 +137,8 @@ abstract final class NexColors {
   /// — lightness 0.72 and 0.82, saturation easing back as it climbs — so the
   /// shipped palette and a hand-picked one are the same shape in a different
   /// hue.
-  /// The Android app's sky blue (#7CB9FF), which the desktop had as #74BCFB —
-  /// one unit of green apart. Same ramp shape (lightness 0.72/0.82), still
-  /// above 3:1 on every dark ground the app draws it on.
-  static const accentDark = Color(0xFF7CB9FF);
-  static const accentStrongDark = Color(0xFFA8CBFF);
+  static const accentDark = Color(0xFF74BCFB);
+  static const accentStrongDark = Color(0xFFA7D4FB);
 
   /// The shipped palette, exactly — not run through [nexAccentPaletteFrom],
   /// so nobody who has never touched the accent setting sees so much as a
@@ -374,8 +380,7 @@ const nexCardHeight = _nexTaller + NexSpacing.cardInset * 2;
 /// is spelled out as the two candidates. Kept private: the public contract is
 /// [nexCardHeight] and [nexCardHeightFor].
 const double _nexTaller =
-    nexCardLeadingSize >
-        nexCardPreviewLineHeight * nexCardPreviewLines
+    nexCardLeadingSize > nexCardPreviewLineHeight * nexCardPreviewLines
     ? nexCardLeadingSize
     : nexCardPreviewLineHeight * nexCardPreviewLines;
 

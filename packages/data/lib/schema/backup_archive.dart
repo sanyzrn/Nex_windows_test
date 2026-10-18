@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:archive/archive_io.dart';
 import 'package:path/path.dart' as p;
@@ -118,8 +119,12 @@ class NexBackupArchive {
     final snapshot = sqlite3.open(snapshotPath, mode: OpenMode.readOnly);
     final expected = <String, String>{};
     try {
+      // Attachments' files are packed with the notes' own (docs/14), and
+      // a removed attachment's tombstone keeps nothing.
       for (final row in snapshot.select(
-        'SELECT media_uri, media_hash FROM notes WHERE media_uri IS NOT NULL',
+        'SELECT media_uri, media_hash FROM notes WHERE media_uri IS NOT NULL '
+        'UNION ALL SELECT media_uri, media_hash FROM note_attachments '
+        'WHERE deleted_at IS NULL',
       )) {
         final uri = row['media_uri'] as String;
         if (!File(uri).existsSync()) {
@@ -226,6 +231,7 @@ class NexBackupArchive {
     final input = InputFileStream(backup.path);
     try {
       final archive = ZipDecoder().decodeStream(input);
+      assertReasonableSize(archive, backup.lengthSync());
       final dbEntry = archive.files.where(
         (file) => file.isFile && file.name == _dbEntry,
       );
@@ -243,6 +249,37 @@ class NexBackupArchive {
       input.closeSync();
     }
   }
+
+  /// Refuses an archive whose entries add up to far more than its own size
+  /// could hold, or that holds absurdly many (SEC-04). Checked from the
+  /// central directory, before anything is written: a crafted backup could
+  /// otherwise unpack until the phone's storage was full.
+  ///
+  /// The bound is generous for real backups — photos and recordings barely
+  /// compress, and the database compresses perhaps tenfold — and still stops
+  /// a zip bomb long before it fills a phone.
+  static void assertReasonableSize(Archive archive, int archiveBytes) {
+    var total = 0;
+    var count = 0;
+    for (final file in archive.files) {
+      if (!file.isFile) continue;
+      count++;
+      total += file.size;
+    }
+    final limit = math.max(archiveBytes * maxExpansion, minUnpackedLimit);
+    if (count > maxEntries || total > limit) {
+      throw StateError('Backup is larger unpacked than it could really be');
+    }
+  }
+
+  /// How many times its own size a backup may unpack to.
+  static const maxExpansion = 100;
+
+  /// Below this, any size is accepted: a small library compresses well.
+  static const minUnpackedLimit = 1 << 30;
+
+  /// More files than any real library has.
+  static const maxEntries = 500000;
 
   /// Writes one archive entry to [path] without holding it whole in memory.
   static void _extract(ArchiveFile entry, String path) {
@@ -379,10 +416,27 @@ class NexBackupArchive {
     if (!File(liveDbPath).existsSync()) return;
     final db = sqlite3.open(liveDbPath);
     try {
-      final rows = db.select(
-        'SELECT id, media_uri FROM notes WHERE media_uri IS NOT NULL',
-      );
-      for (final row in rows) {
+      // A backup from before attachments has no such table; its notes are
+      // all there is to remap.
+      final hasAttachments = db
+          .select(
+            "SELECT 1 FROM sqlite_master WHERE type = 'table' "
+            "AND name = 'note_attachments'",
+          )
+          .isNotEmpty;
+      final rows = [
+        for (final row in db.select(
+          'SELECT id, media_uri FROM notes WHERE media_uri IS NOT NULL',
+        ))
+          (table: 'notes', row: row),
+        if (hasAttachments)
+          for (final row in db.select(
+            'SELECT id, media_uri FROM note_attachments '
+            'WHERE deleted_at IS NULL',
+          ))
+            (table: 'note_attachments', row: row),
+      ];
+      for (final (:table, :row) in rows) {
         final stored = row['media_uri']! as String;
         if (p.isWithin(mediaDir, stored) && File(stored).existsSync()) continue;
 
@@ -401,7 +455,7 @@ class NexBackupArchive {
           }
         }
         if (candidate != null) {
-          db.execute('UPDATE notes SET media_uri = ? WHERE id = ?', [
+          db.execute('UPDATE $table SET media_uri = ? WHERE id = ?', [
             candidate.path,
             row['id']! as String,
           ]);

@@ -22,6 +22,7 @@ import 'note_detail_parts.dart';
 import 'reminder_picker.dart';
 import 'reminder_coordinator.dart' show ReminderDeliveryFailure;
 import 'reminder_policy.dart';
+import 'note_attachments.dart';
 
 class NexNoteDetail extends StatefulWidget {
   const NexNoteDetail({super.key, required this.note, required this.onClose});
@@ -333,6 +334,7 @@ class _NexNoteDetailState extends State<NexNoteDetail> {
                             },
                           ),
                         const SizedBox(height: 12),
+                        NexNoteAttachments(noteId: note.id, revision: note.rev),
                         NoteActionBar(
                           note: note,
                           onPin: () =>
@@ -385,7 +387,7 @@ class _NexNoteDetailState extends State<NexNoteDetail> {
                               avatar: const Icon(Icons.alarm, size: 16),
                               label: Text(
                                 fa
-                                    ? '${nexDisplayDate(shownDue!, solar: true, persian: true)} ${nexDigits(_hhmm(shownDue), persian: true)}${note.dueRepeat != NoteRepeat.once ? ' (${note.dueRepeat == NoteRepeat.daily ? l.repeatDaily : l.repeatWeekly})' : ''}'
+                                    ? '${nexDisplayDate(shownDue!, solar: NexPanelScope.maybeOf(context)?.S.solarCalendar ?? true, persian: true)} ${nexDigits(_hhmm(shownDue), persian: true)}${note.dueRepeat != NoteRepeat.once ? ' (${note.dueRepeat == NoteRepeat.daily ? l.repeatDaily : l.repeatWeekly})' : ''}'
                                     : '${nexDisplayDate(shownDue!)} ${_hhmm(shownDue)}${note.dueRepeat != NoteRepeat.once ? ' (${note.dueRepeat == NoteRepeat.daily ? l.repeatDaily : l.repeatWeekly})' : ''}',
                               ),
                               onPressed: () => showReminderPicker(

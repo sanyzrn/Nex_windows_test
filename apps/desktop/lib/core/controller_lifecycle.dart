@@ -336,7 +336,7 @@ mixin PanelLifecycle on PanelStateBase {
     toast(
       message('Panel moved to the {value}', {
         'value': utilityForLocale(
-          S.language,
+          resolvedLanguage,
           edge == 'left' ? 'Left' : 'Right',
         ),
       }),

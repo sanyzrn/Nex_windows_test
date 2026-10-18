@@ -27,15 +27,22 @@ Future<void> _database(WidgetTester t) async {
   }
 }
 
-Future<void> _waitForWidget(WidgetTester t, Finder finder) async {
+Future<void> _waitForWidget(
+  WidgetTester t,
+  Finder finder, {
+  bool absent = false,
+}) async {
   // SQLite runs in another isolate; a fixed delay races a busy Windows runner.
-  for (var i = 0; i < 100 && finder.evaluate().isEmpty; i++) {
+  bool pending() => absent
+      ? finder.evaluate().isNotEmpty
+      : finder.evaluate().isEmpty;
+  for (var i = 0; i < 100 && pending(); i++) {
     await t.runAsync(
       () => Future<void>.delayed(const Duration(milliseconds: 30)),
     );
     await t.pump(const Duration(milliseconds: 50));
   }
-  expect(finder, findsOneWidget);
+  expect(finder, absent ? findsNothing : findsOneWidget);
 }
 
 Future<({NexFeatures f, PanelController c})> _fixture(
@@ -184,7 +191,7 @@ void main() {
       isNotNull,
       reason: 'Restore preserves the original note metadata.',
     );
-    expect(find.text('Deleted note content'), findsNothing);
+    await _waitForWidget(t, find.text('Deleted note content'), absent: true);
   });
 
   testWidgets(
@@ -312,6 +319,7 @@ void main() {
     expect(deleted, isNull);
     final trash = await t.runAsync(() => fixture.f.store.call<List<Note>>('trash'));
     expect(trash!.any((n) => n.id == 'checklist'), isTrue);
+    await _waitForWidget(t, find.text('Undo'));
     await t.tap(find.text('Undo'));
     await _database(t);
     final restored = await t.runAsync(

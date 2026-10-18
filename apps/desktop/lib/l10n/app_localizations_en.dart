@@ -1224,4 +1224,54 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get workspaceClipboard => 'Clipboard';
+
+  @override
+  String get followSystem => 'System';
+
+  @override
+  String get followTheme => 'Theme default';
+
+  @override
+  String get customAccent => 'Accent color';
+
+  @override
+  String get textScale => 'Text size';
+
+  @override
+  String get solarCalendar => 'Solar calendar';
+
+  @override
+  String get noteAttachments => 'Attachments';
+
+  @override
+  String get backupCompatibility =>
+      'Transfer notes, attachments and appearance between Nex apps. Clipboard, device settings, mobile vault and AI credentials stay on their own device.';
+
+  @override
+  String get scheduledNotes => 'Scheduled notes';
+
+  @override
+  String get releaseNow => 'Deliver now';
+
+  @override
+  String get portableLibraryBackup => 'Portable library backup · all Nex apps';
+
+  @override
+  String get importBackupConfirm =>
+      'This is a Nex export. Its notes and attachments will be added to your library. Existing notes remain unchanged.';
+
+  @override
+  String get importNotes => 'Import notes';
+
+  @override
+  String get importNotesDone => 'Notes and attachments imported';
+
+  @override
+  String get themePalette => 'App theme';
+
+  @override
+  String get hexColor => 'HEX color';
+
+  @override
+  String get backupSaved => 'Backup saved';
 }

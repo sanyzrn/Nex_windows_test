@@ -5,6 +5,13 @@ import 'package:nex_core/nex_core.dart';
 import 'package:nex_data/nex_data.dart';
 import 'package:path/path.dart' as p;
 import 'reminder_policy.dart';
+import '../core/backup_shell.dart';
+
+class DesktopRestoreResult {
+  const DesktopRestoreResult({required this.replacesLibrary, this.settings});
+  final bool replacesLibrary;
+  final Map<String, dynamic>? settings;
+}
 
 /// One persistent database isolate; every command uses Nex's repositories.
 class DesktopStore {
@@ -19,6 +26,8 @@ class DesktopStore {
   Future<void>? _closing;
   final _reminderChanges = StreamController<void>.broadcast();
   Stream<void> get reminderChanges => _reminderChanges.stream;
+  final _libraryChanges = StreamController<void>.broadcast();
+  Stream<void> get libraryChanges => _libraryChanges.stream;
 
   static Future<DesktopStore> open(String root, String deviceId) async {
     final replies = ReceivePort();
@@ -40,6 +49,10 @@ class DesktopStore {
         return;
       }
       final parts = message as List;
+      if (parts[0] == -2) {
+        store?._libraryChanges.add(null);
+        return;
+      }
       if (parts[0] == -1) {
         ready.completeError(StateError(parts[2] as String));
         return;
@@ -102,6 +115,7 @@ class DesktopStore {
     _closed = true;
     return _closing = drained.whenComplete(() async {
       await _reminderChanges.close();
+      await _libraryChanges.close();
       _replies.close();
       _isolate.kill();
     });
@@ -135,6 +149,17 @@ class DesktopStore {
           final a = (raw[2] as Map).cast<String, dynamic>();
           try {
             // Only synchronous repository calls here: one message is one commit.
+            final scheduled = SqliteScheduledNoteRepository(db, notes);
+            if (const {
+              'timeline',
+              'search',
+              'workspace',
+              'reminderCandidates',
+            }.contains(cmd)) {
+              if (scheduled.releaseDue(DateTime.now()).isNotEmpty) {
+                reply.send([-2, true, null]);
+              }
+            }
             final dynamic result;
             switch (cmd) {
               case 'capture':
@@ -217,6 +242,32 @@ class DesktopStore {
                     : matches.where((n) => members.contains(n.id)).toList();
               case 'get':
                 result = notes.getById(a['id'] as String);
+              case 'attachments':
+                result = SqliteAttachmentRepository(
+                  notes,
+                  localDeviceId: device,
+                ).forNote(a['id'] as String);
+              case 'removeAttachment':
+                SqliteAttachmentRepository(
+                  notes,
+                  localDeviceId: device,
+                ).remove(a['id'] as String);
+                result = null;
+              case 'restoreAttachment':
+                result = SqliteAttachmentRepository(
+                  notes,
+                  localDeviceId: device,
+                ).restore(a['id'] as String);
+              case 'scheduled':
+                result = scheduled.pending();
+              case 'releaseScheduled':
+                result = scheduled.releaseNow(
+                  a['id'] as String,
+                  DateTime.now(),
+                );
+              case 'discardScheduled':
+                scheduled.discard(a['id'] as String);
+                result = null;
               case 'delete':
                 notes.softDelete(a['id'] as String);
                 result = null;
@@ -303,6 +354,7 @@ class DesktopStore {
                   'total': totals['total'] ?? 0,
                   'pinned': totals['pinned'] ?? 0,
                   'media': totals['media'] ?? 0,
+                  'scheduled': scheduled.pending().length,
                   'recent': previews('updated_at DESC, id DESC', '', 8),
                   'pins': previews(
                     'pinned_at DESC',
@@ -343,6 +395,11 @@ class DesktopStore {
                 commitments.delete(a['id'] as String);
                 result = null;
               case 'media':
+              case 'attachMedia':
+                if (cmd == 'attachMedia' &&
+                    notes.getById(a['noteId'] as String) == null) {
+                  throw StateError('Parent note is unavailable');
+                }
                 // Stream-copy and hash inside this isolate. Never load arbitrary files into UI memory.
                 final source = File(a['path'] as String);
                 final media = Directory(p.join(root, 'media'))
@@ -364,7 +421,24 @@ class DesktopStore {
                   } else {
                     await staging.delete();
                   }
-                  if (a['duration'] != null ||
+                  if (cmd == 'attachMedia') {
+                    final kind = NexFileKinds.of(path: target.path);
+                    result =
+                        SqliteAttachmentRepository(
+                          notes,
+                          localDeviceId: device,
+                        ).add(
+                          a['noteId'] as String,
+                          kind: kind == NexFileKind.image
+                              ? AttachmentKind.photo
+                              : kind == NexFileKind.audio
+                              ? AttachmentKind.voice
+                              : AttachmentKind.file,
+                          mediaUri: target.path,
+                          mediaHash: hash,
+                          name: p.basename(source.path),
+                        );
+                  } else if (a['duration'] != null ||
                       [
                         '.wav',
                         '.mp3',
@@ -408,7 +482,30 @@ class DesktopStore {
                   mediaDir: p.join(root, 'media'),
                   backupDir: a['directory'] as String,
                 ).path;
+              case 'portableBackup':
+                final library = NexBackupArchive.create(
+                  database: db,
+                  mediaDir: p.join(root, 'media'),
+                  backupDir: p.join(root, 'backups'),
+                );
+                result = NexBackupArchive.portable(
+                  library.path,
+                  a['output'] as String,
+                );
+              case 'backupKind':
+                result = NexBackupKind.detect(a['file'] as String);
               case 'fullBackup':
+                final supplied = a['settings'] as Map<String, dynamic>;
+                final settings = supplied.containsKey('version')
+                    ? supplied
+                    : <String, dynamic>{
+                        'version': PortablePreferences.settingsVersion,
+                        'scope': 'shared',
+                        'preferences': <String, dynamic>{},
+                        'credentials': <String, String>{},
+                        'desktopShell': supplied,
+                      };
+                PortablePreferences.validateScopedBackup(settings);
                 final library = NexBackupArchive.create(
                   database: db,
                   mediaDir: p.join(root, 'media'),
@@ -418,7 +515,7 @@ class DesktopStore {
                 FullBackup.create(
                   library: library.path,
                   output: a['output'] as String,
-                  settings: {'desktopShell': a['settings']},
+                  settings: settings,
                   key: key,
                 );
                 result = key;
@@ -429,8 +526,16 @@ class DesktopStore {
                 Map<String, dynamic>? restoredSettings;
                 Directory? unpackStaging;
                 try {
-                  if (backupPath.toLowerCase().endsWith('.nexfull') ||
-                      backupPath.toLowerCase().endsWith('.fullbak')) {
+                  final kind = NexBackupKind.detect(backupPath);
+                  if (kind == NexBackupKind.export) {
+                    await notes.importArchive(
+                      archiveFile: File(backupPath),
+                      mediaRoot: p.join(root, 'media'),
+                    );
+                    result = const DesktopRestoreResult(replacesLibrary: false);
+                    break;
+                  }
+                  if (kind == NexBackupKind.full) {
                     if (key == null || key.trim().isEmpty) {
                       throw ArgumentError('Recovery key required');
                     }
@@ -443,10 +548,30 @@ class DesktopStore {
                       key.trim(),
                       modelHash: '',
                       modelBytes: 0,
+                      includeModel: false,
                     );
                     libraryPath = p.join(unpackStaging.path, 'library.nexbak');
-                    restoredSettings =
-                        unpacked['desktopShell'] as Map<String, dynamic>?;
+                    // Validate appearance before replacing any live library.
+                    final prefs = unpacked['preferences'];
+                    validateBackupShell(unpacked['desktopShell']);
+                    if (prefs != null &&
+                            unpacked['scope'] != 'shared' &&
+                            unpacked['version'] != 1 ||
+                        unpacked.containsKey('scope') &&
+                            unpacked['scope'] != 'shared') {
+                      throw const FormatException(
+                        'Unsupported settings backup',
+                      );
+                    }
+                    if (unpacked['scope'] == 'shared') {
+                      PortablePreferences.validateScopedBackup(unpacked);
+                    } else if (prefs is Map) {
+                      PortablePreferences.validate({
+                        for (final key in PortablePreferences.keys)
+                          if (prefs.containsKey(key)) key: prefs[key],
+                      });
+                    }
+                    restoredSettings = unpacked;
                   }
                   db.close();
                   try {
@@ -473,7 +598,10 @@ class DesktopStore {
                       mediaRoot: p.join(root, 'media'),
                     );
                   }
-                  result = restoredSettings;
+                  result = DesktopRestoreResult(
+                    replacesLibrary: true,
+                    settings: restoredSettings,
+                  );
                 } finally {
                   if (unpackStaging?.existsSync() == true) {
                     try {

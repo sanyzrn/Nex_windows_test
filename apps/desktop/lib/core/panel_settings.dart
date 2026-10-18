@@ -7,8 +7,10 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:nex_core/nex_core.dart';
 import 'package:nex_ui/nex_ui.dart';
 import 'models.dart';
+import 'backup_shell.dart';
 
 /// The persisted settings, JSON-compatible with the original app.
 class Settings {
@@ -18,6 +20,9 @@ class Settings {
   String language = 'fa';
   String? installLanguageMarker;
   String preset = 'classic';
+  String? accentSeed;
+  double uiScale = 1;
+  bool? solarCalendar;
   String hotkey = 'N';
   Color accent = Colors.black;
   bool startup = false;
@@ -75,6 +80,9 @@ class Settings {
     'language': language,
     'installLanguageMarker': installLanguageMarker,
     'preset': preset,
+    'accentSeed': accentSeed,
+    'uiScale': uiScale,
+    'solarCalendar': solarCalendar,
     'hotkey': hotkey,
     'accent': _hex(accent),
     'startup': startup,
@@ -108,6 +116,14 @@ class Settings {
     s.language = j['language'] as String? ?? 'fa';
     s.installLanguageMarker = j['installLanguageMarker'] as String?;
     s.preset = j['preset'] as String? ?? 'classic';
+    s.accentSeed = PortablePreferences.isColor(j['accentSeed'])
+        ? j['accentSeed'] as String
+        : null;
+    final scale = j['uiScale'];
+    if (scale is num && scale.isFinite) {
+      s.uiScale = scale.clamp(0.5, 3).toDouble();
+    }
+    s.solarCalendar = j['solarCalendar'] as bool?;
     s.hotkey = j['hotkey'] as String? ?? 'N';
     s.accent = _col(j['accent']);
     s.startup = j['startup'] as bool? ?? false;
@@ -154,5 +170,87 @@ class Settings {
     s.dock = (j['dock'] as List?)?.map((e) => e.toString()).toList();
     s.more = (j['more'] as List?)?.map((e) => e.toString()).toList();
     return s;
+  }
+
+  Map<String, dynamic> sharedPreferences() => {
+    'appearance.theme': switch (theme) {
+      'system' => 'system',
+      'light' || 'sky' => 'light',
+      _ => 'dark',
+    },
+    'appearance.theme_preset': preset,
+    if (accentSeed != null) 'appearance.accent_seed': accentSeed,
+    'appearance.recent_colors': recentColors.take(32).map(_hex).toList(),
+    'appearance.locale': language,
+    'appearance.card_density': cardDensity,
+    'appearance.ui_scale': uiScale,
+    if (solarCalendar != null) 'appearance.solar_calendar': solarCalendar,
+  };
+
+  Map<String, dynamic> backupSettings() => {
+    'version': PortablePreferences.settingsVersion,
+    'scope': 'shared',
+    'preferences': sharedPreferences(),
+    'credentials': <String, String>{},
+    'clearedPreferences': [
+      if (accentSeed == null) 'appearance.accent_seed',
+      if (solarCalendar == null) 'appearance.solar_calendar',
+    ],
+    'desktopShell': toMap(),
+  };
+
+  /// A foreign backup can change common appearance, never the Windows host.
+  static Settings fromBackup(Map<String, dynamic> backup, Settings current) {
+    final shell = backup['desktopShell'];
+    validateBackupShell(shell);
+    final restored = fromMap(
+      shell is Map
+          ? {...current.toMap(), ...Map<String, dynamic>.from(shell)}
+          : current.toMap(),
+    );
+    if (backup['scope'] == 'shared') {
+      PortablePreferences.validateScopedBackup(backup);
+    }
+    final raw = backup['preferences'];
+    if (raw is! Map) return restored; // Original Windows full backups.
+    final prefs = <String, dynamic>{
+      if (backup['scope'] != 'shared') ...PortablePreferences.defaults,
+      for (final key in PortablePreferences.keys)
+        if (raw.containsKey(key)) key: raw[key],
+    };
+    PortablePreferences.validate(prefs);
+    if (prefs['appearance.theme'] case final String v) restored.theme = v;
+    if (prefs['appearance.theme_preset'] case final String v) {
+      // Retain a future ID in storage; the theme renderer falls back safely.
+      restored.preset = v;
+    }
+    if (prefs['appearance.accent_seed'] case final String v) {
+      restored.accentSeed = v;
+    }
+    if (prefs['appearance.locale'] case final String v) restored.language = v;
+    if (prefs['appearance.card_density'] case final String v) {
+      restored.cardDensity = v;
+    }
+    if (prefs['appearance.ui_scale'] case final num v) {
+      restored.uiScale = v.toDouble();
+    }
+    if (prefs['appearance.solar_calendar'] case final bool v) {
+      restored.solarCalendar = v;
+    }
+    if (prefs['appearance.recent_colors'] case final List v) {
+      restored.recentColors = v.map(_col).toList();
+    }
+    final cleared = backup['clearedPreferences'] as List? ?? const [];
+    if (cleared.contains('appearance.accent_seed') ||
+        backup['scope'] != 'shared' &&
+            !prefs.containsKey('appearance.accent_seed')) {
+      restored.accentSeed = null;
+    }
+    if (cleared.contains('appearance.solar_calendar') ||
+        backup['scope'] != 'shared' &&
+            !prefs.containsKey('appearance.solar_calendar')) {
+      restored.solarCalendar = null;
+    }
+    return restored;
   }
 }

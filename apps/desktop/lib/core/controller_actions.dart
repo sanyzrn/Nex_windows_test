@@ -85,7 +85,7 @@ mixin PanelActions on PanelStateBase {
         final rect = box.localToGlobal(Offset.zero) & box.size;
         final hit = isGrid
             ? (p.dy < rect.bottom &&
-                      (S.language == 'fa'
+                      (resolvedLanguage == 'fa'
                           ? p.dx > rect.center.dx
                           : p.dx < rect.center.dx)) ||
                   p.dy < rect.top

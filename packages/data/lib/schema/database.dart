@@ -45,7 +45,21 @@ class NexDatabase {
     return nex;
   }
 
+  /// The library layout this build writes, stamped as `user_version`.
+  ///
+  /// Raise it with any change an older build could not read correctly. A
+  /// build that finds a higher number refuses to open the library (DATA-06)
+  /// instead of writing to it with an older idea of its tables — Cafe Bazaar
+  /// and Myket both let someone install an older APK over a newer one.
+  /// Libraries from before the stamp read as 0 and are simply upgraded.
+  static const schemaVersion = 1;
+
   void _migrate() {
+    final stamped = db.select('PRAGMA user_version').first.values.first as int;
+    if (stamped > schemaVersion) {
+      db.dispose();
+      throw NewerLibraryException(stamped, schemaVersion);
+    }
     // The share window and the main app have separate SQLite connections.
     // Allow a short writer to finish instead of dropping an incoming capture.
     db.execute('PRAGMA busy_timeout = 5000;');
@@ -343,6 +357,116 @@ CREATE TABLE IF NOT EXISTS note_threads (
       'ON note_threads(thread_id);',
     );
 
+    // Notes written now and delivered later ("schedule" on the capture
+    // sheet's send button). Kept out of `notes` on purpose: a row there is
+    // seen by the timeline, search, widgets, the assistant, summaries and
+    // every count — forty-odd queries, each of which would have to learn to
+    // skip it, and the one that forgot would show the note early. Here it is
+    // invisible by construction until [ScheduledNoteRepository.releaseDue]
+    // moves it across. Part of the database file, so backups carry it.
+    db.execute('''
+CREATE TABLE IF NOT EXISTS scheduled_notes (
+  id TEXT PRIMARY KEY NOT NULL,
+  content TEXT NOT NULL,
+  release_at TEXT NOT NULL,
+  written_at TEXT NOT NULL
+);
+''');
+    db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_scheduled_notes_release '
+      'ON scheduled_notes(release_at);',
+    );
+
+    // «Cycle», the menstrual cycle assistant. Its own tables, joined to
+    // nothing: no note, search entry, embedding or widget ever reads them,
+    // and the assistant only does if the person turns that on. Days are
+    // `yyyy-MM-dd` calendar dates, not instants (see CycleDate).
+    db.execute('''
+CREATE TABLE IF NOT EXISTS cycle_periods (
+  id TEXT PRIMARY KEY NOT NULL,
+  start_day TEXT NOT NULL,
+  end_day TEXT
+);
+''');
+    db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_cycle_periods_start '
+      'ON cycle_periods(start_day);',
+    );
+    db.execute('''
+CREATE TABLE IF NOT EXISTS cycle_days (
+  day TEXT PRIMARY KEY NOT NULL,
+  flow TEXT,
+  symptoms TEXT,
+  mood TEXT,
+  energy INTEGER,
+  pain_relief INTEGER NOT NULL DEFAULT 0,
+  intimacy INTEGER NOT NULL DEFAULT 0,
+  pill INTEGER NOT NULL DEFAULT 0,
+  note TEXT
+);
+''');
+    // Fertility signs, added with «Cycle»'s trying-to-conceive mode.
+    _addColumnIfMissing('cycle_days', 'temperature', 'REAL');
+    _addColumnIfMissing('cycle_days', 'ovulation_test', 'TEXT');
+    _addColumnIfMissing('cycle_days', 'mucus', 'TEXT');
+
+    // Attachments (docs/14-attachments.md): the files a note carries after
+    // its own. Created empty — no existing row is rewritten and no file
+    // moves, so an older build reading this library still sees each note's
+    // own file exactly where it was. Position 0 is the note's own file, on
+    // the note; this table starts at 1. Shaped for sync like threads and
+    // commitments, for when files join sync.
+    db.execute('''
+CREATE TABLE IF NOT EXISTS note_attachments (
+  id TEXT PRIMARY KEY NOT NULL,
+  note_id TEXT NOT NULL REFERENCES notes(id) ON DELETE CASCADE,
+  position INTEGER NOT NULL,
+  kind TEXT NOT NULL,
+  media_uri TEXT NOT NULL,
+  media_hash TEXT NOT NULL,
+  name TEXT,
+  mime_type TEXT,
+  duration_ms INTEGER,
+  caption TEXT,
+  ocr_text TEXT,
+  transcript_text TEXT,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL,
+  deleted_at TEXT,
+  device_id TEXT NOT NULL,
+  rev INTEGER NOT NULL,
+  sync_state TEXT NOT NULL DEFAULT 'pending'
+);
+''');
+    db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_attachments_note '
+      'ON note_attachments(note_id, position);',
+    );
+    db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_attachments_media '
+      'ON note_attachments(media_uri);',
+    );
+
+    // Modules (ADR-040, docs/17-modules.md): one table every module after
+    // «Cycle» keeps its records in, as JSON, so a new module never needs a
+    // migration. Like Cycle's, joined to nothing — no search, embedding,
+    // widget or assistant reads it — and carried by backups with the rest of
+    // the file.
+    db.execute('''
+CREATE TABLE IF NOT EXISTS module_records (
+  module TEXT NOT NULL,
+  kind TEXT NOT NULL,
+  id TEXT NOT NULL,
+  body TEXT NOT NULL,
+  updated_at TEXT NOT NULL,
+  PRIMARY KEY (module, kind, id)
+);
+''');
+    db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_module_records_recent '
+      'ON module_records(module, kind, updated_at);',
+    );
+
     // Records one-off data migrations, so a seed that the user has since
     // edited or deleted is never quietly put back.
     db.execute('''
@@ -376,6 +500,9 @@ CREATE TABLE IF NOT EXISTS memory_records (
 
     _seedStarterTags();
     _foldSearchIndex();
+    if (stamped != schemaVersion) {
+      db.execute('PRAGMA user_version = $schemaVersion');
+    }
   }
 
   /// Rewrites the search index in folded form, once (1.92.2).
@@ -684,6 +811,11 @@ CREATE TABLE notes_rebuilt (
     Database? probe;
     try {
       probe = sqlite3.open(dbPath, mode: OpenMode.readOnly);
+      final version =
+          probe.select('PRAGMA user_version').first.values.first as int;
+      if (version > schemaVersion) {
+        throw NewerLibraryException(version, schemaVersion);
+      }
       final rows = probe.select('PRAGMA integrity_check;');
       if (rows.isEmpty) {
         throw StateError('integrity_check returned no rows');
@@ -696,4 +828,21 @@ CREATE TABLE notes_rebuilt (
       probe?.dispose();
     }
   }
+}
+
+/// The library on disk was written by a newer Nex than this one.
+///
+/// The name is matched by the app's "could not open" screen, which then says
+/// to install the newer version and does not offer to restore a backup over
+/// a library that is fine.
+class NewerLibraryException implements Exception {
+  const NewerLibraryException(this.found, this.supported);
+
+  final int found;
+  final int supported;
+
+  @override
+  String toString() =>
+      'NewerLibraryException: library layout $found, this build reads up to '
+      '$supported';
 }

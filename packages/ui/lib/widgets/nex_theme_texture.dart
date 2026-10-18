@@ -2,16 +2,40 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-/// A faint motif along the bottom of the screen, for the themes that have
-/// one.
+/// A faint motif rising from the bottom of the screen, for every theme but
+/// the plain Nex one.
 ///
 /// Not a background pattern: those covered the whole page and were retired
 /// for whole-app themes. This is a detail of a theme — paper fibre on
-/// Paper, tile stars on Isfahan turquoise — kept to the lower part of the
-/// screen, fading out as it rises, and drawn at a few percent of the text
-/// colour, so it is felt more than seen and never sits behind the words at
-/// the top of the timeline.
-enum NexThemeTexture { none, fibre, girih, contours, waves, stars }
+/// Paper, tile stars on Isfahan turquoise, falling leaves on Autumn — kept to
+/// the lower half of the screen, fading out as it rises, and drawn at a few
+/// percent of the text colour, so it is felt more than seen and never sits
+/// behind the words at the top of the timeline.
+enum NexThemeTexture {
+  none,
+  fibre,
+  girih,
+  contours,
+  waves,
+  stars,
+  leaves,
+  petals,
+  threads,
+  grid,
+  bauhaus,
+  seams,
+  circuit,
+  halftone,
+}
+
+/// The new motifs use the selected theme's accent, keeping gold seams gold
+/// and circuit traces cyan while established neutral textures stay unchanged.
+bool nexTextureUsesAccent(NexThemeTexture texture) => const {
+  NexThemeTexture.bauhaus,
+  NexThemeTexture.seams,
+  NexThemeTexture.circuit,
+  NexThemeTexture.halftone,
+}.contains(texture);
 
 /// Paints [texture] behind [child], in the lower [extent] of the box.
 class NexTextureBackdrop extends StatelessWidget {
@@ -29,10 +53,6 @@ class NexTextureBackdrop extends StatelessWidget {
   /// How much of the height, from the bottom, the motif occupies.
   final double extent;
 
-  /// Overrides the motif's strength. Null keeps the theme-picker default
-  /// (13%/10%); the desktop window shell passes a quieter value because its
-  /// motif runs behind working content rather than along the bottom of a
-  /// reading page.
   final double? alpha;
 
   @override
@@ -40,9 +60,14 @@ class NexTextureBackdrop extends StatelessWidget {
     if (texture == NexThemeTexture.none) return child;
     final theme = Theme.of(context);
     final dark = theme.brightness == Brightness.dark;
-    final ink = theme.colorScheme.onSurface.withValues(
-      alpha: alpha ?? (dark ? 0.13 : 0.10),
-    );
+    final colored = nexTextureUsesAccent(texture);
+    final ink =
+        (colored ? theme.colorScheme.primary : theme.colorScheme.onSurface)
+            .withValues(
+              alpha:
+                  alpha ??
+                  (colored ? (dark ? 0.22 : 0.18) : (dark ? 0.13 : 0.10)),
+            );
     return Stack(
       fit: StackFit.expand,
       children: [
@@ -68,7 +93,7 @@ class NexTexturePainter extends CustomPainter {
   NexTexturePainter({
     required this.texture,
     required this.ink,
-    this.extent = 0.36,
+    this.extent = 0.5,
   });
 
   final NexThemeTexture texture;
@@ -105,7 +130,23 @@ class NexTexturePainter extends CustomPainter {
       case NexThemeTexture.waves:
         _waves(canvas, band, stroke);
       case NexThemeTexture.stars:
-        _stars(canvas, band, Paint()..color = ink);
+        _stars(canvas, band, stroke, Paint()..color = ink);
+      case NexThemeTexture.leaves:
+        _leaves(canvas, band, stroke);
+      case NexThemeTexture.petals:
+        _petals(canvas, band, stroke);
+      case NexThemeTexture.threads:
+        _threads(canvas, band, stroke);
+      case NexThemeTexture.grid:
+        _grid(canvas, band, stroke);
+      case NexThemeTexture.bauhaus:
+        _bauhaus(canvas, band, stroke);
+      case NexThemeTexture.seams:
+        _seams(canvas, band, stroke);
+      case NexThemeTexture.circuit:
+        _circuit(canvas, band, stroke);
+      case NexThemeTexture.halftone:
+        _halftone(canvas, band, stroke);
     }
     canvas.drawRect(
       band,
@@ -117,7 +158,7 @@ class NexTexturePainter extends CustomPainter {
           colors: const [Color(0x00000000), Color(0xFF000000)],
           // Full strength over the lower part of the band, not only at the
           // very bottom edge, where the navigation bar covers it.
-          stops: const [0, 0.6],
+          stops: const [0, 0.55],
         ).createShader(band),
     );
     canvas.restore();
@@ -196,17 +237,280 @@ class NexTexturePainter extends CustomPainter {
     }
   }
 
-  /// A scatter of small stars, a few of them brighter.
-  static void _stars(Canvas canvas, Rect band, Paint fill) {
+  /// A scatter of small stars; the brightest few sparkle with four points,
+  /// and two short constellations are joined up.
+  static void _stars(Canvas canvas, Rect band, Paint stroke, Paint fill) {
     final random = math.Random(11);
     final count = (band.width * band.height / 900).round();
+    final bright = <Offset>[];
     for (var i = 0; i < count; i++) {
       final at = Offset(
         band.left + random.nextDouble() * band.width,
         band.top + random.nextDouble() * band.height,
       );
-      final bright = random.nextDouble() < 0.12;
-      canvas.drawCircle(at, bright ? 1.6 : 0.8, fill);
+      final roll = random.nextDouble();
+      if (roll < 0.04) {
+        bright.add(at);
+        _sparkle(canvas, at, 3.5, fill);
+      } else {
+        canvas.drawCircle(at, roll < 0.16 ? 1.4 : 0.8, fill);
+      }
+    }
+    // Each bright star to its nearest bright neighbour: a few short lines,
+    // read as constellations rather than as a net.
+    stroke.strokeWidth = 0.6;
+    for (final a in bright.take(8)) {
+      Offset? nearest;
+      for (final b in bright) {
+        if (b == a) continue;
+        if (nearest == null || (b - a).distance < (nearest - a).distance) {
+          nearest = b;
+        }
+      }
+      if (nearest != null && (nearest - a).distance < 110) {
+        canvas.drawLine(a, nearest, stroke);
+      }
+    }
+    // And a thin crescent, low in the sky on the far side.
+    final moon = Offset(
+      band.left + band.width * 0.8,
+      band.top + band.height * 0.42,
+    );
+    const r = 15.0;
+    canvas.drawPath(
+      Path.combine(
+        PathOperation.difference,
+        Path()..addOval(Rect.fromCircle(center: moon, radius: r)),
+        Path()..addOval(
+          Rect.fromCircle(
+            center: moon + const Offset(r * 0.45, -r * 0.3),
+            radius: r * 0.9,
+          ),
+        ),
+      ),
+      fill,
+    );
+  }
+
+  static void _sparkle(Canvas canvas, Offset at, double r, Paint fill) {
+    final path = Path()
+      ..moveTo(at.dx, at.dy - r)
+      ..quadraticBezierTo(at.dx, at.dy, at.dx + r, at.dy)
+      ..quadraticBezierTo(at.dx, at.dy, at.dx, at.dy + r)
+      ..quadraticBezierTo(at.dx, at.dy, at.dx - r, at.dy)
+      ..quadraticBezierTo(at.dx, at.dy, at.dx, at.dy - r)
+      ..close();
+    canvas.drawPath(path, fill);
+  }
+
+  /// A point in [band], more often low than high — so leaves and petals
+  /// gather towards the bottom, the way things that fall do.
+  static Offset _settling(math.Random random, Rect band) => Offset(
+    band.left + random.nextDouble() * band.width,
+    band.top + math.sqrt(random.nextDouble()) * band.height,
+  );
+
+  /// Falling leaves: almond outlines with a midrib, each at its own angle.
+  static void _leaves(Canvas canvas, Rect band, Paint stroke) {
+    final random = math.Random(23);
+    final count = (band.width * band.height / 6500).round();
+    stroke.strokeWidth = 1;
+    for (var i = 0; i < count; i++) {
+      final at = _settling(random, band);
+      final size = 10 + random.nextDouble() * 9;
+      canvas.save();
+      canvas.translate(at.dx, at.dy);
+      canvas.rotate(random.nextDouble() * math.pi * 2);
+      final leaf = Path()
+        ..moveTo(0, -size)
+        ..quadraticBezierTo(size * 0.75, 0, 0, size)
+        ..quadraticBezierTo(-size * 0.75, 0, 0, -size)
+        ..close();
+      canvas.drawPath(leaf, stroke);
+      // The midrib runs on past the leaf into its stalk.
+      canvas.drawLine(Offset(0, -size * 0.7), Offset(0, size * 1.35), stroke);
+      canvas.restore();
+    }
+  }
+
+  /// Five-petalled blossoms, and loose petals drifting between them.
+  static void _petals(Canvas canvas, Rect band, Paint stroke) {
+    final random = math.Random(31);
+    final count = (band.width * band.height / 7000).round();
+    stroke.strokeWidth = 1;
+    Path petal(double length) => Path()
+      ..moveTo(0, 0)
+      ..cubicTo(length * 0.5, -length * 0.45, length, -length * 0.2, length, 0)
+      ..cubicTo(length, length * 0.2, length * 0.5, length * 0.45, 0, 0)
+      ..close();
+    for (var i = 0; i < count; i++) {
+      final at = _settling(random, band);
+      canvas.save();
+      canvas.translate(at.dx, at.dy);
+      canvas.rotate(random.nextDouble() * math.pi * 2);
+      if (random.nextDouble() < 0.4) {
+        final length = 11 + random.nextDouble() * 5;
+        for (var k = 0; k < 5; k++) {
+          canvas.drawPath(petal(length), stroke);
+          canvas.rotate(math.pi * 2 / 5);
+        }
+        canvas.drawCircle(Offset.zero, 2.2, stroke);
+      } else {
+        canvas.drawPath(petal(8 + random.nextDouble() * 5), stroke);
+      }
+      canvas.restore();
+    }
+  }
+
+  /// Saffron threads: three fine, curling stigmas from one point, scattered
+  /// as if shaken from the jar.
+  static void _threads(Canvas canvas, Rect band, Paint stroke) {
+    final random = math.Random(41);
+    final count = (band.width * band.height / 4200).round();
+    stroke
+      ..strokeWidth = 1.1
+      ..strokeCap = StrokeCap.round;
+    for (var i = 0; i < count; i++) {
+      final at = _settling(random, band);
+      final base = random.nextDouble() * math.pi * 2;
+      final strands = random.nextDouble() < 0.5 ? 3 : 1;
+      for (var k = 0; k < strands; k++) {
+        final angle = base + (k - 1) * 0.35;
+        final length = 10 + random.nextDouble() * 9;
+        final end =
+            at + Offset(math.cos(angle) * length, math.sin(angle) * length);
+        final bend = (random.nextDouble() - 0.5) * 8;
+        final control =
+            Offset.lerp(at, end, 0.5)! +
+            Offset(-math.sin(angle) * bend, math.cos(angle) * bend);
+        canvas.drawPath(
+          Path()
+            ..moveTo(at.dx, at.dy)
+            ..quadraticBezierTo(control.dx, control.dy, end.dx, end.dy),
+          stroke,
+        );
+        // The flared tip each thread ends in.
+        canvas.drawCircle(end, 1.1, stroke);
+      }
+    }
+  }
+
+  /// Graph paper, for Graphite: a fine square grid with every fifth line a
+  /// little stronger, as on an engineer's pad.
+  static void _grid(Canvas canvas, Rect band, Paint stroke) {
+    const cell = 14.0;
+    final minor = Paint()
+      ..color = stroke.color.withValues(alpha: stroke.color.a * 0.45)
+      ..strokeWidth = 0.6;
+    final major = Paint()
+      ..color = stroke.color
+      ..strokeWidth = 0.9;
+    final top = band.top - (band.top % cell);
+    var row = (band.top / cell).floor();
+    for (var y = top; y <= band.bottom; y += cell, row++) {
+      canvas.drawLine(
+        Offset(band.left, y),
+        Offset(band.right, y),
+        row % 5 == 0 ? major : minor,
+      );
+    }
+    var column = 0;
+    for (var x = band.left; x <= band.right; x += cell, column++) {
+      canvas.drawLine(
+        Offset(x, band.top),
+        Offset(x, band.bottom),
+        column % 5 == 0 ? major : minor,
+      );
+    }
+  }
+
+  // Four static motifs. Bounded geometry, no blur, timer or animated shader.
+  static void _bauhaus(Canvas canvas, Rect band, Paint stroke) {
+    final unit = band.width / 4;
+    final fill = Paint()..color = stroke.color;
+    canvas.drawRect(
+      Rect.fromLTWH(
+        band.left - unit * .3,
+        band.bottom - unit * 1.3,
+        unit,
+        unit * 1.3,
+      ),
+      fill,
+    );
+    canvas.drawCircle(
+      Offset(band.right - unit * .6, band.bottom - unit * .6),
+      unit * .8,
+      stroke..strokeWidth = 2,
+    );
+    final path = Path()
+      ..moveTo(band.center.dx - unit * .6, band.bottom)
+      ..lineTo(band.center.dx + unit * .8, band.bottom)
+      ..lineTo(band.center.dx + unit * .8, band.bottom - unit * 1.8)
+      ..close();
+    canvas.drawPath(path, fill);
+    for (var i = 0; i < 5; i++) {
+      final x = band.left + unit * .25 + i * unit * .18;
+      canvas.drawLine(
+        Offset(x, band.bottom - unit * 1.5),
+        Offset(x, band.bottom - unit * 2.3),
+        stroke,
+      );
+    }
+  }
+
+  static void _seams(Canvas canvas, Rect band, Paint stroke) {
+    final random = math.Random(31);
+    for (var route = 0; route < 4; route++) {
+      var point = Offset(
+        band.left + band.width * (route + .4) / 4,
+        band.bottom,
+      );
+      final path = Path()..moveTo(point.dx, point.dy);
+      for (var i = 0; i < 7; i++) {
+        final next = Offset(
+          point.dx + (random.nextDouble() - .5) * 72,
+          point.dy - band.height / 7,
+        );
+        path.lineTo(next.dx, next.dy);
+        if (i == 2 || i == 4) {
+          canvas.drawLine(
+            next,
+            next + Offset(route.isEven ? 35 : -35, -28),
+            stroke,
+          );
+        }
+        point = next;
+      }
+      canvas.drawPath(path, stroke..strokeWidth = 1.5);
+    }
+  }
+
+  static void _circuit(Canvas canvas, Rect band, Paint stroke) {
+    final gap = band.width / 9;
+    for (var i = 0; i < 9; i++) {
+      final x = band.left + gap * (i + .5);
+      final turn = band.bottom - band.height * (.2 + (i % 4) * .14);
+      final end = Offset(x + gap * .45, turn - gap * .45);
+      final path = Path()
+        ..moveTo(x, band.bottom)
+        ..lineTo(x, turn)
+        ..lineTo(end.dx, end.dy)
+        ..lineTo(end.dx, end.dy - gap * .8);
+      canvas.drawPath(path, stroke);
+      canvas.drawCircle(end - Offset(0, gap * .8), 3, stroke);
+    }
+  }
+
+  static void _halftone(Canvas canvas, Rect band, Paint stroke) {
+    final fill = Paint()..color = stroke.color;
+    // At most a few hundred dots, cached by the backdrop's repaint boundary.
+    const step = 18.0;
+    for (var y = band.top; y < band.bottom; y += step) {
+      for (var x = band.left; x < band.right; x += step) {
+        final wave = math.sin(x / 45 + y / 55);
+        final radius = .6 + (wave + 1) * 1.35;
+        canvas.drawCircle(Offset(x + math.sin(y / 60) * 6, y), radius, fill);
+      }
     }
   }
 

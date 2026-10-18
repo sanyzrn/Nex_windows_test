@@ -430,5 +430,21 @@
   "workspaceToolsSystem": "Desktop & utilities",
   "retry": "Try again",
   "workspaceLoading": "Loading your notes…",
-  "workspaceClipboard": "Clipboard"
+  "workspaceClipboard": "Clipboard",
+  "followSystem": "System",
+  "followTheme": "Theme default",
+  "customAccent": "Accent color",
+  "textScale": "Text size",
+  "solarCalendar": "Solar calendar",
+  "noteAttachments": "Attachments",
+  "backupCompatibility": "Transfer notes, attachments and appearance between Nex apps. Clipboard, device settings, mobile vault and AI credentials stay on their own device.",
+  "scheduledNotes": "Scheduled notes",
+  "releaseNow": "Deliver now",
+  "portableLibraryBackup": "Portable library backup · all Nex apps",
+  "importBackupConfirm": "This is a Nex export. Its notes and attachments will be added to your library. Existing notes remain unchanged.",
+  "importNotes": "Import notes",
+  "importNotesDone": "Notes and attachments imported",
+  "themePalette": "App theme",
+  "hexColor": "HEX color",
+  "backupSaved": "Backup saved"
 }

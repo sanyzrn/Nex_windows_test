@@ -1,3 +1,4 @@
+import 'scheduled_notes.dart';
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
@@ -100,6 +101,12 @@ class _NexWorkspaceHomeState extends State<NexWorkspaceHome> {
               count: count('media'),
               label: l.workspaceMedia,
             ),
+            if ((_overview['scheduled'] as int? ?? 0) > 0)
+              ActionChip(
+                avatar: const Icon(Icons.schedule_outlined, size: 16),
+                label: Text('${l.scheduledNotes} · ${count('scheduled')}'),
+                onPressed: () => showScheduledNotes(context),
+              ),
           ],
         );
         final intro = Column(
@@ -461,7 +468,12 @@ class _NotePreview extends StatelessWidget {
                 ),
                 const SizedBox(height: 3),
                 Text(
-                  nexDisplayDate(note.updatedAt, solar: fa, persian: fa),
+                  nexDisplayDate(
+                    note.updatedAt,
+                    solar:
+                        NexPanelScope.maybeOf(context)?.S.solarCalendar ?? fa,
+                    persian: fa,
+                  ),
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
                     color: scheme.onSurfaceVariant,
                   ),

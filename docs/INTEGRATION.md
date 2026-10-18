@@ -1,4 +1,4 @@
-> Historical migration guide. The current standalone app is **0.12.1+9**, based on the recorded shared-package snapshot `b00fcddf50ddee90231f6753b4fed7d8b3a9e250`. The SHAs and instructions below document an older transfer plan; do not treat them as current upstream compatibility validation. See [current architecture](../apps/desktop/README.md) and [release guidance](RELEASING.md).
+> Historical migration guide. For the current 0.15.0 cross-platform contract and Android reference, see [compatibility validation](CROSS_PLATFORM_0150.md). The patches and SHAs below describe an older migration plan; do not apply them to the current Android or Windows repositories.
 
 # Integration Guide: Merging Nex Windows Desktop into DbsNex Monorepo
 

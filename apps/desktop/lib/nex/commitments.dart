@@ -216,7 +216,7 @@ class _NexCommitmentsViewState extends State<NexCommitmentsView> {
               itemBuilder: (context, index) {
                 final item = _items[index];
                 final cadenceStr = commitmentCadenceLabel(context, item.cadence, item.every);
-                final dueStr = nexDisplayDate(item.dueAt, solar: isFa, persian: isFa, time: true);
+                final dueStr = nexDisplayDate(item.dueAt, solar: NexPanelScope.maybeOf(context)?.S.solarCalendar ?? isFa, persian: isFa, time: true);
 
                 return Container(
                   margin: const EdgeInsets.symmetric(vertical: 4),

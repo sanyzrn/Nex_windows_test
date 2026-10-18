@@ -16,14 +16,22 @@ typedef NexThemePreset = ({
   Color? dark,
 });
 
-/// The faint motif a theme draws along the bottom of the screen, for the
-/// five whose name suggests one; the rest stay plain.
+/// The faint motif a theme draws up from the bottom of the screen. Every
+/// palette has one but the plain Nex look, which stays plain on purpose.
 NexThemeTexture nexThemeTexture(String presetId) => switch (presetId) {
   'paper' => NexThemeTexture.fibre,
+  'autumn' => NexThemeTexture.leaves,
+  'blossom' => NexThemeTexture.petals,
+  'saffron' => NexThemeTexture.threads,
+  'graphite' => NexThemeTexture.grid,
   'turquoise' => NexThemeTexture.girih,
   'forest' => NexThemeTexture.contours,
   'ocean' => NexThemeTexture.waves,
   'midnight' => NexThemeTexture.stars,
+  'bauhaus' => NexThemeTexture.bauhaus,
+  'porcelain' => NexThemeTexture.seams,
+  'circuit' => NexThemeTexture.circuit,
+  'afterimage' => NexThemeTexture.halftone,
   _ => NexThemeTexture.none,
 };
 
@@ -138,6 +146,50 @@ const nexThemePresets = <NexThemePreset>[
     light: Color(0xFFF1F1F1),
     dark: Color(0xFF151515),
   ),
+  (
+    id: 'bauhaus',
+    en: 'Bauhaus',
+    fa: 'باوهاوس',
+    enDescription: 'Ink, vermilion and bold geometry',
+    faDescription: 'جوهر، سرخ شنگرف و هندسهٔ جسور',
+    seed: Color(0xFFBC352C),
+    icon: Icons.category_outlined,
+    light: Color(0xFFF6F3EB),
+    dark: Color(0xFF231A18),
+  ),
+  (
+    id: 'porcelain',
+    en: 'Kintsugi',
+    fa: 'کینتسوگی',
+    enDescription: 'Cool porcelain stitched with gold',
+    faDescription: 'چینی خنک با رگه‌های طلایی',
+    seed: Color(0xFF8C6C22),
+    icon: Icons.diamond_outlined,
+    light: Color(0xFFF3F4FA),
+    dark: Color(0xFF171D2C),
+  ),
+  (
+    id: 'circuit',
+    en: 'Circuit',
+    fa: 'مدار الکترونیک',
+    enDescription: 'Precise cyan routes on a midnight board',
+    faDescription: 'مسیرهای فیروزه‌ای روی برد نیمه‌شب',
+    seed: Color(0xFF007F86),
+    icon: Icons.memory_outlined,
+    light: Color(0xFFEAF7F9),
+    dark: Color(0xFF071E27),
+  ),
+  (
+    id: 'afterimage',
+    en: 'Afterimage',
+    fa: 'پس‌تصویر',
+    enDescription: 'Electric lime and an optical rhythm',
+    faDescription: 'لیمویی الکتریکی و ریتم خطای دید',
+    seed: Color(0xFF637D00),
+    icon: Icons.blur_circular_outlined,
+    light: Color(0xFFF1F4E9),
+    dark: Color(0xFF181B10),
+  ),
 ];
 
 /// The seed a palette brings with it, or null for the classic look, which
@@ -162,16 +214,45 @@ ThemeData nexApplyThemePreset(ThemeData base, String id, Color? accent) {
     (p) => p.id == id,
     orElse: () => nexThemePresets.first,
   );
-  final colors = ColorScheme.fromSeed(
-    seedColor: accent ?? p.seed,
+  // An accent somebody picked, as opposed to the palette's own. The palette's
+  // seed is laid out tonal-spot, muted to sit with its surfaces; a picked one
+  // was turned brown by the same treatment — a red came out #904A45 — and
+  // read as not applied at all. A picked accent keeps its own colour.
+  final picked = accent != null && accent.toARGB32() != p.seed.toARGB32();
+  final surface = base.brightness == Brightness.light ? p.light : p.dark;
+  var colors = ColorScheme.fromSeed(
+    seedColor: picked ? accent : p.seed,
     brightness: base.brightness,
     // Graphite is the one palette that is about having no colour: its tones
     // are taken without chroma, so nothing turns faintly blue.
     dynamicSchemeVariant: id == 'graphite'
         ? DynamicSchemeVariant.monochrome
+        : picked ||
+              const {
+                'bauhaus',
+                'porcelain',
+                'circuit',
+                'afterimage',
+              }.contains(id)
+        ? DynamicSchemeVariant.fidelity
         : DynamicSchemeVariant.tonalSpot,
-    surface: base.brightness == Brightness.light ? p.light : p.dark,
+    surface: surface,
   );
+  if (picked && id == 'graphite') {
+    // Grey everywhere but the accent: a colour picked on Graphite is the one
+    // colour on the screen, rather than one Graphite quietly ignores.
+    final tint = ColorScheme.fromSeed(
+      seedColor: accent,
+      brightness: base.brightness,
+      dynamicSchemeVariant: DynamicSchemeVariant.fidelity,
+    );
+    colors = colors.copyWith(
+      primary: tint.primary,
+      onPrimary: tint.onPrimary,
+      primaryContainer: tint.primaryContainer,
+      onPrimaryContainer: tint.onPrimaryContainer,
+    );
+  }
   final visual = base.extension<NexVisualStyle>();
   return base.copyWith(
     colorScheme: colors,

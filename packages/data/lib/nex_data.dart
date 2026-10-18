@@ -44,3 +44,7 @@ export 'sync_client/sync_client.dart';
 export 'sync_client/sync_wire.dart';
 
 export 'schema/full_backup.dart';
+export 'schema/backup_kind.dart';
+
+export 'repositories/attachment_repository.dart';
+export 'repositories/scheduled_note_repository.dart';
