@@ -319,6 +319,7 @@ void main() {
     expect(deleted, isNull);
     final trash = await t.runAsync(() => fixture.f.store.call<List<Note>>('trash'));
     expect(trash!.any((n) => n.id == 'checklist'), isTrue);
+    await _waitForWidget(t, find.text('Undo'));
     await t.tap(find.text('Undo'));
     await _database(t);
     final restored = await t.runAsync(
