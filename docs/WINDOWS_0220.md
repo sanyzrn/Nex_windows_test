@@ -37,7 +37,7 @@ already required. Phase 1 gives the desktop window its own form.
 Layout is checked at 440 px (compact) and 1100 px in English/Persian, light/dark
 through `workspace_redesign_test.dart` and `window_shell_test.dart`. Placement and
 re-anchoring are native code and need a manual check on Windows: first launch,
-close to tray and Open, a second monitor, 125%/150% scaling.
+closing and reopening, a second monitor, 125%/150% scaling.
 
 ## Phase 2 — library and cards
 
