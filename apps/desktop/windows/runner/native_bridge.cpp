@@ -818,7 +818,13 @@ bool NativeBridge::OnMessage(HWND hwnd, UINT message, WPARAM wparam, LPARAM lpar
     return true;
   }
   if (message == WM_CLOSE && !quit_requested_) {
-    PostEvent("tray", EncodableValue(EncodableMap{{EncodableValue("id"), EncodableValue("shutdown")}}));
+    // The title-bar X keeps background helpers, reminders and tray alive.
+    // Only an explicit Tray > Quit calls the Dart shutdown/flush path.
+    if (window_mode_) {
+      ShowWindow(window_, SW_HIDE);
+    } else {
+      PostEvent("tray", EncodableValue(EncodableMap{{EncodableValue("id"), EncodableValue("shutdown")}}));
+    }
     return true;
   }
   if (message == WM_HOTKEY && wparam == 1) {

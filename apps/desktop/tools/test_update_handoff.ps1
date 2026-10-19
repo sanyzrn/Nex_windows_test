@@ -56,7 +56,7 @@ try {
     $actualVersion = (Get-Item -LiteralPath $target).VersionInfo.ProductVersion
     Write-Host "Installed target version: $actualVersion; installer: $expectedVersion"
     # The helper is no longer running. Stop the relaunched GUI through its
-    # normal WM_CLOSE route and exercise the newly installed complete bundle.
+    # explicit Tray > Quit route and exercise the newly installed complete bundle.
     Add-Type @'
 using System;
 using System.Runtime.InteropServices;
@@ -66,7 +66,7 @@ public static class NexUpdateClose {
   [DllImport("user32.dll")] private static extern uint GetWindowThreadProcessId(IntPtr hwnd, out uint owner);
   [DllImport("user32.dll")] private static extern bool PostMessage(IntPtr hwnd, uint msg, IntPtr w, IntPtr l);
   public static void Close(uint pid) {
-    EnumWindows((hwnd, unused) => { uint owner; GetWindowThreadProcessId(hwnd, out owner); if (owner == pid) PostMessage(hwnd, 0x0010, IntPtr.Zero, IntPtr.Zero); return true; }, IntPtr.Zero);
+    EnumWindows((hwnd, unused) => { uint owner; GetWindowThreadProcessId(hwnd, out owner); if (owner == pid) PostMessage(hwnd, 0x0111, (IntPtr)40005, IntPtr.Zero); return true; }, IntPtr.Zero);
   }
 }
 '@
@@ -77,7 +77,7 @@ public static class NexUpdateClose {
         Start-Sleep -Milliseconds 100
     } while ([DateTime]::UtcNow -lt $deadline)
     if ($restarted.Count -ne 1) { throw 'Updated Nex was not relaunched exactly once.' }
-    # Wait for first-frame/window setup before posting the normal close event.
+    # Wait for first-frame/window setup before posting the tray Quit command.
     Start-Sleep -Seconds 2
     [NexUpdateClose]::Close([uint32]$restarted[0].Id)
     if (-not $restarted[0].WaitForExit(10000)) { throw 'Updated GUI did not close cleanly.' }
