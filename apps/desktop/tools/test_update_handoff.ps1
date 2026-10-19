@@ -6,10 +6,12 @@ $ErrorActionPreference = 'Stop'
 $Release = (Resolve-Path -LiteralPath $Release).Path
 $helper = Join-Path $Release nex_update.exe
 $helperHash = (Get-FileHash -LiteralPath $helper -Algorithm SHA256).Hash.ToLowerInvariant()
-& $helper --verify-update $helper $helperHash
-if ($LASTEXITCODE -ne 0) { throw 'Native verifier rejected the exact executable hash.' }
-& $helper --verify-update $helper ('0' * 64)
-if ($LASTEXITCODE -eq 0) { throw 'Native verifier accepted an invalid hash.' }
+# This is a Windows GUI-subsystem executable. Await its process explicitly;
+# invocation through & does not reliably populate PowerShell's LASTEXITCODE.
+$verified = Start-Process -FilePath $helper -ArgumentList @('--verify-update', ('"' + $helper + '"'), $helperHash) -Wait -PassThru
+if ($verified.ExitCode -ne 0) { throw "Native verifier rejected the exact executable hash: $($verified.ExitCode)." }
+$rejected = Start-Process -FilePath $helper -ArgumentList @('--verify-update', ('"' + $helper + '"'), ('0' * 64)) -Wait -PassThru
+if ($rejected.ExitCode -ne 4) { throw "Native verifier did not reject an invalid hash: $($rejected.ExitCode)." }
 $setup = @(Get-ChildItem -LiteralPath $InstallerDirectory -Filter 'Nex-Windows-Setup-*-x64.exe')
 if ($setup.Count -ne 1) { throw 'Expected one installer.' }
 $digest = (Get-FileHash -LiteralPath $setup[0].FullName -Algorithm SHA256).Hash.ToLowerInvariant()
