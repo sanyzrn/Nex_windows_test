@@ -150,6 +150,12 @@ FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
     SetFocus(flutter_controller_->view()->GetNativeWindow());
     return 0;
   }
+  // Flutter's top-level handler may consume WM_CLOSE before the tray
+  // bridge sees it. Process the user's X first, while explicit Quit is
+  // allowed through after the bridge sets quit_requested_.
+  if (message == WM_CLOSE && bridge_ && bridge_->OnMessage(hwnd, message, wparam, lparam)) {
+    return 0;
+  }
   const bool display_change = message == WM_DPICHANGED || message == WM_DISPLAYCHANGE;
   if (bridge_ && display_change) bridge_->OnMessage(hwnd, message, wparam, lparam);
   // Give Flutter, including plugins, an opportunity to handle window
