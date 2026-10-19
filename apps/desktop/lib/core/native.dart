@@ -73,14 +73,20 @@ abstract class NativeHost {
 
   Future<bool> cancelReminder(String id) async => false;
 
+  /// [occurrence] is the instant the reminder was due; a toast Windows already
+  /// delivered for it is not shown again.
   Future<bool> showOverdueReminder({
     required String id,
     required String noteId,
     required String title,
     required String body,
+    DateTime? occurrence,
   }) async => false;
 
   Future<List<String>> listScheduledReminders() async => [];
+
+  /// What Windows last said when it refused a notification, if it did.
+  Future<String?> reminderDiagnosticError() async => null;
 
   /// FFI helpers (no-ops off Windows so tests run everywhere).
   bool get ffiAvailable;
@@ -430,12 +436,14 @@ class WinNativeHost extends NativeHost with _NativePointer {
     required String noteId,
     required String title,
     required String body,
+    DateTime? occurrence,
   }) async {
     final ok = await _channel.invokeMethod('showOverdueReminder', {
       'id': id,
       'noteId': noteId,
       'title': title,
       'body': body,
+      'occurrence': occurrence?.millisecondsSinceEpoch ?? 0,
     });
     return ok == true;
   }
@@ -456,6 +464,7 @@ class WinNativeHost extends NativeHost with _NativePointer {
     return (list ?? []).map((e) => (e as Map).cast<String, dynamic>()).toList();
   }
 
+  @override
   Future<String?> reminderDiagnosticError() =>
       _channel.invokeMethod<String>('reminderDiagnosticError');
 }

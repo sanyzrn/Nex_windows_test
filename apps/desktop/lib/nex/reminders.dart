@@ -24,6 +24,7 @@ abstract interface class ReminderScheduler {
     required String noteId,
     required String title,
     required String body,
+    DateTime? occurrence,
   });
 
   Future<Set<String>> listScheduledIds();
@@ -59,11 +60,13 @@ class NativeReminderScheduler implements ReminderScheduler {
     required String noteId,
     required String title,
     required String body,
+    DateTime? occurrence,
   }) => _host.showOverdueReminder(
     id: id,
     noteId: noteId,
     title: title,
     body: body,
+    occurrence: occurrence,
   );
 
   @override
@@ -126,6 +129,7 @@ class FakeReminderScheduler implements ReminderScheduler {
     required String noteId,
     required String title,
     required String body,
+    DateTime? occurrence,
   }) async {
     overdueShown.add(
       ScheduledReminderEntry(
@@ -133,7 +137,7 @@ class FakeReminderScheduler implements ReminderScheduler {
         noteId: noteId,
         title: title,
         body: body,
-        fireAt: DateTime.now().toUtc(),
+        fireAt: (occurrence ?? DateTime.now()).toUtc(),
       ),
     );
     return true;
@@ -195,8 +199,10 @@ class ReminderReconciliationEngine {
 
     final targetMap =
         <String, ({DateTime fireAt, String title, String body})>{};
-    final noteIds = {
-      for (final note in notes) reminderScheduleId(note.id): note.id,
+    final noteIds = <String, String>{
+      for (final note in notes)
+        for (var i = 0; i < reminderLookahead(note.dueRepeat); i++)
+          reminderOccurrenceId(note.id, i): note.id,
     };
     int overdueCount = 0;
     int failedCount = 0;
@@ -230,6 +236,7 @@ class ReminderReconciliationEngine {
                 noteId: note.id,
                 title: titleText,
                 body: bodyText,
+                occurrence: due,
               );
               if (shown) {
                 notifiedOverdueIds?.add(receipt);
@@ -270,6 +277,7 @@ class ReminderReconciliationEngine {
               noteId: note.id,
               title: titleText,
               body: bodyText,
+              occurrence: previous,
             );
             if (shown) {
               notifiedOverdueIds?.add(occurrenceReceipt);
@@ -279,7 +287,17 @@ class ReminderReconciliationEngine {
             }
           }
         }
-        targetMap[id] = (fireAt: nextFire, title: titleText, body: bodyText);
+        // The next few occurrences are queued too, so the series keeps
+        // ringing while Nex is closed.
+        var fireAt = nextFire;
+        for (var i = 0; i < reminderLookahead(note.dueRepeat); i++) {
+          targetMap[reminderOccurrenceId(note.id, i)] = (
+            fireAt: fireAt,
+            title: titleText,
+            body: bodyText,
+          );
+          fireAt = computeNextOccurrence(due, note.dueRepeat, fireAt);
+        }
       }
     }
 

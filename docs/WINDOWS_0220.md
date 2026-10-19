@@ -60,3 +60,19 @@ close to tray and Open, a second monitor, 125%/150% scaling.
   `usability_regression_test`). Whether mixed Persian/English text in
   Flutter's single-direction text field (ADR-037 in the Android repo) is the
   typing problem seen on Windows is not established; it needs the symptom.
+
+## Phase 4 — reminders and notifications
+
+- `reminderLookahead` / `reminderOccurrenceId` (reminder_policy.dart): a repeating
+  reminder queues 7 (daily) or 8 (weekly) occurrences. Ids are `nx<10 hex>r<NN>`
+  (15 characters; the queue rejects 16). The coordinator's 30-second pass
+  reconciles them like any other id, so dropped, paused or edited series are
+  taken back.
+- Scheduled toasts carry the Tag `<id>@<epoch seconds>`. The fallback toast
+  (`showOverdueReminder(occurrence:)`) checks the Action Center history for that
+  tag and does nothing if Windows already delivered it.
+- Settings > Display > Test notifications; native errors come from
+  `reminderDiagnosticError`.
+- Needs a Windows check: scheduled toasts with the installed shortcut
+  (AUMID `Nex.Desktop.App`), the history check, click-through to the note,
+  recurring toasts after the app was exited. See `docs/TEST_0220.md`.

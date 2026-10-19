@@ -7,6 +7,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nex_core/nex_core.dart';
 import 'package:nex_data/nex_data.dart';
+import 'package:nex_desktop/nex/reminder_policy.dart';
 import 'package:nex_desktop/nex/reminders.dart';
 import 'package:path/path.dart' as p;
 
@@ -79,6 +80,12 @@ void main() {
     expect(summary.overdueCount, 1);
     expect(scheduler.overdueShown.length, 1);
     expect(scheduler.overdueShown.first.noteId, 'n1');
+    // The fallback names the occurrence it stands in for, so a toast Windows
+    // already delivered for that instant is not shown twice.
+    expect(
+      scheduler.overdueShown.first.fireAt,
+      repo.getById('n1')!.dueAt!.toUtc(),
+    );
     expect(scheduler.scheduled.isEmpty, isTrue);
   });
 
@@ -94,11 +101,48 @@ void main() {
       nowOverride: now,
     );
 
-    expect(summary.scheduledCount, 1);
+    // The next occurrence plus the six after it: a week that keeps ringing
+    // while Nex is closed.
+    expect(summary.scheduledCount, 7);
     expect(
       scheduler.scheduled['n_daily']!.fireAt,
       DateTime.utc(2026, 10, 11, 9, 0),
     );
+    final times = [
+      for (var i = 0; i < 7; i++)
+        scheduler.scheduled[reminderOccurrenceId('n_daily', i)]!.fireAt,
+    ];
+    for (var i = 1; i < times.length; i++) {
+      expect(times[i].difference(times[i - 1]), const Duration(days: 1));
+    }
+    for (final id in scheduler.scheduled.keys) {
+      expect(id.length, lessThan(16), reason: 'the queue rejects 16: $id');
+    }
+    expect(scheduler.scheduled.keys.toSet().length, 7);
+  });
+
+  test('queued occurrences that are no longer wanted are taken back', () async {
+    final note = createNote('n_queue', 'Water the plants');
+    repo.setDueAt(
+      note.id,
+      DateTime.utc(2026, 10, 1, 9),
+      repeat: NoteRepeat.daily,
+    );
+    final now = DateTime.utc(2026, 10, 10, 10);
+    await ReminderReconciliationEngine.reconcile(
+      repo: repo,
+      scheduler: scheduler,
+      nowOverride: now,
+    );
+    expect(scheduler.scheduled.length, 7);
+    // The series becomes a one-off: only the one queue entry may remain.
+    repo.setDueAt(note.id, DateTime.utc(2026, 10, 12, 9));
+    await ReminderReconciliationEngine.reconcile(
+      repo: repo,
+      scheduler: scheduler,
+      nowOverride: now,
+    );
+    expect(scheduler.scheduled.keys, [reminderOccurrenceId('n_queue', 0)]);
   });
 
   test(
@@ -141,10 +185,14 @@ void main() {
       nowOverride: now,
     );
 
-    expect(summary.scheduledCount, 1);
+    expect(summary.scheduledCount, 8);
     expect(
       scheduler.scheduled['n_weekly']!.fireAt,
       DateTime.utc(2026, 10, 15, 8, 0),
+    );
+    expect(
+      scheduler.scheduled[reminderOccurrenceId('n_weekly', 7)]!.fireAt,
+      DateTime.utc(2026, 12, 3, 8, 0),
     );
   });
 

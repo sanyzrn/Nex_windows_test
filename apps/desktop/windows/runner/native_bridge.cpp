@@ -306,7 +306,8 @@ void NativeBridge::HandleMethodCall(
         ArgString(args, "id"),
         ArgString(args, "noteId"),
         ArgString(args, "title"),
-        ArgString(args, "body"));
+        ArgString(args, "body"),
+        ArgInt64(args, "occurrence"));
     result->Success(EncodableValue(ok));
   } else if (name == "reminderDiagnosticError") {
     result->Success(EncodableValue(ReminderDiagnosticError()));

@@ -132,5 +132,12 @@ class _TrackedScheduler implements ReminderScheduler {
     required String noteId,
     required String title,
     required String body,
-  }) => delegate.showOverdue(id: id, noteId: noteId, title: title, body: body);
+    DateTime? occurrence,
+  }) => delegate.showOverdue(
+    id: id,
+    noteId: noteId,
+    title: title,
+    body: body,
+    occurrence: occurrence,
+  );
 }

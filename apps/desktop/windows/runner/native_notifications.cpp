@@ -34,6 +34,27 @@ bool NotificationsEnabledOrUnknown(
   }
 }
 
+// One tag per occurrence: "id@seconds". A scheduled toast carries it, so the
+// toast Windows delivers and the one Nex would show as a fallback are the same
+// notification to the Action Center.
+std::wstring OccurrenceTag(const std::wstring& id, int64_t epochMs) {
+  if (epochMs <= 0) return id;
+  return id + L"@" + std::to_wstring(epochMs / 1000);
+}
+
+bool AlreadyDelivered(const std::wstring& tag) {
+  try {
+    using namespace winrt::Windows::UI::Notifications;
+    for (auto const& shown :
+         ToastNotificationManager::History().GetHistory(kAppUserModelId)) {
+      if (shown.Tag() == tag) return true;
+    }
+  } catch (...) {
+    // No history to read: behave as if nothing was delivered.
+  }
+  return false;
+}
+
 std::wstring EscapeXml(const std::wstring& s) {
   std::wstring out;
   for (wchar_t c : s) {
@@ -88,6 +109,8 @@ bool ScheduleToastNotification(const std::string& id,
     ScheduledToastNotification scheduled(doc, fireTime);
     stage = "id";
     scheduled.Id(wideId);
+    stage = "tag";
+    scheduled.Tag(OccurrenceTag(wideId, fireAtEpochMs));
 
     stage = "notifier";
     auto notifier = ToastNotificationManager::CreateToastNotifier(kAppUserModelId);
@@ -137,7 +160,9 @@ bool CancelScheduledToastNotification(const std::string& id) {
 bool ShowImmediateToast(const std::string& id,
                         const std::string& noteId,
                         const std::string& title,
-                        const std::string& body) {
+                        const std::string& body,
+                        int64_t occurrenceEpochMs) {
+  last_reminder_error.clear();
   try {
     using namespace winrt::Windows::Data::Xml::Dom;
     using namespace winrt::Windows::UI::Notifications;
@@ -158,15 +183,27 @@ bool ShowImmediateToast(const std::string& id,
     doc.LoadXml(xml);
 
     ToastNotification toast(doc);
-    if (!id.empty()) {
-      toast.Tag(Utf16FromUtf8(id));
+    const std::wstring tag = OccurrenceTag(Utf16FromUtf8(id), occurrenceEpochMs);
+    if (!tag.empty()) {
+      if (occurrenceEpochMs > 0 && AlreadyDelivered(tag)) return true;
+      toast.Tag(tag);
     }
 
     auto notifier = ToastNotificationManager::CreateToastNotifier(kAppUserModelId);
-    if (!NotificationsEnabledOrUnknown(notifier)) return false;
+    if (!NotificationsEnabledOrUnknown(notifier)) {
+      last_reminder_error = "NotificationSetting=" +
+          std::to_string(static_cast<int>(notifier.Setting()));
+      return false;
+    }
     notifier.Show(toast);
     return true;
+  } catch (const winrt::hresult_error& error) {
+    last_reminder_error = "show: " +
+        std::to_string(static_cast<int32_t>(error.code())) + ": " +
+        PanelUtf8FromUtf16(error.message().c_str());
+    return false;
   } catch (...) {
+    last_reminder_error = "Unknown show failure";
     return false;
   }
 }

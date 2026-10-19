@@ -1129,6 +1129,34 @@ class AppLocalizationsFa extends AppLocalizations {
   String get reminderFutureRequired => 'زمانی در آینده انتخاب کنید.';
 
   @override
+  String get notificationSettings => 'تنظیمات اعلان';
+
+  @override
+  String get testNotification => 'آزمایش اعلان‌ها';
+
+  @override
+  String get testNotificationHint =>
+      'یک اعلان همین حالا و یکی دیگر ۱۵ ثانیه بعد نشان می‌دهد تا هر دو راه رساندن یادآورها را بسنجید.';
+
+  @override
+  String get testNotificationRun => 'ارسال آزمایشی';
+
+  @override
+  String get testNotificationSent =>
+      'آزمایش فرستاده شد. باید همین حالا یک اعلان و ۱۵ ثانیه بعد اعلان دیگری ببینید.';
+
+  @override
+  String testNotificationFailed(String detail) {
+    return 'ویندوز اعلان را نپذیرفت$detail. تنظیمات > سیستم > اعلان‌ها و Focus assist را بررسی کنید.';
+  }
+
+  @override
+  String get testNotificationBody => 'این یک اعلان آزمایشی از نکس است.';
+
+  @override
+  String get testNotificationLater => 'اعلان زمان‌بندی‌شدهٔ آزمایشی رسید.';
+
+  @override
   String get reminderDeliveryFailed =>
       'زمان ذخیره شد، اما ویندوز نتوانست اعلان را زمان‌بندی کند. تنظیمات اعلان ویندوز را بررسی کنید و دوباره تلاش کنید.';
 

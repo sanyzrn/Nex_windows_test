@@ -24,6 +24,13 @@
 - Capture: in the compact window the page opens on the editor — the hero line
   and counters give way — and the six capture actions are icon-over-label tiles,
   three across, instead of six wide buttons.
+- Reminders: a repeating reminder now queues its next seven (daily) or eight
+  (weekly) occurrences with Windows, so it keeps ringing for that long even if
+  Nex is closed. A toast Windows already delivered is no longer repeated by
+  Nex's own fallback (both carry one tag per occurrence).
+- Settings > Display > Test notifications sends one notification now and one
+  queued 15 seconds ahead, and shows Windows' own reason if it refuses. The
+  reminder warning on the capture page links to Windows notification settings.
 
 ## 0.21.1 — 2026-10-19
 

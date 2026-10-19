@@ -216,7 +216,17 @@ class _NexWorkspaceHomeState extends State<NexWorkspaceHome> {
                     stats,
                   ],
                   if (NexScope.of(context).reminderDeliveryFailed)
-                    _HomeMessage(l.reminderDeliveryFailed),
+                    _HomeMessage(
+                      l.reminderDeliveryFailed,
+                      actionLabel: c == null ? null : l.notificationSettings,
+                      onAction: c == null
+                          ? null
+                          : () => unawaited(
+                              c.native
+                                  .launch('ms-settings:notifications')
+                                  .catchError((_) {}),
+                            ),
+                    ),
                   if (_error != null) _HomeMessage(_error!, onRetry: _load),
                   SizedBox(height: compactPage ? 4 : 24),
                   if (wide)
@@ -364,9 +374,16 @@ class _ShelfHeading extends StatelessWidget {
 }
 
 class _HomeMessage extends StatelessWidget {
-  const _HomeMessage(this.message, {this.onRetry});
+  const _HomeMessage(
+    this.message, {
+    this.onRetry,
+    this.actionLabel,
+    this.onAction,
+  });
   final String message;
   final VoidCallback? onRetry;
+  final String? actionLabel;
+  final VoidCallback? onAction;
   @override
   Widget build(BuildContext context) => Padding(
     padding: const EdgeInsets.only(top: 12),
@@ -384,6 +401,8 @@ class _HomeMessage extends StatelessWidget {
             style: TextStyle(color: Theme.of(context).colorScheme.error),
           ),
         ),
+        if (onAction != null && actionLabel != null)
+          TextButton(onPressed: onAction, child: Text(actionLabel!)),
         if (onRetry != null)
           IconButton(
             tooltip: AppLocalizations.of(context)!.retry,
