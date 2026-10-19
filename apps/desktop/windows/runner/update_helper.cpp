@@ -106,6 +106,9 @@ int Apply(const std::vector<std::wstring>& args) {
   // --apply-update <parent pid> <installer> <sha256> <installed exe> <nonce> <language>
   if (args.size() != 7 || !IsHash(args[3]) || args[5].size() != 36 ||
       (args[6] != L"english" && args[6] != L"farsi")) return 2;
+  if (!std::all_of(args[5].begin(), args[5].end(), [](wchar_t c) {
+    return c == L'-' || (c >= L'0' && c <= L'9') || (c >= L'a' && c <= L'f');
+  })) return 2;
   if (!std::all_of(args[1].begin(), args[1].end(), [](wchar_t c) { return c >= L'0' && c <= L'9'; })) return 2;
   wchar_t* end = nullptr;
   const auto process_id = wcstoul(args[1].c_str(), &end, 10);
@@ -129,7 +132,9 @@ int Apply(const std::vector<std::wstring>& args) {
                           OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr));
   if (!Verify(file.value, args[3])) return 4;
   const auto ready = setup + L".ready";
-  const std::string nonce(args[5].begin(), args[5].end());
+  std::string nonce;
+  nonce.reserve(args[5].size());
+  for (const auto c : args[5]) nonce += static_cast<char>(c);
   if (!Write(ready, nonce)) return 5;
   // A failed save keeps Nex running. Nothing is installed until it has exited.
   if (WaitForSingleObject(parent.value, 120000) != WAIT_OBJECT_0) return 6;
