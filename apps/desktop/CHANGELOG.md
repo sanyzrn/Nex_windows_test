@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.22.0 — 2026-10-19
+
+- Shared packages (core, data, ui, ai) brought level with Android 2.1.9:
+  automatic AI capability detection and model list, fused search ranking,
+  link and recurring-item fixes. The desktop app now requires Flutter 3.44.
+- New compact window: Nex opens as a tall portrait card in the bottom-right
+  corner of the screen, always at the same size, and returns to that corner
+  each time it is opened from the tray. It can still be resized or maximised;
+  turn on Settings > Display > Remember window size and position to reopen at
+  the last frame instead. The edge panel is unchanged.
+- New window look: a surface tinted by the theme accent, a rounded content
+  card, a caption without its own bar, and a slim navigation rail of icons over
+  labels (Capture, Library, Intelligence, Tools, Settings) with a More menu for
+  the edge panel switch, theme and shortcuts. Wide windows keep the labelled rail.
+
 ## 0.21.1 — 2026-10-19
 
 - Close the desktop window to System Tray instead of stopping Nex, and

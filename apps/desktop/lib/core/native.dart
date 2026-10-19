@@ -40,11 +40,14 @@ abstract class NativeHost {
   /// Restyles the host between the full desktop window and the edge panel.
   /// [bounds] is the saved frame (x/y/w/h, physical px) to restore, if any.
   /// No-op off Windows so tests and stubs work unchanged.
+  /// With [compact] the host ignores [bounds] and opens the fixed portrait
+  /// card in the bottom-right corner of the work area.
   Future<void> setWindowMode(
     String mode, {
     Map<String, dynamic>? bounds,
     bool maximized = false,
     bool show = true,
+    bool compact = false,
   }) async {}
 
   /// Current desktop-window frame {x, y, w, h, maximized} for persistence.
@@ -374,11 +377,13 @@ class WinNativeHost extends NativeHost with _NativePointer {
     Map<String, dynamic>? bounds,
     bool maximized = false,
     bool show = true,
+    bool compact = false,
   }) => _channel.invokeMethod('setWindowMode', {
     'mode': mode,
     if (bounds != null) ...bounds,
     'maximized': maximized,
     'show': show,
+    'compact': compact,
   });
 
   @override

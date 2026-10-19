@@ -19,6 +19,7 @@ class _RecordingNative extends NativeHost {
   Map<String, dynamic>? lastBounds;
   bool? lastShow;
   bool? lastMaximized;
+  bool? lastCompact;
 
   @override
   Future<void> setWindowMode(
@@ -26,11 +27,13 @@ class _RecordingNative extends NativeHost {
     Map<String, dynamic>? bounds,
     bool maximized = false,
     bool show = true,
+    bool compact = false,
   }) async {
     modes.add(mode);
     lastBounds = bounds;
     lastShow = show;
     lastMaximized = maximized;
+    lastCompact = compact;
   }
 
   @override
@@ -170,10 +173,22 @@ void main() {
     expect(find.byType(PanelShell), findsOneWidget);
     expect(find.byType(NexWindowShell), findsNothing);
 
-    // Coming back restores the remembered window frame.
+    // By default the window comes back as the fixed compact card, not at the
+    // frame it was left in.
     await controller.setWindowMode('window');
     await _settle(tester, 12);
     expect(native.modes.last, 'window');
+    expect(native.lastCompact, isTrue);
+    expect(native.lastBounds, isNull);
+    expect(native.lastMaximized, isFalse);
+    expect(find.byType(NexWindowShell), findsOneWidget);
+
+    // With "remember size and position" on, the saved frame returns.
+    await controller.setWindowMode('panel');
+    controller.S.windowRemember = true;
+    await controller.setWindowMode('window');
+    await _settle(tester, 12);
+    expect(native.lastCompact, isFalse);
     expect(native.lastBounds?['w'], 1180);
     expect(native.lastBounds?['h'], 780);
     expect(find.byType(NexWindowShell), findsOneWidget);
@@ -189,6 +204,11 @@ void main() {
       ..windowMaximized = true;
     final restored = Settings.fromMap(s.toMap());
     expect(restored.windowMode, 'panel');
+    expect(restored.windowRemember, isFalse);
+    expect(
+      Settings.fromMap((s..windowRemember = true).toMap()).windowRemember,
+      isTrue,
+    );
     expect(restored.windowBounds?['w'], 900);
     expect(restored.windowMaximized, isTrue);
 

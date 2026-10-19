@@ -248,6 +248,8 @@
   "interfaceMode": "Interface mode",
   "windowMode": "Window",
   "panelMode": "Edge panel",
+  "windowRemember": "Remember window size and position",
+  "windowRememberHint": "Off: Nex opens as a compact card in the bottom-right corner, always at the same size.",
   "modeDescription": "The desktop window is the main experience; the edge panel stays available for quick capture. Both share the same notes, media and settings.",
   "edgePanelOnly": "Applies to the edge panel — switch the interface mode to use it.",
   "switchToPanel": "Switch to edge panel",

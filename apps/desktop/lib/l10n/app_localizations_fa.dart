@@ -766,6 +766,13 @@ class AppLocalizationsFa extends AppLocalizations {
   String get panelMode => 'نوار لبه';
 
   @override
+  String get windowRemember => 'به‌خاطر سپردن اندازه و جای پنجره';
+
+  @override
+  String get windowRememberHint =>
+      'خاموش: نکس همیشه با همان اندازه و در گوشهٔ پایین‌راست صفحه باز می‌شود.';
+
+  @override
   String get modeDescription =>
       'پنجرهٔ دسکتاپ تجربهٔ اصلی است و نوار لبه برای ثبت سریع در دسترس می‌ماند. هر دو حالت از همان یادداشت‌ها، رسانه‌ها و تنظیمات استفاده می‌کنند.';
 

@@ -269,7 +269,8 @@ void NativeBridge::HandleMethodCall(
     const auto mode = ArgString(args, "mode");
     SetWindowMode(mode, ArgInt(args, "x"), ArgInt(args, "y"),
                   ArgInt(args, "w"), ArgInt(args, "h"),
-                  ArgBool(args, "maximized"), ArgBool(args, "show"));
+                  ArgBool(args, "maximized"), ArgBool(args, "show"),
+                  ArgBool(args, "compact"));
     result->Success();
   } else if (name == "windowFrame") {
     result->Success(EncodableValue(WindowFrame()));
@@ -347,7 +348,8 @@ void NativeBridge::SetPassthrough(bool on) {
 }
 
 void NativeBridge::SetWindowMode(const std::string& mode, int x, int y, int w,
-                                  int h, bool maximized, bool show) {
+                                  int h, bool maximized, bool show,
+                                  bool compact) {
   const bool to_window = (mode == "window");
   // Never resize/reveal the previous Flutter surface in the new host frame.
   ShowWindow(window_, SW_HIDE);
@@ -356,6 +358,7 @@ void NativeBridge::SetWindowMode(const std::string& mode, int x, int y, int w,
   surface_requested_generation_ = UINT64_MAX;
   pending_show_ = false;
   window_mode_ = to_window;
+  compact_window_ = to_window && compact;
   if (!to_window) {
     passthrough_ = true;
     SetWindowAccentTransparent(window_, true);
@@ -379,7 +382,8 @@ void NativeBridge::SetWindowMode(const std::string& mode, int x, int y, int w,
   SetWindowLong(window_, GWL_EXSTYLE, ex);
 
   const auto monitors = CollectMonitors();
-  const bool saved = w >= 320 && h >= 320 && x > -32000 && y > -32000;
+  const bool saved =
+      !compact && w >= 320 && h >= 320 && x > -32000 && y > -32000;
   bool placed = false;
   if (saved && !monitors.empty()) {
     const RECT frame{x, y, x + w, y + h};
@@ -395,6 +399,19 @@ void NativeBridge::SetWindowMode(const std::string& mode, int x, int y, int w,
         y = std::max(m.y, std::min(y, m.y + m.h - 60));
         break;
       }
+    }
+  }
+  if (!placed && compact) {
+    POINT cursor = {0, 0};
+    GetCursorPos(&cursor);
+    const RECT frame = CompactWindowFrame(
+        MonitorFromPoint(cursor, MONITOR_DEFAULTTOPRIMARY));
+    if (frame.right > frame.left && frame.bottom > frame.top) {
+      x = frame.left;
+      y = frame.top;
+      w = frame.right - frame.left;
+      h = frame.bottom - frame.top;
+      placed = true;
     }
   }
   if (!placed) {
@@ -422,7 +439,7 @@ void NativeBridge::SetWindowMode(const std::string& mode, int x, int y, int w,
   SetWindowPos(window_, HWND_NOTOPMOST, x, y, w, h,
                SWP_NOACTIVATE | SWP_FRAMECHANGED);
   pending_show_ = show;
-  pending_show_maximized_ = maximized;
+  pending_show_maximized_ = maximized && !compact;
 }
 
 void NativeBridge::OnFirstFrame() {
@@ -499,6 +516,21 @@ void NativeBridge::FocusWindow() {
   if (!surface_ready_) {
     if (window_mode_) pending_show_ = true;
     return;
+  }
+  if (compact_window_ && window_mode_ &&
+      (IsIconic(window_) || !IsWindowVisible(window_))) {
+    // Coming back from the tray: the card returns to its corner, the way a
+    // flyout does, instead of wherever it was last dragged.
+    POINT cursor = {0, 0};
+    GetCursorPos(&cursor);
+    const RECT frame = CompactWindowFrame(
+        MonitorFromPoint(cursor, MONITOR_DEFAULTTOPRIMARY));
+    if (frame.right > frame.left && frame.bottom > frame.top) {
+      if (IsIconic(window_)) ShowWindow(window_, SW_RESTORE);
+      SetWindowPos(window_, nullptr, frame.left, frame.top,
+                   frame.right - frame.left, frame.bottom - frame.top,
+                   SWP_NOZORDER | SWP_NOACTIVATE);
+    }
   }
   FocusWindowTarget(window_);
 }
@@ -851,8 +883,8 @@ bool NativeBridge::OnMessage(HWND hwnd, UINT message, WPARAM wparam, LPARAM lpar
     const UINT dpi = FlutterDesktopGetDpiForMonitor(
         MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST));
     const double scale = dpi == 0 ? 1.0 : dpi / 96.0;
-    mmi->ptMinTrackSize.x = static_cast<LONG>(520 * scale);
-    mmi->ptMinTrackSize.y = static_cast<LONG>(560 * scale);
+    mmi->ptMinTrackSize.x = static_cast<LONG>(380 * scale);
+    mmi->ptMinTrackSize.y = static_cast<LONG>(520 * scale);
     MONITORINFO mi{};
     mi.cbSize = sizeof(mi);
     if (GetMonitorInfo(MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST), &mi)) {

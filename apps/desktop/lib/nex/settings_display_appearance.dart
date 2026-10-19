@@ -43,6 +43,19 @@ mixin _SettingsDisplayAppearance on _SettingsStateBase {
               onSelectionChanged: (v) => c.setWindowMode(v.first),
             ),
           ),
+          const Divider(height: 1),
+          _SettingRow(
+            title: l.windowRemember,
+            subtitle: l.windowRememberHint,
+            control: Switch(
+              value: c.S.windowRemember,
+              onChanged: (v) {
+                c.S.windowRemember = v;
+                c.save();
+                c.refresh();
+              },
+            ),
+          ),
           if (!c.isWindowMode || !widget.windowLayout) ...[
             const Divider(height: 1),
             _SettingRow(

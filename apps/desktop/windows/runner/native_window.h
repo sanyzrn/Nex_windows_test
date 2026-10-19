@@ -17,7 +17,15 @@ struct MonitorItem {
   std::wstring name;
 };
 
+// The compact window: a tall portrait card that always opens at the same
+// size, in the bottom-right corner of the work area (logical px).
+constexpr int kCompactWindowWidth = 460;
+constexpr int kCompactWindowHeight = 760;
+constexpr int kCompactWindowMargin = 12;
+
 std::vector<MonitorItem> CollectMonitors();
+// Physical-px frame of the compact window on [monitor]'s work area.
+RECT CompactWindowFrame(HMONITOR monitor);
 void SetWindowAccentTransparent(HWND hwnd, bool transparent);
 void FocusWindowTarget(HWND window);
 flutter::EncodableMap ComputePlacement(HWND window, const std::string& edge,

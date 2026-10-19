@@ -765,6 +765,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get panelMode => 'Edge panel';
 
   @override
+  String get windowRemember => 'Remember window size and position';
+
+  @override
+  String get windowRememberHint =>
+      'Off: Nex opens as a compact card in the bottom-right corner, always at the same size.';
+
+  @override
   String get modeDescription =>
       'The desktop window is the main experience; the edge panel stays available for quick capture. Both share the same notes, media and settings.';
 

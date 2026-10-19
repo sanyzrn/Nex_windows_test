@@ -1544,6 +1544,18 @@ abstract class AppLocalizations {
   /// **'Edge panel'**
   String get panelMode;
 
+  /// No description provided for @windowRemember.
+  ///
+  /// In en, this message translates to:
+  /// **'Remember window size and position'**
+  String get windowRemember;
+
+  /// No description provided for @windowRememberHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Off: Nex opens as a compact card in the bottom-right corner, always at the same size.'**
+  String get windowRememberHint;
+
   /// No description provided for @modeDescription.
   ///
   /// In en, this message translates to:
