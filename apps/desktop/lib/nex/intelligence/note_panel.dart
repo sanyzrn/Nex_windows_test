@@ -4,6 +4,7 @@ import 'package:nex_ai/cloud.dart';
 import 'package:nex_core/nex_core.dart';
 import 'package:nex_ui/nex_ui.dart';
 import '../../l10n/intelligence_strings.dart';
+import '../../l10n/desktop_strings.dart';
 import '../features_state.dart';
 import 'settings.dart';
 import 'workspace.dart';
@@ -122,204 +123,279 @@ class _NoteIntelligenceState extends State<NoteIntelligencePanel> {
     final ai = NexScope.of(context).intelligence,
         s = AiStrings.of(context),
         theme = Theme.of(context);
-    return ExpansionTile(
+    return NexSoftCard(
       key: const ValueKey('note-intelligence'),
-      tilePadding: EdgeInsets.zero,
-      leading: Icon(
-        Icons.auto_awesome_outlined,
-        color: theme.colorScheme.primary,
-      ),
-      title: Text(s.t('ai')),
-      childrenPadding: const EdgeInsets.only(bottom: 16),
-      children: [
-        FutureBuilder<void>(
-          future: ai.initialize(),
-          builder: (context, snapshot) => ListenableBuilder(
-            listenable: ai,
-            builder: (context, _) {
-              if (!ai.ready) return const LinearProgressIndicator();
-              if (!ai.enabled) {
-                return OutlinedButton.icon(
-                  onPressed: () => showIntelligenceSettings(context),
-                  icon: const Icon(Icons.tune),
-                  label: Text(s.t('configure')),
-                );
-              }
-              final text =
-                  (widget.note.aiSourceText ?? widget.note.caption)
-                      ?.trim()
-                      .isNotEmpty ==
-                  true;
-              Widget tool(String task, IconData icon, bool available) =>
-                  OutlinedButton.icon(
+      accent: theme.colorScheme.primary,
+      padding: const EdgeInsets.all(18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.auto_awesome_outlined,
+                color: theme.colorScheme.primary,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  DesktopStrings.of(context).t('noteAi'),
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              IconButton(
+                tooltip: s.t('settings'),
+                onPressed: () => showIntelligenceSettings(context),
+                icon: const Icon(Icons.tune_rounded, size: 18),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          FutureBuilder<void>(
+            future: ai.initialize(),
+            builder: (context, snapshot) => ListenableBuilder(
+              listenable: ai,
+              builder: (context, _) {
+                if (!ai.ready) return const LinearProgressIndicator();
+                if (!ai.enabled) {
+                  return OutlinedButton.icon(
+                    onPressed: () => showIntelligenceSettings(context),
+                    icon: const Icon(Icons.tune),
+                    label: Text(s.t('configure')),
+                  );
+                }
+                final text =
+                    (widget.note.aiSourceText ?? widget.note.caption)
+                        ?.trim()
+                        .isNotEmpty ==
+                    true;
+                Widget tool(
+                  String task,
+                  IconData icon,
+                  bool available, {
+                  Future<void> Function()? action,
+                }) => Tooltip(
+                  message: s.t(task),
+                  child: IconButton.filledTonal(
                     onPressed: ai.busy || !available
                         ? null
-                        : () => _run(() => _process(task)),
-                    icon: Icon(icon, size: 17),
-                    label: Text(s.t(task)),
-                  );
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      tool(
-                        'summary',
-                        Icons.short_text,
-                        text && ai.flag('ai.summary', true),
-                      ),
-                      tool(
-                        'tags',
-                        Icons.sell_outlined,
-                        text && ai.flag('ai.tags', true),
-                      ),
-                      if (widget.note.type == NoteType.photo)
-                        tool(
-                          'ocr',
-                          Icons.document_scanner_outlined,
-                          ai.config.supportsImages && ai.flag('ai.ocr', true),
-                        ),
-                      if (widget.note.type == NoteType.voice)
-                        tool(
-                          'transcribe',
-                          Icons.graphic_eq,
-                          ai.config.supportsTranscription &&
-                              ai.flag('ai.transcription', true),
-                        ),
-                      OutlinedButton.icon(
-                        onPressed: ai.busy
-                            ? null
-                            : () => showNoteAssistant(context, widget.note),
-                        icon: const Icon(Icons.chat_bubble_outline, size: 17),
-                        label: Text(s.t('assistant')),
-                      ),
-                    ],
+                        : () => _run(action ?? () => _process(task)),
+                    style: IconButton.styleFrom(
+                      minimumSize: const Size(52, 52),
+                      padding: const EdgeInsets.all(14),
+                    ),
+                    icon: Icon(icon, size: 23),
                   ),
-                  const SizedBox(height: 14),
-                  DropdownButtonFormField<AiOutputLanguage>(
-                    initialValue: _language,
-                    decoration: InputDecoration(labelText: s.t('target')),
-                    items: AiOutputLanguage.values
-                        .where((l) => l != AiOutputLanguage.auto)
-                        .map(
-                          (l) => DropdownMenuItem(
-                            value: l,
-                            child: Text(s.t(l.wireName)),
-                          ),
-                        )
-                        .toList(),
-                    onChanged: (v) => setState(() => _language = v!),
-                  ),
-                  const SizedBox(height: 8),
-                  tool('translate', Icons.translate, text),
-                  const SizedBox(height: 14),
-                  DropdownButtonFormField<NexRewriteStyle>(
-                    initialValue: _style,
-                    decoration: InputDecoration(labelText: s.t('rewriteStyle')),
-                    items: NexRewriteStyle.values
-                        .map(
-                          (v) => DropdownMenuItem(
-                            value: v,
-                            child: Text(s.t(v.name)),
-                          ),
-                        )
-                        .toList(),
-                    onChanged: (v) => setState(() => _style = v!),
-                  ),
-                  const SizedBox(height: 8),
-                  tool('rewrite', Icons.edit_note, text),
-                  if (ai.busy)
-                    Row(
-                      children: [
-                        const Expanded(child: LinearProgressIndicator()),
+                );
+                Future<void> choose(String task) async {
+                  final chosen = await showDialog<bool>(
+                    context: context,
+                    builder: (ctx) => AlertDialog(
+                      title: Text(s.t(task)),
+                      content: SizedBox(
+                        width: 340,
+                        child: task == 'translate'
+                            ? DropdownButtonFormField<AiOutputLanguage>(
+                                initialValue: _language,
+                                isExpanded: true,
+                                decoration: InputDecoration(
+                                  labelText: s.t('target'),
+                                ),
+                                items: AiOutputLanguage.values
+                                    .where((v) => v != AiOutputLanguage.auto)
+                                    .map(
+                                      (v) => DropdownMenuItem(
+                                        value: v,
+                                        child: Text(s.t(v.wireName)),
+                                      ),
+                                    )
+                                    .toList(),
+                                onChanged: (v) {
+                                  if (v != null) _language = v;
+                                },
+                              )
+                            : DropdownButtonFormField<NexRewriteStyle>(
+                                initialValue: _style,
+                                isExpanded: true,
+                                decoration: InputDecoration(
+                                  labelText: s.t('rewriteStyle'),
+                                ),
+                                items: NexRewriteStyle.values
+                                    .map(
+                                      (v) => DropdownMenuItem(
+                                        value: v,
+                                        child: Text(s.t(v.name)),
+                                      ),
+                                    )
+                                    .toList(),
+                                onChanged: (v) {
+                                  if (v != null) _style = v;
+                                },
+                              ),
+                      ),
+                      actions: [
                         TextButton(
-                          onPressed: ai.cancel,
-                          child: Text(s.t('stop')),
+                          onPressed: () => Navigator.pop(ctx, false),
+                          child: Text(s.t('cancel')),
+                        ),
+                        FilledButton(
+                          onPressed: () => Navigator.pop(ctx, true),
+                          child: Text(s.t(task)),
                         ),
                       ],
                     ),
-                  const SizedBox(height: 16),
-                  if (_failure != null)
-                    Text(
-                      _failure!,
-                      style: TextStyle(color: theme.colorScheme.error),
-                    ),
-                  if (_result == null)
-                    Text(s.t('emptyResult'), style: theme.textTheme.bodySmall)
-                  else
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.surfaceContainerLowest,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: theme.colorScheme.outlineVariant,
+                  );
+                  if (chosen == true && mounted) await _process(task);
+                }
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        tool(
+                          'summary',
+                          Icons.short_text,
+                          text && ai.flag('ai.summary', true),
                         ),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Text(
-                            s.t('result'),
-                            style: theme.textTheme.labelLarge,
+                        tool(
+                          'tags',
+                          Icons.sell_outlined,
+                          text && ai.flag('ai.tags', true),
+                        ),
+                        if (widget.note.type == NoteType.photo)
+                          tool(
+                            'ocr',
+                            Icons.document_scanner_outlined,
+                            ai.config.supportsImages && ai.flag('ai.ocr', true),
                           ),
-                          const SizedBox(height: 12),
-                          NexSelectableLines(child: NexMarkdown(_result!)),
-                          const SizedBox(height: 12),
-                          Wrap(
-                            spacing: 8,
-                            runSpacing: 8,
-                            children: [
-                              TextButton.icon(
-                                onPressed: () => Clipboard.setData(
-                                  ClipboardData(text: _result!),
-                                ),
-                                icon: const Icon(Icons.copy_outlined, size: 17),
-                                label: Text(s.t('copy')),
-                              ),
-                              TextButton(
-                                onPressed: () => _run(() => _save('new')),
-                                child: Text(s.t('saveNote')),
-                              ),
-                              if (const {
-                                'summary',
-                                'ocr',
-                                'transcribe',
-                              }.contains(_task))
-                                TextButton(
-                                  onPressed: () => _run(() => _save('derived')),
-                                  child: Text(s.t('saveDerived')),
-                                ),
-                              if (_task == 'tags')
-                                TextButton(
-                                  onPressed: () => _run(() => _save('tags')),
-                                  child: Text(s.t('saveTags')),
-                                )
-                              else ...[
-                                TextButton(
-                                  onPressed: () => _run(() => _save('append')),
-                                  child: Text(s.t('append')),
-                                ),
-                                if (widget.note.type == NoteType.text)
-                                  TextButton(
-                                    onPressed: () =>
-                                        _run(() => _save('replace')),
-                                    child: Text(s.t('replaceBody')),
-                                  ),
-                              ],
-                            ],
+                        if (widget.note.type == NoteType.voice)
+                          tool(
+                            'transcribe',
+                            Icons.graphic_eq,
+                            ai.config.supportsTranscription &&
+                                ai.flag('ai.transcription', true),
+                          ),
+                        tool(
+                          'translate',
+                          Icons.translate_rounded,
+                          text,
+                          action: () => choose('translate'),
+                        ),
+                        tool(
+                          'rewrite',
+                          Icons.auto_awesome_rounded,
+                          text,
+                          action: () => choose('rewrite'),
+                        ),
+                        tool(
+                          'assistant',
+                          Icons.chat_bubble_outline_rounded,
+                          true,
+                          action: () => showNoteAssistant(context, widget.note),
+                        ),
+                      ],
+                    ),
+                    if (ai.busy)
+                      Row(
+                        children: [
+                          const Expanded(child: LinearProgressIndicator()),
+                          TextButton(
+                            onPressed: ai.cancel,
+                            child: Text(s.t('stop')),
                           ),
                         ],
                       ),
-                    ),
-                ],
-              );
-            },
+                    const SizedBox(height: 16),
+                    if (_failure != null)
+                      Text(
+                        _failure!,
+                        style: TextStyle(color: theme.colorScheme.error),
+                      ),
+                    if (_result == null)
+                      Text(s.t('emptyResult'), style: theme.textTheme.bodySmall)
+                    else
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.surfaceContainerLowest,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: theme.colorScheme.outlineVariant,
+                          ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Text(
+                              s.t('result'),
+                              style: theme.textTheme.labelLarge,
+                            ),
+                            const SizedBox(height: 12),
+                            NexSelectableLines(child: NexMarkdown(_result!)),
+                            const SizedBox(height: 12),
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children: [
+                                TextButton.icon(
+                                  onPressed: () => Clipboard.setData(
+                                    ClipboardData(text: _result!),
+                                  ),
+                                  icon: const Icon(
+                                    Icons.copy_outlined,
+                                    size: 17,
+                                  ),
+                                  label: Text(s.t('copy')),
+                                ),
+                                TextButton(
+                                  onPressed: () => _run(() => _save('new')),
+                                  child: Text(s.t('saveNote')),
+                                ),
+                                if (const {
+                                  'summary',
+                                  'ocr',
+                                  'transcribe',
+                                }.contains(_task))
+                                  TextButton(
+                                    onPressed: () =>
+                                        _run(() => _save('derived')),
+                                    child: Text(s.t('saveDerived')),
+                                  ),
+                                if (_task == 'tags')
+                                  TextButton(
+                                    onPressed: () => _run(() => _save('tags')),
+                                    child: Text(s.t('saveTags')),
+                                  )
+                                else ...[
+                                  TextButton(
+                                    onPressed: () =>
+                                        _run(() => _save('append')),
+                                    child: Text(s.t('append')),
+                                  ),
+                                  if (widget.note.type == NoteType.text)
+                                    TextButton(
+                                      onPressed: () =>
+                                          _run(() => _save('replace')),
+                                      child: Text(s.t('replaceBody')),
+                                    ),
+                                ],
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
+                );
+              },
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

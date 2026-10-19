@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.21.0 — 2026-10-19
+
+- Add automatic update checks and background downloads from the latest stable
+  GitHub release. Verify asset origins, sizes, GitHub digests and SHA256SUMS;
+  offer Install & restart only after a complete, checked download.
+- Save and close Nex before installing. A standalone native helper waits for
+  the application to exit, locks and verifies the installer again, preserves
+  the installation directory and language, then restarts Nex.
+- Rebuild Intelligence around an overview, separate provider configuration,
+  capability cards and progressively disclosed privacy and response controls.
+- Bring Android's rounded tonal groups, icon badges, settings directory,
+  visual appearance choices and colored utility cards to the Windows workspace.
+- Move note intelligence below the writing, with compact circular actions and
+  translation/rewrite options shown only when needed.
+
 ## 0.20.0 — 2026-10-18
 
 - Bring Android 2.1.6 cloud adapters and action protocol to Windows: Anthropic,

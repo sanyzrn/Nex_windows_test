@@ -50,3 +50,11 @@ target_include_directories(${BINARY_NAME} PRIVATE "${CMAKE_SOURCE_DIR}")
 
 # Run the Flutter tool portions of the build. This must not be removed.
 add_dependencies(${BINARY_NAME} flutter_assemble)
+
+# Kept independent of Flutter so it can run from the update cache while the
+# installer replaces every executable and DLL in the application directory.
+add_executable(nex_update WIN32 "update_helper.cpp")
+apply_standard_settings(nex_update)
+target_compile_definitions(nex_update PRIVATE "NOMINMAX")
+target_link_libraries(nex_update PRIVATE "bcrypt.lib" "shell32.lib")
+set_property(TARGET nex_update PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")

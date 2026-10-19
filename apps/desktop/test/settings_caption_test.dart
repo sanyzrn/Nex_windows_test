@@ -69,13 +69,12 @@ void main() {
   setUp(() => SharedPreferences.setMockInitialValues({}));
   for (final language in ['en', 'fa']) {
     testWidgets(
-      '$language panel settings has one category and bounded searchable tool placement at 200%',
+      '$language settings directory opens bounded searchable tool placement at 200%',
       (t) async {
         final c = await _boot(t, language: language, scale: 2);
         final l = AppLocalizations.of(t.element(find.byType(NexSettingsView)))!;
         expect(find.byType(NexToolOrganizer), findsNothing);
-        await t.tap(find.byKey(const ValueKey('settings-category')));
-        await t.pumpAndSettle();
+        await t.ensureVisible(find.text(l.settingsTools).last);
         await t.tap(find.text(l.settingsTools).last);
         await t.pumpAndSettle();
         expect(find.byType(NexToolOrganizer), findsOneWidget);

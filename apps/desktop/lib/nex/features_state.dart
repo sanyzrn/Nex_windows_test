@@ -20,8 +20,10 @@ import '../core/controller.dart';
 import '../l10n/app_localizations.dart';
 import 'store.dart';
 import 'intelligence/controller.dart';
+import '../updates/controller.dart';
 
 class NexFeatures extends ChangeNotifier {
+  DesktopUpdates? updates;
   DesktopIntelligence? _intelligence;
   final DesktopIntelligence Function(DesktopStore)? _intelligenceFactory;
   DesktopIntelligence get intelligence => _intelligence ??=
@@ -293,6 +295,8 @@ class NexFeatures extends ChangeNotifier {
   }
 
   Future<void> close() async {
+    updates?.dispose();
+    updates = null;
     await _intelligence?.close();
     await _libraryChanges?.cancel();
     while (_pending.isNotEmpty) {

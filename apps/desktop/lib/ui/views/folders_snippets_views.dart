@@ -9,7 +9,6 @@ import '../flyout.dart';
 import '../svg_icon.dart';
 import '../widgets.dart';
 
-
 // ================= Folders =================
 
 class FoldersView extends StatelessWidget {
@@ -212,4 +211,3 @@ class _SnippetsViewState extends State<SnippetsView> {
     c.backToTools();
   }
 }
-

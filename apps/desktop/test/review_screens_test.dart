@@ -115,6 +115,28 @@ class _Shot {
 
 const _matrix = <_Shot>[
   _Shot(
+    'provider_1200_light_en',
+    mode: 'window',
+    size: Size(1200, 1000),
+    target: 'providerSettings',
+  ),
+  _Shot(
+    'provider_1200_dark_fa',
+    mode: 'window',
+    size: Size(1200, 1000),
+    theme: 'dark',
+    locale: 'fa',
+    target: 'providerSettings',
+  ),
+  _Shot(
+    'appearance_700_light_fa_scale2',
+    mode: 'window',
+    size: Size(700, 1100),
+    locale: 'fa',
+    textScale: 2,
+    target: 'appearance',
+  ),
+  _Shot(
     'intelligence_1200_light_en',
     mode: 'window',
     target: 'assistant',
@@ -406,7 +428,7 @@ Future<void> _go(WidgetTester t, PanelController c, _Shot spec) async {
   switch (spec.target) {
     case 'assistant':
       c.selectWindowSection('assistant');
-    case 'aiSettings':
+    case 'aiSettings' || 'providerSettings':
       c.selectWindowSection('settings');
     case 'timeline' || 'reader':
       window ? c.selectWindowSection('library') : c.openWidget('timeline');
@@ -418,27 +440,39 @@ Future<void> _go(WidgetTester t, PanelController c, _Shot spec) async {
       c.openWidget(spec.target == 'palette' ? 'note' : spec.target);
   }
   await _frames(t, 90);
-  if (spec.target == 'aiSettings') {
-    final fa = spec.locale == 'fa';
-    await t.tap(find.text(fa ? 'هوش نکس' : 'Intelligence').last);
+  if (spec.target == 'aiSettings' || spec.target == 'providerSettings') {
+    final open = find.byKey(const ValueKey('settings-open-6'));
+    await t.ensureVisible(open);
+    await t.tap(open);
+    await _frames(t, 60);
+    if (spec.target == 'providerSettings') {
+      final provider = find.byKey(const ValueKey('ai-provider-open'));
+      await t.ensureVisible(provider);
+      await t.tap(provider);
+      await _frames(t, 60);
+      final custom = find.byKey(const ValueKey('provider-choice-custom'));
+      await t.ensureVisible(custom);
+      await t.tap(custom);
+      await _frames(t, 60);
+    }
+  }
+  if (spec.target == 'settings' && !window) {
+    await t.tap(find.byKey(const ValueKey('settings-open-0')));
     await _frames(t, 60);
   }
   if (spec.target == 'toolsSettings') {
     final l = AppLocalizations.of(t.element(find.byType(Scaffold)))!;
-    if (!window) {
-      await t.tap(find.byKey(const ValueKey('settings-category')));
-      await _frames(t, 45);
-    }
+    await t.ensureVisible(find.text(l.settingsTools).last);
     await t.tap(find.text(l.settingsTools).last);
     await _frames(t, 90);
   }
   if (spec.target == 'appearance' || spec.target == 'backup') {
     final l = AppLocalizations.of(t.element(find.byType(Scaffold)))!;
-    await t.tap(
-      find.text(
-        spec.target == 'appearance' ? l.settingsAppearance : l.settingsBackup,
-      ),
+    final target = find.text(
+      spec.target == 'appearance' ? l.settingsAppearance : l.settingsBackup,
     );
+    await t.ensureVisible(target);
+    await t.tap(target);
     await t.pumpAndSettle();
   }
   if (spec.target == 'palette') {

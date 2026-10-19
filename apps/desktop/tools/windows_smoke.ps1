@@ -4,7 +4,7 @@ $ErrorActionPreference = 'Stop'
 $Release = (Resolve-Path -LiteralPath $Release).Path
 $Output = [IO.Path]::GetFullPath($Output)
 $exe = Join-Path $Release 'nex_desktop.exe'
-foreach ($file in @('nex_desktop.exe', 'flutter_windows.dll', 'sqlite3.dll', 'file_selector_windows_plugin.dll', 'record_windows_plugin.dll', 'just_audio_windows_plugin.dll', 'data/flutter_assets', 'data/app.so', 'data/icudtl.dat')) {
+foreach ($file in @('nex_desktop.exe', 'nex_update.exe', 'flutter_windows.dll', 'sqlite3.dll', 'file_selector_windows_plugin.dll', 'record_windows_plugin.dll', 'just_audio_windows_plugin.dll', 'data/flutter_assets', 'data/app.so', 'data/icudtl.dat')) {
     if (-not (Test-Path -LiteralPath (Join-Path $Release $file))) { throw "Missing bundle member: $file" }
 }
 if (Get-Process -Name nex_desktop -ErrorAction SilentlyContinue) { throw 'Close the existing Nex desktop instance before running smoke tests.' }

@@ -9,7 +9,6 @@ import '../flyout.dart';
 import '../svg_icon.dart';
 import '../widgets.dart';
 
-
 // ================= Media =================
 
 class MediaView extends StatelessWidget {
@@ -222,4 +221,3 @@ class _GenerateViewState extends State<GenerateView> {
     c.backToTools();
   }
 }
-

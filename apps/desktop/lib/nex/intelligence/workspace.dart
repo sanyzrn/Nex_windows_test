@@ -8,6 +8,7 @@ import 'package:nex_core/nex_core.dart';
 import 'package:nex_ui/nex_ui.dart';
 import 'package:record/record.dart';
 import '../../l10n/intelligence_strings.dart';
+import '../../l10n/desktop_strings.dart';
 import '../features_state.dart';
 import 'controller.dart';
 import 'citations.dart';
@@ -444,42 +445,48 @@ class _AssistantState extends State<DesktopAssistant> {
                                   const SizedBox(height: 24),
                                   Text(
                                     s.t('studio'),
-                                    style: theme.textTheme.headlineLarge
+                                    style: theme.textTheme.headlineMedium
                                         ?.copyWith(
                                           fontWeight: FontWeight.w700,
-                                          letterSpacing: -1,
+                                          letterSpacing: -.5,
                                         ),
                                   ),
                                   const SizedBox(height: 12),
                                   Text(
-                                    s.t('intro'),
+                                    DesktopStrings.of(context).t('askHint'),
                                     style: theme.textTheme.bodyLarge?.copyWith(
                                       color: c.onSurfaceVariant,
                                       height: 1.8,
                                     ),
                                   ),
                                   const SizedBox(height: 28),
-                                  for (final prompt in [
-                                    'promptPlan',
-                                    'promptFind',
-                                    'promptTasks',
-                                  ])
-                                    Padding(
-                                      padding: const EdgeInsets.only(
-                                        bottom: 10,
-                                      ),
-                                      child: OutlinedButton(
-                                        style: OutlinedButton.styleFrom(
-                                          alignment:
-                                              AlignmentDirectional.centerStart,
-                                          padding: const EdgeInsets.all(18),
+                                  NexResponsiveGrid(
+                                    minWidth: 210,
+                                    maxColumns: 3,
+                                    children: [
+                                      for (final entry in <(String, IconData)>[
+                                        (
+                                          'promptPlan',
+                                          Icons.auto_awesome_outlined,
                                         ),
-                                        onPressed: !ai.enabled || locked
-                                            ? null
-                                            : () => _send(s.t(prompt)),
-                                        child: Text(s.t(prompt)),
-                                      ),
-                                    ),
+                                        (
+                                          'promptFind',
+                                          Icons.travel_explore_rounded,
+                                        ),
+                                        (
+                                          'promptTasks',
+                                          Icons.checklist_rounded,
+                                        ),
+                                      ])
+                                        _PromptTile(
+                                          label: s.t(entry.$1),
+                                          icon: entry.$2,
+                                          onPressed: !ai.enabled || locked
+                                              ? null
+                                              : () => _send(s.t(entry.$1)),
+                                        ),
+                                    ],
+                                  ),
                                   const SizedBox(height: 20),
                                 ],
                                 for (final turn in ai.turns)
@@ -499,7 +506,9 @@ class _AssistantState extends State<DesktopAssistant> {
                                             18,
                                           ),
                                           border: Border.all(
-                                            color: c.outlineVariant,
+                                            color: c.outlineVariant.withValues(
+                                              alpha: .3,
+                                            ),
                                           ),
                                         ),
                                         child: Column(
@@ -682,7 +691,19 @@ class _AssistantState extends State<DesktopAssistant> {
                                         : 'ask',
                                   ),
                                   filled: true,
-                                  fillColor: c.surfaceContainerLowest,
+                                  fillColor: c.surfaceContainerLow,
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 22,
+                                    vertical: 18,
+                                  ),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(28),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(28),
+                                    borderSide: BorderSide.none,
+                                  ),
                                   suffixIcon: IconButton(
                                     tooltip: s.t('send'),
                                     onPressed:
@@ -926,5 +947,42 @@ class _CitationState extends State<_Citation> {
         ),
       );
     },
+  );
+}
+
+class _PromptTile extends StatelessWidget {
+  const _PromptTile({
+    required this.label,
+    required this.icon,
+    required this.onPressed,
+  });
+  final String label;
+  final IconData icon;
+  final VoidCallback? onPressed;
+  @override
+  Widget build(BuildContext context) => TextButton(
+    onPressed: onPressed,
+    style: TextButton.styleFrom(
+      padding: EdgeInsets.zero,
+      alignment: AlignmentDirectional.centerStart,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+    ),
+    child: NexSoftCard(
+      accent: Theme.of(context).colorScheme.primary,
+      padding: const EdgeInsets.all(18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          NexIconBadge(icon: icon, size: 38),
+          const SizedBox(height: 16),
+          Text(
+            label,
+            style: Theme.of(
+              context,
+            ).textTheme.titleSmall?.copyWith(height: 1.5),
+          ),
+        ],
+      ),
+    ),
   );
 }

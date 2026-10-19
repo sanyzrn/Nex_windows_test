@@ -104,7 +104,9 @@ class _EmojiViewState extends State<EmojiView> {
                         crossAxisCount: 7,
                         childAspectRatio: 36 / 36,
                         padding: const EdgeInsets.only(bottom: 10),
-                        children: [for (final e in list) _EmojiButton(emoji: e)],
+                        children: [
+                          for (final e in list) _EmojiButton(emoji: e),
+                        ],
                       ),
                     ),
                     // Audit defect 10: the last row dissolved into a hard
@@ -120,10 +122,7 @@ class _EmojiViewState extends State<EmojiView> {
                             gradient: LinearGradient(
                               begin: Alignment.topCenter,
                               end: Alignment.bottomCenter,
-                              colors: [
-                                p.liquid.withValues(alpha: 0),
-                                p.liquid,
-                              ],
+                              colors: [p.liquid.withValues(alpha: 0), p.liquid],
                             ),
                           ),
                         ),

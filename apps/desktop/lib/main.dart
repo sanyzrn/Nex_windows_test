@@ -15,6 +15,9 @@ import 'nex/reminder_smoke.dart';
 import 'nex/reminder_coordinator.dart';
 import 'nex/note_activation.dart';
 import 'l10n/app_localizations.dart';
+import 'core/app_meta.dart';
+import 'updates/controller.dart';
+import 'updates/handoff.dart';
 
 import 'core/controller.dart';
 import 'core/native.dart';
@@ -222,6 +225,17 @@ void main(List<String> arguments) async {
     await features.close();
   };
   unawaited(reminders.start());
+  if (Platform.isWindows) {
+    final updates = features.updates = DesktopUpdates(
+      currentVersion: kAppShortVersion,
+      cache: Directory(
+        '${(await getTemporaryDirectory()).path}/nex-windows-updates',
+      ),
+      install: (file, digest) => installWindowsUpdate(file, digest, controller),
+    );
+    // Give capture and the first frame priority. No updater runs in probes.
+    unawaited(Future<void>.delayed(const Duration(seconds: 12), updates.start));
+  }
   runApp(RightPanelApp(controller: controller, features: features));
   // A manual launch must immediately present a usable, focused capture
   // surface. Startup launches opt into the unobtrusive background mode;

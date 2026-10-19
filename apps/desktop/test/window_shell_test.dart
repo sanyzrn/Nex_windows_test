@@ -124,6 +124,8 @@ void main() {
     // Settings shows the interface-mode selector, not the panel-only edge UI.
     await tester.tap(find.text('Settings'));
     await _settle(tester);
+    await tester.tap(find.byKey(const ValueKey('settings-open-0')));
+    await _settle(tester);
     expect(find.text('Interface mode'), findsOneWidget);
     expect(find.text('Window'), findsOneWidget);
     expect(find.text('Edge panel'), findsOneWidget);

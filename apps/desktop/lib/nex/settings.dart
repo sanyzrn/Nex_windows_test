@@ -3,6 +3,7 @@ import 'package:nex_data/schema/backup_kind.dart';
 import 'package:flutter/services.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:nex_ui/nex_ui.dart';
+import 'command_palette.dart' show nexFoldText;
 import '../core/app_meta.dart';
 import '../core/display_identity.dart';
 import '../core/panel_settings.dart';
@@ -12,6 +13,8 @@ import '../l10n/app_localizations.dart';
 import 'features.dart';
 import '../l10n/intelligence_strings.dart';
 import 'intelligence/settings.dart';
+import '../l10n/desktop_strings.dart';
+import '../updates/widgets.dart';
 
 part 'settings_display_appearance.dart';
 part 'settings_shortcuts_backup.dart';
@@ -30,7 +33,14 @@ class NexSettingsView extends StatefulWidget {
 
 abstract class _SettingsStateBase extends State<NexSettingsView> {
   String? recoveryKey;
-  int category = 0;
+  int? category;
+  final search = TextEditingController();
+  String query = '';
+  @override
+  void dispose() {
+    search.dispose();
+    super.dispose();
+  }
 
   // Card builders implemented in the part files of this library; declared
   // here so the base build can compose them.
@@ -65,60 +75,136 @@ abstract class _SettingsStateBase extends State<NexSettingsView> {
       if (f != null) AiStrings.of(context).t('ai'),
     ];
 
+    final d = DesktopStrings.of(context);
+    final icons = [
+      Icons.web_asset_rounded,
+      Icons.palette_outlined,
+      Icons.keyboard_outlined,
+      Icons.cloud_upload_outlined,
+      Icons.grid_view_rounded,
+      Icons.info_outline_rounded,
+      Icons.auto_awesome_rounded,
+    ];
+    final hints = [
+      'displayHint',
+      'appearanceHint',
+      'shortcutsHint',
+      'backupHint',
+      'toolsHint',
+      'aboutHint',
+      'aiHint',
+    ];
+    Widget group(List<int> indexes, String title) {
+      final matching = indexes
+          .where(
+            (i) =>
+                i < names.length &&
+                nexFoldText(
+                  '${names[i]} ${d.t(hints[i])}',
+                ).contains(nexFoldText(query)),
+          )
+          .toList();
+      if (matching.isEmpty) return const SizedBox.shrink();
+      return NexSoftCard(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              child: Text(
+                d.t(title),
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+            for (var n = 0; n < matching.length; n++) ...[
+              if (n != 0) const Divider(height: 1, indent: 56),
+              NexSettingsLink(
+                key: ValueKey('settings-open-${matching[n]}'),
+                icon: icons[matching[n]],
+                title: names[matching[n]],
+                subtitle: d.t(hints[matching[n]]),
+                onTap: () => setState(() => category = matching[n]),
+              ),
+            ],
+          ],
+        ),
+      );
+    }
+
     return Material(
       type: MaterialType.transparency,
       child: Padding(
         padding: EdgeInsets.symmetric(
           horizontal: widget.windowLayout ? 8 : 16,
-          vertical: widget.windowLayout ? 16 : 16,
+          vertical: 16,
         ),
         child: Column(
-          spacing: 16,
+          spacing: 18,
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // No page title here: the flyout's panel header already names the
-            // view (audit defect 5 - "Settings" used to appear twice).
-            if (widget.windowLayout) ...[
-              NexWorkspaceIntro(
-                title: l.workspaceSettingsDescription,
-                description: l.modeDescription,
-                compact: true,
+            if (category == null) ...[
+              if (widget.windowLayout)
+                NexSoftCard(
+                  accent: scheme.primary,
+                  child: Row(
+                    children: [
+                      const NexIconBadge(icon: Icons.tune_rounded, size: 54),
+                      const SizedBox(width: 18),
+                      Expanded(
+                        child: NexWorkspaceIntro(
+                          title: d.t('settingsIntro'),
+                          description: d.t('settingsHint'),
+                          compact: true,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              TextField(
+                key: const ValueKey('settings-search'),
+                controller: search,
+                onChanged: (v) => setState(() => query = v),
+                decoration: InputDecoration(
+                  hintText: d.t('searchSettings'),
+                  prefixIcon: const Icon(Icons.search_rounded),
+                  filled: true,
+                  fillColor: scheme.surfaceContainerLow,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(24),
+                    borderSide: BorderSide.none,
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(24),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
               ),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
+              NexResponsiveGrid(
+                minWidth: 300,
                 children: [
-                  for (var i = 0; i < names.length; i++)
-                    ChoiceChip(
-                      label: Text(names[i]),
-                      selected: category == i,
-                      onSelected: (_) => setState(() => category = i),
-                    ),
+                  group([0, 1, 2, 6], 'personal'),
+                  group([3, 4, 5], 'data'),
                 ],
               ),
-              const SizedBox(height: 8),
-              cards[category],
             ] else ...[
-              DropdownButtonFormField<int>(
-                key: const ValueKey('settings-category'),
-                initialValue: category,
-                isExpanded: true,
-                items: [
-                  for (var i = 0; i < names.length; i++)
-                    DropdownMenuItem(value: i, child: Text(names[i])),
-                ],
-                onChanged: (v) {
-                  if (v != null) setState(() => category = v);
-                },
+              Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: TextButton.icon(
+                  key: const ValueKey('settings-back'),
+                  onPressed: () => setState(() => category = null),
+                  icon: const Icon(Icons.arrow_back_rounded),
+                  label: Text(d.t('back')),
+                ),
               ),
-              cards[category],
+              cards[category!],
             ],
-
             if (f?.error != null)
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.all(8),
                 child: Text(
                   '${l.failed}: ${f!.error}',
                   style: TextStyle(color: scheme.error),
@@ -154,46 +240,25 @@ class _SettingsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-
-    return Container(
-      decoration: BoxDecoration(
-        color: scheme.surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: scheme.outlineVariant),
-      ),
-      padding: EdgeInsets.all(MediaQuery.sizeOf(context).width < 900 ? 14 : 18),
+    return NexSoftCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
             children: [
-              Container(
-                width: 28,
-                height: 28,
-                decoration: BoxDecoration(
-                  color: iconColor.withValues(alpha: 0.14),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(icon, size: 16, color: iconColor),
-              ),
-              const SizedBox(width: 10),
+              NexIconBadge(icon: icon, color: iconColor),
+              const SizedBox(width: 14),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
+                child: Text(
+                  title,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 22),
           ...children,
         ],
       ),

@@ -1,4 +1,4 @@
-# Nex Windows 0.20.0+13
+# Nex Windows 0.21.0+14
 
 Android-compatible cloud intelligence and a new tag-colored note gallery.
 [Scope, architecture, phased implementation and validation](docs/WINDOWS_0200.md).
@@ -6,7 +6,7 @@ Android-compatible cloud intelligence and a new tag-colored note gallery.
 
 Use the installer and SHA256SUMS from the same successful GitHub release.
 The complete main-branch Windows CI must pass before the automatic publisher
-creates v0.20.0. It publishes the exact tested installer, without rebuilding it.
+creates v0.21.0. It publishes the exact tested installer, without rebuilding it.
 Published versions are never silently replaced.
 
 AI is disabled until configured and explicitly enabled. Five cloud providers

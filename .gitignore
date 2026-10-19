@@ -21,3 +21,6 @@ installer-toolchain/
 # Installer binaries are published as GitHub Release assets.
 /Nex-Windows-Setup-*.exe
 upstream/
+
+**/test/candidate_review/
+**/test/candidate_goldens/

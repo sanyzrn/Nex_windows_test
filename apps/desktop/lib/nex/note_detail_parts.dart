@@ -114,7 +114,11 @@ class NoteMetadataLine extends StatelessWidget {
           Icon(Icons.schedule_rounded, size: 13, color: muted),
           const SizedBox(width: 4),
           Text(
-            nexDisplayDate(note.createdAt, solar: NexPanelScope.maybeOf(context)?.S.solarCalendar ?? fa, persian: fa),
+            nexDisplayDate(
+              note.createdAt,
+              solar: NexPanelScope.maybeOf(context)?.S.solarCalendar ?? fa,
+              persian: fa,
+            ),
             style: style,
           ),
         ],

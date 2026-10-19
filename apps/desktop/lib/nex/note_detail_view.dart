@@ -186,20 +186,6 @@ class _NexNoteDetailState extends State<NexNoteDetail> {
                               setState(() => editing = !editing),
                         ),
                         NoteMetadataLine(note: note),
-                        NoteIntelligencePanel(
-                          key: ValueKey('ai-${note.id}'),
-                          note: note,
-                          onChanged: () async {
-                            final fresh = await features.store.call<Note?>(
-                              'get',
-                              {'id': note.id},
-                            );
-                            if (mounted && fresh != null) {
-                              features.reflectReaderEdit(fresh);
-                              setState(() => note = fresh);
-                            }
-                          },
-                        ),
                         const SizedBox(height: 10),
                         if (editing &&
                             (note.type == NoteType.text ||
@@ -354,6 +340,21 @@ class _NexNoteDetailState extends State<NexNoteDetail> {
                           ),
                         const SizedBox(height: 12),
                         NexNoteAttachments(noteId: note.id, revision: note.rev),
+                        NoteIntelligencePanel(
+                          key: ValueKey('ai-${note.id}'),
+                          note: note,
+                          onChanged: () async {
+                            final fresh = await features.store.call<Note?>(
+                              'get',
+                              {'id': note.id},
+                            );
+                            if (mounted && fresh != null) {
+                              features.reflectReaderEdit(fresh);
+                              setState(() => note = fresh);
+                            }
+                          },
+                        ),
+                        const SizedBox(height: 18),
                         NoteActionBar(
                           note: note,
                           onPin: () =>
@@ -424,6 +425,7 @@ class _NexNoteDetailState extends State<NexNoteDetail> {
                         ],
                         if (note.tags.isNotEmpty) ...[
                           const SizedBox(height: 8),
+                          const SizedBox(height: 18),
                           Wrap(
                             spacing: 6,
                             runSpacing: 4,

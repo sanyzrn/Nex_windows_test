@@ -169,6 +169,10 @@ jobs:
           $checksum = (Get-FileHash -LiteralPath $setup.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
           "$checksum  $($setup.Name)" | Set-Content -LiteralPath apps/desktop/build/installer/output/SHA256SUMS -Encoding ascii
 
+      - name: Test verified update installation and restart
+        shell: pwsh
+        run: ./apps/desktop/tools/test_update_handoff.ps1
+
       - name: Upload verified installer
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:

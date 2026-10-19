@@ -20,6 +20,7 @@ import 'flyout.dart' show buildPanelView;
 import 'svg_icon.dart';
 import 'widgets.dart';
 import 'window_caption.dart';
+import '../updates/widgets.dart';
 
 part 'window_nav_rail.dart';
 part 'window_section.dart';
@@ -74,7 +75,14 @@ class _NexWindowShellState extends State<NexWindowShell> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 _WindowNavRail(controller: c, features: widget.features),
-                Expanded(child: _WindowSection(controller: c)),
+                Expanded(
+                  child: Column(
+                    children: [
+                      NexUpdateBanner(updates: widget.features?.updates),
+                      Expanded(child: _WindowSection(controller: c)),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),

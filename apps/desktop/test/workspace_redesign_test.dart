@@ -112,22 +112,29 @@ void main() {
     },
   );
 
-  testWidgets('settings categories reveal the existing controls in place', (
-    t,
-  ) async {
-    await _boot(t, section: 'settings');
-    final l = AppLocalizations.of(t.element(find.byType(Scaffold)))!;
-    expect(find.text(l.interfaceMode), findsOneWidget);
-    expect(find.text(l.colorMode), findsNothing);
-    await t.tap(find.text(l.settingsAppearance));
-    await t.pumpAndSettle();
-    expect(find.text(l.colorMode), findsOneWidget);
-    expect(find.text(l.interfaceMode), findsNothing);
-    await t.tap(find.text(l.settingsBackup));
-    await t.pumpAndSettle();
-    expect(find.text(l.colorMode), findsNothing);
-    expect(t.takeException(), isNull);
-  });
+  testWidgets(
+    'settings directory opens existing controls and returns to categories',
+    (t) async {
+      await _boot(t, section: 'settings');
+      final l = AppLocalizations.of(t.element(find.byType(Scaffold)))!;
+      await t.tap(find.byKey(const ValueKey('settings-open-0')));
+      await t.pumpAndSettle();
+      expect(find.text(l.interfaceMode), findsOneWidget);
+      expect(find.text(l.colorMode), findsNothing);
+      await t.tap(find.byKey(const ValueKey('settings-back')));
+      await t.pumpAndSettle();
+      await t.tap(find.text(l.settingsAppearance));
+      await t.pumpAndSettle();
+      expect(find.text(l.colorMode), findsOneWidget);
+      expect(find.text(l.interfaceMode), findsNothing);
+      await t.tap(find.byKey(const ValueKey('settings-back')));
+      await t.pumpAndSettle();
+      await t.tap(find.text(l.settingsBackup));
+      await t.pumpAndSettle();
+      expect(find.text(l.colorMode), findsNothing);
+      expect(t.takeException(), isNull);
+    },
+  );
 
   testWidgets(
     'a command query with no results remains usable and dismissible',
