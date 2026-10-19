@@ -27,6 +27,7 @@ void main() {
       repo.convertMarkdown(note.id, note.content!, '/media/note.md', 'hash');
       final file = repo.getById(note.id)!;
       expect(file.type, NoteType.file);
+      // Named after its first line, not a fixed `note.md` (1.94.0).
       expect(file.originalFilename, 'فارسی Generator.md');
       expect(file.ocrText, note.content);
       expect(file.title, 'Keep title');

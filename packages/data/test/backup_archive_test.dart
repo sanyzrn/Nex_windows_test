@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
 import 'package:test/test.dart';
@@ -102,6 +103,20 @@ void main() {
       }
     },
   );
+
+  test('an archive that unpacks far past its own size is refused (SEC-04)', () {
+    final archive = Archive()
+      ..addFile(ArchiveFile('nex.sqlite', 3 << 30, Uint8List(0)));
+    expect(
+      () => NexBackupArchive.assertReasonableSize(archive, 1 << 20),
+      throwsStateError,
+    );
+    // A real one, photos and all, is well inside it.
+    final real = Archive()
+      ..addFile(ArchiveFile('nex.sqlite', 40 << 20, Uint8List(0)))
+      ..addFile(ArchiveFile('media/a.jpg', 300 << 20, Uint8List(0)));
+    NexBackupArchive.assertReasonableSize(real, 320 << 20);
+  });
 
   test('a restore onto a moved sandbox rewrites media paths', () {
     // The reinstall case: every restore on iOS and most on Android lands in
@@ -350,6 +365,27 @@ void main() {
     );
     expect(repo.getById('n'), isNotNull);
     expect(File(p.join(mediaDir, 'a.jpg')).readAsBytesSync(), marker);
+  });
+
+  // 1.99.96 reviews, DATA-13: backups are named by the clock, so after the
+  // clock moved back the one just written sorted oldest and was pruned by
+  // its own rotation, and so was every one after it.
+  test('the backup just written survives a clock that moved back', () {
+    Directory(backupDir).createSync(recursive: true);
+    for (var i = 0; i < NexDatabase.backupRetention; i++) {
+      File(
+        p.join(
+          backupDir,
+          'nex-2099010${i}T000000Z${NexBackupArchive.extension}',
+        ),
+      ).writeAsBytesSync([0]);
+    }
+    final made = repo.backup(backupDir, mediaDir: mediaDir);
+    expect(made.existsSync(), isTrue);
+    final kept = Directory(backupDir).listSync().whereType<File>().where(
+      (f) => NexBackupArchive.isBackupFile(f.path),
+    );
+    expect(kept.length, NexDatabase.backupRetention);
   });
 
   test('retention prunes both formats together', () {

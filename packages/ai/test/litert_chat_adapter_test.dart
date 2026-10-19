@@ -1,3 +1,7 @@
+import 'dart:async';
+import 'dart:io';
+
+import 'package:flutter_litert_lm/flutter_litert_lm.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nex_ai/nex_ai.dart';
 
@@ -9,6 +13,26 @@ import 'package:nex_ai/nex_ai.dart';
 /// model anything at all, and the part that decides how much of a conversation
 /// gets re-processed. Both are ours, and both are where a mistake is silent.
 void main() {
+  test('new user turns reach the model as one message', () {
+    // A question and the Cycle summary the app read for it. Sent one at a
+    // time, the model answered the question blind first — a whole reply
+    // spent on a guess — before it saw the summary.
+    expect(
+      LiteRtChatAdapter.asOneMessage(const [
+        ChatMessage(role: ChatRole.user, content: 'when is my period?'),
+        ChatMessage(role: ChatRole.user, content: '<<<NOTES\nCycle\nNOTES>>>'),
+      ]),
+      'when is my period?\n\n<<<NOTES\nCycle\nNOTES>>>',
+    );
+    expect(
+      LiteRtChatAdapter.asOneMessage(const [
+        ChatMessage(role: ChatRole.assistant, content: 'hi'),
+      ]),
+      isNull,
+      reason: 'nothing was asked',
+    );
+  });
+
   group('availability is a state, not an error', () {
     test(
       'a model that is not downloaded yet answers null, before awaiting',
@@ -31,6 +55,38 @@ void main() {
 
     test('an empty path is unavailable rather than a filesystem question', () {
       expect(LiteRtChatAdapter(modelPath: '').available, isFalse);
+    });
+
+    test('a following adapter asks again which model, every time', () {
+      // The on-device screen can switch models; the bound adapter must not
+      // keep answering for the one it started with.
+      var path = '';
+      final adapter = LiteRtChatAdapter.following(() => path);
+      expect(adapter.modelPath, '');
+      path = '/models/minicpm5-2b-int4/MiniCPM5-2B_int4.litertlm';
+      expect(adapter.modelPath, path);
+      expect(adapter.available, isFalse);
+    });
+
+    test('the instructions open the first user turn, once', () {
+      const turns = [
+        ChatMessage(role: ChatRole.user, content: 'what is left to do?'),
+        ChatMessage(role: ChatRole.assistant, content: 'The plumber.'),
+        ChatMessage(role: ChatRole.user, content: 'and tomorrow?'),
+      ];
+      final prepared = LiteRtChatAdapter.withInstructions(
+        'You are the assistant inside Nex.',
+        turns,
+      );
+      expect(prepared, hasLength(3));
+      expect(prepared.first.content, startsWith('[Instructions from the Nex'));
+      expect(prepared.first.content, contains('You are the assistant inside'));
+      expect(prepared.first.content, endsWith('what is left to do?'));
+      // Only the first: later turns are the user's words alone.
+      expect(prepared[1].content, 'The plumber.');
+      expect(prepared[2].content, 'and tomorrow?');
+      // Nothing to add, nothing added.
+      expect(LiteRtChatAdapter.withInstructions(null, turns), same(turns));
     });
 
     test('an empty history is never sent anywhere', () {
@@ -75,4 +131,269 @@ void main() {
     // there is nothing to wait for and nothing to close (PERF-02).
     expect(LiteRtChatAdapter(modelPath: '').release(), isNull);
   });
+
+  test(
+    'generation serializes conversations, and a failed turn does not poison the queue',
+    () async {
+      final gate = Completer<LiteLmMessage>();
+      final calls = <String>[];
+      final engine = _QueueEngine((text) {
+        calls.add(text);
+        return calls.length == 1
+            ? gate.future
+            : Future.value(LiteLmMessage.model('second'));
+      });
+      final adapter = LiteRtChatAdapter(
+        modelPath: 'test-model',
+        engine: engine,
+        availableForTest: true,
+      );
+      final first = adapter.sendMessage(const [
+        ChatMessage(role: ChatRole.system, content: 'context A'),
+        ChatMessage(role: ChatRole.user, content: 'question A'),
+      ])!;
+      final second = adapter.sendMessage(const [
+        ChatMessage(role: ChatRole.system, content: 'context B'),
+        ChatMessage(role: ChatRole.user, content: 'question B'),
+      ])!;
+      final firstFailure = expectLater(first, throwsStateError);
+      await Future<void>.delayed(Duration.zero);
+      expect(calls, hasLength(1));
+      expect(engine.conversations, hasLength(1));
+      gate.completeError(StateError('first failed'));
+      await firstFailure;
+      expect((await second).content, 'second');
+      expect(calls.last, contains('question B'));
+      expect(calls.last, isNot(contains('context A')));
+      await adapter.close();
+    },
+  );
+
+  testWidgets(
+    'expired queued work is skipped and late native output is discarded',
+    (tester) async {
+      final gate = Completer<LiteLmMessage>();
+      var calls = 0;
+      final engine = _QueueEngine((_) {
+        calls++;
+        return calls == 1
+            ? gate.future
+            : Future.value(LiteLmMessage.model('fresh'));
+      });
+      final adapter = LiteRtChatAdapter(
+        modelPath: 'test-model',
+        engine: engine,
+        availableForTest: true,
+        requestTimeout: const Duration(seconds: 1),
+      );
+      const turns = [ChatMessage(role: ChatRole.user, content: 'question')];
+      final first = adapter.sendMessage(turns)!;
+      final queued = adapter.sendMessage(turns)!;
+      final firstFailure = expectLater(first, throwsA(isA<TimeoutException>()));
+      final queuedFailure = expectLater(
+        queued,
+        throwsA(isA<TimeoutException>()),
+      );
+      await tester.pump();
+      expect(calls, 1);
+      await tester.pump(const Duration(seconds: 2));
+      await firstFailure;
+      await queuedFailure;
+      expect(
+        engine.conversations.single.disposed,
+        isFalse,
+        reason: 'never dispose a native session while it is generating',
+      );
+      gate.complete(LiteLmMessage.model('late'));
+      await tester.pump();
+      expect(calls, 1, reason: 'expired queued inference never starts');
+      expect(engine.conversations.single.disposed, isTrue);
+      final fresh = adapter.sendMessage(turns)!;
+      await tester.pump();
+      expect((await fresh).content, 'fresh');
+      expect(
+        engine.conversations,
+        hasLength(2),
+        reason: 'retry has a clean session',
+      );
+      await adapter.close();
+    },
+  );
+
+  group('loading the model', () {
+    late Directory dir;
+    late String path;
+
+    setUp(() {
+      dir = Directory.systemTemp.createTempSync('nex_litert_');
+      path = '${dir.path}/model.litertlm';
+      File(path).writeAsStringSync('weights');
+    });
+    tearDown(() => dir.deleteSync(recursive: true));
+
+    File marker() => File('$path.loading');
+
+    test('two callers at once share one load, never two', () async {
+      // Opening the assistant warms the model up; a message sent in the
+      // same moment used to start a second load, and two copies of the
+      // weights do not fit on a phone.
+      var loads = 0;
+      final release = Completer<void>();
+      final adapter = LiteRtChatAdapter(
+        modelPath: path,
+        preferGpu: false,
+        loadEngine: (config) async {
+          loads++;
+          await release.future;
+          return _FakeEngine();
+        },
+      );
+
+      final first = adapter.ensureEngine();
+      final second = adapter.ensureEngine();
+      release.complete();
+      expect(identical(await first, await second), isTrue);
+      expect(loads, 1);
+    });
+
+    test('a load that never came back once is tried again', () async {
+      // Swiped away, or reclaimed by Android mid-load: not a broken
+      // backend. One of these used to bar the backend for good.
+      marker().writeAsStringSync('cpu');
+      var loads = 0;
+      final adapter = LiteRtChatAdapter(
+        modelPath: path,
+        preferGpu: false,
+        loadEngine: (config) async {
+          loads++;
+          return _FakeEngine();
+        },
+      );
+
+      await adapter.ensureEngine();
+      expect(loads, 1);
+      expect(marker().existsSync(), isFalse, reason: 'cleared on success');
+    });
+
+    test('twice in a row, recently, and the backend is skipped', () async {
+      final now = DateTime.now().millisecondsSinceEpoch;
+      marker().writeAsStringSync('cpu 2 $now');
+      final adapter = LiteRtChatAdapter(
+        modelPath: path,
+        preferGpu: false,
+        loadEngine: (config) async => _FakeEngine(),
+      );
+
+      await expectLater(adapter.ensureEngine(), throwsStateError);
+    });
+
+    test('a skipped backend is tried again once the strikes expire', () async {
+      final old = DateTime.now()
+          .subtract(LiteRtChatAdapter.strikeExpiry + const Duration(minutes: 1))
+          .millisecondsSinceEpoch;
+      marker().writeAsStringSync('cpu 2 $old');
+      var loads = 0;
+      final adapter = LiteRtChatAdapter(
+        modelPath: path,
+        preferGpu: false,
+        loadEngine: (config) async {
+          loads++;
+          return _FakeEngine();
+        },
+      );
+
+      await adapter.ensureEngine();
+      expect(loads, 1);
+    });
+
+    test('the attempt is on disk while the load is running', () async {
+      // What survives a crash: written before the native call, gone after.
+      final release = Completer<void>();
+      String? during;
+      final adapter = LiteRtChatAdapter(
+        modelPath: path,
+        preferGpu: false,
+        loadEngine: (config) async {
+          during = marker().readAsStringSync();
+          await release.future;
+          return _FakeEngine();
+        },
+      );
+
+      final loading = adapter.ensureEngine();
+      await Future<void>.delayed(Duration.zero);
+      release.complete();
+      await loading;
+      expect(during, startsWith('cpu 1 '));
+      expect(marker().existsSync(), isFalse);
+    });
+
+    test('a load that fails politely clears its attempt', () async {
+      final adapter = LiteRtChatAdapter(
+        modelPath: path,
+        preferGpu: false,
+        loadEngine: (config) async => throw StateError('no OpenCL'),
+      );
+
+      await expectLater(adapter.ensureEngine(), throwsStateError);
+      expect(marker().existsSync(), isFalse);
+    });
+  });
+}
+
+class _FakeEngine implements LiteLmEngine {
+  @override
+  Future<void> dispose() async {}
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class _QueueEngine implements LiteLmEngine {
+  _QueueEngine(this.answer);
+  final Future<LiteLmMessage> Function(String) answer;
+  final conversations = <_QueueConversation>[];
+  @override
+  Future<LiteLmConversation> createConversation([
+    LiteLmConversationConfig? config,
+  ]) async {
+    final conversation = _QueueConversation(answer);
+    conversations.add(conversation);
+    return conversation;
+  }
+
+  @override
+  Future<void> dispose() async {}
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class _QueueConversation implements LiteLmConversation {
+  _QueueConversation(this.answer);
+  final Future<LiteLmMessage> Function(String) answer;
+  bool disposed = false;
+  bool busy = false;
+  @override
+  Future<LiteLmMessage> sendMessage(
+    String text, {
+    Map<String, Object>? extraContext,
+  }) async {
+    expectSync(disposed, isFalse);
+    expectSync(busy, isFalse);
+    busy = true;
+    try {
+      return await answer(text);
+    } finally {
+      busy = false;
+    }
+  }
+
+  @override
+  Future<void> dispose() async {
+    expectSync(busy, isFalse);
+    disposed = true;
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }

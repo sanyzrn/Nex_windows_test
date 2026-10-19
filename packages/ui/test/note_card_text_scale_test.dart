@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nex_core/nex_core.dart';
 import 'package:nex_ui/nex_ui.dart';
@@ -11,7 +12,7 @@ import 'package:nex_ui/nex_ui.dart';
 /// each `SizedBox(height: 24)`, which is one bodyLarge line at scale 1.0 and
 /// nothing like one at 1.9 — so the card got taller while the text inside it
 /// stayed squeezed into a box built for the default size. The app's own
-/// UI-size setting composes with the system's and clamps at 1.9, and its own
+/// UI-size setting composes with the system's accessibility curve, and its own
 /// "Larger" step is 1.3, so this is reachable from the settings screen without
 /// touching Android's.
 ///
@@ -50,7 +51,7 @@ void main() {
     );
   }
 
-  for (final scale in <double>[1.0, 1.3, 1.9]) {
+  for (final scale in <double>[1.0, 1.3, 1.9, 3.2]) {
     testWidgets('checklist rows are one scaled line apart at $scale', (
       tester,
     ) async {
@@ -107,4 +108,60 @@ void main() {
     // draws have to fit inside the height it claims.
     expect(rowHeight * nexCardPreviewLines, lessThanOrEqualTo(cardHeight));
   });
+
+  // 2.1.7: under a non-linear scaler the 14-point compact preview grew more
+  // than the 20-point row reserved for it, and with a reminder below — where
+  // the preview sits in a box of exactly two rows — the second line's bottom
+  // was cut off. The box is now never shorter than the text it holds.
+  testWidgets('compact two-line preview above a reminder is not clipped '
+      'under non-linear scaling', (tester) async {
+    tester.view.physicalSize = const Size(400, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final note = Note(
+      id: 'n-due',
+      type: NoteType.text,
+      content:
+          'اضافه کاری غرفه جدید از لحظه خروج تا ساعت نوزده و سی\n'
+          'اضافه کاری غرفه قبل از لحظه خروج تا ساعت هجده',
+      createdAt: now,
+      updatedAt: now,
+      dueAt: now.add(const Duration(hours: 16)),
+      deviceId: 'test',
+      rev: 1,
+      syncState: SyncState.pending,
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(textScaler: _NonLinearScaler()),
+          child: Scaffold(
+            body: NexCardDensityScope(
+              density: NexCardDensity.compact,
+              child: SizedBox(
+                width: 400,
+                child: NoteCard(note: note, showDue: true),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    final paragraph = tester
+        .renderObjectList<RenderParagraph>(find.byType(RichText))
+        .firstWhere((p) => p.text.toPlainText().contains('غرفه'));
+    final needed = paragraph.getMaxIntrinsicHeight(paragraph.size.width);
+    expect(paragraph.size.height, greaterThanOrEqualTo(needed - 0.01));
+    expect(tester.takeException(), isNull);
+  });
+}
+
+/// Small sizes grow more than large ones, the way Android's non-linear font
+/// scaling does from Android 14.
+class _NonLinearScaler extends TextScaler {
+  const _NonLinearScaler();
+  @override
+  double scale(double fontSize) => fontSize + 4.2;
+  @override
+  double get textScaleFactor => scale(14) / 14;
 }

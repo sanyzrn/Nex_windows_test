@@ -12,27 +12,35 @@ library;
 /// reverse.
 export 'package:nex_core/nex_core.dart'
     show
+        AttachmentKind,
         MemoryKind,
         NexCadence,
         NexCommitment,
         MemoryRecord,
         MemorySource,
         Note,
+        NoteAttachment,
         NoteEmbedding,
         NoteType,
         SearchFilters,
         SyncPort,
         SyncResult,
+        ScheduledNote,
         SyncState,
         Tag,
         newUuidV7,
         sha256OfBytes,
         sha256OfFile;
 
+export 'repositories/attachment_repository.dart';
+export 'repositories/attachment_text.dart';
 export 'repositories/commitment_repository.dart';
+export 'repositories/cycle_repository.dart';
 export 'repositories/library_maintenance.dart';
 export 'repositories/memory_repository.dart';
+export 'repositories/module_record_repository.dart';
 export 'repositories/note_repository.dart';
+export 'repositories/scheduled_note_repository.dart';
 export 'repositories/thread_repository.dart';
 export 'schema/backup_archive.dart';
 export 'schema/import_archive.dart';
@@ -42,9 +50,5 @@ export 'schema/write_lock.dart';
 export 'search/vector_index.dart';
 export 'sync_client/sync_client.dart';
 export 'sync_client/sync_wire.dart';
-
 export 'schema/full_backup.dart';
 export 'schema/backup_kind.dart';
-
-export 'repositories/attachment_repository.dart';
-export 'repositories/scheduled_note_repository.dart';
