@@ -7,6 +7,42 @@
 part of 'settings.dart';
 
 mixin _SettingsDisplayAppearance on _SettingsStateBase {
+  /// One toast now, one queued with Windows for 15 seconds later — the two
+  /// ways reminders reach the screen — and Windows' own reason if it refuses.
+  Future<void> _sendTestNotification(
+    PanelController c,
+    AppLocalizations l,
+  ) async {
+    final native = c.native;
+    var shown = false, queued = false;
+    try {
+      shown = await native.showOverdueReminder(
+        id: 'nextest',
+        noteId: '',
+        title: l.applicationName,
+        body: l.testNotificationBody,
+      );
+      queued = await native.scheduleReminder(
+        id: 'nextest2',
+        noteId: '',
+        title: l.applicationName,
+        body: l.testNotificationLater,
+        fireAt: DateTime.now().add(const Duration(seconds: 15)),
+      );
+    } catch (_) {}
+    if (shown && queued) {
+      c.toast(l.testNotificationSent);
+      return;
+    }
+    String? why;
+    try {
+      why = await native.reminderDiagnosticError();
+    } catch (_) {}
+    c.toast(
+      l.testNotificationFailed(why == null || why.isEmpty ? '' : ' ($why)'),
+    );
+  }
+
   @override
   List<Widget> _buildDisplayAppearance(BuildContext context) {
     final c = LiquidScope.panelOf(context);
@@ -41,6 +77,19 @@ mixin _SettingsDisplayAppearance on _SettingsStateBase {
               ],
               selected: {c.S.windowMode},
               onSelectionChanged: (v) => c.setWindowMode(v.first),
+            ),
+          ),
+          const Divider(height: 1),
+          _SettingRow(
+            title: l.windowRemember,
+            subtitle: l.windowRememberHint,
+            control: Switch(
+              value: c.S.windowRemember,
+              onChanged: (v) {
+                c.S.windowRemember = v;
+                c.save();
+                c.refresh();
+              },
             ),
           ),
           if (!c.isWindowMode || !widget.windowLayout) ...[
@@ -84,6 +133,16 @@ mixin _SettingsDisplayAppearance on _SettingsStateBase {
               ),
             ],
           ],
+          const Divider(height: 1),
+          _SettingRow(
+            title: l.testNotification,
+            subtitle: l.testNotificationHint,
+            control: OutlinedButton(
+              key: const ValueKey('test-notification'),
+              onPressed: () => _sendTestNotification(c, l),
+              child: Text(l.testNotificationRun),
+            ),
+          ),
           const Divider(height: 1),
           _SettingRow(
             title: l.startup,

@@ -11,69 +11,69 @@ class NexWindowCaption extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     return SizedBox(
       height: 36,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: scheme.surfaceContainerLow,
-          border: Border(
-            bottom: BorderSide(
-              color: scheme.outlineVariant.withValues(alpha: .4),
-            ),
-          ),
-        ),
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: Row(
-            children: [
-              Expanded(
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onPanStart: (_) => controller.native.windowCommand('drag'),
-                  onDoubleTap: () =>
-                      controller.native.windowCommand('maximize'),
-                  onSecondaryTap: () => controller.native.windowCommand('menu'),
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 14),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.edit_note_rounded,
+      // No bar of its own: the caption is the window surface itself — the
+      // mark on the leading side, the window buttons on the other.
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: Row(
+          children: [
+            Expanded(
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onPanStart: (_) => controller.native.windowCommand('drag'),
+                onDoubleTap: () => controller.native.windowCommand('maximize'),
+                onSecondaryTap: () => controller.native.windowCommand('menu'),
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 14),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 20,
+                        height: 20,
+                        decoration: BoxDecoration(
                           color: scheme.primary,
-                          size: 17,
+                          borderRadius: BorderRadius.circular(6),
                         ),
-                        const SizedBox(width: 7),
-                        Text(
-                          l.applicationName,
-                          style: const TextStyle(
-                            fontSize: 12.5,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: .3,
-                          ),
+                        child: Icon(
+                          Icons.edit_note_rounded,
+                          color: scheme.onPrimary,
+                          size: 14,
                         ),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        l.applicationName,
+                        style: TextStyle(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: .3,
+                          color: scheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
-              _CaptionButton(
-                label: l.minimizeWindow,
-                icon: Icons.remove_rounded,
-                onPressed: () => controller.native.windowCommand('minimize'),
-              ),
-              _CaptionButton(
-                label: l.maximizeWindow,
-                icon: controller.S.windowMaximized
-                    ? Icons.filter_none_rounded
-                    : Icons.crop_square_rounded,
-                onPressed: () => controller.native.windowCommand('maximize'),
-              ),
-              _CaptionButton(
-                label: l.closeWindow,
-                icon: Icons.close_rounded,
-                close: true,
-                onPressed: () => controller.native.windowCommand('close'),
-              ),
-            ],
-          ),
+            ),
+            _CaptionButton(
+              label: l.minimizeWindow,
+              icon: Icons.remove_rounded,
+              onPressed: () => controller.native.windowCommand('minimize'),
+            ),
+            _CaptionButton(
+              label: l.maximizeWindow,
+              icon: controller.S.windowMaximized
+                  ? Icons.filter_none_rounded
+                  : Icons.crop_square_rounded,
+              onPressed: () => controller.native.windowCommand('maximize'),
+            ),
+            _CaptionButton(
+              label: l.closeWindow,
+              icon: Icons.close_rounded,
+              close: true,
+              onPressed: () => controller.native.windowCommand('close'),
+            ),
+          ],
         ),
       ),
     );

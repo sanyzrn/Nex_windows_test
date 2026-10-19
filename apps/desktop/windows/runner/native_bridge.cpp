@@ -269,7 +269,8 @@ void NativeBridge::HandleMethodCall(
     const auto mode = ArgString(args, "mode");
     SetWindowMode(mode, ArgInt(args, "x"), ArgInt(args, "y"),
                   ArgInt(args, "w"), ArgInt(args, "h"),
-                  ArgBool(args, "maximized"), ArgBool(args, "show"));
+                  ArgBool(args, "maximized"), ArgBool(args, "show"),
+                  ArgBool(args, "compact"));
     result->Success();
   } else if (name == "windowFrame") {
     result->Success(EncodableValue(WindowFrame()));
@@ -305,7 +306,8 @@ void NativeBridge::HandleMethodCall(
         ArgString(args, "id"),
         ArgString(args, "noteId"),
         ArgString(args, "title"),
-        ArgString(args, "body"));
+        ArgString(args, "body"),
+        ArgInt64(args, "occurrence"));
     result->Success(EncodableValue(ok));
   } else if (name == "reminderDiagnosticError") {
     result->Success(EncodableValue(ReminderDiagnosticError()));
@@ -347,16 +349,17 @@ void NativeBridge::SetPassthrough(bool on) {
 }
 
 void NativeBridge::SetWindowMode(const std::string& mode, int x, int y, int w,
-                                  int h, bool maximized, bool show) {
+                                  int h, bool maximized, bool show,
+                                  bool compact) {
   const bool to_window = (mode == "window");
   // Never resize/reveal the previous Flutter surface in the new host frame.
   ShowWindow(window_, SW_HIDE);
-  hidden_to_tray_ = false;
   surface_ready_ = false;
   ++surface_generation_;
   surface_requested_generation_ = UINT64_MAX;
   pending_show_ = false;
   window_mode_ = to_window;
+  compact_window_ = to_window && compact;
   if (!to_window) {
     passthrough_ = true;
     SetWindowAccentTransparent(window_, true);
@@ -380,7 +383,8 @@ void NativeBridge::SetWindowMode(const std::string& mode, int x, int y, int w,
   SetWindowLong(window_, GWL_EXSTYLE, ex);
 
   const auto monitors = CollectMonitors();
-  const bool saved = w >= 320 && h >= 320 && x > -32000 && y > -32000;
+  const bool saved =
+      !compact && w >= 320 && h >= 320 && x > -32000 && y > -32000;
   bool placed = false;
   if (saved && !monitors.empty()) {
     const RECT frame{x, y, x + w, y + h};
@@ -396,6 +400,19 @@ void NativeBridge::SetWindowMode(const std::string& mode, int x, int y, int w,
         y = std::max(m.y, std::min(y, m.y + m.h - 60));
         break;
       }
+    }
+  }
+  if (!placed && compact) {
+    POINT cursor = {0, 0};
+    GetCursorPos(&cursor);
+    const RECT frame = CompactWindowFrame(
+        MonitorFromPoint(cursor, MONITOR_DEFAULTTOPRIMARY));
+    if (frame.right > frame.left && frame.bottom > frame.top) {
+      x = frame.left;
+      y = frame.top;
+      w = frame.right - frame.left;
+      h = frame.bottom - frame.top;
+      placed = true;
     }
   }
   if (!placed) {
@@ -423,7 +440,7 @@ void NativeBridge::SetWindowMode(const std::string& mode, int x, int y, int w,
   SetWindowPos(window_, HWND_NOTOPMOST, x, y, w, h,
                SWP_NOACTIVATE | SWP_FRAMECHANGED);
   pending_show_ = show;
-  pending_show_maximized_ = maximized;
+  pending_show_maximized_ = maximized && !compact;
 }
 
 void NativeBridge::OnFirstFrame() {
@@ -497,16 +514,6 @@ flutter::EncodableMap NativeBridge::WindowFrame() const {
 }
 
 void NativeBridge::FocusWindow() {
-  // A user-hidden window has already drawn a valid desktop frame. Restore it
-  // immediately even if Flutter's surface-ready callback is being refreshed.
-  // Waiting only for a future Flutter frame left Tray > Open permanently hidden
-  // on some Windows runners. A pending redraw can still reveal itself normally.
-  if (window_mode_ && hidden_to_tray_) {
-    hidden_to_tray_ = false;
-    if (!surface_ready_) pending_show_ = true;
-    FocusWindowTarget(window_);
-    return;
-  }
   if (!surface_ready_) {
     if (window_mode_) pending_show_ = true;
     return;
@@ -829,14 +836,7 @@ bool NativeBridge::OnMessage(HWND hwnd, UINT message, WPARAM wparam, LPARAM lpar
     return true;
   }
   if (message == WM_CLOSE && !quit_requested_) {
-    // The title-bar X keeps background helpers, reminders and tray alive.
-    // Only an explicit Tray > Quit calls the Dart shutdown/flush path.
-    if (window_mode_) {
-      hidden_to_tray_ = true;
-      ShowWindow(window_, SW_HIDE);
-    } else {
-      PostEvent("tray", EncodableValue(EncodableMap{{EncodableValue("id"), EncodableValue("shutdown")}}));
-    }
+    PostEvent("tray", EncodableValue(EncodableMap{{EncodableValue("id"), EncodableValue("shutdown")}}));
     return true;
   }
   if (message == WM_HOTKEY && wparam == 1) {
@@ -863,8 +863,8 @@ bool NativeBridge::OnMessage(HWND hwnd, UINT message, WPARAM wparam, LPARAM lpar
     const UINT dpi = FlutterDesktopGetDpiForMonitor(
         MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST));
     const double scale = dpi == 0 ? 1.0 : dpi / 96.0;
-    mmi->ptMinTrackSize.x = static_cast<LONG>(520 * scale);
-    mmi->ptMinTrackSize.y = static_cast<LONG>(560 * scale);
+    mmi->ptMinTrackSize.x = static_cast<LONG>(380 * scale);
+    mmi->ptMinTrackSize.y = static_cast<LONG>(520 * scale);
     MONITORINFO mi{};
     mi.cbSize = sizeof(mi);
     if (GetMonitorInfo(MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST), &mi)) {

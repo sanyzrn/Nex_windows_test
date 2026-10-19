@@ -100,7 +100,14 @@ Future<_Store> _openStore(String name, {int count = 0}) async {
   final repo = SqliteNoteRepository(db);
   for (var i = 0; i < count; i++) {
     repo.insert(_note(i));
-    if (i % 7 == 0) repo.pinNote('review-$i');
+    if (i % 7 == 0 && repo.pinNote('review-$i')) {
+      // Windows clock ticks can tie between inserts and change pin ordering.
+      // Keep the fixture order independent of runner speed and wall time.
+      db.db.execute('UPDATE notes SET pinned_at = ? WHERE id = ?', [
+        _day.add(Duration(minutes: i)).toUtc().toIso8601String(),
+        'review-$i',
+      ]);
+    }
     final tag = repo.upsertTag(
       name: ['Ideas', 'Work', 'Personal', 'Study'][i % 4],
     );

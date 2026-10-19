@@ -46,7 +46,7 @@ abstract class _LibraryStateBase extends State<NexLibraryView> {
   // Cross-mixin members, implemented in the part files of this library;
   // declared here so the base build and sibling mixins can call them.
   KeyEventResult _handleKeyEvent(FocusNode node, KeyEvent event);
-  Widget _buildListPane(BuildContext context, AppLocalizations l, bool fa, {required bool allowGrid});
+  Widget _buildListPane(BuildContext context, AppLocalizations l, bool fa);
   Future<void> _deleteNote(Note note);
   Future<void> _undoLastDelete();
   void _showCardContextMenu(Offset globalPosition, Note note);
@@ -231,9 +231,7 @@ abstract class _LibraryStateBase extends State<NexLibraryView> {
     // Card density (IDEAS.md): the user's compact/standard/readable choice
     // from Settings feeds every NoteCard below through the nex_ui scope.
     // No scope above (tests, embeds) keeps the standard density.
-    // The library is also embedded in isolated LiquidScope-only tests;
-    // both shell scopes must preserve mode and card-density preferences.
-    final c = NexPanelScope.maybeOf(context) ?? LiquidScope.maybePanelOf(context);
+    final c = LiquidScope.maybePanelOf(context);
     return NexCardDensityScope(
       density: NexCardDensity.fromWire(c?.S.cardDensity),
       child: Focus(
@@ -267,10 +265,7 @@ abstract class _LibraryStateBase extends State<NexLibraryView> {
               }
               return SizedBox(
                 height: height,
-                child: _buildListPane(
-                     context, l, fa,
-                     allowGrid: c?.isWindowMode == true && constraints.maxWidth >= 640,
-                   ),
+                child: _buildListPane(context, l, fa),
               );
             }
 
@@ -287,10 +282,7 @@ abstract class _LibraryStateBase extends State<NexLibraryView> {
                 children: [
                   SizedBox(
                     width: clampedWidth,
-                    child: _buildListPane(
-                       context, l, fa,
-                       allowGrid: c?.isWindowMode == true && clampedWidth >= 640,
-                     ),
+                    child: _buildListPane(context, l, fa),
                   ),
                   // Draggable vertical divider
                   MouseRegion(

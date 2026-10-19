@@ -309,7 +309,7 @@ void main() {
     final fixture = await _fixture(t);
     await t.tap(find.byType(NoteCard).first);
     await t.pump();
-    final action = find.widgetWithText(OutlinedButton, 'Delete');
+    final action = find.widgetWithText(InkWell, 'Delete');
     await t.ensureVisible(action);
     await t.tap(action);
     fixture.c.selectWindowSection('tools');
@@ -323,7 +323,11 @@ void main() {
     );
     expect(trash!.any((n) => n.id == 'checklist'), isTrue);
     await _waitForWidget(t, find.text('Undo'));
-    await t.tap(find.text('Undo'));
+    // The label exists before the SnackBar entrance animation can be tapped.
+    await t.pump(const Duration(milliseconds: 300));
+    final undo = find.text('Undo').hitTestable();
+    expect(undo, findsOneWidget);
+    await t.tap(undo);
     await _database(t);
     final restored = await t.runAsync(
       () => fixture.f.store.call<Note?>('get', {'id': 'checklist'}),

@@ -1,14 +1,35 @@
 # Changelog
 
-## 0.21.1 — 2026-10-19
+## 0.22.0 — 2026-10-19
 
-- Close the desktop window to System Tray instead of stopping Nex, and
-  restore with Open; exit cleanly only through Tray > Quit.
-- Add live reminder delivery fallback for Windows while Nex stays resident;
-  track one-off and daily/weekly notification receipts after actual attempts.
-- Use a genuine Saturday-first Solar Hijri date picker for reminders whenever
-  Solar Calendar is enabled; save the equivalent standard Gregorian date.
-- Hide inoperative Grid/List controls in panel and narrow library layouts.
+- Shared packages (core, data, ui, ai) brought level with Android 2.1.9:
+  automatic AI capability detection and model list, fused search ranking,
+  link and recurring-item fixes. The desktop app now requires Flutter 3.44.
+- New compact window: Nex opens as a tall portrait card in the bottom-right
+  corner of the screen, always at the same size. It can still be resized or
+  maximised; turn on Settings > Display > Remember window size and position to
+  reopen at the last frame instead. The edge panel is unchanged.
+- New window look: a surface tinted by the theme accent, a rounded content
+  card, a caption without its own bar, and a slim navigation rail of icons over
+  labels (Capture, Library, Intelligence, Tools, Settings) with a More menu for
+  the edge panel switch, theme and shortcuts. Wide windows keep the labelled rail.
+- Library: one search row with the tag manager beside it, date headers as soft
+  capsules, and the filter pills start at the leading edge in wide windows. The
+  keyboard shortcut button left the filter row (F1 and More still open it).
+- Note cards: a reminder and the "+N" files mark now sit in a footnote row under
+  the preview instead of beside it, so a sentence keeps the card's full width.
+- Reader: Copy, Pin, Remind and Delete are one tonal dock whose actions share the
+  width, so none is cut off in the compact window.
+- Capture: in the compact window the page opens on the editor — the hero line
+  and counters give way — and the six capture actions are icon-over-label tiles,
+  three across, instead of six wide buttons.
+- Reminders: a repeating reminder now queues its next seven (daily) or eight
+  (weekly) occurrences with Windows, so it keeps ringing for that long even if
+  Nex is closed. A missed one-off reminder that Windows already delivered is not
+  shown a second time by Nex.
+- Settings > Display > Test notifications sends one notification now and one
+  queued 15 seconds ahead, and shows Windows' own reason if it refuses. The
+  reminder warning on the capture page links to Windows notification settings.
 
 ## 0.21.0 — 2026-10-19
 

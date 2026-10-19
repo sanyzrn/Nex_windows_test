@@ -99,7 +99,7 @@ class NativeBridge {
   // Desktop window mode: restyles the host as a normal resizable window
   // ("window") or back to the borderless edge panel ("panel").
   void SetWindowMode(const std::string& mode, int x, int y, int w, int h,
-                     bool maximized, bool show);
+                     bool maximized, bool show, bool compact);
   flutter::EncodableMap WindowFrame() const;
   void FocusWindow();
 
@@ -123,10 +123,11 @@ class NativeBridge {
   HWND previous_foreground_ = nullptr;
   bool passthrough_ = false;
   bool window_mode_ = false;
+  // The window opens as the fixed compact card (bottom-right) rather than at
+  // a remembered frame; it re-anchors whenever it is revealed from hiding.
+  bool compact_window_ = false;
   bool first_frame_done_ = false;
   bool surface_ready_ = false;
-  // True only after the visible desktop window was dismissed with X.
-  bool hidden_to_tray_ = false;
   uint64_t surface_generation_ = 0;
   uint64_t surface_requested_generation_ = 0;
   bool frame_callback_pending_ = false;

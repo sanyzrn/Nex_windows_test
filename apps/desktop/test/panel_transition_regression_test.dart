@@ -24,6 +24,7 @@ class _Native extends NativeHost {
     Map<String, dynamic>? bounds,
     bool maximized = false,
     bool show = true,
+    bool compact = false,
   }) async {
     calls.add('mode:$mode');
     await gate?.future;

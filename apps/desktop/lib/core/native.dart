@@ -40,11 +40,14 @@ abstract class NativeHost {
   /// Restyles the host between the full desktop window and the edge panel.
   /// [bounds] is the saved frame (x/y/w/h, physical px) to restore, if any.
   /// No-op off Windows so tests and stubs work unchanged.
+  /// With [compact] the host ignores [bounds] and opens the fixed portrait
+  /// card in the bottom-right corner of the work area.
   Future<void> setWindowMode(
     String mode, {
     Map<String, dynamic>? bounds,
     bool maximized = false,
     bool show = true,
+    bool compact = false,
   }) async {}
 
   /// Current desktop-window frame {x, y, w, h, maximized} for persistence.
@@ -70,14 +73,20 @@ abstract class NativeHost {
 
   Future<bool> cancelReminder(String id) async => false;
 
+  /// [occurrence] is the instant the reminder was due; a toast Windows already
+  /// delivered for it is not shown again.
   Future<bool> showOverdueReminder({
     required String id,
     required String noteId,
     required String title,
     required String body,
+    DateTime? occurrence,
   }) async => false;
 
   Future<List<String>> listScheduledReminders() async => [];
+
+  /// What Windows last said when it refused a notification, if it did.
+  Future<String?> reminderDiagnosticError() async => null;
 
   /// FFI helpers (no-ops off Windows so tests run everywhere).
   bool get ffiAvailable;
@@ -374,11 +383,13 @@ class WinNativeHost extends NativeHost with _NativePointer {
     Map<String, dynamic>? bounds,
     bool maximized = false,
     bool show = true,
+    bool compact = false,
   }) => _channel.invokeMethod('setWindowMode', {
     'mode': mode,
     if (bounds != null) ...bounds,
     'maximized': maximized,
     'show': show,
+    'compact': compact,
   });
 
   @override
@@ -425,12 +436,14 @@ class WinNativeHost extends NativeHost with _NativePointer {
     required String noteId,
     required String title,
     required String body,
+    DateTime? occurrence,
   }) async {
     final ok = await _channel.invokeMethod('showOverdueReminder', {
       'id': id,
       'noteId': noteId,
       'title': title,
       'body': body,
+      'occurrence': occurrence?.millisecondsSinceEpoch ?? 0,
     });
     return ok == true;
   }
@@ -451,6 +464,7 @@ class WinNativeHost extends NativeHost with _NativePointer {
     return (list ?? []).map((e) => (e as Map).cast<String, dynamic>()).toList();
   }
 
+  @override
   Future<String?> reminderDiagnosticError() =>
       _channel.invokeMethod<String>('reminderDiagnosticError');
 }

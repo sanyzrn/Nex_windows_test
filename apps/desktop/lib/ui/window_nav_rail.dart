@@ -19,15 +19,8 @@ class _WindowNavRail extends StatelessWidget {
       builder: (context, section, _) => Container(
         key: const ValueKey('workspace-sidebar'),
         width: wide ? 206 : 64,
-        margin: const EdgeInsetsDirectional.fromSTEB(8, 8, 8, 12),
+        margin: const EdgeInsetsDirectional.fromSTEB(8, 0, 8, 10),
         padding: EdgeInsets.symmetric(horizontal: wide ? 12 : 10),
-        decoration: BoxDecoration(
-          color: Color.alphaBlend(
-            c.onSurface.withValues(alpha: .025),
-            c.surface,
-          ),
-          borderRadius: BorderRadius.circular(24),
-        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [

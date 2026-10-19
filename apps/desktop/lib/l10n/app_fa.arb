@@ -248,6 +248,8 @@
   "interfaceMode": "حالت نمایش",
   "windowMode": "پنجره",
   "panelMode": "نوار لبه",
+  "windowRemember": "به‌خاطر سپردن اندازه و جای پنجره",
+  "windowRememberHint": "خاموش: نکس همیشه با همان اندازه و در گوشهٔ پایین‌راست صفحه باز می‌شود.",
   "modeDescription": "پنجرهٔ دسکتاپ تجربهٔ اصلی است و نوار لبه برای ثبت سریع در دسترس می‌ماند. هر دو حالت از همان یادداشت‌ها، رسانه‌ها و تنظیمات استفاده می‌کنند.",
   "edgePanelOnly": "این تنظیم مخصوص نوار لبه است؛ برای استفاده، حالت نمایش را عوض کنید.",
   "switchToPanel": "تغییر به نوار لبه",
@@ -376,6 +378,21 @@
   "workspaceToolsSearch": "جستجوی ابزار…",
   "workspaceBrand": "Nex",
   "reminderFutureRequired": "زمانی در آینده انتخاب کنید.",
+  "notificationSettings": "تنظیمات اعلان",
+  "testNotification": "آزمایش اعلان‌ها",
+  "testNotificationHint": "یک اعلان همین حالا و یکی دیگر ۱۵ ثانیه بعد نشان می‌دهد تا هر دو راه رساندن یادآورها را بسنجید.",
+  "testNotificationRun": "ارسال آزمایشی",
+  "testNotificationSent": "آزمایش فرستاده شد. باید همین حالا یک اعلان و ۱۵ ثانیه بعد اعلان دیگری ببینید.",
+  "testNotificationFailed": "ویندوز اعلان را نپذیرفت{detail}. تنظیمات > سیستم > اعلان‌ها و Focus assist را بررسی کنید.",
+  "@testNotificationFailed": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "testNotificationBody": "این یک اعلان آزمایشی از نکس است.",
+  "testNotificationLater": "اعلان زمان‌بندی‌شدهٔ آزمایشی رسید.",
   "reminderDeliveryFailed": "زمان ذخیره شد، اما ویندوز نتوانست اعلان را زمان‌بندی کند. تنظیمات اعلان ویندوز را بررسی کنید و دوباره تلاش کنید.",
   "reminderSaveFailed": "یادآور ذخیره نشد. دوباره تلاش کنید.",
   "workspaceNotebook": "دفتر یادداشت شما",

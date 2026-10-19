@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:nex_core/nex_core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'reminders.dart';
+import 'reminder_policy.dart';
 import 'store.dart';
 
 class ReminderDeliveryFailure implements Exception {}
@@ -47,6 +48,10 @@ class ReminderCoordinator {
       }
       try {
         final notes = await store.call<List<Note>>('reminderCandidates');
+        _scheduler.currentReceipts = {
+          for (final note in notes)
+            reminderScheduleId(note.id): reminderReceipt(note),
+        };
         final result = await ReminderReconciliationEngine.reconcileNotes(
           notes: notes,
           scheduler: _scheduler,
@@ -84,6 +89,7 @@ class _TrackedScheduler implements ReminderScheduler {
   _TrackedScheduler(this.delegate);
   final ReminderScheduler delegate;
   final receipts = <String>{};
+  Map<String, String> currentReceipts = {};
   final _signatures = <String, String>{};
   Set<String> _scheduled = {};
 
@@ -112,6 +118,8 @@ class _TrackedScheduler implements ReminderScheduler {
     if (success) {
       _signatures[id] = signature;
       _scheduled.add(id);
+      final receipt = currentReceipts[id];
+      if (receipt != null) receipts.add(receipt);
     }
     return success;
   }
@@ -132,5 +140,12 @@ class _TrackedScheduler implements ReminderScheduler {
     required String noteId,
     required String title,
     required String body,
-  }) => delegate.showOverdue(id: id, noteId: noteId, title: title, body: body);
+    DateTime? occurrence,
+  }) => delegate.showOverdue(
+    id: id,
+    noteId: noteId,
+    title: title,
+    body: body,
+    occurrence: occurrence,
+  );
 }

@@ -71,6 +71,26 @@ std::vector<MonitorItem> CollectMonitors() {
   return out;
 }
 
+RECT CompactWindowFrame(HMONITOR monitor) {
+  RECT out = {0, 0, 0, 0};
+  MONITORINFO mi = {};
+  mi.cbSize = sizeof(mi);
+  if (!GetMonitorInfo(monitor, &mi)) return out;
+  const UINT dpi = FlutterDesktopGetDpiForMonitor(monitor);
+  const double scale = dpi == 0 ? 1.0 : dpi / 96.0;
+  const RECT& work = mi.rcWork;
+  const int margin = static_cast<int>(kCompactWindowMargin * scale);
+  const int w = std::min<int>(static_cast<int>(kCompactWindowWidth * scale),
+                              (work.right - work.left) - 2 * margin);
+  const int h = std::min<int>(static_cast<int>(kCompactWindowHeight * scale),
+                              (work.bottom - work.top) - 2 * margin);
+  out.right = work.right - margin;
+  out.bottom = work.bottom - margin;
+  out.left = out.right - w;
+  out.top = out.bottom - h;
+  return out;
+}
+
 void FocusWindowTarget(HWND window) {
   if (window == nullptr) return;
   if (IsIconic(window)) {

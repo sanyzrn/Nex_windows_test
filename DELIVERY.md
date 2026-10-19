@@ -1,4 +1,4 @@
-# Nex Windows 0.21.1+15
+# Nex Windows 0.22.0+16
 
 Android-inspired interface, cloud intelligence and verified GitHub updates.
 [Windows 0.21.0 design and update contract](docs/WINDOWS_0210.md).
@@ -7,7 +7,7 @@ Android-inspired interface, cloud intelligence and verified GitHub updates.
 
 Use the installer and SHA256SUMS from the same successful GitHub release.
 The complete main-branch Windows CI must pass before the automatic publisher
-creates v0.21.0. It publishes the exact tested installer, without rebuilding it.
+creates v0.22.0. It publishes the exact tested installer, without rebuilding it.
 Published versions are never silently replaced.
 
 AI is disabled until configured and explicitly enabled. Five cloud providers

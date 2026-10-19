@@ -5,6 +5,7 @@ import 'package:file_selector/file_selector.dart';
 import 'package:nex_ui/nex_ui.dart';
 import 'command_palette.dart' show nexFoldText;
 import '../core/app_meta.dart';
+import '../core/controller.dart' show PanelController;
 import '../core/display_identity.dart';
 import '../core/panel_settings.dart';
 import 'tool_organizer.dart';

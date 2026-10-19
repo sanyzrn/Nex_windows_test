@@ -10,7 +10,7 @@ part of 'library_view.dart';
 /// the Today strip, empty states and the note card list with date dividers.
 mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
   @override
-  Widget _buildListPane(BuildContext context, AppLocalizations l, bool fa, {required bool allowGrid}) {
+  Widget _buildListPane(BuildContext context, AppLocalizations l, bool fa) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
 
@@ -139,86 +139,87 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
             ),
           ),
         Padding(
-          padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
-          child: Focus(
-            onFocusChange: (focused) {
-              final c = NexPanelScope.maybeOf(context);
-              if (focused) {
-                c?.focusGained();
-              } else {
-                c?.focusLost();
-              }
-            },
-            child: TextField(
-              key: const ValueKey('library-search'),
-              controller: query,
-              focusNode: _searchFocusNode,
-              textDirection: nexDirectionOf(query.text),
-              decoration: InputDecoration(
-                hintText: l.search,
-                // The Android app's search fields are capsules; a stadium
-                // here matches it and separates search from the card edges
-                // around it.
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(999),
-                  borderSide: BorderSide(color: scheme.outlineVariant),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(999),
-                  borderSide: BorderSide(
-                    color: scheme.primary,
-                    width: nexFocusRingWidth,
-                  ),
-                ),
-                contentPadding: const EdgeInsets.symmetric(vertical: 10),
-                prefixIcon: const Icon(Icons.search_rounded, size: 18),
-                suffixIcon: query.text.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.close_rounded, size: 16),
-                        onPressed: () {
-                          query.clear();
-                          load();
-                        },
-                      )
-                    : Padding(
-                        padding: const EdgeInsetsDirectional.only(end: 10),
-                        child: Center(
-                          widthFactor: 1,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: scheme.surfaceContainerHighest,
-                              borderRadius: BorderRadius.circular(4),
-                              border: Border.all(
-                                color: scheme.outlineVariant.withValues(
-                                  alpha: 0.5,
+          padding: const EdgeInsetsDirectional.fromSTEB(12, 8, 8, 4),
+          child: Row(
+            children: [
+              Expanded(
+                child: Focus(
+                  onFocusChange: (focused) {
+                    final c = NexPanelScope.maybeOf(context);
+                    if (focused) {
+                      c?.focusGained();
+                    } else {
+                      c?.focusLost();
+                    }
+                  },
+                  child: TextField(
+                    key: const ValueKey('library-search'),
+                    controller: query,
+                    focusNode: _searchFocusNode,
+                    textDirection: nexDirectionOf(query.text),
+                    decoration: InputDecoration(
+                      hintText: l.search,
+                      // The Android app's search fields are capsules; a stadium
+                      // here matches it and separates search from the card edges
+                      // around it.
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(999),
+                        borderSide: BorderSide(color: scheme.outlineVariant),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(999),
+                        borderSide: BorderSide(
+                          color: scheme.primary,
+                          width: nexFocusRingWidth,
+                        ),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                      prefixIcon: const Icon(Icons.search_rounded, size: 18),
+                      suffixIcon: query.text.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.close_rounded, size: 16),
+                              onPressed: () {
+                                query.clear();
+                                load();
+                              },
+                            )
+                          : Padding(
+                              padding: const EdgeInsetsDirectional.only(
+                                end: 10,
+                              ),
+                              child: Center(
+                                widthFactor: 1,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: scheme.surfaceContainerHighest,
+                                    borderRadius: BorderRadius.circular(4),
+                                    border: Border.all(
+                                      color: scheme.outlineVariant.withValues(
+                                        alpha: 0.5,
+                                      ),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    'Ctrl+F',
+                                    style: TextStyle(
+                                      fontSize: 10.5,
+                                      fontWeight: FontWeight.w600,
+                                      color: scheme.onSurfaceVariant,
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
-                            child: Text(
-                              'Ctrl+F',
-                              style: TextStyle(
-                                fontSize: 10.5,
-                                fontWeight: FontWeight.w600,
-                                color: scheme.onSurfaceVariant,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
+                    ),
+                    onChanged: _queryChanged,
+                  ),
+                ),
               ),
-              onChanged: _queryChanged,
-            ),
-          ),
-        ),
-        Row(
-          children: [
-            const SizedBox(width: 12),
-            // Don't offer a layout switch when the pane cannot display a grid.
-            if (allowGrid) ...[
+              const SizedBox(width: 4),
               IconButton(
                 tooltip: AiStrings.of(context).t('board'),
                 isSelected: board,
@@ -231,22 +232,21 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
                 onPressed: () => setState(() => board = false),
                 icon: const Icon(Icons.view_agenda_outlined),
               ),
+              IconButton.filledTonal(
+                key: const ValueKey('manage-tags'),
+                tooltip: l.manageTags,
+                icon: const Icon(Icons.sell_outlined, size: 18),
+                onPressed: () async {
+                  await showTagManager(context, NexScope.of(context));
+                  if (!mounted) return;
+                  final all = await store.call<List<Tag>>('tags');
+                  if (!mounted) return;
+                  if (tag != null && !all.any((t) => t.id == tag)) tag = null;
+                  await load();
+                },
+              ),
             ],
-            const Spacer(),
-            TextButton.icon(
-              key: const ValueKey('manage-tags'),
-              icon: const Icon(Icons.sell_outlined, size: 16),
-              label: Text(l.manageTags),
-              onPressed: () async {
-                await showTagManager(context, NexScope.of(context));
-                if (!mounted) return;
-                final all = await store.call<List<Tag>>('tags');
-                if (!mounted) return;
-                if (tag != null && !all.any((t) => t.id == tag)) tag = null;
-                await load();
-              },
-            ),
-          ],
+          ),
         ),
         _FilterBar(
           type: type,
@@ -284,7 +284,6 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
             trash = false;
             load();
           },
-          onShortcutsTap: () => showShortcutsDialog(context),
         ),
         if (!trash && notes.any(_isDueToday)) _buildTodayStrip(context, l, fa),
         if (failure != null)
@@ -368,12 +367,25 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
                           padding: const EdgeInsets.fromLTRB(6, 14, 6, 8),
                           child: Row(
                             children: [
-                              Text(
-                                date,
-                                style: theme.textTheme.labelSmall?.copyWith(
-                                  fontWeight: FontWeight.w700,
-                                  color: scheme.onSurfaceVariant,
-                                  letterSpacing: 0.4,
+                              DecoratedBox(
+                                decoration: BoxDecoration(
+                                  color: scheme.primary.withValues(alpha: .1),
+                                  borderRadius: BorderRadius.circular(
+                                    NexRadius.lg,
+                                  ),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 3,
+                                  ),
+                                  child: Text(
+                                    date,
+                                    style: theme.textTheme.labelSmall?.copyWith(
+                                      fontWeight: FontWeight.w700,
+                                      color: scheme.primary,
+                                    ),
+                                  ),
                                 ),
                               ),
                               const SizedBox(width: 8),

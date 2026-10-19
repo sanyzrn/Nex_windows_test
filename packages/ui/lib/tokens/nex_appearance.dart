@@ -82,6 +82,15 @@ class NexGlassWash {
   /// destination blend state, including during a sliver's first paint.
   final Color anchor;
 
+  /// Reference source-over composition, also used to bound foreground contrast.
+  Color over(Color backdrop) {
+    var result = backdrop;
+    for (final film in [...films, lift, anchor]) {
+      result = Color.alphaBlend(film, result);
+    }
+    return result;
+  }
+
   NexGlassWash lerp(NexGlassWash other, double t) => NexGlassWash(
     films: [
       for (var i = 0; i < films.length; i++)
@@ -108,6 +117,7 @@ class NexVisualStyle extends ThemeExtension<NexVisualStyle> {
     required this.liquidGlass,
     required this.baseColor,
     required this.glassWash,
+    NexGlassWash? floatingGlassWash,
     required this.glassOpaque,
     required this.glassRim,
     required this.glassBorder,
@@ -115,13 +125,28 @@ class NexVisualStyle extends ThemeExtension<NexVisualStyle> {
     required this.glassHighlight,
     required this.glassDepth,
     required this.blurSigma,
-  });
+  }) : floatingGlassWash = floatingGlassWash ?? glassWash;
 
   final bool liquidGlass;
   final Color baseColor;
 
   /// What the blurred backdrop is turned into — see [NexGlassWash].
   final NexGlassWash glassWash;
+
+  /// More backdrop transmission for menus and floating action bars, with
+  /// smaller blur so the shapes beneath remain perceptible.
+  final NexGlassWash floatingGlassWash;
+
+  /// The least favourable backdrop for ink, including the optical gradient.
+  Color floatingContrastGround(Brightness brightness) {
+    final dark = brightness == Brightness.dark;
+    return Color.alphaBlend(
+      (dark ? glassHighlight : glassDepth).withValues(
+        alpha: (dark ? glassHighlight : glassDepth).a * 0.6,
+      ),
+      floatingGlassWash.over(dark ? Colors.white : Colors.black),
+    );
+  }
 
   /// What a glass surface falls back to when the backdrop must not show
   /// through: high contrast, and the non-glass appearance's sheets.
@@ -157,6 +182,7 @@ class NexVisualStyle extends ThemeExtension<NexVisualStyle> {
     bool? liquidGlass,
     Color? baseColor,
     NexGlassWash? glassWash,
+    NexGlassWash? floatingGlassWash,
     Color? glassOpaque,
     Color? glassRim,
     Color? glassBorder,
@@ -168,6 +194,7 @@ class NexVisualStyle extends ThemeExtension<NexVisualStyle> {
     liquidGlass: liquidGlass ?? this.liquidGlass,
     baseColor: baseColor ?? this.baseColor,
     glassWash: glassWash ?? this.glassWash,
+    floatingGlassWash: floatingGlassWash ?? this.floatingGlassWash,
     glassOpaque: glassOpaque ?? this.glassOpaque,
     glassRim: glassRim ?? this.glassRim,
     glassBorder: glassBorder ?? this.glassBorder,
@@ -184,6 +211,7 @@ class NexVisualStyle extends ThemeExtension<NexVisualStyle> {
       liquidGlass: t < 0.5 ? liquidGlass : other.liquidGlass,
       baseColor: Color.lerp(baseColor, other.baseColor, t)!,
       glassWash: glassWash.lerp(other.glassWash, t),
+      floatingGlassWash: floatingGlassWash.lerp(other.floatingGlassWash, t),
       glassOpaque: Color.lerp(glassOpaque, other.glassOpaque, t)!,
       glassRim: Color.lerp(glassRim, other.glassRim, t)!,
       glassBorder: Color.lerp(glassBorder, other.glassBorder, t)!,
@@ -285,6 +313,9 @@ class NexAppBackground extends StatelessWidget {
   }
 }
 
+/// Panels keep a reading wash; menus and bars reveal more of the page.
+enum NexGlassMaterial { panel, floating }
+
 class NexGlassSurface extends StatelessWidget {
   const NexGlassSurface({
     super.key,
@@ -293,12 +324,20 @@ class NexGlassSurface extends StatelessWidget {
     this.padding,
     this.fallbackColor,
     this.showShadow = true,
+    this.material = NexGlassMaterial.panel,
+    this.blur = true,
   });
 
   final Widget child;
   final BorderRadius borderRadius;
   final EdgeInsetsGeometry? padding;
   final bool showShadow;
+  final NexGlassMaterial material;
+
+  /// Live backdrop blur is for overlays. In-page cards and nested controls
+  /// keep the same optical finish over a stable tint, without sampling the
+  /// scrolling page or blurring a second time inside a glass sheet.
+  final bool blur;
 
   /// What to draw outside the glass appearance.
   ///
@@ -343,6 +382,33 @@ class NexGlassSurface extends StatelessWidget {
         child: Padding(padding: padding ?? EdgeInsets.zero, child: child),
       );
     }
+    final floating = material == NexGlassMaterial.floating;
+    final opticalStrength = floating ? 0.6 : 1.0;
+    final content = CustomPaint(
+      painter: _GlassWashPainter(
+        floating ? visual.floatingGlassWash : visual.glassWash,
+      ),
+      foregroundPainter: _GlassRimPainter(borderRadius, visual),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            stops: const [0, 0.38, 1],
+            colors: [
+              visual.glassHighlight.withValues(
+                alpha: visual.glassHighlight.a * opticalStrength,
+              ),
+              Colors.transparent,
+              visual.glassDepth.withValues(
+                alpha: visual.glassDepth.a * opticalStrength,
+              ),
+            ],
+          ),
+        ),
+        child: Padding(padding: padding ?? EdgeInsets.zero, child: child),
+      ),
+    );
     return CustomPaint(
       painter: _GlassEdgePainter(
         shadows: showShadow
@@ -352,35 +418,63 @@ class NexGlassSurface extends StatelessWidget {
       ),
       child: ClipRRect(
         borderRadius: borderRadius,
-        child: BackdropFilter(
-          filter: ImageFilter.blur(
-            sigmaX: visual.blurSigma,
-            sigmaY: visual.blurSigma,
-          ),
-          // Source-over films stay stable when the sliver or refresh indicator
-          // temporarily paints into a fresh layer above the blurred page.
-          child: CustomPaint(
-            painter: _GlassWashPainter(visual.glassWash),
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  stops: const [0, 0.38, 1],
-                  colors: [
-                    visual.glassHighlight,
-                    Colors.transparent,
-                    visual.glassDepth,
-                  ],
+        child: blur
+            ? BackdropFilter(
+                filter: ImageFilter.blur(
+                  sigmaX: visual.blurSigma * (floating ? 0.7 : 1),
+                  sigmaY: visual.blurSigma * (floating ? 0.7 : 1),
                 ),
-              ),
-              child: Padding(padding: padding ?? EdgeInsets.zero, child: child),
-            ),
-          ),
-        ),
+                child: content,
+              )
+            : ColoredBox(color: visual.glassOpaque, child: content),
       ),
     );
   }
+}
+
+class _GlassRimPainter extends CustomPainter {
+  const _GlassRimPainter(this.radius, this.visual);
+  final BorderRadius radius;
+  final NexVisualStyle visual;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (size.isEmpty) return;
+    final rect = (Offset.zero & size).deflate(0.7);
+    final shape = radius.toRRect(rect);
+    final shader = LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [visual.glassRim, visual.glassBorder, visual.glassDepth],
+      stops: const [0, 0.48, 1],
+    ).createShader(rect);
+    canvas.drawRRect(
+      shape,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.2
+        ..shader = shader,
+    );
+    // A narrow top reflection makes the curvature visible even over a quiet
+    // plain backdrop. It stays on the rim, outside the reading area.
+    canvas.save();
+    canvas.clipRect(Rect.fromLTWH(0, 0, size.width, size.height * 0.48));
+    canvas.drawRRect(
+      shape,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1
+        ..shader = LinearGradient(
+          colors: [Colors.transparent, visual.glassRim, Colors.transparent],
+          stops: const [0.08, 0.42, 0.92],
+        ).createShader(rect),
+    );
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(_GlassRimPainter old) =>
+      old.radius != radius || old.visual != visual;
 }
 
 /// The blurred band behind a top bar, for a bar the content scrolls under.

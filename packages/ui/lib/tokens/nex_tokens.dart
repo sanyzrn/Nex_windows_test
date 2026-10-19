@@ -228,17 +228,64 @@ abstract final class NexSpacing {
   static const xl = 32.0;
 }
 
+/// How everything in Nex moves — one language, so a sheet, a dialog, a page
+/// and a module being added all feel like the same app. See the Motion
+/// section of `docs/16-design-language.md`.
+///
+/// Four kinds of movement, each with one duration and one curve:
+///
+/// - **Arriving** ([enter], [curve]): a page, a sheet, a dialog, a card that
+///   appears. Most of the travel happens early and it settles softly.
+/// - **Leaving** ([exit], [exitCurve]): the same things going away —
+///   quicker than they came, accelerating out, because nobody waits to watch
+///   something they dismissed.
+/// - **Changing shape** ([morph], [moveCurve]): one thing becoming another
+///   or moving between places — the dock turning into the selection bar, a
+///   day folding, a card snapping back.
+/// - **Popping in** ([pop], [popCurve]): a small mark arriving with a touch
+///   of overshoot — a check, a badge, a count.
+///
+/// [fast], [standard] and [slow] are for state changes inside something
+/// already on screen: a press, a crossfade, a row growing.
 abstract final class NexMotion {
   static const fast = Duration(milliseconds: 120);
   static const standard = Duration(milliseconds: 180);
   static const slow = Duration(milliseconds: 320);
 
+  static const enter = Duration(milliseconds: 300);
+  static const exit = Duration(milliseconds: 220);
+  static const morph = Duration(milliseconds: 400);
+  static const pop = Duration(milliseconds: 260);
+
   /// How long a commit receipt takes to fade out.
   static const receipt = Duration(milliseconds: 600);
+
+  /// Arriving and settling.
   static const curve = Curves.easeOutCubic;
+
+  /// Leaving.
+  static const exitCurve = Curves.easeInCubic;
+
+  /// Moving from one place or shape to another.
+  static const moveCurve = Curves.easeInOutCubic;
+
+  /// A small mark popping in.
+  static const popCurve = Curves.easeOutBack;
 
   /// How long a toast's content takes to pop in — see [NexToastPop].
   static const toastPop = Duration(milliseconds: 380);
+
+  /// Every sheet, page-like or not, rises and falls this way.
+  static const sheet = AnimationStyle(
+    duration: enter,
+    reverseDuration: exit,
+    curve: curve,
+  );
+
+  /// [duration], or nothing at all when the person has asked the system to
+  /// remove animations.
+  static Duration of(BuildContext context, Duration duration) =>
+      MediaQuery.disableAnimationsOf(context) ? Duration.zero : duration;
 }
 
 /// One radius scale. Inner radii are derived from an outer radius minus the
@@ -325,6 +372,10 @@ const nexCardInsets = EdgeInsets.symmetric(
   vertical: 6,
 );
 
+/// [nexCardInsets] for the density in force — tighter only when compact.
+EdgeInsets nexCardInsetsFor(BuildContext context) =>
+    NexCardDensity.of(context).cardInsets;
+
 /// The type glyph's container on a card, and the photo thumbnail's size.
 ///
 /// Smaller than it was — the Android app's note cards carry a 40–44dp leading
@@ -384,23 +435,34 @@ const double _nexTaller =
     ? nexCardLeadingSize
     : nexCardPreviewLineHeight * nexCardPreviewLines;
 
-/// [nexCardHeight], grown only as far as larger text actually needs.
+/// [nexCardHeight], grown for larger text and an optional status row.
 ///
-/// At the default scale this is exactly [nexCardHeight]. Past that the lines
-/// outgrow their reserved space and the card follows them, because the
-/// alternative is a fixed box clipping the text of whoever turned the size
-/// up. The app's own UI-scale setting composes with the system's and clamps
-/// at 1.9, so this can be asked for nearly twice the default.
-double nexCardHeightFor(BuildContext context) {
+/// Without a status row, the default scale is [nexCardHeight]: two preview lines
+/// and the glyph both come to 48. Past that the lines outgrow the glyph and
+/// the card follows them, because the alternative is a fixed box clipping the
+/// text of whoever turned the size up. The app's own UI-scale setting composes
+/// with the system's accessibility curve, so this follows the actual text size.
+double nexCardHeightFor(BuildContext context, {bool withFootnote = false}) {
   final density = NexCardDensity.of(context);
   final lines = nexCardPreviewLineHeightFor(context) * density.lines;
-  return math.max(density.leading, lines) + density.inset * 2;
+  final footnote = withFootnote ? nexCardFootnoteHeightFor(context) : 0.0;
+  return math.max(density.leading, lines + footnote) + density.inset * 2;
+}
+
+/// The status line and its gap from the preview. Its text follows the
+/// person's text size, while the bell and paperclip always have room.
+double nexCardFootnoteHeightFor(BuildContext context) {
+  final style = Theme.of(context).textTheme.labelSmall;
+  final textHeight =
+      MediaQuery.textScalerOf(context).scale(style?.fontSize ?? 12) *
+      (style?.height ?? 1.5);
+  return NexSpacing.xs + math.max(14, textHeight);
 }
 
 /// How much a timeline card holds, chosen in Settings → Appearance (W7.2).
 ///
-/// Every value keeps the one-height-for-every-card rule; each is a different
-/// height. Compact keeps two lines — a link's title and site, a voice note's
+/// Each density has one preview budget, with a status row added only when
+/// needed. Compact keeps two lines — a link's title and site, a voice note's
 /// words and length, are two rows whatever the density — in smaller type.
 enum NexCardDensity {
   compact(inset: 9, leading: 34, lines: 2, lineHeight: 20),
@@ -430,6 +492,19 @@ enum NexCardDensity {
 
   /// One of those lines, at the default text size.
   final double lineHeight;
+
+  /// The gutter round a card on the timeline.
+  ///
+  /// Compact also draws the cards closer together — half the vertical gap,
+  /// so a screen holds more of them — which is what someone choosing it
+  /// is asking for. The horizontal gutter, and both of the other densities,
+  /// keep [nexCardInsets].
+  EdgeInsets get cardInsets => this == compact
+      ? const EdgeInsets.symmetric(
+          horizontal: NexSpacing.md,
+          vertical: NexSpacing.xs,
+        )
+      : nexCardInsets;
 
   /// The type the preview is set in: a size down when compact.
   TextStyle? previewStyle(ThemeData theme) =>
@@ -466,11 +541,26 @@ class NexCardDensityScope extends InheritedWidget {
 /// [nexCardHeightFor] or the card gets taller around text that is still being
 /// squeezed into 24 logical pixels. They were literal `24`s, which held only
 /// at scale 1.0: the app's own UI-size setting composes with the system's and
-/// clamps at 1.9, so bodyLarge can ask for 45 in a box built for 24.
-double nexCardPreviewLineHeightFor(BuildContext context) =>
-    MediaQuery.textScalerOf(
-      context,
-    ).scale(NexCardDensity.of(context).lineHeight);
+/// can grow beyond 1.9, so the row must follow the actual scaled height.
+///
+/// Never less than a line of the preview's own text (2.1.7). Scaling the
+/// budget and scaling the text agree only while the text scaler is linear;
+/// Android's non-linear font scaling grows the 14-point preview more than
+/// the 20-point budget, so two compact lines came out taller than the two
+/// rows reserved for them, and with a reminder or a paperclip underneath —
+/// where the preview sits in a box of exactly that height — the bottom of
+/// the second line was cut off. Standard and readable had a couple of
+/// pixels of slack and never showed it.
+double nexCardPreviewLineHeightFor(BuildContext context) {
+  final density = NexCardDensity.of(context);
+  final scaler = MediaQuery.textScalerOf(context);
+  final budget = scaler.scale(density.lineHeight);
+  final style = density.previewStyle(Theme.of(context));
+  final size = style?.fontSize;
+  final height = style?.height;
+  if (size == null || height == null) return budget;
+  return math.max(budget, scaler.scale(size) * height);
+}
 
 /// The typeface used everywhere except in Persian.
 ///
@@ -595,15 +685,11 @@ ThemeData _theme({
 }) {
   final dark = brightness == Brightness.dark;
   final errorColor = dark ? NexColors.errorDark : NexColors.error;
-  final pageSurface = liquidGlass
-      ? background.withValues(alpha: dark ? 0.72 : 0.68)
-      : background;
-  final cardSurface = liquidGlass
-      ? card.withValues(alpha: dark ? 0.76 : 0.74)
-      : card;
-  final elevatedSurface = liquidGlass
-      ? elevated.withValues(alpha: dark ? 0.66 : 0.62)
-      : elevated;
+  // Reading surfaces stay solid. Glass is a material for floating chrome,
+  // not a whole-page transparency mode that makes note text overlap.
+  final pageSurface = background;
+  final cardSurface = card;
+  final elevatedSurface = elevated;
   // What a sheet is drawn on. Higher than the other glass surfaces on
   // purpose: a sheet covers the page rather than sitting within it, and it is
   // the one place where seeing the layer underneath is not depth, it is two
@@ -731,6 +817,9 @@ ThemeData _theme({
       surfaceTintColor: Colors.transparent,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(NexRadius.xl),
+        // A dialog can open over a sheet with the same fill. Its boundary
+        // must remain visible even when the two surfaces match.
+        side: liquidGlass ? BorderSide.none : BorderSide(color: border),
       ),
     ),
     bottomSheetTheme: BottomSheetThemeData(
@@ -903,6 +992,29 @@ ThemeData _theme({
                             ? const Color(0xFFC9BFAF)
                             : const Color(0xFFD9DDE2))
                         .withValues(alpha: 0.60),
+              ),
+        // Small menus and floating bars reveal about 27–28% of the backdrop
+        // instead of 13–19%, without changing the reading material of sheets.
+        floatingGlassWash: dark
+            ? NexGlassWash(
+                films: [
+                  Colors.white.withValues(alpha: 0.02),
+                  Colors.black.withValues(alpha: 0.66),
+                ],
+                lift: const Color(0xFF222222).withValues(alpha: 0.16),
+                anchor: const Color(0xFF262626).withValues(alpha: 0.05),
+              )
+            : NexGlassWash(
+                films: [
+                  Colors.black.withValues(alpha: 0.08),
+                  Colors.white.withValues(alpha: 0.52),
+                ],
+                lift: Colors.white.withValues(alpha: 0.08),
+                anchor:
+                    (comfortMode
+                            ? const Color(0xFFC9BFAF)
+                            : const Color(0xFFD9DDE2))
+                        .withValues(alpha: 0.30),
               ),
         glassOpaque: card,
         // Apple's #D0D0D0 in light. In dark a grey sliver would vanish, so
@@ -1208,6 +1320,100 @@ IconData nexNoteTypeIcon(String? wireName) => switch (wireName) {
   'link' => Icons.link_outlined,
   _ => Icons.all_inclusive_outlined,
 };
+
+/// The colour for a note type, and the only place one is chosen.
+///
+/// Every card's leading square used to be the same grey with the same grey
+/// glyph, so a timeline of ten notes was ten identical marks and the type —
+/// the thing the square is there to say — had to be read glyph by glyph. A
+/// colour per type says it before the glyph is read: the voice notes, the
+/// lists, the links pick themselves out of a day at a glance.
+///
+/// The colours are not fixed hues. Fixed ones were fine on the shipped blue
+/// and wrong on almost every other accent — a mustard link on a blue theme,
+/// a lilac voice note on a green one — because only text followed the
+/// accent and the other five ignored it. So the set is the accent's own fan:
+/// the accent opened out round the colour wheel, text at its centre, lists
+/// and links a step either side, voice and photos a step further, and the
+/// file a quiet grey with a trace of the same hue. On blue that is teal,
+/// indigo, violet and green; on amber it is red, olive, green and rose — a
+/// different family on every theme, and always the theme's own.
+///
+/// Each one keeps the accent's tone, a little less of its saturation — a
+/// fully saturated blue turned to violet is neon, where the blue was not —
+/// and is then walked, hue kept, until it reads at 3:1 on the square it sits
+/// on, so a turn of the wheel into yellow cannot leave a glyph too pale to
+/// see. Text is walked too: the accent on its own wash was 2.5:1 on the light
+/// theme, a mark the type colour exists to make easier to read. An accent
+/// with almost no colour in it gives a fan of greys — what that theme asked
+/// for — told apart by tone instead.
+Color nexNoteTypeTint(String? wireName, ColorScheme scheme) {
+  final accent = scheme.primary.withValues(alpha: 1);
+  final ground = scheme.surfaceContainerHighest.withValues(alpha: 1);
+  final key = (wireName, accent.toARGB32(), ground.toARGB32());
+  final cached = _typeTints[key];
+  if (cached != null) return cached;
+  if (_typeTints.length > 64) _typeTints.clear();
+  return _typeTints[key] = _typeTint(
+    wireName,
+    accent,
+    ground,
+    scheme.brightness == Brightness.dark,
+  );
+}
+
+final _typeTints = <(String?, int, int), Color>{};
+
+/// Where each type sits on the fan, in degrees from the accent, and how much
+/// of the accent's saturation it keeps. Text is null: the accent, untouched.
+const _typeFan = <String, (double, double)>{
+  'checklist': (-36, 1),
+  'link': (36, 1),
+  'voice': (72, 1),
+  'photo': (-72, 1),
+  'file': (0, 0.22),
+};
+
+Color _typeTint(String? wireName, Color accent, Color ground, bool dark) {
+  final place = _typeFan[wireName];
+  var tint = accent;
+  if (place != null) {
+    final (turn, keep) = place;
+    final hsl = HSLColor.fromColor(accent);
+    final grey = hsl.saturation < 0.12;
+    // A grey accent has no hue to turn; its fan is steps of tone instead.
+    final tone = grey
+        ? (hsl.lightness + turn / 72 * 0.12).clamp(0.0, 1.0)
+        : hsl.lightness;
+    final saturation = grey
+        ? hsl.saturation
+        : (hsl.saturation * keep * 0.85).clamp(keep < 1 ? 0.0 : 0.38, 0.72);
+    tint = HSLColor.fromAHSL(
+      1,
+      (hsl.hue + turn) % 360,
+      saturation,
+      tone,
+    ).toColor();
+  }
+  // Measured on the square it is drawn on — its own wash — which is a
+  // shade darker than the card on the light theme. Twice, since walking the
+  // glyph darker darkens the wash under it a little too.
+  for (var pass = 0; pass < 2; pass++) {
+    tint = nexReadableOn(tint, _wash(tint, ground, dark), ratio: 3.1);
+  }
+  return tint;
+}
+
+Color _wash(Color tint, Color ground, bool dark) =>
+    Color.alphaBlend(tint.withValues(alpha: dark ? 0.2 : 0.13), ground);
+
+/// The fill behind a type's glyph: a wash of its colour over the card's
+/// usual square.
+Color nexNoteTypeWash(String? wireName, ColorScheme scheme) => _wash(
+  nexNoteTypeTint(wireName, scheme),
+  scheme.surfaceContainerHighest.withValues(alpha: 1),
+  scheme.brightness == Brightness.dark,
+);
 
 double nexContrastRatio(Color a, Color b) {
   final high = math.max(a.computeLuminance(), b.computeLuminance());

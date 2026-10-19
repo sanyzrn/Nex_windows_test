@@ -9,6 +9,25 @@ String reminderScheduleId(String noteId) => noteId.length < 16
     ? noteId
     : 'nx${sha256OfBytes(Uint8List.fromList(utf8.encode(noteId))).substring(0, 13)}';
 
+/// How many future occurrences of a repeating reminder are queued with
+/// Windows at once. Scheduled toasts fire without Nex running, so a series
+/// keeps ringing for this long after the app was last opened: a week of
+/// daily reminders, two months of weekly ones.
+int reminderLookahead(NoteRepeat repeat) => switch (repeat) {
+  NoteRepeat.daily => 7,
+  NoteRepeat.weekly => 8,
+  NoteRepeat.once => 1,
+};
+
+/// The queue id of the [index]th upcoming occurrence (0 = the next one).
+/// Index 0 keeps the id the note always had; the rest are "nx<hash>r<NN>",
+/// 15 characters like every other id (the queue rejects 16).
+String reminderOccurrenceId(String noteId, int index) {
+  if (index == 0) return reminderScheduleId(noteId);
+  final hash = sha256OfBytes(Uint8List.fromList(utf8.encode(noteId)));
+  return 'nx${hash.substring(0, 10)}r${index.toString().padLeft(2, '0')}';
+}
+
 String reminderReceipt(Note note) =>
     '${note.id}:${note.dueAt!.millisecondsSinceEpoch}';
 

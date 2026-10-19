@@ -78,6 +78,10 @@ class _NexWorkspaceHomeState extends State<NexWorkspaceHome> {
     return LayoutBuilder(
       builder: (context, box) {
         final wide = box.maxWidth >= 860 && scale < 1.5;
+        // The compact window: writing comes first. The hero line and the
+        // counters (both also in the library) would push the editor below the
+        // fold of a 460 px card.
+        final compactPage = box.maxWidth < 620;
         final columns = box.maxWidth >= 1000 && scale < 1.3
             ? 3
             : box.maxWidth >= 620 && scale < 1.6
@@ -206,15 +210,25 @@ class _NexWorkspaceHomeState extends State<NexWorkspaceHome> {
                         stats,
                       ],
                     )
-                  else ...[
+                  else if (!compactPage) ...[
                     intro,
                     const SizedBox(height: 16),
                     stats,
                   ],
                   if (NexScope.of(context).reminderDeliveryFailed)
-                    _HomeMessage(l.reminderDeliveryFailed),
+                    _HomeMessage(
+                      l.reminderDeliveryFailed,
+                      actionLabel: c == null ? null : l.notificationSettings,
+                      onAction: c == null
+                          ? null
+                          : () => unawaited(
+                              c.native
+                                  .launch('ms-settings:notifications')
+                                  .catchError((_) {}),
+                            ),
+                    ),
                   if (_error != null) _HomeMessage(_error!, onRetry: _load),
-                  const SizedBox(height: 24),
+                  SizedBox(height: compactPage ? 4 : 24),
                   if (wide)
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -360,9 +374,16 @@ class _ShelfHeading extends StatelessWidget {
 }
 
 class _HomeMessage extends StatelessWidget {
-  const _HomeMessage(this.message, {this.onRetry});
+  const _HomeMessage(
+    this.message, {
+    this.onRetry,
+    this.actionLabel,
+    this.onAction,
+  });
   final String message;
   final VoidCallback? onRetry;
+  final String? actionLabel;
+  final VoidCallback? onAction;
   @override
   Widget build(BuildContext context) => Padding(
     padding: const EdgeInsets.only(top: 12),
@@ -380,6 +401,8 @@ class _HomeMessage extends StatelessWidget {
             style: TextStyle(color: Theme.of(context).colorScheme.error),
           ),
         ),
+        if (onAction != null && actionLabel != null)
+          TextButton(onPressed: onAction, child: Text(actionLabel!)),
         if (onRetry != null)
           IconButton(
             tooltip: AppLocalizations.of(context)!.retry,

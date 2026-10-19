@@ -70,8 +70,9 @@ mixin PanelLifecycle on PanelStateBase {
         try {
           await native.setWindowMode(
             'window',
-            bounds: S.windowBounds,
-            maximized: S.windowMaximized,
+            bounds: S.windowRemember ? S.windowBounds : null,
+            maximized: S.windowRemember && S.windowMaximized,
+            compact: !S.windowRemember,
             show: showWindow,
           );
         } catch (_) {}

@@ -248,6 +248,8 @@
   "interfaceMode": "Interface mode",
   "windowMode": "Window",
   "panelMode": "Edge panel",
+  "windowRemember": "Remember window size and position",
+  "windowRememberHint": "Off: Nex opens as a compact card in the bottom-right corner, always at the same size.",
   "modeDescription": "The desktop window is the main experience; the edge panel stays available for quick capture. Both share the same notes, media and settings.",
   "edgePanelOnly": "Applies to the edge panel — switch the interface mode to use it.",
   "switchToPanel": "Switch to edge panel",
@@ -397,6 +399,21 @@
   "workspaceToolsSearch": "Find a tool…",
   "workspaceBrand": "Nex",
   "reminderFutureRequired": "Choose a time in the future.",
+  "notificationSettings": "Notification settings",
+  "testNotification": "Test notifications",
+  "testNotificationHint": "Shows one notification now and a second one 15 seconds later, so you can check both ways Nex delivers reminders.",
+  "testNotificationRun": "Send test",
+  "testNotificationSent": "Test sent. You should see one notification now and another in 15 seconds.",
+  "testNotificationFailed": "Windows did not accept the notification{detail}. Check Settings > System > Notifications and Focus assist.",
+  "@testNotificationFailed": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "testNotificationBody": "This is a test notification from Nex.",
+  "testNotificationLater": "The scheduled test notification arrived.",
   "reminderDeliveryFailed": "The time was saved, but Windows could not schedule the notification. Check Windows notification settings and try again.",
   "reminderSaveFailed": "The reminder could not be saved. Please try again.",
   "workspaceNotebook": "Your notebook",

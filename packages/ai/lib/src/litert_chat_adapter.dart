@@ -21,17 +21,45 @@ import 'package:nex_core/nex_core.dart';
 /// package's dependency list.
 class LiteRtChatAdapter implements ChatAdapter {
   LiteRtChatAdapter({
-    required this.modelPath,
+    required String modelPath,
     this.preferGpu = true,
+    this.requestTimeout = const Duration(minutes: 5),
+    @visibleForTesting bool? availableForTest,
     @visibleForTesting LiteLmEngine? engine,
-  }) : _engine = engine;
+    @visibleForTesting
+    Future<LiteLmEngine> Function(LiteLmEngineConfig config)? loadEngine,
+  }) : _availableForTest = availableForTest,
+       _path = (() => modelPath),
+       _engine = engine,
+       _enginePath = engine == null ? null : modelPath,
+       _loadEngine = loadEngine ?? LiteLmEngine.create;
+
+  /// An adapter whose model can change while the app runs: [modelPath] is
+  /// asked again before every load, and a loaded model that is no longer the
+  /// one it names is released and the new one loaded in its place.
+  LiteRtChatAdapter.following(
+    String Function() modelPath, {
+    this.preferGpu = true,
+    this.requestTimeout = const Duration(minutes: 5),
+  }) : _availableForTest = null,
+       _path = modelPath,
+       _loadEngine = LiteLmEngine.create;
+
+  final String Function() _path;
+
+  /// How an engine is brought up: the runtime's own loader, or a test's.
+  final Future<LiteLmEngine> Function(LiteLmEngineConfig config) _loadEngine;
 
   /// Where the `.litertlm` weights live on disk.
   ///
-  /// Supplied rather than discovered: the file is ~2.6 GB and arrives through
-  /// a download this package deliberately knows nothing about. A path that is
-  /// not there yet is an ordinary state, not an error — see [available].
-  final String modelPath;
+  /// Supplied rather than discovered: the file is gigabytes and arrives
+  /// through a download this package deliberately knows nothing about. A path
+  /// that is not there yet is an ordinary state, not an error — see
+  /// [available].
+  String get modelPath => _path();
+
+  /// The path [_engine] was loaded from.
+  String? _enginePath;
 
   /// Try the GPU (OpenCL) backend first.
   ///
@@ -41,6 +69,9 @@ class LiteRtChatAdapter implements ChatAdapter {
   /// catch. A chat feature is not worth a crash, so this ships GPU-then-CPU
   /// and leaves NPU to a device allowlist that does not exist yet.
   final bool preferGpu;
+  final Duration requestTimeout;
+  final bool? _availableForTest;
+  Future<void> _messageTail = Future<void>.value();
 
   LiteLmEngine? _engine;
   LiteLmConversation? _conversation;
@@ -79,9 +110,32 @@ class LiteRtChatAdapter implements ChatAdapter {
       !kIsWeb && (Platform.isAndroid || Platform.isIOS);
 
   /// Whether there is a model on disk to answer with.
+  ///
+  /// Remembered for a few seconds rather than asked of the disk each time
+  /// (PERF-09): the timeline header and every adapter call read this, on the
+  /// UI isolate, where a synchronous stat per rebuild is the cost the project
+  /// otherwise keeps off it. Only a model that is there is remembered: one
+  /// just installed is seen at once, one deleted within [_availabilityTtl].
   @override
-  bool get available =>
-      supportedPlatform && modelPath.isNotEmpty && File(modelPath).existsSync();
+  bool get available {
+    if (_availableForTest case final present?) return present;
+    if (!supportedPlatform || modelPath.isEmpty) return false;
+    final now = DateTime.now();
+    final seen = _seenAt;
+    if (seen != null &&
+        _seenPath == modelPath &&
+        now.difference(seen) < _availabilityTtl) {
+      return true;
+    }
+    final present = File(modelPath).existsSync();
+    _seenPath = present ? modelPath : null;
+    _seenAt = present ? now : null;
+    return present;
+  }
+
+  static const _availabilityTtl = Duration(seconds: 3);
+  String? _seenPath;
+  DateTime? _seenAt;
 
   /// Backends to try, in order. GPU is Android-only; CPU is the floor
   /// everywhere and is always last, so there is always something left to fall
@@ -98,8 +152,13 @@ class LiteRtChatAdapter implements ChatAdapter {
   /// "there is a wait coming" without starting one.
   @override
   Future<void>? warmUp() {
-    if (!available || _engine != null) return null;
-    return _ensureEngine().whenComplete(_settle);
+    if (!available || (_engine != null && _enginePath == modelPath)) {
+      return null;
+    }
+    return (_inFlight == 0
+            ? _ensureEngine().then<void>((_) {})
+            : _messageTail.then((_) => _ensureEngine()).then<void>((_) {}))
+        .whenComplete(_settle);
   }
 
   /// How long a loaded model may sit unused before it is released.
@@ -131,17 +190,53 @@ class LiteRtChatAdapter implements ChatAdapter {
     // "unavailable" is a state the caller checks for, not an exception it
     // catches. With no model downloaded yet this is the whole answer.
     if (!available || history.isEmpty) return null;
-    _inFlight++;
-    return _send(withScopeCeiling(history)).whenComplete(() {
-      _inFlight--;
-      _settle();
+    final result = Completer<ChatResponse>();
+    final timer = Timer(requestTimeout, () {
+      if (!result.isCompleted) {
+        result.completeError(
+          TimeoutException('The on-device model timed out.'),
+        );
+      }
     });
+    final prepared = withScopeCeiling(List<ChatMessage>.of(history));
+    _inFlight++;
+    final work = _messageTail.then((_) async {
+      try {
+        // A queued request may have expired while another native call was
+        // finishing. Never run abandoned work in the background.
+        if (result.isCompleted) return;
+        final reply = await _send(prepared);
+        if (!result.isCompleted) {
+          result.complete(reply);
+        } else {
+          // The native API has no cancellation method. Let it settle before
+          // disposing its session; never free native state mid-generation.
+          await _resetConversation();
+        }
+      } catch (error, stack) {
+        try {
+          await _resetConversation();
+        } catch (_) {
+          /* Keep original error. */
+        }
+        if (!result.isCompleted) result.completeError(error, stack);
+      } finally {
+        _inFlight--;
+        _settle();
+      }
+    });
+    // A failed/disposed session must not poison the next queued request.
+    _messageTail = work.then<void>(
+      (_) {},
+      onError: (Object _, StackTrace __) {},
+    );
+    return result.future.whenComplete(timer.cancel);
   }
 
   Future<ChatResponse> _send(List<ChatMessage> conversation) async {
-    // The system message becomes LiteRT-LM's `systemInstruction` rather than a
-    // turn in the transcript. It is not something the user said, and models
-    // weight it differently when it arrives in the slot meant for it.
+    // The system message is taken off the transcript and written into the
+    // start of the first user turn — see [withInstructions] for why not
+    // LiteRT-LM's own `systemInstruction` slot.
     final system = conversation.first.role == ChatRole.system
         ? conversation.first.content
         : null;
@@ -152,33 +247,28 @@ class LiteRtChatAdapter implements ChatAdapter {
     if (turns.isEmpty) {
       return const ChatResponse(content: '');
     }
+    final prepared = withInstructions(system, turns);
 
-    await _ensureConversation(system, turns);
+    await _ensureConversation(system, turns, prepared);
 
     // Only the turns the live conversation has not seen. The contract hands
     // over the whole history every call, and replaying all of it would mean
     // re-running prefill over the entire transcript on every message — which
     // is the expensive half on this hardware, and grows with the conversation.
     // `_sentThroughIndex` is what lets an append-only history cost one turn.
-    final pending = turns.sublist(_sentThroughIndex.clamp(0, turns.length));
-    final userTurns = [
-      for (final turn in pending)
-        if (turn.role == ChatRole.user) turn.content,
-    ];
-    if (userTurns.isEmpty) {
+    final pending = prepared.sublist(_sentThroughIndex.clamp(0, turns.length));
+    final message = asOneMessage(pending);
+    if (message == null) {
       // The last thing in the history is already an assistant turn — nothing
       // was asked. Better an empty answer than replaying the transcript to
       // manufacture one.
       return const ChatResponse(content: '');
     }
 
-    LiteLmMessage? reply;
-    for (final text in userTurns) {
-      reply = await _conversation!.sendMessage(text);
-    }
+    final reply = await _conversation!.sendMessage(message);
     _sentThroughIndex = turns.length;
     _sentSignature = _signatureOf(system, turns, _sentThroughIndex);
-    return ChatResponse(content: reply?.text.trim() ?? '');
+    return ChatResponse(content: reply.text.trim());
   }
 
   /// Brings up an engine and a conversation, reusing both when they still
@@ -192,6 +282,7 @@ class LiteRtChatAdapter implements ChatAdapter {
   Future<void> _ensureConversation(
     String? system,
     List<ChatMessage> turns,
+    List<ChatMessage> prepared,
   ) async {
     final engine = await _ensureEngine();
     final diverged =
@@ -211,12 +302,13 @@ class LiteRtChatAdapter implements ChatAdapter {
     // Everything before the pending turns is replayed as history the model is
     // given rather than as messages it answers, which is what
     // `initialMessages` is for.
-    final replay = turns.length > 1
-        ? turns.sublist(0, turns.length - 1)
+    final replay = prepared.length > 1
+        ? prepared.sublist(0, prepared.length - 1)
         : const <ChatMessage>[];
     _conversation = await engine.createConversation(
+      // No `systemInstruction`: the instructions ride the first user turn
+      // instead — see [withInstructions].
       LiteLmConversationConfig(
-        systemInstruction: system,
         initialMessages: [
           for (final turn in replay)
             turn.role == ChatRole.assistant
@@ -229,6 +321,55 @@ class LiteRtChatAdapter implements ChatAdapter {
     _sentSignature = _signatureOf(system, turns, replay.length);
   }
 
+  /// The user turns in [pending] as the one message the model is sent, or
+  /// null when there is none.
+  ///
+  /// One message, not one each. Two user turns in a row — a question and
+  /// the Cycle summary the app read for it — sent one at a time made the
+  /// model answer the question blind first, at the cost of a whole reply,
+  /// and only then the summary.
+  @visibleForTesting
+  static String? asOneMessage(List<ChatMessage> pending) {
+    final texts = [
+      for (final turn in pending)
+        if (turn.role == ChatRole.user) turn.content,
+    ];
+    return texts.isEmpty ? null : texts.join('\n\n');
+  }
+
+  /// [turns] with [system] written into the start of the first user turn.
+  ///
+  /// Not LiteRT-LM's `systemInstruction`. Whether that slot reaches the
+  /// model depends on the model's own chat template, and with Gemma 4 it
+  /// did not: the assistant introduced itself as "Gemma, not Nex" and had
+  /// never seen the notes it was asked about, though both were in the
+  /// instruction it was given. Every template carries a user turn, so the
+  /// instructions go there — once, at the start of the conversation, and
+  /// marked as the app's rather than the person's words.
+  @visibleForTesting
+  static List<ChatMessage> withInstructions(
+    String? system,
+    List<ChatMessage> turns,
+  ) {
+    if (system == null || system.trim().isEmpty) return turns;
+    final first = turns.indexWhere((turn) => turn.role == ChatRole.user);
+    if (first < 0) return turns;
+    return [
+      for (var i = 0; i < turns.length; i++)
+        if (i == first)
+          ChatMessage(
+            role: ChatRole.user,
+            content:
+                '[Instructions from the Nex app — not written by the user]\n'
+                '${system.trim()}\n'
+                '[End of instructions. The user says:]\n'
+                '${turns[i].content}',
+          )
+        else
+          turns[i],
+    ];
+  }
+
   /// A note on disk saying "a backend load is in progress".
   ///
   /// Loading a model is native work, and native work does not fail politely:
@@ -237,64 +378,153 @@ class LiteRtChatAdapter implements ChatAdapter {
   /// next launch tries the same backend and dies the same way — the app
   /// becomes unopenable by the one action the user most wants to repeat.
   ///
-  /// So the attempt is written down *before* it happens and cleared after. A
-  /// marker found still sitting there on a later run means that backend took
-  /// the process with it, and it is skipped from then on.
+  /// So the attempt is written down *before* it happens and cleared after.
+  ///
+  /// One line per backend: its name, how many loads in a row never came
+  /// back, and when the last one started. This used to be the name alone,
+  /// and one unfinished load was enough to skip that backend *for good* —
+  /// but a load also never comes back when the app is swiped away, or when
+  /// Android reclaims it mid-load, which on a phone loading two gigabytes is
+  /// ordinary. Once both backends had been unlucky once, the model never
+  /// loaded again and "try again" could not change that: the error a person
+  /// saw on every message. Now a backend is skipped only after [maxStrikes]
+  /// loads in a row that took the process with them, and only for
+  /// [strikeExpiry]: a phone that was short of memory once is not barred
+  /// for ever.
   File get _attemptMarker => File('$modelPath.loading');
 
-  Set<String> _crashedBackends() {
+  /// Unfinished loads in a row before a backend is skipped.
+  static const maxStrikes = 2;
+
+  /// How long a skipped backend stays skipped before it is tried again.
+  static const strikeExpiry = Duration(hours: 12);
+
+  /// Backend name → (unfinished loads in a row, when the last one started),
+  /// leaving out entries older than [strikeExpiry]. A line in the old format
+  /// — a bare name — counts as one strike as of the file's own date, so an
+  /// install stuck under the old rule gets its backends back.
+  Map<String, (int, DateTime)> _strikes() {
     try {
-      if (!_attemptMarker.existsSync()) return const {};
-      return _attemptMarker
-          .readAsLinesSync()
-          .map((line) => line.trim())
-          .where((line) => line.isNotEmpty)
-          .toSet();
+      final file = _attemptMarker;
+      if (!file.existsSync()) return {};
+      final now = DateTime.now();
+      final written = file.lastModifiedSync();
+      final strikes = <String, (int, DateTime)>{};
+      for (final raw in file.readAsLinesSync()) {
+        final fields = raw.trim().split(' ');
+        if (fields.first.isEmpty) continue;
+        final count = fields.length > 1 ? int.tryParse(fields[1]) ?? 1 : 1;
+        final at = fields.length > 2
+            ? DateTime.fromMillisecondsSinceEpoch(
+                int.tryParse(fields[2]) ?? written.millisecondsSinceEpoch,
+              )
+            : written;
+        if (now.difference(at) > strikeExpiry) continue;
+        strikes[fields.first] = (count, at);
+      }
+      return strikes;
     } catch (_) {
-      return const {};
+      return {};
     }
   }
 
-  void _recordAttempt(LiteLmBackend backend) {
+  void _writeStrikes(Map<String, (int, DateTime)> strikes) {
     try {
-      final known = _crashedBackends()..add(backend.name);
-      _attemptMarker.writeAsStringSync(known.join('\n'), flush: true);
+      if (strikes.isEmpty) {
+        if (_attemptMarker.existsSync()) _attemptMarker.deleteSync();
+        return;
+      }
+      _attemptMarker.writeAsStringSync(
+        [
+          for (final MapEntry(:key, value: (count, at)) in strikes.entries)
+            '$key $count ${at.millisecondsSinceEpoch}',
+        ].join('\n'),
+        flush: true,
+      );
     } catch (_) {
       // An unwritable directory costs the protection, not the feature.
     }
   }
 
-  void _clearAttempt(LiteLmBackend backend) {
-    try {
-      final left = _crashedBackends()..remove(backend.name);
-      if (left.isEmpty) {
-        if (_attemptMarker.existsSync()) _attemptMarker.deleteSync();
-      } else {
-        _attemptMarker.writeAsStringSync(left.join('\n'), flush: true);
-      }
-    } catch (_) {}
+  void _recordAttempt(LiteLmBackend backend) {
+    final strikes = _strikes();
+    final (count, _) = strikes[backend.name] ?? (0, DateTime.now());
+    strikes[backend.name] = (count + 1, DateTime.now());
+    _writeStrikes(strikes);
   }
 
-  Future<LiteLmEngine> _ensureEngine() async {
-    final existing = _engine;
-    if (existing != null) return existing;
+  void _clearAttempt(LiteLmBackend backend) =>
+      _writeStrikes(_strikes()..remove(backend.name));
 
-    final crashed = _crashedBackends();
+  /// The engine being brought up, while one is. Every caller in that time
+  /// waits for it instead of starting a load of its own.
+  ///
+  /// Without this, opening the assistant (which warms the model up) and
+  /// sending a message — or the smart summary asking at the same moment —
+  /// each loaded the model, and two copies of two gigabytes do not fit on a
+  /// phone: Android ended the app mid-load, which also left the marker
+  /// above behind.
+  Future<LiteLmEngine>? _loading;
+  String? _loadingPath;
+
+  @visibleForTesting
+  Future<LiteLmEngine> ensureEngine() => _ensureEngine();
+
+  Future<LiteLmEngine> _ensureEngine() {
+    final path = modelPath;
+    final existing = _engine;
+    if (existing != null && _enginePath == path) return Future.value(existing);
+    final pending = _loading;
+    if (pending != null && _loadingPath == path) return pending;
+    final load = _loadAfter(pending, path);
+    _loading = load;
+    _loadingPath = path;
+    return load.whenComplete(() {
+      if (identical(_loading, load)) {
+        _loading = null;
+        _loadingPath = null;
+      }
+    });
+  }
+
+  /// Loads [path] once [before] — a load of a different model — has
+  /// settled, so the two are never in memory together.
+  Future<LiteLmEngine> _loadAfter(
+    Future<LiteLmEngine>? before,
+    String path,
+  ) async {
+    if (before != null) {
+      try {
+        await before;
+      } catch (_) {}
+    }
+    final existing = _engine;
+    if (existing != null && _enginePath == path) return existing;
+    // Another model was picked since this one loaded: two sets of weights
+    // will not fit in memory together, so the old one goes first.
+    if (existing != null) await close();
+
+    final strikes = _strikes();
     Object? lastFailure;
     for (final backend in _backends) {
-      if (crashed.contains(backend.name)) {
-        // Tried before and never came back. Skipping it is the difference
-        // between an app that starts and one that does not.
-        lastFailure = StateError('${backend.name} crashed on a previous load');
+      final (count, _) = strikes[backend.name] ?? (0, DateTime.now());
+      if (count >= maxStrikes) {
+        // Tried and never came back, more than once and recently. Skipping
+        // it is the difference between an app that starts and one that
+        // does not.
+        lastFailure = StateError(
+          '${backend.name} did not finish loading $count times in a row',
+        );
         continue;
       }
       _recordAttempt(backend);
       try {
-        final engine = await LiteLmEngine.create(
-          LiteLmEngineConfig(modelPath: modelPath, backend: backend),
+        final engine = await _loadEngine(
+          LiteLmEngineConfig(modelPath: path, backend: backend),
         );
         _clearAttempt(backend);
         _engine = engine;
+        _enginePath = path;
         return engine;
       } catch (error) {
         // A device that reports OpenCL and still fails to bring up the GPU
@@ -305,21 +535,27 @@ class LiteRtChatAdapter implements ChatAdapter {
         lastFailure = error;
       }
     }
-    throw StateError(
-      'No LiteRT-LM backend could load $modelPath: $lastFailure',
-    );
+    throw StateError('No LiteRT-LM backend could load $path: $lastFailure');
   }
 
   /// Releases the model. Worth calling: the weights are the largest single
   /// allocation this app ever makes, and Android reclaims the process rather
   /// than asking twice.
-  Future<void> close() async {
-    await _conversation?.dispose();
-    await _engine?.dispose();
+  Future<void> _resetConversation() async {
+    final previous = _conversation;
     _conversation = null;
-    _engine = null;
     _sentThroughIndex = 0;
     _sentSignature = 0;
     _systemInstruction = null;
+    await previous?.dispose();
+  }
+
+  Future<void> close() async {
+    _idle?.cancel();
+    _idle = null;
+    await _resetConversation();
+    await _engine?.dispose();
+    _engine = null;
+    _enginePath = null;
   }
 }
