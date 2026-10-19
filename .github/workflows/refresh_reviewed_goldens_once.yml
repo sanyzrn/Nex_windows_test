@@ -1,0 +1,58 @@
+name: Apply four reviewed Windows golden updates (one time)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/refresh_reviewed_goldens_once.yml'
+
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  update-reviewed-images:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out current main
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - name: Install exactly four visually reviewed snapshots
+        shell: pwsh
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $expected = @{
+            'timeline_panel_right_light_en' = 'a4f3dc4df13be7a621ac55da9c3e1468f7ea5bea685d4e4acd33b75b3dc0e4a3'
+            'timeline_panel_right_dark_fa' = '349cbbdeedf453c8a1d340bae54226efd52b360dcc160c4a09f882250ab9a912'
+            'window_library_700_light_en' = '59b419ff5ff2b5334812bd7b5418b640e09753f180c1d2a8af3c9296588f2267'
+            'window_reader_1200_dark_en' = 'b857a0e7d453c01767584b5799073205c57a5aa15f8fbe389b83d11c58151b03'
+          }
+          $zip = Join-Path $env:RUNNER_TEMP 'reviewed-failures.zip'
+          $dir = Join-Path $env:RUNNER_TEMP 'reviewed-failures'
+          $url = "https://api.github.com/repos/$env:GITHUB_REPOSITORY/actions/artifacts/12190336272/zip"
+          $headers = @{ Authorization = "Bearer $env:GITHUB_TOKEN"; Accept = 'application/vnd.github+json'; 'X-GitHub-Api-Version' = '2022-11-28' }
+          Invoke-WebRequest -Uri $url -Headers $headers -OutFile $zip
+          Expand-Archive -LiteralPath $zip -DestinationPath $dir
+          foreach ($name in $expected.Keys) {
+            $source = Join-Path $dir "${name}_testImage.png"
+            if (-not (Test-Path -LiteralPath $source)) { throw "Missing source snapshot: $name" }
+            $hash = (Get-FileHash -LiteralPath $source -Algorithm SHA256).Hash.ToLowerInvariant()
+            if ($hash -ne $expected[$name]) { throw "Review hash mismatch: $name" }
+            $target = "apps/desktop/test/review_goldens/$name.png"
+            Copy-Item -LiteralPath $source -Destination $target -Force
+            git add -- $target
+            if ($LASTEXITCODE -ne 0) { throw "Could not stage $name" }
+          }
+          $changed = @(git diff --cached --name-only)
+          if ($changed.Count -ne 4) { throw "Unexpected staged image count: $($changed.Count)" }
+          foreach ($file in $changed) {
+            if ($file -notmatch '^apps/desktop/test/review_goldens/[^/]+[.]png$') { throw "Unexpected path: $file" }
+          }
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'test(goldens): approve four verified Nex library layout snapshots'
+          if ($LASTEXITCODE -ne 0) { throw 'Golden commit failed' }
+          git push origin HEAD:refs/heads/main
+          if ($LASTEXITCODE -ne 0) { throw 'Main changed before golden push; no force push attempted' }
