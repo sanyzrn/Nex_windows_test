@@ -41,6 +41,13 @@ public static class NexWindowProbe {
     [DllImport("user32.dll")] private static extern bool EnumWindows(EnumProc callback, IntPtr unused);
     [DllImport("user32.dll")] private static extern uint GetWindowThreadProcessId(IntPtr hwnd, out uint processId);
     [DllImport("user32.dll")] public static extern bool IsWindowVisible(IntPtr hwnd);
+    [DllImport("user32.dll")] public static extern bool IsIconic(IntPtr hwnd);
+    [StructLayout(LayoutKind.Sequential)] public struct Rect { public int Left, Top, Right, Bottom; }
+    [DllImport("user32.dll")] private static extern bool GetWindowRect(IntPtr hwnd, out Rect rect);
+    public static string Frame(IntPtr hwnd) {
+        Rect r; if (!GetWindowRect(hwnd, out r)) return "unknown";
+        return r.Left + "," + r.Top + "," + (r.Right - r.Left) + "x" + (r.Bottom - r.Top);
+    }
     [DllImport("user32.dll")] private static extern int GetClassName(IntPtr hwnd, StringBuilder lpClassName, int nMaxCount);
     [DllImport("user32.dll")] public static extern bool PostMessage(IntPtr hwnd, uint message, IntPtr wparam, IntPtr lparam);
     public static IntPtr VisibleWindow(uint processId) {
@@ -93,6 +100,9 @@ while (-not $normal.HasExited -and -not [NexWindowProbe]::IsWindowVisible($windo
     Start-Sleep -Milliseconds 60
 }
 $result | Add-Member trayRestoresWindow (-not $normal.HasExited -and [NexWindowProbe]::IsWindowVisible($window))
+# Diagnostics only (not part of the pass criteria): where the window is after Open.
+$result | Add-Member trayRestoreFrame ([NexWindowProbe]::Frame($window))
+$result | Add-Member trayRestoreIconic ([NexWindowProbe]::IsIconic($window))
 [void][NexWindowProbe]::PostMessage($window, 0x0111, [IntPtr]40005, [IntPtr]::Zero)
 if (-not $normal.WaitForExit(10000)) { throw 'Normal GUI failed to drain and quit from tray.' }
 $result | Add-Member normalGuiExitCode $normal.ExitCode
