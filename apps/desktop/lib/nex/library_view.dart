@@ -231,9 +231,7 @@ abstract class _LibraryStateBase extends State<NexLibraryView> {
     // Card density (IDEAS.md): the user's compact/standard/readable choice
     // from Settings feeds every NoteCard below through the nex_ui scope.
     // No scope above (tests, embeds) keeps the standard density.
-    // The library is also embedded in isolated LiquidScope-only tests;
-    // both shell scopes must preserve mode and card-density preferences.
-    final c = NexPanelScope.maybeOf(context) ?? LiquidScope.maybePanelOf(context);
+    final c = LiquidScope.maybePanelOf(context);
     return NexCardDensityScope(
       density: NexCardDensity.fromWire(c?.S.cardDensity),
       child: Focus(

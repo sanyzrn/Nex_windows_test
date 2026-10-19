@@ -150,18 +150,6 @@ FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
     SetFocus(flutter_controller_->view()->GetNativeWindow());
     return 0;
   }
-  // Native close and tray commands must run before Flutter's top-level
-  // dispatcher: it may consume WM_COMMAND from a hidden host window,
-  // leaving the process alive but unable to restore from its tray icon.
-  // Only intercept our five reserved tray IDs; other menu/plugin commands
-  // still go through Flutter normally.
-  const bool tray_command = message == WM_COMMAND && HIWORD(wparam) == 0 &&
-      lparam == 0 && LOWORD(wparam) >= IDM_TRAY_OPEN &&
-      LOWORD(wparam) <= IDM_TRAY_QUIT;
-  if ((message == WM_CLOSE || tray_command) && bridge_ &&
-      bridge_->OnMessage(hwnd, message, wparam, lparam)) {
-    return 0;
-  }
   const bool display_change = message == WM_DPICHANGED || message == WM_DISPLAYCHANGE;
   if (bridge_ && display_change) bridge_->OnMessage(hwnd, message, wparam, lparam);
   // Give Flutter, including plugins, an opportunity to handle window

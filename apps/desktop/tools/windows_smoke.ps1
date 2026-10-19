@@ -103,19 +103,11 @@ $result | Add-Member normalGuiAliveAfterCapture (-not $normal.HasExited)
 $result | Add-Member normalGuiFrameBeforeClose ([NexWindowProbe]::Frame($window))
 # Title-bar close hides to tray instead of stopping the reminder coordinator.
 [void][NexWindowProbe]::PostMessage($window, 0x0010, [IntPtr]::Zero, [IntPtr]::Zero)
-$hideUntil = [DateTime]::UtcNow.AddSeconds(3)
-while (-not $normal.HasExited -and [NexWindowProbe]::IsWindowVisible($window) -and [DateTime]::UtcNow -lt $hideUntil) {
-    Start-Sleep -Milliseconds 60
-}
-$result | Add-Member normalGuiAliveAfterClose (-not $normal.HasExited)
-$result | Add-Member normalGuiVisibleAfterClose ([NexWindowProbe]::IsWindowVisible($window))
-$result | Add-Member closeHidesToTray ($result.normalGuiAliveAfterClose -and -not $result.normalGuiVisibleAfterClose)
+Start-Sleep -Milliseconds 350
+$result | Add-Member closeHidesToTray (-not $normal.HasExited -and -not [NexWindowProbe]::IsWindowVisible($window))
 # Restore from the native tray's Open command, then check Quit drains cleanly.
 [void][NexWindowProbe]::PostMessage($window, 0x0111, [IntPtr]40001, [IntPtr]::Zero)
-$showUntil = [DateTime]::UtcNow.AddSeconds(3)
-while (-not $normal.HasExited -and -not [NexWindowProbe]::IsWindowVisible($window) -and [DateTime]::UtcNow -lt $showUntil) {
-    Start-Sleep -Milliseconds 60
-}
+Start-Sleep -Milliseconds 350
 $result | Add-Member trayRestoresWindow (-not $normal.HasExited -and [NexWindowProbe]::IsWindowVisible($window))
 # Diagnostics only (not part of the pass criteria): where the window is after Open.
 $result | Add-Member trayRestoreFrame ([NexWindowProbe]::Frame($window))
