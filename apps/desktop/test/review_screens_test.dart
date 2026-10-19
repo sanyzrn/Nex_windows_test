@@ -103,7 +103,7 @@ Future<_Store> _openStore(String name, {int count = 0}) async {
     if (i % 7 == 0 && repo.pinNote('review-$i')) {
       // Windows clock ticks can tie between inserts and change pin ordering.
       // Keep the fixture order independent of runner speed and wall time.
-      db.execute('UPDATE notes SET pinned_at = ? WHERE id = ?', [
+      db.db.execute('UPDATE notes SET pinned_at = ? WHERE id = ?', [
         _day.add(Duration(minutes: i)).toUtc().toIso8601String(),
         'review-$i',
       ]);
