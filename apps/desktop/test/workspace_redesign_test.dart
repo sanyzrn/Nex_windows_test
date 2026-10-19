@@ -113,6 +113,24 @@ void main() {
     expect(t.takeException(), isNull);
   });
 
+  testWidgets('compact capture page puts the editor first, actions as tiles', (
+    t,
+  ) async {
+    await _boot(t, width: 440);
+    final l = AppLocalizations.of(t.element(find.byType(Scaffold)))!;
+    // The hero line and counters give way to the editor.
+    expect(find.text(l.workspaceNotebook), findsNothing);
+    final field = find.byKey(const ValueKey('capture-field'));
+    expect(t.getTopLeft(field).dy, lessThan(220));
+    // All six capture actions stay reachable, three across.
+    final paste = t.getTopLeft(find.text(l.pasteText));
+    final image = t.getTopLeft(find.text(l.addImage));
+    final attach = t.getTopLeft(find.text(l.attach));
+    expect(image.dy, paste.dy);
+    expect(attach.dy, paste.dy);
+    expect(t.takeException(), isNull);
+  });
+
   testWidgets('compact rail "More" holds the panel switch, theme, shortcuts', (
     t,
   ) async {

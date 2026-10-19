@@ -311,9 +311,62 @@ class _CaptureAction extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     return LayoutBuilder(
       builder: (context, constraints) {
-        final columns = constraints.maxWidth >= 680 ? 3 : 2;
+        // In a narrow column the actions are icon-over-label tiles, three
+        // across: six wide text buttons in two columns were three rows of the
+        // card's height spent on things that are not writing.
+        final tiles = constraints.maxWidth < 520;
+        final columns = tiles || constraints.maxWidth >= 680 ? 3 : 2;
+        final width = (constraints.maxWidth - (columns - 1) * 8) / columns;
+        if (tiles) {
+          final color = onPressed == null
+              ? scheme.onSurface.withValues(alpha: .38)
+              : scheme.onSurfaceVariant;
+          return SizedBox(
+            width: width,
+            child: Material(
+              color: scheme.surfaceContainerLowest,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(NexRadius.md + 4),
+                side: BorderSide(
+                  color: scheme.outlineVariant.withValues(alpha: .6),
+                ),
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: InkWell(
+                onTap: onPressed,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 10,
+                    horizontal: 4,
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(icon, size: 21, color: color),
+                      const SizedBox(height: 4),
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          label,
+                          maxLines: 1,
+                          style: Theme.of(context).textTheme.labelMedium
+                              ?.copyWith(
+                                color: onPressed == null
+                                    ? color
+                                    : scheme.onSurface,
+                                fontWeight: FontWeight.w500,
+                              ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+        }
         return SizedBox(
-          width: (constraints.maxWidth - (columns - 1) * 8) / columns,
+          width: width,
           child: OutlinedButton.icon(
             onPressed: onPressed,
             icon: Icon(icon, size: 15),

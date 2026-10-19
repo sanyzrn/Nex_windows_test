@@ -48,3 +48,15 @@ close to tray and Open, a second monitor, 125%/150% scaling.
   fits, tag manager). Date dividers are accent capsules. `_FilterBar` is full width
   so its pills align to the leading edge.
 - `NoteActionBar` is a single tonal dock; each action takes an equal share.
+
+## Phase 3 — capture
+
+- `NexWorkspaceHome` hides the hero line and the counters below 620 px
+  (`compactPage`), so the editor starts under the section header.
+- `_CaptureAction` renders as an icon-over-label tile below 520 px, three
+  across; wider layouts keep the outlined buttons.
+- Not changed: Ctrl+V is still handled by the composer (it protects a note that
+  was started while the clipboard was being read, see
+  `usability_regression_test`). Whether mixed Persian/English text in
+  Flutter's single-direction text field (ADR-037 in the Android repo) is the
+  typing problem seen on Windows is not established; it needs the symptom.

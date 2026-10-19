@@ -21,6 +21,9 @@
   the preview instead of beside it, so a sentence keeps the card's full width.
 - Reader: Copy, Pin, Remind and Delete are one tonal dock whose actions share the
   width, so none is cut off in the compact window.
+- Capture: in the compact window the page opens on the editor — the hero line
+  and counters give way — and the six capture actions are icon-over-label tiles,
+  three across, instead of six wide buttons.
 
 ## 0.21.1 — 2026-10-19
 
