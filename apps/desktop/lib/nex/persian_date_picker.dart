@@ -91,7 +91,7 @@ class _NexSolarDatePickerState extends State<NexSolarDatePickerDialog> {
     final offset = (first.weekday + 1) % 7;
     final minimum = nexPersianDate(widget.firstDate).year;
     final maximum = nexPersianDate(widget.lastDate).year;
-    String numerals(int number) => nexDigits('$number', persian: fa);
+    final numerals = (int number) => nexDigits('$number', persian: fa);
     const weekdaysFa = ['ش', 'ی', 'د', 'س', 'چ', 'پ', 'ج'];
     const weekdaysEn = ['Sa', 'Su', 'Mo', 'Tu', 'We', 'Th', 'Fr'];
 
