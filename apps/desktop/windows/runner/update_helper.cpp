@@ -116,7 +116,7 @@ int Apply(const std::vector<std::wstring>& args) {
       setup.size() < 4 || setup.substr(setup.size() - 4) != L".exe") return 2;
   const auto split = target.find_last_of(L"\\/");
   if (split == std::wstring::npos) return 2;
-  const auto directory = target.substr(0, split);
+  const auto directory = target.substr(0, split == 2 && target[1] == L':' ? 3 : split);
   Handle parent(OpenProcess(SYNCHRONIZE | PROCESS_QUERY_LIMITED_INFORMATION, FALSE, process_id));
   if (parent.value == nullptr) return 3;
   std::wstring image(32768, L'\0');

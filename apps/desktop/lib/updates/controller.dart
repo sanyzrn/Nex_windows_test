@@ -261,7 +261,7 @@ class DesktopUpdates extends ChangeNotifier {
       if (automatic && release != null && !ready) await _download(generation);
     } catch (_) {
       if (!_stale(generation)) {
-        error = 'check';
+        error = phase == UpdatePhase.downloading ? 'download' : 'check';
         phase = ready
             ? UpdatePhase.ready
             : release == null
@@ -326,7 +326,7 @@ class DesktopUpdates extends ChangeNotifier {
               response.contentLength != target.size) {
         throw const FormatException('Installer response mismatch');
       }
-      var count = 0, shownPercent = -1;
+      var count = 0, shownPercent = -1, flushed = 0;
       final sink = partial.openWrite();
       try {
         await for (final chunk in response.stream.timeout(
@@ -338,6 +338,10 @@ class DesktopUpdates extends ChangeNotifier {
             throw const FormatException('Oversized installer');
           }
           sink.add(chunk);
+          if (count - flushed >= 1024 * 1024) {
+            await sink.flush();
+            flushed = count;
+          }
           progress = count / target.size;
           final percent = (progress * 100).floor();
           if (percent != shownPercent) {

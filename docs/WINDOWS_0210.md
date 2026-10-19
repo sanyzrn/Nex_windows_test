@@ -37,3 +37,14 @@ checks locale preservation and restart, then smoke-tests the installed bundle.
 
 References: https://docs.github.com/en/rest/releases/releases#get-the-latest-release
 and https://jrsoftware.org/ishelp/index.php?topic=setupcmdline
+
+Reviewed all 64 Windows screenshots from source
+`8b72da824dbc429751703b0cfe98c8aa9ccb0199`, CI run `39210928992`.
+Candidate ZIP SHA256:
+`4a5925184ff7c1dc4c51465f88aa3bbbee5b7f6242b6d5eae1a130317db27bca`.
+All 62 rendering tests passed. The comparison run had 203 passes and 39 expected
+image differences; all failures were named screenshot comparisons. Baselines
+were updated after review, with no changes to comparison tolerances.
+Local validation: desktop analysis clean, 180 behavioral tests, 197 shared UI
+tests and all 16 updater/security/large-text tests pass. Native compile and real
+installer handoff remain gated on the final Windows CI run.

@@ -119,7 +119,13 @@ mixin _SettingsDisplayAppearance on _SettingsStateBase {
                       : mode == 'dark'
                       ? l.dark
                       : l.followSystem,
-                  selected: c.S.theme == mode,
+                  selected:
+                      (c.S.theme == 'system'
+                          ? 'system'
+                          : c.palette.isLight
+                          ? 'light'
+                          : 'dark') ==
+                      mode,
                   icon: mode == 'light'
                       ? Icons.light_mode_outlined
                       : mode == 'dark'

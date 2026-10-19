@@ -14,8 +14,8 @@ $setup = @(Get-ChildItem -LiteralPath $InstallerDirectory -Filter 'Nex-Windows-S
 if ($setup.Count -ne 1) { throw 'Expected one installer.' }
 $digest = (Get-FileHash -LiteralPath $setup[0].FullName -Algorithm SHA256).Hash.ToLowerInvariant()
 $root = Join-Path $env:RUNNER_TEMP ('nex updater integration ' + [guid]::NewGuid().ToString('N'))
-$app = Join-Path $root 'installed app'
-$cache = Join-Path $root 'download cache'
+$app = Join-Path $root 'installed app فارسی'
+$cache = Join-Path $root 'download cache آزمایش'
 New-Item -ItemType Directory -Path $app, $cache | Out-Null
 Copy-Item -Path (Join-Path $Release '*') -Destination $app -Recurse
 $copiedHelper = Join-Path $cache nex_update.exe

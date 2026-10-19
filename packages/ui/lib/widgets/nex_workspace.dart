@@ -140,7 +140,10 @@ class NexFeatureCard extends StatelessWidget {
             children: [
               NexIconBadge(icon: icon, filled: value && onChanged != null),
               const Spacer(),
-              Switch(value: value, onChanged: onChanged),
+              Semantics(
+                label: title,
+                child: Switch(value: value, onChanged: onChanged),
+              ),
             ],
           ),
           const SizedBox(height: 16),
