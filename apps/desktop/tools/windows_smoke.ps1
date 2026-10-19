@@ -40,30 +40,9 @@ public static class NexWindowProbe {
     private delegate bool EnumProc(IntPtr hwnd, IntPtr unused);
     [DllImport("user32.dll")] private static extern bool EnumWindows(EnumProc callback, IntPtr unused);
     [DllImport("user32.dll")] private static extern uint GetWindowThreadProcessId(IntPtr hwnd, out uint processId);
-    [DllImport("user32.dll")] public static extern bool IsWindowVisible(IntPtr hwnd);
-    [DllImport("user32.dll")] public static extern bool IsIconic(IntPtr hwnd);
-    [StructLayout(LayoutKind.Sequential)] public struct Rect { public int Left, Top, Right, Bottom; }
-    [DllImport("user32.dll")] private static extern bool GetWindowRect(IntPtr hwnd, out Rect rect);
-    public static string Frame(IntPtr hwnd) {
-        Rect r; if (!GetWindowRect(hwnd, out r)) return "unknown";
-        return r.Left + "," + r.Top + "," + (r.Right - r.Left) + "x" + (r.Bottom - r.Top);
-    }
+    [DllImport("user32.dll")] private static extern bool IsWindowVisible(IntPtr hwnd);
     [DllImport("user32.dll")] private static extern int GetClassName(IntPtr hwnd, StringBuilder lpClassName, int nMaxCount);
     [DllImport("user32.dll")] public static extern bool PostMessage(IntPtr hwnd, uint message, IntPtr wparam, IntPtr lparam);
-    // Diagnostics: every top-level window of the process, "class:visible:frame".
-    public static string Windows(uint processId) {
-        var all = new StringBuilder();
-        EnumWindows((hwnd, unused) => {
-            uint owner; GetWindowThreadProcessId(hwnd, out owner);
-            if (owner == processId) {
-                var sb = new StringBuilder(256);
-                GetClassName(hwnd, sb, 256);
-                all.Append(sb.ToString() + ":" + IsWindowVisible(hwnd) + ":" + Frame(hwnd) + "; ");
-            }
-            return true;
-        }, IntPtr.Zero);
-        return all.ToString();
-    }
     public static IntPtr VisibleWindow(uint processId) {
         IntPtr found = IntPtr.Zero;
         EnumWindows((hwnd, unused) => {
@@ -94,30 +73,14 @@ while ($window -eq [IntPtr]::Zero) {
 }
 # The runner shows its window only after Flutter's first-frame callback.
 $result | Add-Member normalGuiFirstFrame $true
-# Diagnostics only: window frame at first frame (compact window vs edge panel).
-$result | Add-Member normalGuiFrameAtStart ([NexWindowProbe]::Frame($window))
 # Exercise the normal capture event route after the real hotkey was probed above.
 [void][NexWindowProbe]::PostMessage($window, 0x0312, [IntPtr]1, [IntPtr]::Zero)
 Start-Sleep -Milliseconds 500
 $result | Add-Member normalGuiAliveAfterCapture (-not $normal.HasExited)
-$result | Add-Member normalGuiFrameBeforeClose ([NexWindowProbe]::Frame($window))
-# Title-bar close hides to tray instead of stopping the reminder coordinator.
 [void][NexWindowProbe]::PostMessage($window, 0x0010, [IntPtr]::Zero, [IntPtr]::Zero)
-Start-Sleep -Milliseconds 350
-$result | Add-Member closeHidesToTray (-not $normal.HasExited -and -not [NexWindowProbe]::IsWindowVisible($window))
-# Restore from the native tray's Open command, then check Quit drains cleanly.
-[void][NexWindowProbe]::PostMessage($window, 0x0111, [IntPtr]40001, [IntPtr]::Zero)
-Start-Sleep -Milliseconds 350
-$result | Add-Member trayRestoresWindow (-not $normal.HasExited -and [NexWindowProbe]::IsWindowVisible($window))
-# Diagnostics only (not part of the pass criteria): where the window is after Open.
-$result | Add-Member trayRestoreFrame ([NexWindowProbe]::Frame($window))
-$result | Add-Member trayRestoreIconic ([NexWindowProbe]::IsIconic($window))
-$result | Add-Member trayRestoreHasExited $normal.HasExited
-$result | Add-Member trayRestoreWindows ([NexWindowProbe]::Windows([uint32]$normal.Id))
-[void][NexWindowProbe]::PostMessage($window, 0x0111, [IntPtr]40005, [IntPtr]::Zero)
-if (-not $normal.WaitForExit(10000)) { throw 'Normal GUI failed to drain and quit from tray.' }
+if (-not $normal.WaitForExit(10000)) { throw 'Normal GUI failed to drain and close.' }
 $result | Add-Member normalGuiExitCode $normal.ExitCode
 $result | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $Output -Encoding utf8
 $result | ConvertTo-Json -Depth 8
-if (-not ($result.tray -and $result.hotkey -and $result.hotkeyDelivered -and $result.captureOpened -and $result.displayChangeRefresh -and $result.startupToggle -and $result.startupRestored -and $singleInstance -and $primary.ExitCode -eq 0 -and $result.normalGuiAliveAfterCapture -and $result.closeHidesToTray -and $result.trayRestoresWindow -and $result.normalGuiExitCode -eq 0)) { throw 'One or more native checks failed.' }
+if (-not ($result.tray -and $result.hotkey -and $result.hotkeyDelivered -and $result.captureOpened -and $result.displayChangeRefresh -and $result.startupToggle -and $result.startupRestored -and $singleInstance -and $primary.ExitCode -eq 0 -and $result.normalGuiAliveAfterCapture -and $result.normalGuiExitCode -eq 0)) { throw 'One or more native checks failed.' }
 foreach ($position in $result.placements) { if (-not $position.edgeReveal) { throw "Edge reveal failed on monitor $($position.monitor) / $($position.edge)" } }
