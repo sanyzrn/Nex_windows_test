@@ -38,7 +38,9 @@ class _CalcViewState extends State<CalcView> {
     final (p, c, _) = LiquidScope.of(context);
     return Panel(
       children: [
-        Head(onBack: () => _backToMore(c)),
+        Head(
+          onBack: () => _backToMore(c),
+        ),
         Field(
           controller: _input,
           hint: utilityLabel(context, 'utility20'),
@@ -246,7 +248,9 @@ class TimerView extends StatelessWidget {
     final (p, c, _) = LiquidScope.of(context);
     return Panel(
       children: [
-        Head(onBack: () => _backToMore(c)),
+        Head(
+          onBack: () => _backToMore(c),
+        ),
         Text(
           fmtTimer(c.tLeft),
           textAlign: TextAlign.center,
@@ -318,7 +322,9 @@ class StopwatchView extends StatelessWidget {
     final (p, c, _) = LiquidScope.of(context);
     return Panel(
       children: [
-        Head(onBack: () => _backToMore(c)),
+        Head(
+          onBack: () => _backToMore(c),
+        ),
         ValueListenableBuilder<String>(
           valueListenable: c.swDisplay,
           builder: (context, txt, _) => Text(
@@ -401,3 +407,4 @@ class StopwatchView extends StatelessWidget {
 
 String fmtSw(int ms) =>
     '${(ms ~/ 60000).toString().padLeft(2, '0')}:${((ms ~/ 1000) % 60).toString().padLeft(2, '0')}.${((ms ~/ 10) % 100).toString().padLeft(2, '0')}';
+

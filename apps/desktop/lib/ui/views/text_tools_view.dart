@@ -33,7 +33,9 @@ class TextToolsView extends StatelessWidget {
     final (_, c, _) = LiquidScope.of(context);
     return Panel(
       children: [
-        Head(onBack: () => _backToMore(c)),
+        Head(
+          onBack: () => _backToMore(c),
+        ),
         Wrap(
           spacing: 8,
           runSpacing: 8,
@@ -230,3 +232,4 @@ String transformText(String text, String mode) {
       return text;
   }
 }
+

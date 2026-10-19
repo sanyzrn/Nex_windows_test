@@ -72,6 +72,13 @@ class _SettingsState extends State<DesktopIntelligenceSettings> {
     }
   }
 
+  void _showProvider(bool show) {
+    setState(() => _providerPage = show);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) Scrollable.maybeOf(context)?.position.jumpTo(0);
+    });
+  }
+
   Future<void> _initialize() async {
     await _ai!.initialize();
     if (mounted) setState(() => _select(_ai!.config.provider));
@@ -210,7 +217,9 @@ class _SettingsState extends State<DesktopIntelligenceSettings> {
         ) => NexFeatureCard(
           icon: icon,
           title: s.t(title),
-          description: d.t(supported ? hint : 'notSupported'),
+          description: d.t(
+            supported || !ai.config.isUsable ? hint : 'notSupported',
+          ),
           value: supported && ai.flag(pref, true),
           onChanged: supported ? (v) => _run(() => ai.setValue(pref, v)) : null,
         );
@@ -219,7 +228,7 @@ class _SettingsState extends State<DesktopIntelligenceSettings> {
             Align(
               alignment: AlignmentDirectional.centerStart,
               child: TextButton.icon(
-                onPressed: () => setState(() => _providerPage = false),
+                onPressed: () => _showProvider(false),
                 icon: const Icon(Icons.arrow_back_rounded),
                 label: Text(s.t('settings')),
               ),
@@ -354,6 +363,16 @@ class _SettingsState extends State<DesktopIntelligenceSettings> {
                         ),
                       ],
                       const SizedBox(height: 12),
+                      CheckboxListTile(
+                        contentPadding: EdgeInsets.zero,
+                        controlAffinity: ListTileControlAffinity.leading,
+                        title: Text(s.t('cloudConsent')),
+                        value: ai.flag('ai.cloud_opt_in'),
+                        onChanged: (v) => _run(
+                          () => ai.setValue('ai.cloud_opt_in', v ?? false),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
                       Wrap(
                         spacing: 12,
                         runSpacing: 8,
@@ -385,8 +404,9 @@ class _SettingsState extends State<DesktopIntelligenceSettings> {
                                 ? null
                                 : () => _run(() async {
                                     await ai.saveProvider(_current);
-                                    if (mounted)
+                                    if (mounted) {
                                       setState(() => _status = s.t('saved'));
+                                    }
                                   }),
                             icon: const Icon(Icons.check_rounded),
                             label: Text(s.t('save')),
@@ -446,10 +466,17 @@ class _SettingsState extends State<DesktopIntelligenceSettings> {
                           ],
                         ),
                       ),
+                      Semantics(
+                        label: s.t('enabled'),
+                        child: Switch.adaptive(
+                          value: ai.flag('ai.enabled'),
+                          onChanged: (v) =>
+                              _run(() => ai.setValue('ai.enabled', v)),
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 20),
-                  toggle('enabled', 'ai.enabled'),
                   CheckboxListTile(
                     contentPadding: EdgeInsets.zero,
                     controlAffinity: ListTileControlAffinity.leading,
@@ -473,7 +500,7 @@ class _SettingsState extends State<DesktopIntelligenceSettings> {
                     subtitle: ai.config.provider == AiProvider.none
                         ? s.t('configure')
                         : '${ai.config.provider.label} · ${ai.config.resolvedModel}',
-                    onTap: () => setState(() => _providerPage = true),
+                    onTap: () => _showProvider(true),
                   ),
                   const Divider(height: 1, indent: 58),
                   ExpansionTile(

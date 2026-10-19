@@ -10,11 +10,7 @@ import '../l10n/app_localizations.dart';
 import 'features_state.dart';
 
 /// Localized cadence label.
-String commitmentCadenceLabel(
-  BuildContext context,
-  NexCadence cadence,
-  int every,
-) {
+String commitmentCadenceLabel(BuildContext context, NexCadence cadence, int every) {
   final isFa = Localizations.localeOf(context).languageCode == 'fa';
   if (isFa) {
     if (every == 1) {
@@ -57,9 +53,7 @@ String commitmentCadenceLabel(
 
 /// Weekday metadata for the weekday selector.
 /// In Persian, Saturday is the first day of the week.
-List<({int day, String name, String shortName})> commitmentWeekdays(
-  bool isPersian,
-) {
+List<({int day, String name, String shortName})> commitmentWeekdays(bool isPersian) {
   if (isPersian) {
     return const [
       (day: 6, name: 'شنبه', shortName: 'ش'),
@@ -170,30 +164,21 @@ class _NexCommitmentsViewState extends State<NexCommitmentsView> {
                   color: scheme.primary.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(9),
                 ),
-                child: Icon(
-                  Icons.event_repeat_rounded,
-                  size: 18,
-                  color: scheme.primary,
-                ),
+                child: Icon(Icons.event_repeat_rounded, size: 18, color: scheme.primary),
               ),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
                   isFa ? 'تعهدات و موارد تکرارشونده' : 'Commitments & Cadences',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
               FilledButton.tonalIcon(
                 style: FilledButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 8,
-                  ),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                 ),
                 icon: const Icon(Icons.add_rounded, size: 18),
                 label: Text(isFa ? 'تعهد جدید' : 'New Commitment'),
@@ -205,31 +190,19 @@ class _NexCommitmentsViewState extends State<NexCommitmentsView> {
         if (_error != null)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-            child: Text(
-              '${l.failed}: $_error',
-              style: TextStyle(color: scheme.error, fontSize: 12),
-            ),
+            child: Text('${l.failed}: $_error', style: TextStyle(color: scheme.error, fontSize: 12)),
           ),
         if (_loading && _items.isEmpty)
-          const Center(
-            child: Padding(
-              padding: EdgeInsets.all(32),
-              child: CircularProgressIndicator(),
-            ),
-          )
+          const Center(child: Padding(padding: EdgeInsets.all(32), child: CircularProgressIndicator()))
         else if (_items.isEmpty)
           Expanded(
             child: Center(
               child: NexEmptyState(
                 icon: Icons.event_repeat_rounded,
-                message: isFa
-                    ? 'هیچ تعهد یا وظیفه تکرارشونده‌ای ثبت نشده است.'
-                    : 'No commitments recorded yet.',
+                message: isFa ? 'هیچ تعهد یا وظیفه تکرارشونده‌ای ثبت نشده است.' : 'No commitments recorded yet.',
                 action: TextButton.icon(
                   icon: const Icon(Icons.add_rounded, size: 16),
-                  label: Text(
-                    isFa ? 'افزودن اولین تعهد' : 'Add First Commitment',
-                  ),
+                  label: Text(isFa ? 'افزودن اولین تعهد' : 'Add First Commitment'),
                   onPressed: () => _openEditor(),
                 ),
               ),
@@ -242,18 +215,8 @@ class _NexCommitmentsViewState extends State<NexCommitmentsView> {
               itemCount: _items.length,
               itemBuilder: (context, index) {
                 final item = _items[index];
-                final cadenceStr = commitmentCadenceLabel(
-                  context,
-                  item.cadence,
-                  item.every,
-                );
-                final dueStr = nexDisplayDate(
-                  item.dueAt,
-                  solar:
-                      NexPanelScope.maybeOf(context)?.S.solarCalendar ?? isFa,
-                  persian: isFa,
-                  time: true,
-                );
+                final cadenceStr = commitmentCadenceLabel(context, item.cadence, item.every);
+                final dueStr = nexDisplayDate(item.dueAt, solar: NexPanelScope.maybeOf(context)?.S.solarCalendar ?? isFa, persian: isFa, time: true);
 
                 return Container(
                   margin: const EdgeInsets.symmetric(vertical: 4),
@@ -290,10 +253,7 @@ class _NexCommitmentsViewState extends State<NexCommitmentsView> {
                             Row(
                               children: [
                                 Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 7,
-                                    vertical: 2,
-                                  ),
+                                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                                   decoration: BoxDecoration(
                                     color: scheme.surfaceContainerHigh,
                                     borderRadius: BorderRadius.circular(6),
@@ -301,11 +261,7 @@ class _NexCommitmentsViewState extends State<NexCommitmentsView> {
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      Icon(
-                                        Icons.repeat_rounded,
-                                        size: 12,
-                                        color: scheme.onSurfaceVariant,
-                                      ),
+                                      Icon(Icons.repeat_rounded, size: 12, color: scheme.onSurfaceVariant),
                                       const SizedBox(width: 4),
                                       Text(
                                         cadenceStr,
@@ -319,11 +275,7 @@ class _NexCommitmentsViewState extends State<NexCommitmentsView> {
                                   ),
                                 ),
                                 const SizedBox(width: 8),
-                                Icon(
-                                  Icons.schedule_rounded,
-                                  size: 12,
-                                  color: scheme.onSurfaceVariant,
-                                ),
+                                Icon(Icons.schedule_rounded, size: 12, color: scheme.onSurfaceVariant),
                                 const SizedBox(width: 4),
                                 Text(
                                   dueStr,
@@ -343,10 +295,7 @@ class _NexCommitmentsViewState extends State<NexCommitmentsView> {
                         onPressed: () => _openEditor(item),
                       ),
                       IconButton(
-                        icon: const Icon(
-                          Icons.delete_outline_rounded,
-                          size: 18,
-                        ),
+                        icon: const Icon(Icons.delete_outline_rounded, size: 18),
                         tooltip: l.delete,
                         color: scheme.error.withValues(alpha: 0.8),
                         onPressed: () => _delete(item),
@@ -368,20 +317,16 @@ class NexCommitmentEditorDialog extends StatefulWidget {
   final NexCommitment? existing;
 
   @override
-  State<NexCommitmentEditorDialog> createState() =>
-      _NexCommitmentEditorDialogState();
+  State<NexCommitmentEditorDialog> createState() => _NexCommitmentEditorDialogState();
 }
 
 class _NexCommitmentEditorDialogState extends State<NexCommitmentEditorDialog> {
-  late final TextEditingController _titleController = TextEditingController(
-    text: widget.existing?.title ?? '',
-  );
+  late final TextEditingController _titleController =
+      TextEditingController(text: widget.existing?.title ?? '');
   late NexCadence _cadence = widget.existing?.cadence ?? NexCadence.days;
   late int _every = widget.existing?.every ?? 1;
-  late final DateTime _dueAt =
-      widget.existing?.dueAt ?? DateTime.now().add(const Duration(hours: 1));
-  late final Set<int> _selectedWeekdays =
-      widget.existing?.weekdays.toSet() ?? {};
+  late final DateTime _dueAt = widget.existing?.dueAt ?? DateTime.now().add(const Duration(hours: 1));
+  late final Set<int> _selectedWeekdays = widget.existing?.weekdays.toSet() ?? {};
   late bool _notify = widget.existing?.notify ?? true;
 
   @override
@@ -440,12 +385,8 @@ class _NexCommitmentEditorDialogState extends State<NexCommitmentEditorDialog> {
               textDirection: nexDirectionOf(_titleController.text),
               decoration: InputDecoration(
                 labelText: isFa ? 'عنوان تعهد' : 'Title',
-                hintText: isFa
-                    ? 'مثال: پرداخت قبض، مصرف دارو...'
-                    : 'e.g., Pay rent, Take medicine...',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
+                hintText: isFa ? 'مثال: پرداخت قبض، مصرف دارو...' : 'e.g., Pay rent, Take medicine...',
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
               ),
             ),
             const SizedBox(height: 12),
@@ -456,17 +397,13 @@ class _NexCommitmentEditorDialogState extends State<NexCommitmentEditorDialog> {
                     initialValue: _cadence,
                     decoration: InputDecoration(
                       labelText: isFa ? 'بازه زمانی' : 'Cadence',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                     ),
                     items: NexCadence.values
-                        .map(
-                          (c) => DropdownMenuItem(
-                            value: c,
-                            child: Text(commitmentCadenceLabel(context, c, 1)),
-                          ),
-                        )
+                        .map((c) => DropdownMenuItem(
+                              value: c,
+                              child: Text(commitmentCadenceLabel(context, c, 1)),
+                            ))
                         .toList(),
                     onChanged: (v) {
                       if (v != null) setState(() => _cadence = v);
@@ -480,9 +417,7 @@ class _NexCommitmentEditorDialogState extends State<NexCommitmentEditorDialog> {
                     initialValue: '$_every',
                     decoration: InputDecoration(
                       labelText: isFa ? 'هر' : 'Every',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                     ),
                     keyboardType: TextInputType.number,
                     onChanged: (v) {
@@ -497,9 +432,7 @@ class _NexCommitmentEditorDialogState extends State<NexCommitmentEditorDialog> {
               const SizedBox(height: 14),
               Text(
                 isFa ? 'روزهای هفته:' : 'Weekdays:',
-                style: Theme.of(
-                  context,
-                ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 6),
               Wrap(
@@ -510,9 +443,7 @@ class _NexCommitmentEditorDialogState extends State<NexCommitmentEditorDialog> {
                   return FilterChip(
                     label: Text(w.shortName),
                     selected: isSelected,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     onSelected: (selected) {
                       setState(() {
                         if (selected) {
@@ -541,7 +472,10 @@ class _NexCommitmentEditorDialogState extends State<NexCommitmentEditorDialog> {
           onPressed: () => Navigator.pop(context),
           child: Text(l.discard),
         ),
-        FilledButton(onPressed: _save, child: Text(l.save)),
+        FilledButton(
+          onPressed: _save,
+          child: Text(l.save),
+        ),
       ],
     );
   }

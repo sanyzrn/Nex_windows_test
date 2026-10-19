@@ -162,7 +162,24 @@ class DesktopUpdates extends ChangeNotifier {
       const Duration(hours: 6),
       (_) => unawaited(check(manual: false)),
     );
+    await _cleanOldDownloads();
     unawaited(check(manual: false));
+  }
+
+  Future<void> _cleanOldDownloads() async {
+    if (!await cache.exists()) return;
+    await for (final entry in cache.list(followLinks: false)) {
+      if (entry is! Directory) continue;
+      final name = p.basename(entry.path);
+      if (!RegExp(r'^v\d+\.\d+\.\d+$').hasMatch(name)) continue;
+      if (WindowsRelease.compare(name, currentVersion) <= 0) {
+        try {
+          await entry.delete(recursive: true);
+        } on FileSystemException {
+          /* A helper may still be exiting. */
+        }
+      }
+    }
   }
 
   Future<void> setAutomatic(bool value) async {
@@ -291,6 +308,9 @@ class DesktopUpdates extends ChangeNotifier {
     await directory.create(recursive: true);
     final file = File(p.join(directory.path, target.filename));
     final partial = File('${file.path}.part');
+    final deadline = Timer(const Duration(minutes: 8), () {
+      if (!_stale(generation)) _client?.close();
+    });
     try {
       final sums = await _bytes(target.checksums, generation);
       if (sha256.convert(sums).toString() !=
@@ -340,6 +360,7 @@ class DesktopUpdates extends ChangeNotifier {
       phase = UpdatePhase.ready;
       _notify();
     } finally {
+      deadline.cancel();
       if (await partial.exists()) await partial.delete();
     }
   }

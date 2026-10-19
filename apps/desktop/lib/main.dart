@@ -233,6 +233,7 @@ void main(List<String> arguments) async {
       ),
       install: (file, digest) => installWindowsUpdate(file, digest, controller),
     );
+    unawaited(updates.initialize());
     // Give capture and the first frame priority. No updater runs in probes.
     unawaited(Future<void>.delayed(const Duration(seconds: 12), updates.start));
   }

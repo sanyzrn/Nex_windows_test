@@ -3,9 +3,13 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:crypto/crypto.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:nex_desktop/updates/controller.dart';
+import 'package:nex_desktop/updates/widgets.dart';
+import 'package:nex_ui/nex_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 final _binary = [0x4d, 0x5a, 1, 2, 3, 4];
@@ -54,12 +58,13 @@ void main() {
       clientFactory: () => MockClient((r) async {
         requests.add(r);
         if (respond != null) return await respond!(r);
-        if (r.url == WindowsRelease.latest)
+        if (r.url == WindowsRelease.latest) {
           return http.Response(
             jsonEncode(metadata),
             200,
             headers: {'etag': 'release-v22'},
           );
+        }
         if (r.url.path.endsWith('/SHA256SUMS')) {
           return http.Response(
             '${_hash(_binary)}  Nex-Windows-Setup-0.22.0-x64.exe\r\n',
@@ -177,13 +182,15 @@ void main() {
   );
   test('corrupt executable is removed and cannot be installed', () async {
     respond = (r) {
-      if (r.url == WindowsRelease.latest)
+      if (r.url == WindowsRelease.latest) {
         return http.Response(jsonEncode(metadata), 200);
-      if (r.url.path.endsWith('SHA256SUMS'))
+      }
+      if (r.url.path.endsWith('SHA256SUMS')) {
         return http.Response(
           '${_hash(_binary)}  Nex-Windows-Setup-0.22.0-x64.exe\r\n',
           200,
         );
+      }
       return http.Response.bytes([0x4d, 0x5a, 9, 9, 9, 9], 200);
     };
     await updates.check();
@@ -230,13 +237,15 @@ void main() {
     () async {
       final response = Completer<http.Response>();
       respond = (r) {
-        if (r.url == WindowsRelease.latest)
+        if (r.url == WindowsRelease.latest) {
           return http.Response(jsonEncode(metadata), 200);
-        if (r.url.path.endsWith('SHA256SUMS'))
+        }
+        if (r.url.path.endsWith('SHA256SUMS')) {
           return http.Response(
             '${_hash(_binary)}  Nex-Windows-Setup-0.22.0-x64.exe\r\n',
             200,
           );
+        }
         return response.future;
       };
       final task = updates.check();
@@ -286,4 +295,51 @@ void main() {
       expect(updates.error, 'check');
     },
   );
+
+  for (final locale in ['en', 'fa']) {
+    testWidgets(
+      'update controls wrap and remain actionable in $locale at 200%',
+      (t) async {
+        await t.runAsync(updates.check);
+        t.view.physicalSize = const Size(420, 900);
+        t.view.devicePixelRatio = 1;
+        addTearDown(t.view.reset);
+        await t.pumpWidget(
+          MaterialApp(
+            locale: Locale(locale),
+            supportedLocales: const [Locale('en'), Locale('fa')],
+            localizationsDelegates: GlobalMaterialLocalizations.delegates,
+            theme: locale == 'fa' ? nexDarkTheme() : nexLightTheme(),
+            builder: (context, child) => MediaQuery(
+              data: MediaQuery.of(
+                context,
+              ).copyWith(textScaler: const TextScaler.linear(2)),
+              child: child!,
+            ),
+            home: Scaffold(
+              body: SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: NexUpdateCard(updates: updates),
+              ),
+            ),
+          ),
+        );
+        await t.pumpAndSettle();
+        expect(t.takeException(), isNull);
+        final install = find.text(
+          locale == 'fa' ? 'نصب و راه‌اندازی مجدد' : 'Install & restart',
+        );
+        await t.ensureVisible(install);
+        await t.tap(install);
+        for (var i = 0; i < 30 && installed == 0; i++) {
+          await t.runAsync(
+            () => Future<void>.delayed(const Duration(milliseconds: 10)),
+          );
+          await t.pump();
+        }
+        expect(installed, 1);
+        await t.pumpWidget(const SizedBox());
+      },
+    );
+  }
 }

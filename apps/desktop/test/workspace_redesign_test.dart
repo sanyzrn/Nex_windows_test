@@ -84,11 +84,10 @@ void main() {
 
   testWidgets('sidebar collapses while writing stays available', (t) async {
     await _boot(t, width: 700);
-    // 64px icons-only rail: the compact width Windows nav panes use, down
-    // from 76, leaving the section beside it more of a small window.
+    // Compact icon rail includes its breathing room inside an 80px lane.
     expect(
       t.getSize(find.byKey(const ValueKey('workspace-sidebar'))).width,
-      64,
+      80,
     );
     expect(find.byKey(const ValueKey('capture-field')), findsOneWidget);
     expect(t.takeException(), isNull);

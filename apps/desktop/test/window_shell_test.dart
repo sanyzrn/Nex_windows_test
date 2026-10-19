@@ -161,6 +161,8 @@ void main() {
     // Settings -> Edge panel drives the same switch as the rail button.
     await tester.tap(find.text('Settings'));
     await _settle(tester);
+    await tester.tap(find.byKey(const ValueKey('settings-open-0')));
+    await _settle(tester);
     await tester.tap(find.text('Edge panel'));
     await _settle(tester, 12);
 

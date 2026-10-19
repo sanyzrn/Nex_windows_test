@@ -60,10 +60,15 @@ bool Verify(HANDLE file, const std::wstring& expected) {
 }
 
 bool Write(const std::wstring& path, const std::string& text) {
-  Handle file(CreateFileW(path.c_str(), GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr));
-  if (file.value == INVALID_HANDLE_VALUE) return false;
-  DWORD written = 0;
-  return WriteFile(file.value, text.data(), static_cast<DWORD>(text.size()), &written, nullptr) && written == text.size();
+  const auto temporary = path + L".tmp";
+  {
+    Handle file(CreateFileW(temporary.c_str(), GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr));
+    if (file.value == INVALID_HANDLE_VALUE) return false;
+    DWORD written = 0;
+    if (!WriteFile(file.value, text.data(), static_cast<DWORD>(text.size()), &written, nullptr) || written != text.size()) return false;
+    if (!FlushFileBuffers(file.value)) return false;
+  }
+  return MoveFileExW(temporary.c_str(), path.c_str(), MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH) != FALSE;
 }
 
 // Every path is passed through the Windows command-line quoting algorithm.

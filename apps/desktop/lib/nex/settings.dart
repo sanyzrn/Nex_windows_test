@@ -48,6 +48,13 @@ abstract class _SettingsStateBase extends State<NexSettingsView> {
   List<Widget> _buildShortcutsBackup(BuildContext context);
   List<Widget> _buildToolsAbout(BuildContext context);
 
+  void _openCategory(int? value) {
+    setState(() => category = value);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) Scrollable.maybeOf(context)?.position.jumpTo(0);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context)!;
@@ -57,13 +64,7 @@ abstract class _SettingsStateBase extends State<NexSettingsView> {
       ..._buildDisplayAppearance(context),
       ..._buildShortcutsBackup(context),
       ..._buildToolsAbout(context),
-      if (f != null)
-        _SettingsCard(
-          icon: Icons.auto_awesome_outlined,
-          iconColor: scheme.primary,
-          title: AiStrings.of(context).t('ai'),
-          children: const [DesktopIntelligenceSettings()],
-        ),
+      if (f != null) const DesktopIntelligenceSettings(),
     ];
     final names = [
       l.settingsDisplay,
@@ -126,7 +127,7 @@ abstract class _SettingsStateBase extends State<NexSettingsView> {
                 icon: icons[matching[n]],
                 title: names[matching[n]],
                 subtitle: d.t(hints[matching[n]]),
-                onTap: () => setState(() => category = matching[n]),
+                onTap: () => _openCategory(matching[n]),
               ),
             ],
           ],
@@ -139,7 +140,7 @@ abstract class _SettingsStateBase extends State<NexSettingsView> {
       child: Padding(
         padding: EdgeInsets.symmetric(
           horizontal: widget.windowLayout ? 8 : 16,
-          vertical: 16,
+          vertical: widget.windowLayout ? 0 : 16,
         ),
         child: Column(
           spacing: 18,
@@ -195,7 +196,7 @@ abstract class _SettingsStateBase extends State<NexSettingsView> {
                 alignment: AlignmentDirectional.centerStart,
                 child: TextButton.icon(
                   key: const ValueKey('settings-back'),
-                  onPressed: () => setState(() => category = null),
+                  onPressed: () => _openCategory(null),
                   icon: const Icon(Icons.arrow_back_rounded),
                   label: Text(d.t('back')),
                 ),

@@ -295,8 +295,6 @@ class NexFeatures extends ChangeNotifier {
   }
 
   Future<void> close() async {
-    updates?.dispose();
-    updates = null;
     await _intelligence?.close();
     await _libraryChanges?.cancel();
     while (_pending.isNotEmpty) {
@@ -310,6 +308,8 @@ class NexFeatures extends ChangeNotifier {
     await session.flushed;
     await store.close();
     await _recorder?.dispose();
+    updates?.dispose();
+    updates = null;
     composer.dispose();
     focus.dispose();
   }

@@ -25,8 +25,7 @@ String formatNoteForCopy(Note note) {
   if (note.type == NoteType.file) {
     final path = note.mediaUri;
     final filename = (note.originalFilename ?? path ?? '').toLowerCase();
-    final isTextDoc =
-        filename.endsWith('.txt') ||
+    final isTextDoc = filename.endsWith('.txt') ||
         filename.endsWith('.md') ||
         filename.endsWith('.markdown') ||
         filename.endsWith('.docx') ||

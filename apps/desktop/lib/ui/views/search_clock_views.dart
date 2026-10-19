@@ -11,6 +11,7 @@ import '../../core/data.dart';
 import '../flyout.dart';
 import '../widgets.dart';
 
+
 // ================= Web search =================
 
 class SearchView extends StatefulWidget {

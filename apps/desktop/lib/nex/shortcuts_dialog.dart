@@ -40,7 +40,9 @@ class _ShortcutsDialog extends StatelessWidget {
     ];
 
     return AlertDialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
       title: Row(
         children: [
           Container(

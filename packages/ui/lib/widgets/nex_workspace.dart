@@ -21,7 +21,14 @@ class NexSoftCard extends StatelessWidget {
     return Container(
       padding: padding,
       decoration: BoxDecoration(
-        color: c.surfaceContainerLow,
+        color: Color.alphaBlend(
+          c.onSurface.withValues(
+            alpha: Theme.of(context).brightness == Brightness.light
+                ? .075
+                : .025,
+          ),
+          c.surfaceContainerLow,
+        ),
         gradient: accent == null || contrast
             ? null
             : LinearGradient(

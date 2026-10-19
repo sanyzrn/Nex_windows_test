@@ -18,7 +18,7 @@ class _WindowNavRail extends StatelessWidget {
       valueListenable: controller.windowSection,
       builder: (context, section, _) => Container(
         key: const ValueKey('workspace-sidebar'),
-        width: wide ? 222 : 80,
+        width: wide ? 206 : 64,
         margin: const EdgeInsetsDirectional.fromSTEB(8, 8, 8, 12),
         padding: EdgeInsets.symmetric(horizontal: wide ? 12 : 10),
         decoration: BoxDecoration(

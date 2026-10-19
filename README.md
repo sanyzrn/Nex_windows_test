@@ -100,3 +100,12 @@ The Intelligence workspace supports five cloud providers, conversation history, 
 ## License and acknowledgements
 
 The standalone Windows project uses the [MIT license](LICENSE). Shared packages and the desktop shell retain their upstream notices. Shell references include [raminturne/right-panel](https://github.com/raminturne/right-panel). Fonts, plugins and upstream attribution are listed in [THIRD_PARTY_NOTICES](apps/desktop/THIRD_PARTY_NOTICES.md).
+
+## Windows 0.21.0
+
+The interface follows Android Nex's rounded tonal groups and capability cards.
+Automatic updates check the latest stable GitHub release and download verified
+installers in the background. Choose **Install & restart** when ready; the app
+saves before closing. Toggle automatic downloads or check manually in Settings →
+About Nex. Install 0.21.0 once to get this updater; older versions do not contain it.
+[Design and update contract](docs/WINDOWS_0210.md).
