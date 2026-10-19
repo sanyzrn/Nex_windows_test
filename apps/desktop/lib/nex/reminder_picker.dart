@@ -12,7 +12,6 @@ import 'package:nex_core/nex_core.dart';
 import '../l10n/app_localizations.dart';
 import 'reminder_coordinator.dart' show ReminderDeliveryFailure;
 import 'reminder_policy.dart';
-import 'persian_date_picker.dart';
 
 /// Shows a dialog to pick or clear a note reminder.
 Future<void> showReminderPicker(
@@ -87,24 +86,12 @@ class _ReminderPickerDialogState extends State<_ReminderPickerDialog> {
   Future<void> _pickCustomDateTime() async {
     final now = DateTime.now();
     final initialDate = _selectedDue ?? now.add(const Duration(hours: 1));
-    final fa = Localizations.localeOf(context).languageCode == 'fa';
-    final solar = NexPanelScope.maybeOf(context)?.S.solarCalendar ?? fa;
-    final firstDate = DateUtils.dateOnly(now);
-    final safeInitialDate = initialDate.isBefore(now) ? now : initialDate;
-    final lastDate = now.add(const Duration(days: 365 * 10));
-    final pickedDate = solar
-        ? await showNexSolarDatePicker(
-            context: context,
-            initialDate: safeInitialDate,
-            firstDate: firstDate,
-            lastDate: lastDate,
-          )
-        : await showDatePicker(
-            context: context,
-            initialDate: safeInitialDate,
-            firstDate: firstDate,
-            lastDate: lastDate,
-          );
+    final pickedDate = await showDatePicker(
+      context: context,
+      initialDate: initialDate.isBefore(now) ? now : initialDate,
+      firstDate: now,
+      lastDate: now.add(const Duration(days: 365 * 10)),
+    );
     if (pickedDate == null || !mounted) return;
 
     final pickedTime = await showTimePicker(

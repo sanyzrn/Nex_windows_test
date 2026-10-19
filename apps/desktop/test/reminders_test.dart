@@ -196,30 +196,6 @@ void main() {
     );
   });
 
-  test('daily reminders notify once for each occurrence', () async {
-    final note = createNote('daily_once', 'Daily reminder');
-    repo.setDueAt(note.id, DateTime.utc(2026, 10, 1, 9), repeat: NoteRepeat.daily);
-    final seen = <String>{};
-    final now = DateTime.utc(2026, 10, 10, 9, 1);
-    final first = await ReminderReconciliationEngine.reconcile(
-      repo: repo, scheduler: scheduler, nowOverride: now, notifiedOverdueIds: seen,
-    );
-    expect(first.overdueCount, 1);
-    final second = await ReminderReconciliationEngine.reconcile(
-      repo: repo, scheduler: scheduler,
-      nowOverride: now.add(const Duration(minutes: 1)),
-      notifiedOverdueIds: seen,
-    );
-    expect(second.overdueCount, 0);
-    final tomorrow = await ReminderReconciliationEngine.reconcile(
-      repo: repo, scheduler: scheduler,
-      nowOverride: now.add(const Duration(days: 1)),
-      notifiedOverdueIds: seen,
-    );
-    expect(tomorrow.overdueCount, 1);
-    expect(scheduler.overdueShown.length, 2);
-  });
-
   test('cancelling or clearing reminder removes it from schedule', () async {
     final note = createNote('n1', 'Team standup');
     final futureTime = DateTime.utc(2026, 10, 10, 14, 0);

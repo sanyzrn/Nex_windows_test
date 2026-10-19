@@ -251,42 +251,6 @@ class ReminderReconciliationEngine {
         }
       } else {
         final nextFire = computeNextOccurrence(due, note.dueRepeat, now);
-        // Windows can queue a scheduled desktop toast without displaying it.
-        // When Nex runs (including in the tray), deliver the due occurrence
-        // immediately and keep a separate receipt for every repeat cycle.
-        final localNext = nextFire.toLocal();
-        final step = note.dueRepeat == NoteRepeat.daily ? 1 : 7;
-        final previous = DateTime(
-          localNext.year,
-          localNext.month,
-          localNext.day - step,
-          localNext.hour,
-          localNext.minute,
-          localNext.second,
-          localNext.millisecond,
-        ).toUtc();
-        if (!previous.isBefore(due) &&
-            !previous.isAfter(now) &&
-            now.difference(previous) < const Duration(hours: 48)) {
-          final occurrenceReceipt =
-              '${note.id}:${previous.millisecondsSinceEpoch}';
-          if (notifiedOverdueIds == null ||
-              !notifiedOverdueIds.contains(occurrenceReceipt)) {
-            final shown = await scheduler.showOverdue(
-              id: id,
-              noteId: note.id,
-              title: titleText,
-              body: bodyText,
-              occurrence: previous,
-            );
-            if (shown) {
-              notifiedOverdueIds?.add(occurrenceReceipt);
-              overdueCount++;
-            } else {
-              failedCount++;
-            }
-          }
-        }
         // The next few occurrences are queued too, so the series keeps
         // ringing while Nex is closed.
         var fireAt = nextFire;
