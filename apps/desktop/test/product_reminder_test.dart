@@ -5,6 +5,7 @@ import 'package:nex_core/nex_core.dart';
 import 'package:nex_desktop/l10n/app_localizations.dart';
 import 'package:nex_desktop/nex/reminder_coordinator.dart';
 import 'package:nex_desktop/nex/reminder_picker.dart';
+import 'package:nex_desktop/nex/persian_date_picker.dart';
 import 'package:nex_desktop/nex/reminder_policy.dart';
 import 'package:nex_desktop/nex/reminders.dart';
 import 'package:nex_desktop/nex/store.dart';
@@ -49,11 +50,12 @@ Note _note(DateTime due) => Note(
 Future<void> _dialog(
   WidgetTester t,
   Note note,
-  Future<void> Function(DateTime?, NoteRepeat) save,
-) async {
+  Future<void> Function(DateTime?, NoteRepeat) save, {
+  Locale locale = const Locale('en'),
+}) async {
   await t.pumpWidget(
     MaterialApp(
-      locale: const Locale('en'),
+      locale: locale,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: Scaffold(
@@ -156,6 +158,42 @@ void main() {
     expect(saved!.hour, 9);
     expect(saved!.minute, 0);
     expect(saved!.day, tomorrow.day);
+  });
+
+  testWidgets('Persian reminder uses a genuine Solar Hijri date grid', (t) async {
+    final tomorrow = DateTime.now().add(const Duration(days: 1));
+    DateTime? saved;
+    await _dialog(
+      t,
+      _note(tomorrow),
+      (at, repeat) async => saved = at,
+      locale: const Locale('fa'),
+    );
+    final l = AppLocalizations.of(t.element(find.byType(AlertDialog)))!;
+    await t.tap(find.text(l.customDateTime));
+    await t.pumpAndSettle();
+    expect(find.byType(NexSolarDatePickerDialog), findsOneWidget);
+    final date = nexPersianDate(tomorrow);
+    expect(find.text(nexPersianMonthNames[date.month - 1]), findsOneWidget);
+    expect(find.text(nexDigits('${date.year}', persian: true)), findsOneWidget);
+    final confirm = MaterialLocalizations.of(
+      t.element(find.byType(NexSolarDatePickerDialog)),
+    ).okButtonLabel;
+    await t.tap(find.descendant(
+      of: find.byType(NexSolarDatePickerDialog), matching: find.text(confirm),
+    ));
+    await t.pumpAndSettle();
+    expect(find.byType(TimePickerDialog), findsOneWidget);
+    final material = MaterialLocalizations.of(t.element(find.byType(TimePickerDialog)));
+    await t.tap(find.descendant(of: find.byType(TimePickerDialog), matching: find.text(material.okButtonLabel)));
+    await t.pumpAndSettle();
+    await t.tap(find.text(l.reminderSet));
+    await t.pumpAndSettle();
+    expect(saved, isNotNull);
+    final restored = nexPersianDate(saved!);
+    expect(restored.year, date.year);
+    expect(restored.month, date.month);
+    expect(restored.day, date.day);
   });
 
   testWidgets(
