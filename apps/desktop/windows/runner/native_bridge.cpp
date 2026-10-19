@@ -351,6 +351,7 @@ void NativeBridge::SetWindowMode(const std::string& mode, int x, int y, int w,
   const bool to_window = (mode == "window");
   // Never resize/reveal the previous Flutter surface in the new host frame.
   ShowWindow(window_, SW_HIDE);
+  hidden_to_tray_ = false;
   surface_ready_ = false;
   ++surface_generation_;
   surface_requested_generation_ = UINT64_MAX;
@@ -496,6 +497,16 @@ flutter::EncodableMap NativeBridge::WindowFrame() const {
 }
 
 void NativeBridge::FocusWindow() {
+  // A user-hidden window has already drawn a valid desktop frame. Restore it
+  // immediately even if Flutter's surface-ready callback is being refreshed.
+  // Waiting only for a future Flutter frame left Tray > Open permanently hidden
+  // on some Windows runners. A pending redraw can still reveal itself normally.
+  if (window_mode_ && hidden_to_tray_) {
+    hidden_to_tray_ = false;
+    if (!surface_ready_) pending_show_ = true;
+    FocusWindowTarget(window_);
+    return;
+  }
   if (!surface_ready_) {
     if (window_mode_) pending_show_ = true;
     return;
@@ -821,6 +832,7 @@ bool NativeBridge::OnMessage(HWND hwnd, UINT message, WPARAM wparam, LPARAM lpar
     // The title-bar X keeps background helpers, reminders and tray alive.
     // Only an explicit Tray > Quit calls the Dart shutdown/flush path.
     if (window_mode_) {
+      hidden_to_tray_ = true;
       ShowWindow(window_, SW_HIDE);
     } else {
       PostEvent("tray", EncodableValue(EncodableMap{{EncodableValue("id"), EncodableValue("shutdown")}}));

@@ -125,6 +125,8 @@ class NativeBridge {
   bool window_mode_ = false;
   bool first_frame_done_ = false;
   bool surface_ready_ = false;
+  // True only after the visible desktop window was dismissed with X.
+  bool hidden_to_tray_ = false;
   uint64_t surface_generation_ = 0;
   uint64_t surface_requested_generation_ = 0;
   bool frame_callback_pending_ = false;
