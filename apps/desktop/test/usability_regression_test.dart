@@ -260,6 +260,7 @@ void main() {
 
   testWidgets('layout switch is hidden in panel and shown in wide window', (t) async {
     final f = await _boot(t);
+    f.controller.S.windowMode = 'panel';
     await _mount(t, f, const NexLibraryView());
     expect(find.byIcon(Icons.grid_view_outlined), findsNothing);
     expect(find.byIcon(Icons.view_agenda_outlined), findsNothing);
