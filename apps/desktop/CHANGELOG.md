@@ -14,6 +14,13 @@
   card, a caption without its own bar, and a slim navigation rail of icons over
   labels (Capture, Library, Intelligence, Tools, Settings) with a More menu for
   the edge panel switch, theme and shortcuts. Wide windows keep the labelled rail.
+- Library: one search row with the tag manager beside it, date headers as soft
+  capsules, and the filter pills start at the leading edge in wide windows. The
+  keyboard shortcut button left the filter row (F1 and More still open it).
+- Note cards: a reminder and the "+N" files mark now sit in a footnote row under
+  the preview instead of beside it, so a sentence keeps the card's full width.
+- Reader: Copy, Pin, Remind and Delete are one tonal dock whose actions share the
+  width, so none is cut off in the compact window.
 
 ## 0.21.1 — 2026-10-19
 

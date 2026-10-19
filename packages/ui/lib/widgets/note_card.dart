@@ -183,8 +183,8 @@ class NoteCard extends StatelessWidget {
         constraints: board
             ? BoxConstraints.tightFor(height: nexBoardCardHeight(context))
             : expanded
-            ? BoxConstraints(minHeight: nexCardHeightFor(context))
-            : BoxConstraints.tightFor(height: nexCardHeightFor(context)),
+            ? BoxConstraints(minHeight: _height(context))
+            : BoxConstraints.tightFor(height: _height(context)),
         child: Semantics(
           button: onTap != null,
           selected: selected ?? (active ? true : null),
@@ -219,6 +219,12 @@ class NoteCard extends StatelessWidget {
       ),
     );
   }
+
+  /// A card with a status row (reminder, files) is one footnote taller.
+  double _height(BuildContext context) => nexCardHeightFor(
+    context,
+    withFootnote: (showDue && note.dueAt != null) || note.attachmentCount > 0,
+  );
 
   /// The card's own announcement: what kind of note, and what it says.
   ///
@@ -610,45 +616,99 @@ class _CardBody extends StatelessWidget {
               else
                 _LeadingWithPin(note: note, strings: strings),
               const SizedBox(width: NexSpacing.contentGap),
-              // A due reminder remains visible because it is an action for
-              // the future. The edit time belongs in note details, leaving
-              // this row for the note's own content.
-              if (showDue ? note.dueAt : null case final due?)
-                _DueChip(
-                  due: due,
-                  label: strings.dueLabel?.call(due, note.dueRepeat),
-                  // A lapsed reminder is not an alarm any more, so it stops
-                  // asking for attention in the accent colour. A repeating one
-                  // never lapses: it is always about to happen again, however
-                  // long ago the series began.
-                  upcoming:
-                      note.dueRepeat != NoteRepeat.once ||
-                      due.isAfter(DateTime.now().toUtc()),
-                ),
-              if (showDue && note.dueAt != null)
-                const SizedBox(width: NexSpacing.contentGap),
-              if (note.attachmentCount > 0) ...[
-                const Icon(Icons.attach_file, size: 14),
-                Text(
-                  '+${note.attachmentCount}',
-                  style: theme.textTheme.labelSmall,
-                ),
-                const SizedBox(width: NexSpacing.sm),
-              ],
-              Expanded(
-                child:
-                    previewOverride ??
-                    _Preview(
-                      note: note,
-                      expanded: expanded,
-                      strings: strings,
-                      onChecklistToggle: onChecklistToggle,
-                    ),
-              ),
+              // A due reminder and the files a note carries sit in a footnote
+              // under the preview. Beside it they took the preview's width,
+              // which in a compact window is the width a sentence needs.
+              Expanded(child: _withFootnote(context)),
             ],
           ),
         ),
       ),
+    );
+  }
+}
+
+extension on _CardBody {
+  /// The preview and, when the note has a reminder or more files, a compact
+  /// status row below it. The row follows the interface direction and owns its
+  /// space: nothing is painted over the note's last line.
+  Widget _withFootnote(BuildContext context) {
+    final due = showDue ? note.dueAt : null;
+    final attached = note.attachmentCount > 0;
+    final preview =
+        previewOverride ??
+        _Preview(
+          note: note,
+          expanded: expanded,
+          strings: strings,
+          onChecklistToggle: onChecklistToggle,
+        );
+    if (due == null && !attached) return preview;
+    final theme = Theme.of(context);
+    final density = NexCardDensity.of(context);
+    final marks = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (due != null)
+          Flexible(
+            child: _DueChip(
+              due: due,
+              label: strings.dueLabel?.call(due, note.dueRepeat),
+              // A lapsed reminder is not an alarm any more, so it stops
+              // asking for attention in the accent colour. A repeating one
+              // never lapses: it is always about to happen again.
+              upcoming:
+                  note.dueRepeat != NoteRepeat.once ||
+                  due.isAfter(DateTime.now().toUtc()),
+            ),
+          ),
+        if (due != null && attached) const SizedBox(width: NexSpacing.sm),
+        if (attached) ...[
+          ExcludeSemantics(
+            child: Icon(
+              Icons.attach_file,
+              size: 13,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(width: NexSpacing.xs),
+          ExcludeSemantics(
+            child: Text(
+              '+${note.attachmentCount}',
+              textDirection: TextDirection.ltr,
+              maxLines: 1,
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (expanded)
+          preview
+        else
+          SizedBox(
+            height: nexCardPreviewLineHeightFor(context) * density.lines,
+            child: Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: preview,
+            ),
+          ),
+        const SizedBox(height: NexSpacing.xs),
+        SizedBox(
+          height: nexCardFootnoteHeightFor(context) - NexSpacing.xs,
+          child: Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: marks,
+          ),
+        ),
+      ],
     );
   }
 }

@@ -309,7 +309,7 @@ void main() {
     final fixture = await _fixture(t);
     await t.tap(find.byType(NoteCard).first);
     await t.pump();
-    final action = find.widgetWithText(OutlinedButton, 'Delete');
+    final action = find.widgetWithText(InkWell, 'Delete');
     await t.ensureVisible(action);
     await t.tap(action);
     fixture.c.selectWindowSection('tools');

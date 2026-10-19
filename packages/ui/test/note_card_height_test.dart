@@ -66,6 +66,50 @@ void main() {
     expect(short, nexCardHeight + nexCardInsets.vertical);
   });
 
+  testWidgets('a reminder or files add one footnote row, not a squeezed preview', (
+    tester,
+  ) async {
+    final base = note(
+      'a note long enough to wrap onto a second line and then keep going well past it',
+    );
+    final plain = await heightOf(tester, base);
+    final due = await heightOf(
+      tester,
+      base.copyWith(dueAt: DateTime.utc(2027, 1, 1)),
+    );
+    final files = await heightOf(tester, base.copyWith(attachmentCount: 3));
+    final both = await heightOf(
+      tester,
+      base.copyWith(dueAt: DateTime.utc(2027, 1, 1), attachmentCount: 3),
+    );
+    // One footnote row whatever it holds, so marked cards stay a uniform height.
+    expect(due, greaterThan(plain));
+    expect(files, due);
+    expect(both, due);
+
+    // The preview keeps its width: the marks sit below it, not beside it.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            width: 400,
+            child: NoteCard(
+              note: base.copyWith(
+                dueAt: DateTime.utc(2027, 1, 1),
+                attachmentCount: 3,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(find.text('+3'), findsOneWidget);
+    expect(
+      tester.getTopLeft(find.text('+3')).dy,
+      greaterThan(tester.getBottomLeft(find.byType(NexTextSurface)).dy - 1),
+    );
+  });
+
   testWidgets('a pinned note shows a pin, an unpinned one does not', (
     tester,
   ) async {
@@ -228,8 +272,8 @@ void main() {
     // The invariant itself: the const and the runtime agree, and the card
     // reserves room for both its tenants — the leading glyph and the preview
     // block — whichever is taller.
-    final taller = nexCardLeadingSize >
-            nexCardPreviewLineHeight * nexCardPreviewLines
+    final taller =
+        nexCardLeadingSize > nexCardPreviewLineHeight * nexCardPreviewLines
         ? nexCardLeadingSize
         : nexCardPreviewLineHeight * nexCardPreviewLines;
     expect(nexCardHeight, taller + NexSpacing.cardInset * 2);
@@ -260,8 +304,8 @@ void main() {
     // Smaller text may let the card settle back toward its other tenant — the
     // leading glyph — but never below what that glyph still needs. The card
     // follows the taller of the two, whichever it is.
-    final floor = nexCardLeadingSize + NexSpacing.cardInset * 2 +
-        nexCardInsets.vertical;
+    final floor =
+        nexCardLeadingSize + NexSpacing.cardInset * 2 + nexCardInsets.vertical;
     expect(await at(0.8), greaterThanOrEqualTo(floor));
     expect(await at(0.8), lessThanOrEqualTo(normal));
     expect(await at(1.4), greaterThan(normal));

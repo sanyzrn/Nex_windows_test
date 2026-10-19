@@ -38,3 +38,13 @@ Layout is checked at 440 px (compact) and 1100 px in English/Persian, light/dark
 through `workspace_redesign_test.dart` and `window_shell_test.dart`. Placement and
 re-anchoring are native code and need a manual check on Windows: first launch,
 close to tray and Open, a second monitor, 125%/150% scaling.
+
+## Phase 2 — library and cards
+
+- `NoteCard` (packages/ui) puts the reminder chip and the "+N" files mark in a
+  footnote row below the preview. Marked cards are exactly one footnote row taller
+  (`nexCardHeightFor(withFootnote: true)`), whatever the marks hold.
+- The library list pane has one search row (search, grid/list switch where a grid
+  fits, tag manager). Date dividers are accent capsules. `_FilterBar` is full width
+  so its pills align to the leading edge.
+- `NoteActionBar` is a single tonal dock; each action takes an equal share.
