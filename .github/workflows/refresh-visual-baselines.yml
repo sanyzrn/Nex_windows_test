@@ -1,12 +1,16 @@
 name: Refresh visual baselines
 
-# Manual only. Regenerates the Windows golden and review screenshots on a
+# On request only: a push to a windows/** branch that changes
+# .github/refresh-baselines-request.txt (a new workflow file cannot be
+# dispatched by hand until it exists on the default branch). Regenerates the Windows golden and review screenshots on a
 # Windows runner and commits them to the branch it was started on, so a
 # reviewed visual change does not need the candidate artifact to be downloaded
 # and committed by hand. Never runs on main/master; the comparison gate in
 # desktop.yml stays the only thing that decides whether a build passes.
 on:
-  workflow_dispatch:
+  push:
+    branches: ['windows/**']
+    paths: ['.github/refresh-baselines-request.txt']
 
 permissions:
   contents: write
