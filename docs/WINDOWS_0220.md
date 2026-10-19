@@ -12,9 +12,9 @@ already required. Phase 1 gives the desktop window its own form.
   `windows/runner/native_window.h` holds the numbers; `CompactWindowFrame`
   computes the frame.
 - **Always the same.** With the default setting (`windowRemember` off) the saved
-  frame is ignored on start and when switching back from the edge panel. When the
-  window comes back from the tray (hidden or minimised) it returns to the corner
-  (`NativeBridge::FocusWindow`). A visible window that is only focused is never moved.
+  frame is ignored on start and when switching back from the edge panel.
+  (Re-anchoring on a return from the tray was dropped together with the
+  tray-close behaviour, see "Reverted" below.)
 - **Remembering.** `Settings > Display > Remember window size and position`
   restores the last frame (and maximised state) as in 0.21. The saved frame is
   recorded either way, so turning it on later has something to restore.
@@ -85,3 +85,13 @@ regenerates them on a Windows runner when
 and commits them to that branch (a bot commit does not start CI by itself; push
 any ordinary commit after it). Review the changed images in the PR before
 merging. The comparison gate in `desktop.yml` is unchanged.
+
+## Reverted
+
+Everything committed to `main` after the 0.21.0 release (PR #6, 10:55 Tehran) and
+before this work started — sixteen commits between 16:26 and 18:58 Tehran on
+2026-10-19: close-to-tray, the reminder recovery/fallback, the Solar Hijri
+reminder picker, the layout-toggle visibility change, their golden updates, the
+0.21.1 bump and the one-off golden workflow — was removed again on this branch
+(`git revert`, history kept; no force push). The tree is 0.21.0 plus the phases
+above. Closing the window quits Nex, as in 0.21.0.

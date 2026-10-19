@@ -6,10 +6,9 @@
   automatic AI capability detection and model list, fused search ranking,
   link and recurring-item fixes. The desktop app now requires Flutter 3.44.
 - New compact window: Nex opens as a tall portrait card in the bottom-right
-  corner of the screen, always at the same size, and returns to that corner
-  each time it is opened from the tray. It can still be resized or maximised;
-  turn on Settings > Display > Remember window size and position to reopen at
-  the last frame instead. The edge panel is unchanged.
+  corner of the screen, always at the same size. It can still be resized or
+  maximised; turn on Settings > Display > Remember window size and position to
+  reopen at the last frame instead. The edge panel is unchanged.
 - New window look: a surface tinted by the theme accent, a rounded content
   card, a caption without its own bar, and a slim navigation rail of icons over
   labels (Capture, Library, Intelligence, Tools, Settings) with a More menu for
@@ -26,8 +25,8 @@
   three across, instead of six wide buttons.
 - Reminders: a repeating reminder now queues its next seven (daily) or eight
   (weekly) occurrences with Windows, so it keeps ringing for that long even if
-  Nex is closed. A toast Windows already delivered is no longer repeated by
-  Nex's own fallback (both carry one tag per occurrence).
+  Nex is closed. A missed one-off reminder that Windows already delivered is not
+  shown a second time by Nex.
 - Settings > Display > Test notifications sends one notification now and one
   queued 15 seconds ahead, and shows Windows' own reason if it refuses. The
   reminder warning on the capture page links to Windows notification settings.
