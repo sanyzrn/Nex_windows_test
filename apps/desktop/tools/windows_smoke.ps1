@@ -50,6 +50,20 @@ public static class NexWindowProbe {
     }
     [DllImport("user32.dll")] private static extern int GetClassName(IntPtr hwnd, StringBuilder lpClassName, int nMaxCount);
     [DllImport("user32.dll")] public static extern bool PostMessage(IntPtr hwnd, uint message, IntPtr wparam, IntPtr lparam);
+    // Diagnostics: every top-level window of the process, "class:visible:frame".
+    public static string Windows(uint processId) {
+        var all = new StringBuilder();
+        EnumWindows((hwnd, unused) => {
+            uint owner; GetWindowThreadProcessId(hwnd, out owner);
+            if (owner == processId) {
+                var sb = new StringBuilder(256);
+                GetClassName(hwnd, sb, 256);
+                all.Append(sb.ToString() + ":" + IsWindowVisible(hwnd) + ":" + Frame(hwnd) + "; ");
+            }
+            return true;
+        }, IntPtr.Zero);
+        return all.ToString();
+    }
     public static IntPtr VisibleWindow(uint processId) {
         IntPtr found = IntPtr.Zero;
         EnumWindows((hwnd, unused) => {
@@ -103,6 +117,8 @@ $result | Add-Member trayRestoresWindow (-not $normal.HasExited -and [NexWindowP
 # Diagnostics only (not part of the pass criteria): where the window is after Open.
 $result | Add-Member trayRestoreFrame ([NexWindowProbe]::Frame($window))
 $result | Add-Member trayRestoreIconic ([NexWindowProbe]::IsIconic($window))
+$result | Add-Member trayRestoreHasExited $normal.HasExited
+$result | Add-Member trayRestoreWindows ([NexWindowProbe]::Windows([uint32]$normal.Id))
 [void][NexWindowProbe]::PostMessage($window, 0x0111, [IntPtr]40005, [IntPtr]::Zero)
 if (-not $normal.WaitForExit(10000)) { throw 'Normal GUI failed to drain and quit from tray.' }
 $result | Add-Member normalGuiExitCode $normal.ExitCode
