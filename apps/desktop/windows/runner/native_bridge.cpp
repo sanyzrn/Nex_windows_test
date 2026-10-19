@@ -518,24 +518,7 @@ void NativeBridge::FocusWindow() {
     if (window_mode_) pending_show_ = true;
     return;
   }
-  // Coming back from the tray (hidden or minimised) the compact card returns
-  // to its corner, the way a flyout does, instead of wherever it was last
-  // dragged. The window is shown first and moved after: a window that is only
-  // focused is never moved.
-  const bool returning = compact_window_ && window_mode_ &&
-      (IsIconic(window_) || !IsWindowVisible(window_));
   FocusWindowTarget(window_);
-  if (returning && !IsZoomed(window_) && !IsIconic(window_)) {
-    POINT cursor = {0, 0};
-    GetCursorPos(&cursor);
-    const RECT frame = CompactWindowFrame(
-        MonitorFromPoint(cursor, MONITOR_DEFAULTTOPRIMARY));
-    if (frame.right > frame.left && frame.bottom > frame.top) {
-      SetWindowPos(window_, nullptr, frame.left, frame.top,
-                   frame.right - frame.left, frame.bottom - frame.top,
-                   SWP_NOZORDER | SWP_NOACTIVATE);
-    }
-  }
 }
 
 void NativeBridge::RememberForeground() {
