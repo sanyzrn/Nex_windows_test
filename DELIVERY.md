@@ -1,4 +1,4 @@
-# Nex Windows 0.21.0+14
+# Nex Windows 0.21.1+15
 
 Android-inspired interface, cloud intelligence and verified GitHub updates.
 [Windows 0.21.0 design and update contract](docs/WINDOWS_0210.md).

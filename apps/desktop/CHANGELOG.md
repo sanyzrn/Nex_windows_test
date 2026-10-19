@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.21.1 — 2026-10-19
+
+- Close the desktop window to System Tray instead of stopping Nex, and
+  restore with Open; exit cleanly only through Tray > Quit.
+- Add live reminder delivery fallback for Windows while Nex stays resident;
+  track one-off and daily/weekly notification receipts after actual attempts.
+- Use a genuine Saturday-first Solar Hijri date picker for reminders whenever
+  Solar Calendar is enabled; save the equivalent standard Gregorian date.
+- Hide inoperative Grid/List controls in panel and narrow library layouts.
+
 ## 0.21.0 — 2026-10-19
 
 - Add automatic update checks and background downloads from the latest stable
