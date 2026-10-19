@@ -247,6 +247,30 @@ void main() {
     },
   );
 
+  test('a queued one-off still alerts when Nex reaches its due time', () async {
+    final root = await Directory.systemTemp.createTemp('nex-reminder-live-');
+    final store = await DesktopStore.open(root.path, 'live');
+    final scheduler = _Scheduler();
+    final runtime = ReminderCoordinator(store, scheduler);
+    try {
+      final note = await store.call<Note>('capture', {'text': 'Due while running'});
+      final at = DateTime.now().add(const Duration(seconds: 2));
+      await store.call('remind', {'id': note.id, 'at': at, 'repeat': 'once'});
+      await runtime.start();
+      expect(scheduler.scheduled, isNotEmpty);
+      expect(scheduler.overdueShown, isEmpty);
+      await Future<void>.delayed(const Duration(milliseconds: 2100));
+      await runtime.refresh();
+      expect(scheduler.overdueShown.length, 1);
+      await runtime.refresh();
+      expect(scheduler.overdueShown.length, 1);
+    } finally {
+      await runtime.close();
+      await store.close();
+      await root.delete(recursive: true);
+    }
+  });
+
   test(
     'delivery acknowledgement survives restarts and a changed due time gets its own receipt',
     () async {

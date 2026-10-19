@@ -75,9 +75,7 @@ bool ScheduleToastNotification(const std::string& id,
         L"<text>" + wideTitle + L"</text>"
         L"<text>" + wideBody + L"</text>"
         L"</binding></visual>"
-        L"<actions>"
-        L"<action content=\"\" arguments=\"dismiss\" activationType=\"system\"/>"
-        L"</actions></toast>";
+        L"</toast>";
 
     XmlDocument doc;
     doc.LoadXml(xml);
@@ -154,9 +152,7 @@ bool ShowImmediateToast(const std::string& id,
         L"<text>" + wideTitle + L"</text>"
         L"<text>" + wideBody + L"</text>"
         L"</binding></visual>"
-        L"<actions>"
-        L"<action content=\"\" arguments=\"dismiss\" activationType=\"system\"/>"
-        L"</actions></toast>";
+        L"</toast>";
 
     XmlDocument doc;
     doc.LoadXml(xml);

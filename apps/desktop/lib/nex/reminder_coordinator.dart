@@ -48,10 +48,6 @@ class ReminderCoordinator {
       }
       try {
         final notes = await store.call<List<Note>>('reminderCandidates');
-        _scheduler.currentReceipts = {
-          for (final note in notes)
-            reminderScheduleId(note.id): reminderReceipt(note),
-        };
         final result = await ReminderReconciliationEngine.reconcileNotes(
           notes: notes,
           scheduler: _scheduler,
@@ -89,7 +85,6 @@ class _TrackedScheduler implements ReminderScheduler {
   _TrackedScheduler(this.delegate);
   final ReminderScheduler delegate;
   final receipts = <String>{};
-  Map<String, String> currentReceipts = {};
   final _signatures = <String, String>{};
   Set<String> _scheduled = {};
 
@@ -118,8 +113,6 @@ class _TrackedScheduler implements ReminderScheduler {
     if (success) {
       _signatures[id] = signature;
       _scheduled.add(id);
-      final receipt = currentReceipts[id];
-      if (receipt != null) receipts.add(receipt);
     }
     return success;
   }
