@@ -10,7 +10,7 @@ part of 'library_view.dart';
 /// the Today strip, empty states and the note card list with date dividers.
 mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
   @override
-  Widget _buildListPane(BuildContext context, AppLocalizations l, bool fa) {
+  Widget _buildListPane(BuildContext context, AppLocalizations l, bool fa, {required bool allowGrid}) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
 
@@ -217,18 +217,21 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
         Row(
           children: [
             const SizedBox(width: 12),
-            IconButton(
-              tooltip: AiStrings.of(context).t('board'),
-              isSelected: board,
-              onPressed: () => setState(() => board = true),
-              icon: const Icon(Icons.grid_view_outlined),
-            ),
-            IconButton(
-              tooltip: AiStrings.of(context).t('list'),
-              isSelected: !board,
-              onPressed: () => setState(() => board = false),
-              icon: const Icon(Icons.view_agenda_outlined),
-            ),
+            // Don't offer a layout switch when the pane cannot display a grid.
+            if (allowGrid) ...[
+              IconButton(
+                tooltip: AiStrings.of(context).t('board'),
+                isSelected: board,
+                onPressed: () => setState(() => board = true),
+                icon: const Icon(Icons.grid_view_outlined),
+              ),
+              IconButton(
+                tooltip: AiStrings.of(context).t('list'),
+                isSelected: !board,
+                onPressed: () => setState(() => board = false),
+                icon: const Icon(Icons.view_agenda_outlined),
+              ),
+            ],
             const Spacer(),
             TextButton.icon(
               key: const ValueKey('manage-tags'),

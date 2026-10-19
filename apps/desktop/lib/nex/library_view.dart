@@ -46,7 +46,7 @@ abstract class _LibraryStateBase extends State<NexLibraryView> {
   // Cross-mixin members, implemented in the part files of this library;
   // declared here so the base build and sibling mixins can call them.
   KeyEventResult _handleKeyEvent(FocusNode node, KeyEvent event);
-  Widget _buildListPane(BuildContext context, AppLocalizations l, bool fa);
+  Widget _buildListPane(BuildContext context, AppLocalizations l, bool fa, {required bool allowGrid});
   Future<void> _deleteNote(Note note);
   Future<void> _undoLastDelete();
   void _showCardContextMenu(Offset globalPosition, Note note);
@@ -265,7 +265,10 @@ abstract class _LibraryStateBase extends State<NexLibraryView> {
               }
               return SizedBox(
                 height: height,
-                child: _buildListPane(context, l, fa),
+                child: _buildListPane(
+                     context, l, fa,
+                     allowGrid: c?.isWindowMode == true && constraints.maxWidth >= 640,
+                   ),
               );
             }
 
@@ -282,7 +285,10 @@ abstract class _LibraryStateBase extends State<NexLibraryView> {
                 children: [
                   SizedBox(
                     width: clampedWidth,
-                    child: _buildListPane(context, l, fa),
+                    child: _buildListPane(
+                       context, l, fa,
+                       allowGrid: c?.isWindowMode == true && clampedWidth >= 640,
+                     ),
                   ),
                   // Draggable vertical divider
                   MouseRegion(
