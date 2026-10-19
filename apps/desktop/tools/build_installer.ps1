@@ -7,7 +7,7 @@ param(
 $ErrorActionPreference = 'Stop'
 $appRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..')).Path
 $Release = (Resolve-Path -LiteralPath $Release).Path
-foreach ($name in @('nex_desktop.exe', 'flutter_windows.dll', 'sqlite3.dll', 'file_selector_windows_plugin.dll', 'record_windows_plugin.dll', 'just_audio_windows_plugin.dll', 'sqlite3_flutter_libs_plugin.dll', 'data/app.so', 'data/icudtl.dat', 'data/flutter_assets')) {
+foreach ($name in @('nex_desktop.exe', 'nex_update.exe', 'flutter_windows.dll', 'sqlite3.dll', 'file_selector_windows_plugin.dll', 'record_windows_plugin.dll', 'just_audio_windows_plugin.dll', 'sqlite3_flutter_libs_plugin.dll', 'data/app.so', 'data/icudtl.dat', 'data/flutter_assets')) {
   if (-not (Test-Path -LiteralPath (Join-Path $Release $name))) { throw "Missing Release member: $name" }
 }
 if (-not $VCRuntime) {

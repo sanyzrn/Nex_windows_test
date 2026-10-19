@@ -6,7 +6,7 @@
 
 A local-first notebook and desktop toolkit for Windows, with English and Persian interfaces. Work in a full desktop window or a compact panel at either screen edge.
 
-**Current app version: `0.20.0+13` · Windows 10/11 · x64**
+**Current app version: `0.21.0+14` · Windows 10/11 · x64**
 
 [Download the latest installer](https://github.com/sanyzrn/Nex_windows_test/releases/latest) · [What's new](apps/desktop/CHANGELOG.md) · [Report a bug](https://github.com/sanyzrn/Nex_windows_test/issues/new/choose) · [فارسی](#راهنمای-فارسی)
 
@@ -100,3 +100,12 @@ The Intelligence workspace supports five cloud providers, conversation history, 
 ## License and acknowledgements
 
 The standalone Windows project uses the [MIT license](LICENSE). Shared packages and the desktop shell retain their upstream notices. Shell references include [raminturne/right-panel](https://github.com/raminturne/right-panel). Fonts, plugins and upstream attribution are listed in [THIRD_PARTY_NOTICES](apps/desktop/THIRD_PARTY_NOTICES.md).
+
+## Windows 0.21.0
+
+The interface follows Android Nex's rounded tonal groups and capability cards.
+Automatic updates check the latest stable GitHub release and download verified
+installers in the background. Choose **Install & restart** when ready; the app
+saves before closing. Toggle automatic downloads or check manually in Settings →
+About Nex. Install 0.21.0 once to get this updater; older versions do not contain it.
+[Design and update contract](docs/WINDOWS_0210.md).

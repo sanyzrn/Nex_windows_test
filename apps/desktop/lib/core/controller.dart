@@ -149,6 +149,7 @@ abstract class PanelStateBase extends ChangeNotifier implements PanelHoldable {
   /// animation state machine uses it so behavior is deterministic in tests.
   double clockSec = 0;
   bool _quitQueued = false;
+  bool get shutdownQueued => _quitQueued;
   bool _disposed = false;
   final _delayed = <Timer>{};
   void _later(Duration delay, VoidCallback action) {

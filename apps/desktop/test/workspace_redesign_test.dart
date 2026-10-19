@@ -84,11 +84,10 @@ void main() {
 
   testWidgets('sidebar collapses while writing stays available', (t) async {
     await _boot(t, width: 700);
-    // 64px icons-only rail: the compact width Windows nav panes use, down
-    // from 76, leaving the section beside it more of a small window.
+    // Compact icon rail includes its breathing room inside an 80px lane.
     expect(
       t.getSize(find.byKey(const ValueKey('workspace-sidebar'))).width,
-      64,
+      80,
     );
     expect(find.byKey(const ValueKey('capture-field')), findsOneWidget);
     expect(t.takeException(), isNull);
@@ -112,22 +111,29 @@ void main() {
     },
   );
 
-  testWidgets('settings categories reveal the existing controls in place', (
-    t,
-  ) async {
-    await _boot(t, section: 'settings');
-    final l = AppLocalizations.of(t.element(find.byType(Scaffold)))!;
-    expect(find.text(l.interfaceMode), findsOneWidget);
-    expect(find.text(l.colorMode), findsNothing);
-    await t.tap(find.text(l.settingsAppearance));
-    await t.pumpAndSettle();
-    expect(find.text(l.colorMode), findsOneWidget);
-    expect(find.text(l.interfaceMode), findsNothing);
-    await t.tap(find.text(l.settingsBackup));
-    await t.pumpAndSettle();
-    expect(find.text(l.colorMode), findsNothing);
-    expect(t.takeException(), isNull);
-  });
+  testWidgets(
+    'settings directory opens existing controls and returns to categories',
+    (t) async {
+      await _boot(t, section: 'settings');
+      final l = AppLocalizations.of(t.element(find.byType(Scaffold)))!;
+      await t.tap(find.byKey(const ValueKey('settings-open-0')));
+      await t.pumpAndSettle();
+      expect(find.text(l.interfaceMode), findsOneWidget);
+      expect(find.text(l.colorMode), findsNothing);
+      await t.tap(find.byKey(const ValueKey('settings-back')));
+      await t.pumpAndSettle();
+      await t.tap(find.text(l.settingsAppearance));
+      await t.pumpAndSettle();
+      expect(find.text(l.colorMode), findsOneWidget);
+      expect(find.text(l.interfaceMode), findsNothing);
+      await t.tap(find.byKey(const ValueKey('settings-back')));
+      await t.pumpAndSettle();
+      await t.tap(find.text(l.settingsBackup));
+      await t.pumpAndSettle();
+      expect(find.text(l.colorMode), findsNothing);
+      expect(t.takeException(), isNull);
+    },
+  );
 
   testWidgets(
     'a command query with no results remains usable and dismissible',

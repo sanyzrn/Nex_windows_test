@@ -72,6 +72,8 @@ void main() {
     await _pumpSecs(tester, 1.0);
     controllerOf(tester).setPanel('settings');
     await _pumpSecs(tester, 1.0);
+    await tester.tap(find.byKey(const ValueKey('settings-open-0')));
+    await _pumpSecs(tester, 1.0);
     // A narrow panel must keep labels readable beside large desktop controls.
     final modeLabel = find.text('Interface mode');
     expect(tester.getSize(modeLabel).height, lessThan(30));

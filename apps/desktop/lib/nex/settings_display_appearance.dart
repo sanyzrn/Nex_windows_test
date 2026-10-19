@@ -106,71 +106,75 @@ mixin _SettingsDisplayAppearance on _SettingsStateBase {
         iconColor: scheme.tertiary,
         title: l.settingsAppearance,
         children: [
-          _SettingRow(
-            title: l.colorMode,
-            control: SegmentedButton<String>(
-              direction: MediaQuery.textScalerOf(context).scale(1) > 1.4
-                  ? Axis.vertical
-                  : Axis.horizontal,
-              segments: [
-                ButtonSegment(
-                  value: 'system',
-                  icon: const Icon(Icons.brightness_auto_outlined, size: 16),
-                  label: Text(l.followSystem),
+          Text(l.colorMode, style: Theme.of(context).textTheme.titleSmall),
+          const SizedBox(height: 12),
+          NexResponsiveGrid(
+            minWidth: 135,
+            maxColumns: 3,
+            children: [
+              for (final mode in ['light', 'dark', 'system'])
+                _AppearanceChoice(
+                  label: mode == 'light'
+                      ? l.light
+                      : mode == 'dark'
+                      ? l.dark
+                      : l.followSystem,
+                  selected:
+                      (c.S.theme == 'system'
+                          ? 'system'
+                          : c.palette.isLight
+                          ? 'light'
+                          : 'dark') ==
+                      mode,
+                  icon: mode == 'light'
+                      ? Icons.light_mode_outlined
+                      : mode == 'dark'
+                      ? Icons.dark_mode_outlined
+                      : Icons.brightness_auto_outlined,
+                  onTap: () {
+                    c.S.theme = mode;
+                    c.save();
+                    c.refresh();
+                  },
                 ),
-                ButtonSegment(
-                  value: 'light',
-                  icon: const Icon(Icons.light_mode_outlined, size: 16),
-                  label: Text(l.light),
-                ),
-                ButtonSegment(
-                  value: 'dark',
-                  icon: const Icon(Icons.dark_mode_outlined, size: 16),
-                  label: Text(l.dark),
-                ),
-              ],
-              selected: {
-                c.S.theme == 'system'
-                    ? 'system'
-                    : c.palette.isLight
-                    ? 'light'
-                    : 'dark',
-              },
-              onSelectionChanged: (v) {
-                c.S.theme = v.first;
-                c.save();
-                c.refresh();
-              },
-            ),
+            ],
           ),
+          const SizedBox(height: 18),
           const Divider(height: 1),
           // Card density (IDEAS.md): compact / standard / readable, feeding
           // the NexCardDensityScope around the library.
-          _SettingRow(
-            title: l.settingsDensity,
-            control: SegmentedButton<String>(
-              direction: MediaQuery.textScalerOf(context).scale(1) > 1.4
-                  ? Axis.vertical
-                  : Axis.horizontal,
-              segments: [
-                ButtonSegment(value: 'compact', label: Text(l.densityCompact)),
-                ButtonSegment(
-                  value: 'standard',
-                  label: Text(l.densityStandard),
-                ),
-                ButtonSegment(
-                  value: 'readable',
-                  label: Text(l.densityReadable),
-                ),
-              ],
-              selected: {c.S.cardDensity},
-              onSelectionChanged: (v) {
-                c.S.cardDensity = v.first;
-                c.save();
-                c.refresh();
-              },
-            ),
+          const SizedBox(height: 18),
+          Text(
+            l.settingsDensity,
+            style: Theme.of(context).textTheme.titleSmall,
           ),
+          const SizedBox(height: 12),
+          NexResponsiveGrid(
+            minWidth: 145,
+            maxColumns: 3,
+            children: [
+              for (final density in ['compact', 'standard', 'readable'])
+                _AppearanceChoice(
+                  label: density == 'compact'
+                      ? l.densityCompact
+                      : density == 'standard'
+                      ? l.densityStandard
+                      : l.densityReadable,
+                  selected: c.S.cardDensity == density,
+                  icon: density == 'compact'
+                      ? Icons.view_headline_rounded
+                      : density == 'standard'
+                      ? Icons.view_agenda_outlined
+                      : Icons.view_day_outlined,
+                  onTap: () {
+                    c.S.cardDensity = density;
+                    c.save();
+                    c.refresh();
+                  },
+                ),
+            ],
+          ),
+          const SizedBox(height: 18),
           const Divider(height: 1),
           _SettingRow(
             title: l.themePalette,
@@ -378,6 +382,50 @@ class _AccentDialogState extends State<_AccentDialog> {
           child: Text(l.save),
         ),
       ],
+    );
+  }
+}
+
+class _AppearanceChoice extends StatelessWidget {
+  const _AppearanceChoice({
+    required this.label,
+    required this.icon,
+    required this.selected,
+    required this.onTap,
+  });
+  final String label;
+  final IconData icon;
+  final bool selected;
+  final VoidCallback onTap;
+  @override
+  Widget build(BuildContext context) {
+    final c = Theme.of(context).colorScheme;
+    return Semantics(
+      selected: selected,
+      child: OutlinedButton(
+        onPressed: onTap,
+        style: OutlinedButton.styleFrom(
+          padding: const EdgeInsets.all(18),
+          backgroundColor: selected
+              ? c.primary.withValues(alpha: .09)
+              : c.surface,
+          foregroundColor: selected ? c.primary : c.onSurface,
+          side: BorderSide(
+            color: selected ? c.primary : c.outline,
+            width: selected ? 2 : 1,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, size: 30),
+            const SizedBox(height: 14),
+            Text(label, textAlign: TextAlign.center),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -50,6 +50,10 @@ mixin _SettingsToolsAbout on _SettingsStateBase {
         iconColor: scheme.outline,
         title: l.settingsAbout,
         children: [
+          if (NexScope.maybeOf(context)?.updates case final updates?) ...[
+            NexUpdateCard(updates: updates),
+            const SizedBox(height: 18),
+          ],
           Row(
             children: [
               Expanded(

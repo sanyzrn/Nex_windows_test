@@ -207,9 +207,9 @@ class _ToolTile extends StatelessWidget {
             backgroundColor: active
                 ? c.primary.withValues(alpha: .09)
                 : c.surfaceContainerLowest,
-            padding: const EdgeInsets.all(18),
+            padding: EdgeInsets.zero,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(24),
             ),
             alignment: AlignmentDirectional.centerStart,
           ).copyWith(
@@ -217,67 +217,68 @@ class _ToolTile extends StatelessWidget {
               (states) => BorderSide(
                 color: states.contains(WidgetState.focused) || active
                     ? c.primary
-                    : c.outlineVariant,
+                    : c.outlineVariant.withValues(alpha: 0),
                 width: states.contains(WidgetState.focused) ? 2 : 1,
               ),
             ),
           ),
-      child: Row(
-        children: [
-          Container(
-            width: 42,
-            height: 42,
-            decoration: BoxDecoration(
-              color: accent.withValues(alpha: .16),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Center(
-              child: _ToolIcon(controller: controller, id: id, color: accent),
-            ),
-          ),
-          const SizedBox(width: 11),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
+      child: NexSoftCard(
+        accent: accent,
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
               children: [
-                Text(
-                  utilityLabelForText(context, ToolInfo.of(id).name),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: accent.withValues(alpha: .15),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Center(
+                    child: _ToolIcon(
+                      controller: controller,
+                      id: id,
+                      color: accent,
+                    ),
                   ),
                 ),
-                const SizedBox(height: 3),
-                Text(
-                  description,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 12,
-                    height: 1.4,
-                    color: c.onSurfaceVariant,
+                const Spacer(),
+                if (id == 'awake' && controller.awakeBusy)
+                  const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                else
+                  Icon(
+                    active
+                        ? Icons.check_circle_rounded
+                        : Icons.arrow_forward_rounded,
+                    size: 18,
+                    color: active ? c.primary : c.onSurfaceVariant,
                   ),
-                ),
               ],
             ),
-          ),
-          const SizedBox(width: 6),
-          if (id == 'awake' && controller.awakeBusy)
-            const SizedBox(
-              width: 14,
-              height: 14,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            )
-          else
-            Icon(
-              active ? Icons.check_circle_outline : Icons.chevron_right_rounded,
-              size: 16,
-              color: active ? c.primary : c.onSurfaceVariant,
+            const SizedBox(height: 20),
+            Text(
+              utilityLabelForText(context, ToolInfo.of(id).name),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
             ),
-        ],
+            const SizedBox(height: 6),
+            Text(
+              description,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                height: 1.5,
+                color: c.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

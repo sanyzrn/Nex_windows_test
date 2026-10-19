@@ -2,7 +2,7 @@
 [Setup]
 AppId={{48B6A24D-07D7-4DE8-8D6C-801190DF6A42}
 AppName=Nex
-AppVersion=0.20.0+13
+AppVersion=0.21.0+14
 AppPublisher=Nex
 DefaultDirName={localappdata}\Programs\Nex
 DefaultGroupName=Nex
@@ -22,13 +22,13 @@ LicenseFile=..\LICENSE
 SetupIconFile=..\windows\runner\resources\app_icon.ico
 UninstallDisplayIcon={app}\nex_desktop.exe
 OutputDir=..\build\installer\output
-OutputBaseFilename=Nex-Windows-Setup-0.20.0-x64
+OutputBaseFilename=Nex-Windows-Setup-0.21.0-x64
 Compression=lzma2
 SolidCompression=yes
 AppMutex=Local\NexDesktopSingleton
 CloseApplications=no
 RestartApplications=no
-VersionInfoVersion=0.20.0.13
+VersionInfoVersion=0.21.0.14
 VersionInfoDescription=Nex Windows installer
 
 [Languages]
@@ -67,7 +67,9 @@ procedure CurStepChanged(CurStep: TSetupStep);
 var
   Locale: String;
 begin
-  if CurStep = ssPostInstall then
+  // An in-app update preserves the user's saved language, including System.
+  if (CurStep = ssPostInstall) and
+    (ExpandConstant('{param:NEXUPDATE|0}') <> '1') then
   begin
     if ActiveLanguage = 'english' then Locale := 'en' else Locale := 'fa';
     SaveStringToFile(ExpandConstant('{app}\install-language.txt'),

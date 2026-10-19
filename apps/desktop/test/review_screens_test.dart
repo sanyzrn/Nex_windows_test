@@ -11,6 +11,11 @@
 library;
 
 import 'dart:io';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:nex_desktop/nex/intelligence/controller.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -67,7 +72,29 @@ class _Store with _StoreCleanup {
 
 mixin _StoreCleanup {}
 
+class _PreviewSecrets implements AiSecrets {
+  @override
+  Future<String?> read(String key) async =>
+      key.endsWith('.custom') ? 'preview-only' : null;
+  @override
+  Future<void> write(String key, String value) async {}
+  @override
+  Future<void> delete(String key) async {}
+}
+
 Future<_Store> _openStore(String name, {int count = 0}) async {
+  SharedPreferences.setMockInitialValues({
+    if (name.startsWith('intelligence_configured')) ...{
+      'ai.enabled': true,
+      'ai.cloud_opt_in': true,
+      'ai.provider': 'custom',
+      'ai.baseUrl.custom': 'https://example.test/v1/chat/completions',
+      'ai.model.custom': 'gemini-3.5-flash-lite',
+      'ai.images.custom': 'enabled',
+      'ai.audio.custom': 'enabled',
+      'ai.embeddings.custom': 'enabled',
+    },
+  });
   final root = await Directory.systemTemp.createTemp('nex-review-$name-');
   final db = NexDatabase.open('${root.path}/nex.sqlite');
   final repo = SqliteNoteRepository(db);
@@ -84,7 +111,26 @@ Future<_Store> _openStore(String name, {int count = 0}) async {
     repo.attachTag(noteId: 'review-$i', tagId: tag.id);
   }
   db.close();
-  final features = NexFeatures(await DesktopStore.open(root.path, name));
+  final features = NexFeatures(
+    await DesktopStore.open(root.path, name),
+    intelligenceFactory: (store) => DesktopIntelligence(
+      store,
+      secrets: _PreviewSecrets(),
+      clientFactory: () => MockClient(
+        (_) async => http.Response(
+          jsonEncode({
+            'choices': [
+              {
+                'message': {'content': 'A clear plan'},
+                'finish_reason': 'stop',
+              },
+            ],
+          }),
+          200,
+        ),
+      ),
+    ),
+  );
   return _Store(features, root);
 }
 
@@ -114,6 +160,42 @@ class _Shot {
 }
 
 const _matrix = <_Shot>[
+  _Shot(
+    'intelligence_configured_1200_light_en',
+    mode: 'window',
+    size: Size(1200, 1100),
+    target: 'aiSettings',
+  ),
+  _Shot(
+    'intelligence_configured_1200_dark_fa',
+    mode: 'window',
+    size: Size(1200, 1100),
+    target: 'aiSettings',
+    theme: 'dark',
+    locale: 'fa',
+  ),
+  _Shot(
+    'provider_1200_light_en',
+    mode: 'window',
+    size: Size(1200, 1000),
+    target: 'providerSettings',
+  ),
+  _Shot(
+    'provider_1200_dark_fa',
+    mode: 'window',
+    size: Size(1200, 1000),
+    theme: 'dark',
+    locale: 'fa',
+    target: 'providerSettings',
+  ),
+  _Shot(
+    'appearance_700_light_fa_scale2',
+    mode: 'window',
+    size: Size(700, 1100),
+    locale: 'fa',
+    textScale: 2,
+    target: 'appearance',
+  ),
   _Shot(
     'intelligence_1200_light_en',
     mode: 'window',
@@ -406,7 +488,7 @@ Future<void> _go(WidgetTester t, PanelController c, _Shot spec) async {
   switch (spec.target) {
     case 'assistant':
       c.selectWindowSection('assistant');
-    case 'aiSettings':
+    case 'aiSettings' || 'providerSettings':
       c.selectWindowSection('settings');
     case 'timeline' || 'reader':
       window ? c.selectWindowSection('library') : c.openWidget('timeline');
@@ -418,27 +500,39 @@ Future<void> _go(WidgetTester t, PanelController c, _Shot spec) async {
       c.openWidget(spec.target == 'palette' ? 'note' : spec.target);
   }
   await _frames(t, 90);
-  if (spec.target == 'aiSettings') {
-    final fa = spec.locale == 'fa';
-    await t.tap(find.text(fa ? 'هوش نکس' : 'Intelligence').last);
+  if (spec.target == 'aiSettings' || spec.target == 'providerSettings') {
+    final open = find.byKey(const ValueKey('settings-open-6'));
+    await t.ensureVisible(open);
+    await t.tap(open);
+    await _frames(t, 60);
+    if (spec.target == 'providerSettings') {
+      final provider = find.byKey(const ValueKey('ai-provider-open'));
+      await t.ensureVisible(provider);
+      await t.tap(provider);
+      await _frames(t, 60);
+      final custom = find.byKey(const ValueKey('provider-choice-custom'));
+      await t.ensureVisible(custom);
+      await t.tap(custom);
+      await _frames(t, 60);
+    }
+  }
+  if (spec.target == 'settings' && !window) {
+    await t.tap(find.byKey(const ValueKey('settings-open-0')));
     await _frames(t, 60);
   }
   if (spec.target == 'toolsSettings') {
     final l = AppLocalizations.of(t.element(find.byType(Scaffold)))!;
-    if (!window) {
-      await t.tap(find.byKey(const ValueKey('settings-category')));
-      await _frames(t, 45);
-    }
+    await t.ensureVisible(find.text(l.settingsTools).last);
     await t.tap(find.text(l.settingsTools).last);
     await _frames(t, 90);
   }
   if (spec.target == 'appearance' || spec.target == 'backup') {
     final l = AppLocalizations.of(t.element(find.byType(Scaffold)))!;
-    await t.tap(
-      find.text(
-        spec.target == 'appearance' ? l.settingsAppearance : l.settingsBackup,
-      ),
+    final target = find.text(
+      spec.target == 'appearance' ? l.settingsAppearance : l.settingsBackup,
     );
+    await t.ensureVisible(target);
+    await t.tap(target);
     await t.pumpAndSettle();
   }
   if (spec.target == 'palette') {

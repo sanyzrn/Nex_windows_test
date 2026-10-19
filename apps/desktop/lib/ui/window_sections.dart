@@ -18,7 +18,7 @@ class _SettingsSection extends StatelessWidget {
         // Narrower than the old 960: a settings row's control sits at the
         // far end of its line, and past ~760px the label and its control
         // stopped reading as one thing.
-        constraints: const BoxConstraints(maxWidth: 760),
+        constraints: const BoxConstraints(maxWidth: 1040),
         child: const NexSettingsView(windowLayout: true),
       ),
     ),
