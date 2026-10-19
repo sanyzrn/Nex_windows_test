@@ -1,6 +1,11 @@
 /// Nex shared Flutter UI package.
 library;
 
+export 'widgets/nex_app_bar.dart';
+export 'widgets/nex_alert_dialog.dart';
+export 'widgets/nex_surface.dart';
+export 'widgets/nex_popup_menu.dart';
+
 export 'tokens/nex_accent_palette.dart';
 export 'tokens/nex_appearance.dart';
 export 'tokens/nex_contrast.dart';
@@ -13,6 +18,7 @@ export 'widgets/nex_color_wheel.dart';
 export 'widgets/nex_empty_state.dart';
 export 'widgets/nex_navigation_dock.dart';
 export 'widgets/nex_markdown.dart';
+export 'widgets/nex_link_text.dart';
 export 'widgets/nex_selection_menu.dart';
 export 'widgets/nex_selectable_lines.dart';
 export 'widgets/nex_edge_glow.dart';
@@ -30,5 +36,8 @@ export 'widgets/note_card.dart';
 export 'widgets/swipeable_note_card.dart';
 export 'widgets/tag_filter_row.dart';
 
+export 'widgets/nex_reveal.dart';
+export 'widgets/nex_press.dart';
+export 'widgets/nex_animated_size.dart';
 export 'tokens/nex_theme_presets.dart';
 export 'widgets/nex_workspace.dart';

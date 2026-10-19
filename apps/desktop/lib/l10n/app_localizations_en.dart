@@ -765,6 +765,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get panelMode => 'Edge panel';
 
   @override
+  String get windowRemember => 'Remember window size and position';
+
+  @override
+  String get windowRememberHint =>
+      'Off: Nex opens as a compact card in the bottom-right corner, always at the same size.';
+
+  @override
   String get modeDescription =>
       'The desktop window is the main experience; the edge panel stays available for quick capture. Both share the same notes, media and settings.';
 
@@ -1117,6 +1124,35 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reminderFutureRequired => 'Choose a time in the future.';
+
+  @override
+  String get notificationSettings => 'Notification settings';
+
+  @override
+  String get testNotification => 'Test notifications';
+
+  @override
+  String get testNotificationHint =>
+      'Shows one notification now and a second one 15 seconds later, so you can check both ways Nex delivers reminders.';
+
+  @override
+  String get testNotificationRun => 'Send test';
+
+  @override
+  String get testNotificationSent =>
+      'Test sent. You should see one notification now and another in 15 seconds.';
+
+  @override
+  String testNotificationFailed(String detail) {
+    return 'Windows did not accept the notification$detail. Check Settings > System > Notifications and Focus assist.';
+  }
+
+  @override
+  String get testNotificationBody => 'This is a test notification from Nex.';
+
+  @override
+  String get testNotificationLater =>
+      'The scheduled test notification arrived.';
 
   @override
   String get reminderDeliveryFailed =>

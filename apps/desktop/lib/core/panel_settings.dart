@@ -41,6 +41,10 @@ class Settings {
   /// persisted so the window reopens where the user left it.
   Map<String, dynamic>? windowBounds;
   bool windowMaximized = false;
+
+  /// False (default): the window opens as the compact card in the corner,
+  /// always the same size. True: it reopens at the frame it was left in.
+  bool windowRemember = false;
   List<String> recentEmoji = [];
   List<Color> recentColors = [];
   String edge = 'right';
@@ -93,6 +97,7 @@ class Settings {
     'cardDensity': cardDensity,
     'windowBounds': windowBounds,
     'windowMaximized': windowMaximized,
+    'windowRemember': windowRemember,
     'recentEmoji': recentEmoji,
     'recentColors': recentColors.map(_hex).toList(),
     'edge': edge,
@@ -145,6 +150,7 @@ class Settings {
       };
     }
     s.windowMaximized = j['windowMaximized'] as bool? ?? false;
+    s.windowRemember = j['windowRemember'] as bool? ?? false;
     s.recentEmoji = ((j['recentEmoji'] as List?) ?? [])
         .map((e) => e.toString())
         .toList();

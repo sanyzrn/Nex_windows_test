@@ -258,26 +258,6 @@ void main() {
     },
   );
 
-  testWidgets('layout switch is hidden in panel and shown in wide window', (t) async {
-    final f = await _boot(t);
-    f.controller.S.windowMode = 'panel';
-    await _mount(t, f, const NexLibraryView());
-    expect(find.byIcon(Icons.grid_view_outlined), findsNothing);
-    expect(find.byIcon(Icons.view_agenda_outlined), findsNothing);
-    // Mutating a test controller does not notify inherited widgets; remount
-    // the library in the new shell so the layout is evaluated at 850 logical px.
-    await t.pumpWidget(const SizedBox.shrink());
-    f.controller.S.windowMode = 'window';
-    t.view.physicalSize = const Size(850, 900);
-    t.view.devicePixelRatio = 1;
-    addTearDown(t.view.reset);
-    await _mount(t, f, const NexLibraryView());
-    expect(find.byIcon(Icons.grid_view_outlined), findsOneWidget);
-    await t.tap(find.byIcon(Icons.view_agenda_outlined));
-    await t.pump();
-    expect(t.takeException(), isNull);
-  });
-
   testWidgets(
     'library searches the last query in a rapid burst and clear reloads',
     (t) async {

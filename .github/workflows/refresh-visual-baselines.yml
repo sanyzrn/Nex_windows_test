@@ -1,0 +1,55 @@
+name: Refresh visual baselines
+
+# On request only: a push to a windows/** branch that changes
+# .github/refresh-baselines-request.txt (a new workflow file cannot be
+# dispatched by hand until it exists on the default branch). Regenerates the Windows golden and review screenshots on a
+# Windows runner and commits them to the branch it was started on, so a
+# reviewed visual change does not need the candidate artifact to be downloaded
+# and committed by hand. Never runs on main/master; the comparison gate in
+# desktop.yml stays the only thing that decides whether a build passes.
+on:
+  push:
+    branches: ['windows/**']
+    paths: ['.github/refresh-baselines-request.txt']
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh-visual-baselines-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    if: github.ref_name != 'main' && github.ref_name != 'master'
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          channel: 'stable'
+          flutter-version: '3.44.8'
+          cache: true
+
+      - name: Install dependencies
+        working-directory: apps/desktop
+        run: flutter pub get --enforce-lockfile
+
+      - name: Regenerate golden and review screenshots
+        working-directory: apps/desktop
+        run: flutter test --no-pub --tags "golden || review" --update-goldens
+
+      - name: Commit changed baselines
+        shell: pwsh
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps/desktop/test/goldens apps/desktop/test/review_goldens
+          git diff --cached --quiet
+          if ($LASTEXITCODE -eq 0) { Write-Host "No baseline changes."; exit 0 }
+          git commit -m "Refresh Windows visual baselines"
+          git push origin "HEAD:${{ github.ref_name }}"

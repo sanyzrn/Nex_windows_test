@@ -108,6 +108,43 @@ void main() {
     );
   });
 
+  test('when nothing stands out, only the plainly close few come back', () {
+    // A library like a real one: every note leans the same way, and none
+    // of them is about the query more than the others.
+    final rnd = Random(3);
+    const dims = 32;
+    for (var i = 0; i < 40; i++) {
+      addNote('n$i');
+      repo.setEmbedding('n$i', [
+        for (var d = 0; d < dims; d++)
+          (d == 0 ? 1.0 : 0.0) + (rnd.nextDouble() * 2 - 1) * 0.3,
+      ]);
+    }
+    final query = [
+      for (var d = 0; d < dims; d++) d == 0 ? 0.8 : (d == 1 ? 0.6 : 0.0),
+    ];
+    final found = repo.nearestEmbeddings(
+      query,
+      limit: 20,
+      minScore: 0.5,
+      standout: true,
+    );
+    expect(found, isNotEmpty, reason: 'meaning search does not go silent');
+    expect(found.length, lessThanOrEqualTo(3));
+    for (final hit in found) {
+      expect(hit.score, greaterThanOrEqualTo(0.6));
+    }
+    // A query nothing is close to still finds nothing.
+    expect(
+      repo.nearestEmbeddings(
+        [for (var d = 0; d < dims; d++) d == 2 ? 1.0 : 0.0],
+        minScore: 0.5,
+        standout: true,
+      ),
+      isEmpty,
+    );
+  });
+
   test('re-embedding and edits keep the index in step', () {
     addNote('a');
     addNote('b');
@@ -203,5 +240,66 @@ void main() {
       wanted += expected.length;
     }
     expect(found / wanted, greaterThanOrEqualTo(0.95));
+  });
+
+  group('standing out', () {
+    // A library shaped like the owner's (1.99.81): every note shares one
+    // strong direction — the language, the app, the length — thirty notes
+    // each lean towards a subject of their own, and five short, generic
+    // ones are almost nothing but the shared direction.
+    const dims = 64;
+    final random = Random(7);
+    List<double> vector(Map<int, double> parts, {double noise = 0.05}) => [
+      for (var i = 0; i < dims; i++)
+        (parts[i] ?? 0) + (random.nextDouble() - 0.5) * 2 * noise,
+    ];
+    Float32List unit(List<double> values) => VectorCodec.unit(values)!;
+
+    late VectorIndex index;
+    setUp(() {
+      index = VectorIndex(dims);
+      for (var k = 1; k <= 30; k++) {
+        final code = VectorCodec.encode(vector({0: 0.7, k: 0.7}))!;
+        index.put('topic$k', code.q8, code.scale);
+      }
+      for (var h = 0; h < 5; h++) {
+        final code = VectorCodec.encode(vector({0: 0.97}))!;
+        index.put('generic$h', code.q8, code.scale);
+      }
+    });
+
+    test('plain similarity lists the generic notes for anything', () {
+      final unrelated = unit(vector({0: 0.8, 50: 0.6}, noise: 0));
+      final plain = index.nearest(unrelated, 5).map((hit) => hit.id);
+      expect(plain.where((id) => id.startsWith('generic')), hasLength(5));
+    });
+
+    test('a related query finds its note, and nothing generic', () {
+      final query = unit(vector({0: 0.75, 3: 0.6}, noise: 0));
+      final found = index.standout(query, 10).map((hit) => hit.id).toList();
+      expect(found.first, 'topic3');
+      expect(found.where((id) => id.startsWith('generic')), isEmpty);
+      expect(found.length, lessThanOrEqualTo(2));
+    });
+
+    test('an unrelated query finds nothing at all', () {
+      final unrelated = unit(vector({0: 0.8, 50: 0.6}, noise: 0));
+      expect(index.standout(unrelated, 10), isEmpty);
+    });
+
+    test('a library too small to measure answers nothing here', () {
+      final small = VectorIndex(dims);
+      final code = VectorCodec.encode(vector({0: 0.7, 1: 0.7}))!;
+      small.put('only', code.q8, code.scale);
+      expect(small.standout(unit(vector({0: 0.7, 1: 0.7})), 5), isEmpty);
+    });
+
+    test('adding a note moves the centre with it', () {
+      final query = unit(vector({0: 0.75, 31: 0.6}, noise: 0));
+      expect(index.standout(query, 10), isEmpty);
+      final code = VectorCodec.encode(vector({0: 0.7, 31: 0.7}))!;
+      index.put('topic31', code.q8, code.scale);
+      expect(index.standout(query, 10).first.id, 'topic31');
+    });
   });
 }

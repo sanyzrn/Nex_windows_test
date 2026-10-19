@@ -21,7 +21,6 @@ class _FilterBar extends StatelessWidget {
     required this.onThreadChanged,
     required this.onTrashToggled,
     required this.onClearAll,
-    required this.onShortcutsTap,
   });
 
   final NoteType? type;
@@ -35,7 +34,6 @@ class _FilterBar extends StatelessWidget {
   final ValueChanged<String?> onThreadChanged;
   final VoidCallback onTrashToggled;
   final VoidCallback onClearAll;
-  final VoidCallback onShortcutsTap;
 
   @override
   Widget build(BuildContext context) {
@@ -43,161 +41,157 @@ class _FilterBar extends StatelessWidget {
     final hasActiveFilter =
         type != null || tag != null || thread != null || trash;
 
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      child: Row(
-        children: [
-          // "All" filter pill
-          _FilterPill(
-            label: l.filterAll,
-            icon: Icons.all_inbox_rounded,
-            selected: !hasActiveFilter,
-            onTap: onClearAll,
-          ),
-          const SizedBox(width: 6),
-          // Type filter dropdown menu
-          PopupMenuButton<String>(
-            key: const ValueKey('library-type-filter'),
-            tooltip: l.type,
-            initialValue: type?.name ?? '__all__',
-            onSelected: (value) => onTypeChanged(
-              value == '__all__' ? null : NoteType.values.byName(value),
+    // Full width: in a Column a bare scroll view shrinks to its chips and is
+    // centred, which put the pills mid-pane in a wide window.
+    return SizedBox(
+      width: double.infinity,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+        child: Row(
+          children: [
+            // "All" filter pill
+            _FilterPill(
+              label: l.filterAll,
+              icon: Icons.all_inbox_rounded,
+              selected: !hasActiveFilter,
+              onTap: onClearAll,
             ),
-            itemBuilder: (context) => [
-              PopupMenuItem<String>(
-                value: '__all__',
-                child: Text(l.filterAllTypes),
-              ),
-              ...NoteType.values.map(
-                (v) => PopupMenuItem<String>(
-                  value: v.name,
-                  child: Row(
-                    children: [
-                      Icon(nexNoteTypeIcon(v.name), size: 18),
-                      const SizedBox(width: 8),
-                      Text(noteTypeLabel(l, v)),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-            child: _FilterPill(
-              label: type == null ? l.type : noteTypeLabel(l, type!),
-              icon: type == null
-                  ? Icons.filter_list_rounded
-                  : nexNoteTypeIcon(type!.name),
-              selected: type != null,
-              onClear: type != null ? () => onTypeChanged(null) : null,
-            ),
-          ),
-          if (tags.isNotEmpty) ...[
             const SizedBox(width: 6),
+            // Type filter dropdown menu
             PopupMenuButton<String>(
-              tooltip: l.tags,
-              initialValue: tag ?? '__all__',
-              onSelected: (value) =>
-                  onTagChanged(value == '__all__' ? null : value),
+              key: const ValueKey('library-type-filter'),
+              tooltip: l.type,
+              initialValue: type?.name ?? '__all__',
+              onSelected: (value) => onTypeChanged(
+                value == '__all__' ? null : NoteType.values.byName(value),
+              ),
               itemBuilder: (context) => [
                 PopupMenuItem<String>(
                   value: '__all__',
-                  child: Text(l.filterAllTags),
+                  child: Text(l.filterAllTypes),
                 ),
-                ...tags.map(
-                  (t) => PopupMenuItem<String>(
-                    value: t.id,
+                ...NoteType.values.map(
+                  (v) => PopupMenuItem<String>(
+                    value: v.name,
                     child: Row(
                       children: [
-                        if (t.color != null)
-                          Container(
-                            width: 8,
-                            height: 8,
-                            margin: const EdgeInsetsDirectional.only(end: 8),
-                            decoration: BoxDecoration(
-                              color: nexParseTagColor(t.color),
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                        Text(t.name),
+                        Icon(nexNoteTypeIcon(v.name), size: 18),
+                        const SizedBox(width: 8),
+                        Text(noteTypeLabel(l, v)),
                       ],
                     ),
                   ),
                 ),
               ],
               child: _FilterPill(
-                label: tag == null
-                    ? l.tags
-                    : (tags.where((t) => t.id == tag).firstOrNull?.name ??
-                          l.tags),
-                icon: Icons.tag_rounded,
-                selected: tag != null,
-                onClear: tag != null ? () => onTagChanged(null) : null,
+                label: type == null ? l.type : noteTypeLabel(l, type!),
+                icon: type == null
+                    ? Icons.filter_list_rounded
+                    : nexNoteTypeIcon(type!.name),
+                selected: type != null,
+                onClear: type != null ? () => onTypeChanged(null) : null,
               ),
             ),
-          ],
-          if (threads.isNotEmpty) ...[
-            const SizedBox(width: 6),
-            PopupMenuButton<String>(
-              tooltip: l.threads,
-              initialValue: thread ?? '__all__',
-              onSelected: (value) =>
-                  onThreadChanged(value == '__all__' ? null : value),
-              itemBuilder: (context) => [
-                PopupMenuItem<String>(
-                  value: '__all__',
-                  child: Text(l.filterAllThreads),
+            if (tags.isNotEmpty) ...[
+              const SizedBox(width: 6),
+              PopupMenuButton<String>(
+                tooltip: l.tags,
+                initialValue: tag ?? '__all__',
+                onSelected: (value) =>
+                    onTagChanged(value == '__all__' ? null : value),
+                itemBuilder: (context) => [
+                  PopupMenuItem<String>(
+                    value: '__all__',
+                    child: Text(l.filterAllTags),
+                  ),
+                  ...tags.map(
+                    (t) => PopupMenuItem<String>(
+                      value: t.id,
+                      child: Row(
+                        children: [
+                          if (t.color != null)
+                            Container(
+                              width: 8,
+                              height: 8,
+                              margin: const EdgeInsetsDirectional.only(end: 8),
+                              decoration: BoxDecoration(
+                                color: nexParseTagColor(t.color),
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          Text(t.name),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+                child: _FilterPill(
+                  label: tag == null
+                      ? l.tags
+                      : (tags.where((t) => t.id == tag).firstOrNull?.name ??
+                            l.tags),
+                  icon: Icons.tag_rounded,
+                  selected: tag != null,
+                  onClear: tag != null ? () => onTagChanged(null) : null,
                 ),
-                ...threads.map(
-                  (th) =>
-                      PopupMenuItem<String>(value: th.id, child: Text(th.name)),
-                ),
-              ],
-              child: _FilterPill(
-                label: thread == null
-                    ? l.threads
-                    : (threads
-                              .where((th) => th.id == thread)
-                              .firstOrNull
-                              ?.name ??
-                          l.threads),
-                icon: Icons.forum_outlined,
-                selected: thread != null,
-                onClear: thread != null ? () => onThreadChanged(null) : null,
               ),
-            ),
-          ],
-          const SizedBox(width: 6),
-          // Trash toggle
-          _FilterPill(
-            label: l.trash,
-            icon: trash
-                ? Icons.restore_from_trash_outlined
-                : Icons.delete_outline_rounded,
-            selected: trash,
-            danger: trash,
-            onTap: onTrashToggled,
-          ),
-          if (hasActiveFilter) ...[
+            ],
+            if (threads.isNotEmpty) ...[
+              const SizedBox(width: 6),
+              PopupMenuButton<String>(
+                tooltip: l.threads,
+                initialValue: thread ?? '__all__',
+                onSelected: (value) =>
+                    onThreadChanged(value == '__all__' ? null : value),
+                itemBuilder: (context) => [
+                  PopupMenuItem<String>(
+                    value: '__all__',
+                    child: Text(l.filterAllThreads),
+                  ),
+                  ...threads.map(
+                    (th) => PopupMenuItem<String>(
+                      value: th.id,
+                      child: Text(th.name),
+                    ),
+                  ),
+                ],
+                child: _FilterPill(
+                  label: thread == null
+                      ? l.threads
+                      : (threads
+                                .where((th) => th.id == thread)
+                                .firstOrNull
+                                ?.name ??
+                            l.threads),
+                  icon: Icons.forum_outlined,
+                  selected: thread != null,
+                  onClear: thread != null ? () => onThreadChanged(null) : null,
+                ),
+              ),
+            ],
             const SizedBox(width: 6),
+            // Trash toggle
             _FilterPill(
-              label: l.clear,
-              icon: Icons.filter_alt_off_rounded,
-              selected: false,
-              onTap: onClearAll,
+              label: l.trash,
+              icon: trash
+                  ? Icons.restore_from_trash_outlined
+                  : Icons.delete_outline_rounded,
+              selected: trash,
+              danger: trash,
+              onTap: onTrashToggled,
             ),
+            if (hasActiveFilter) ...[
+              const SizedBox(width: 6),
+              _FilterPill(
+                label: l.clear,
+                icon: Icons.filter_alt_off_rounded,
+                selected: false,
+                onTap: onClearAll,
+              ),
+            ],
           ],
-          const SizedBox(width: 6),
-          IconButton(
-            tooltip: '${l.keyboardShortcuts} (F1)',
-            icon: const Icon(Icons.keyboard_outlined, size: 18),
-            onPressed: onShortcutsTap,
-            style: IconButton.styleFrom(
-              minimumSize: const Size(32, 32),
-              maximumSize: const Size(32, 32),
-              padding: EdgeInsets.zero,
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

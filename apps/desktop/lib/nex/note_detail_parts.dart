@@ -195,15 +195,18 @@ class NoteActionBar extends StatelessWidget {
           onPressed: onOpenMedia,
         ),
     ];
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: [
-          for (var i = 0; i < cells.length; i++) ...[
-            if (i > 0) const SizedBox(width: 8),
-            cells[i],
-          ],
-        ],
+    // One tonal dock: every action gets an equal share of the width, so none
+    // is ever clipped and the row reads the same at 440 px and at 1200.
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerHigh,
+        borderRadius: BorderRadius.circular(NexRadius.lg),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(4),
+        child: Row(
+          children: [for (final cell in cells) Expanded(child: cell)],
+        ),
       ),
     );
   }
@@ -228,25 +231,36 @@ class _ToolAction extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final tone = danger ? scheme.error : (accent ?? scheme.onSurfaceVariant);
-    return OutlinedButton.icon(
-      onPressed: onPressed,
-      icon: Icon(icon, size: 16, color: onPressed == null ? null : tone),
-      label: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis),
-      style: OutlinedButton.styleFrom(
-        foregroundColor: onPressed == null
-            ? scheme.onSurface.withValues(alpha: .38)
-            : (danger ? scheme.error : scheme.onSurface),
-        minimumSize: const Size(0, 40),
-        padding: const EdgeInsets.symmetric(horizontal: 10),
-        side: BorderSide(
-          color: danger
-              ? scheme.error.withValues(alpha: .45)
-              : (accent ?? scheme.outlineVariant),
-        ),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        textStyle: Theme.of(context).textTheme.labelLarge?.copyWith(
-          fontSize: 12.5,
-          fontWeight: FontWeight.w600,
+    final disabled = onPressed == null;
+    final color = disabled ? scheme.onSurface.withValues(alpha: .38) : tone;
+    return Semantics(
+      button: true,
+      enabled: !disabled,
+      label: label,
+      excludeSemantics: true,
+      child: InkWell(
+        onTap: onPressed,
+        borderRadius: BorderRadius.circular(NexRadius.md),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 20, color: color),
+              const SizedBox(height: 3),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: color,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

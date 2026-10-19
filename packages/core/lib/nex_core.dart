@@ -15,13 +15,19 @@
 library;
 
 // Domain models.
+export 'cycle/cycle_models.dart';
+export 'cycle/cycle_mode.dart';
+export 'cycle/cycle_patterns.dart';
+export 'cycle/cycle_predictor.dart';
 export 'models/checklist.dart';
 export 'models/commitment.dart';
 export 'models/link_url.dart';
 export 'models/memory_record.dart';
 export 'models/note.dart';
+export 'models/note_attachment.dart';
 export 'models/note_embedding.dart';
 export 'models/note_thread.dart';
+export 'models/scheduled_note.dart';
 export 'search/fused_ranking.dart';
 export 'search/search_fold.dart';
 export 'models/search_filters.dart';
@@ -34,6 +40,7 @@ export 'import/note_import.dart';
 // What a file note is, for whoever has to show one.
 export 'files/delimited_text.dart';
 export 'files/file_kind.dart';
+export 'files/file_names.dart';
 
 // The user's own writing, with formatting in it.
 export 'text/markdown_formatting.dart';
@@ -57,10 +64,12 @@ export 'ai/chat_adapter_binding.dart';
 export 'ai/chat_scope_policy.dart';
 export 'ai/entitlement.dart';
 export 'ai/enrichment_service.dart';
+export 'ai/note_embedder.dart';
 export 'ai/import/context_import_draft.dart';
 export 'ai/on_device_ai_adapter.dart';
 export 'ai/recap_brief.dart';
 export 'ai/recap_source.dart';
+export 'ai/writing_portrait.dart';
 export 'ai/rewrite_style.dart';
 export 'ai/tools/nex_tool_registry.dart';
 export 'ai/tools/tool_call.dart';
@@ -71,9 +80,4 @@ export 'sync/field_aware_merger.dart';
 
 export 'models/calendar_date.dart';
 
-export 'models/note_attachment.dart';
-export 'models/scheduled_note.dart';
-export 'files/file_names.dart';
 export 'models/portable_preferences.dart';
-
-export 'ai/note_embedder.dart';

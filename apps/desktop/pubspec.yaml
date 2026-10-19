@@ -1,11 +1,11 @@
 name: nex_desktop
 description: "Nex for Windows desktop application."
 publish_to: "none"
-version: 0.21.1+15
+version: 0.22.0+16
 
 environment:
-  sdk: ^3.9.0
-  flutter: ">=3.35.0 <4.0.0"
+  sdk: ^3.12.0
+  flutter: ">=3.44.0 <4.0.0"
 
 # No WebView, no wrapper: the whole UI is real Flutter/Dart.
 dependencies:

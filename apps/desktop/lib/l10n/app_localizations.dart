@@ -1544,6 +1544,18 @@ abstract class AppLocalizations {
   /// **'Edge panel'**
   String get panelMode;
 
+  /// No description provided for @windowRemember.
+  ///
+  /// In en, this message translates to:
+  /// **'Remember window size and position'**
+  String get windowRemember;
+
+  /// No description provided for @windowRememberHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Off: Nex opens as a compact card in the bottom-right corner, always at the same size.'**
+  String get windowRememberHint;
+
   /// No description provided for @modeDescription.
   ///
   /// In en, this message translates to:
@@ -2209,6 +2221,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Choose a time in the future.'**
   String get reminderFutureRequired;
+
+  /// No description provided for @notificationSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification settings'**
+  String get notificationSettings;
+
+  /// No description provided for @testNotification.
+  ///
+  /// In en, this message translates to:
+  /// **'Test notifications'**
+  String get testNotification;
+
+  /// No description provided for @testNotificationHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Shows one notification now and a second one 15 seconds later, so you can check both ways Nex delivers reminders.'**
+  String get testNotificationHint;
+
+  /// No description provided for @testNotificationRun.
+  ///
+  /// In en, this message translates to:
+  /// **'Send test'**
+  String get testNotificationRun;
+
+  /// No description provided for @testNotificationSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Test sent. You should see one notification now and another in 15 seconds.'**
+  String get testNotificationSent;
+
+  /// No description provided for @testNotificationFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Windows did not accept the notification{detail}. Check Settings > System > Notifications and Focus assist.'**
+  String testNotificationFailed(String detail);
+
+  /// No description provided for @testNotificationBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This is a test notification from Nex.'**
+  String get testNotificationBody;
+
+  /// No description provided for @testNotificationLater.
+  ///
+  /// In en, this message translates to:
+  /// **'The scheduled test notification arrived.'**
+  String get testNotificationLater;
 
   /// No description provided for @reminderDeliveryFailed.
   ///

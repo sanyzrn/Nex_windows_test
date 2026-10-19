@@ -38,9 +38,27 @@ final _textLinkPattern = RegExp(
   caseSensitive: false,
 );
 
+/// Persian and Arabic letters, which no host a person types contains.
+final _arabicScript = RegExp(
+  r'[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF]',
+);
+
 Iterable<NexTextLink> nexTextLinks(String text) sync* {
   for (final match in _textLinkPattern.allMatches(text)) {
     var address = match.group(0)!;
+    // Persian written straight after an address, with no space between —
+    // "https://example.comسلام" — is the next word, not part of the domain.
+    // Only the host is cut there: a path in Persian, the way fa.wikipedia
+    // writes its articles, is still the address.
+    final hostStart = address.contains('://') ? address.indexOf('://') + 3 : 0;
+    var hostEnd = address.indexOf(RegExp(r'[/?#]'), hostStart);
+    if (hostEnd < 0) hostEnd = address.length;
+    final foreign = _arabicScript.firstMatch(
+      address.substring(hostStart, hostEnd),
+    );
+    if (foreign != null) {
+      address = address.substring(0, hostStart + foreign.start);
+    }
     while (address.isNotEmpty) {
       final last = address[address.length - 1];
       final opening = {')': '(', ']': '[', '}': '{'}[last];
@@ -109,4 +127,41 @@ String? urlHost(String? url) {
   final bare = normaliseUrl(text);
   if (bare != null) return (url: bare, words: null);
   return sharedLink(text);
+}
+
+/// The canonical watch address of a YouTube video, or null when [url] is not
+/// one.
+///
+/// Recognises what people actually save: `youtube.com/watch?v=`, the
+/// `youtu.be/` short link a share sheet produces, Shorts, live streams and
+/// embeds, on the `www.`, `m.` and `music.` hosts. A channel, a playlist or a
+/// search is not a video and answers null.
+///
+/// Canonical because the address is handed to a model that fetches it
+/// itself (2.1.7): one form it is known to accept, with tracking parameters
+/// such as `si=` and `t=` left behind.
+String? nexYouTubeWatchUrl(String? url) {
+  final normalised = url == null ? null : normaliseUrl(url);
+  final uri = normalised == null ? null : Uri.tryParse(normalised);
+  if (uri == null) return null;
+  final host = uri.host.toLowerCase();
+  final segments = uri.pathSegments.where((s) => s.isNotEmpty).toList();
+  String? id;
+  if (host == 'youtu.be') {
+    id = segments.firstOrNull;
+  } else if (const {
+    'youtube.com',
+    'www.youtube.com',
+    'm.youtube.com',
+    'music.youtube.com',
+  }.contains(host)) {
+    if (segments.firstOrNull == 'watch') {
+      id = uri.queryParameters['v'];
+    } else if (segments.length >= 2 &&
+        const {'shorts', 'live', 'embed'}.contains(segments.first)) {
+      id = segments[1];
+    }
+  }
+  if (id == null || !RegExp(r'^[A-Za-z0-9_-]{11}$').hasMatch(id)) return null;
+  return 'https://www.youtube.com/watch?v=$id';
 }

@@ -23,10 +23,26 @@ import 'window_caption.dart';
 import '../updates/widgets.dart';
 
 part 'window_nav_rail.dart';
+part 'window_slim_rail.dart';
 part 'window_section.dart';
 part 'window_sections.dart';
 part 'window_tools.dart';
 part 'record_stop_button.dart';
+
+/// Window width (logical px) from which the rail grows labels beside its
+/// icons. Below it — the compact card Nex opens as — the rail is the slim
+/// icon-over-label column.
+const double kWindowWideAt = 960;
+
+/// The surface behind the content card: the surface tone washed with the
+/// accent, so every theme gets a window of its own colour rather than a
+/// neutral grey.
+Color nexWindowTint(ColorScheme scheme) => Color.alphaBlend(
+  scheme.primary.withValues(
+    alpha: scheme.brightness == Brightness.light ? .08 : .12,
+  ),
+  scheme.surfaceContainerLow,
+);
 
 /// The full desktop window shell — the app's main mode. A navigation rail on
 /// the leading edge switches between Capture, Library, Tools and Settings;
@@ -67,6 +83,7 @@ class _NexWindowShellState extends State<NexWindowShell> {
     final c = widget.controller;
     final scheme = Theme.of(context).colorScheme;
     Widget buildSurface(BuildContext context, Widget? child) {
+      final wide = MediaQuery.sizeOf(context).width >= kWindowWideAt;
       final surface = Column(
         children: [
           NexWindowCaption(controller: c),
@@ -74,13 +91,32 @@ class _NexWindowShellState extends State<NexWindowShell> {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _WindowNavRail(controller: c, features: widget.features),
+                wide
+                    ? _WindowNavRail(controller: c, features: widget.features)
+                    : _SlimRail(controller: c, features: widget.features),
                 Expanded(
-                  child: Column(
-                    children: [
-                      NexUpdateBanner(updates: widget.features?.updates),
-                      Expanded(child: _WindowSection(controller: c)),
-                    ],
+                  child: Padding(
+                    padding: const EdgeInsetsDirectional.only(
+                      end: NexSpacing.sm + 2,
+                      bottom: NexSpacing.sm + 2,
+                    ),
+                    child: Material(
+                      key: const ValueKey('window-card'),
+                      color: scheme.surface,
+                      clipBehavior: Clip.antiAlias,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(NexRadius.xl),
+                        side: BorderSide(
+                          color: scheme.outlineVariant.withValues(alpha: .5),
+                        ),
+                      ),
+                      child: Column(
+                        children: [
+                          NexUpdateBanner(updates: widget.features?.updates),
+                          Expanded(child: _WindowSection(controller: c)),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -102,7 +138,7 @@ class _NexWindowShellState extends State<NexWindowShell> {
     return Scaffold(
       // transparentScaffold is for the floating edge panel; the desktop
       // window must paint an opaque surface.
-      backgroundColor: scheme.surface,
+      backgroundColor: nexWindowTint(scheme),
       body: LiquidScope(
         controller: c,
         palette: c.palette,

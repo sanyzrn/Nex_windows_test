@@ -84,12 +84,66 @@ void main() {
 
   testWidgets('sidebar collapses while writing stays available', (t) async {
     await _boot(t, width: 700);
-    // Compact icon rail includes its breathing room inside an 80px lane.
+    // The compact rail is a slim 76px lane of icon-over-label tiles.
     expect(
       t.getSize(find.byKey(const ValueKey('workspace-sidebar'))).width,
-      80,
+      76,
     );
     expect(find.byKey(const ValueKey('capture-field')), findsOneWidget);
+    expect(t.takeException(), isNull);
+  });
+
+  testWidgets('compact rail keeps every destination named and reachable', (
+    t,
+  ) async {
+    final c = await _boot(t, width: 440);
+    final l = AppLocalizations.of(t.element(find.byType(Scaffold)))!;
+    // Labels sit under the icons — nothing is an unlabelled glyph.
+    for (final label in [l.navCapture, l.library, l.navTools, l.settings]) {
+      expect(find.text(label), findsWidgets);
+    }
+    expect(find.byKey(const ValueKey('window-card')), findsOneWidget);
+
+    await t.tap(find.byKey(const ValueKey('rail-library')));
+    await t.pump();
+    expect(c.windowSection.value, 'library');
+    await t.tap(find.byKey(const ValueKey('rail-settings')));
+    await t.pump();
+    expect(c.windowSection.value, 'settings');
+    expect(t.takeException(), isNull);
+  });
+
+  testWidgets('compact capture page puts the editor first, actions as tiles', (
+    t,
+  ) async {
+    await _boot(t, width: 440);
+    final l = AppLocalizations.of(t.element(find.byType(Scaffold)))!;
+    // The hero line and counters give way to the editor.
+    expect(find.text(l.workspaceNotebook), findsNothing);
+    final field = find.byKey(const ValueKey('capture-field'));
+    expect(t.getTopLeft(field).dy, lessThan(220));
+    // All six capture actions stay reachable, three across.
+    final paste = t.getTopLeft(find.text(l.pasteText));
+    final image = t.getTopLeft(find.text(l.addImage));
+    final attach = t.getTopLeft(find.text(l.attach));
+    expect(image.dy, paste.dy);
+    expect(attach.dy, paste.dy);
+    expect(t.takeException(), isNull);
+  });
+
+  testWidgets('compact rail "More" holds the panel switch, theme, shortcuts', (
+    t,
+  ) async {
+    final c = await _boot(t, width: 440);
+    final l = AppLocalizations.of(t.element(find.byType(Scaffold)))!;
+    await t.tap(find.byKey(const ValueKey('rail-more')));
+    await t.pumpAndSettle();
+    expect(find.text(l.switchToPanel), findsOneWidget);
+    expect(find.text(l.keyboardShortcuts), findsOneWidget);
+    final wasLight = c.palette.isLight;
+    await t.tap(find.text(wasLight ? l.dark : l.light));
+    await t.pumpAndSettle();
+    expect(c.palette.isLight, !wasLight);
     expect(t.takeException(), isNull);
   });
 

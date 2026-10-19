@@ -14,6 +14,9 @@ import 'disclosure_log.dart';
 import 'local_budget.dart';
 import 'cloud_budget.dart';
 
+part 'capability_check.dart';
+part 'model_list.dart';
+
 /// The cloud services Nex can talk to.
 ///
 /// Three of them speak OpenAI's chat-completions shape and differ only in host,
@@ -100,6 +103,16 @@ extension AiProviderWire on AiProvider {
   /// endpoint needs.
   bool get needsBaseUrl => this == AiProvider.custom;
 
+  /// Whether an address may be typed in at all (2.1.8).
+  ///
+  /// Custom's is required: it is the whole endpoint. Gemini's is optional:
+  /// a reseller or gateway that serves Gemini's own format, given as its
+  /// address with or without `/v1beta`. Through Custom the same model is
+  /// reached in OpenAI's shape, which has no way to hand over a video by its
+  /// address — so a Gemini bought from a reseller could not watch one.
+  bool get takesAddress =>
+      this == AiProvider.custom || this == AiProvider.gemini;
+
   /// Whether the provider can read an image, so photo notes can be OCR'd.
   bool get readsImages => this != AiProvider.none;
 
@@ -126,6 +139,12 @@ bool anthropicTakesTemperature(String model) => !RegExp(
   r'^claude-(?:opus|sonnet|fable|mythos)-(?:[5-9]|4-[7-9])\b',
 ).hasMatch(model.trim());
 
+/// Whether a provider is taken to offer one capability.
+///
+/// [automatic] is the provider's known default. Since 2.1.8 [enabled] and
+/// [disabled] are written by the check that runs with Test (see
+/// `nexCheckCapabilities`), not chosen by hand; a choice made by hand in an
+/// older version is kept until the first check replaces it.
 enum AiCapabilityMode { automatic, enabled, disabled }
 
 /// Everything needed to reach a provider.
@@ -143,6 +162,9 @@ class AiProviderConfig {
     this.images = AiCapabilityMode.automatic,
     this.audio = AiCapabilityMode.automatic,
     this.embeddings = AiCapabilityMode.automatic,
+    this.video = AiCapabilityMode.automatic,
+    this.checkedAt = '',
+    this.checkedFor = '',
   });
 
   final AiProvider provider;
@@ -157,6 +179,20 @@ class AiProviderConfig {
   final AiCapabilityMode audio;
   final AiCapabilityMode embeddings;
 
+  /// Watching a YouTube video from its address (2.1.7).
+  final AiCapabilityMode video;
+
+  /// When the capabilities were last checked, as UTC ISO-8601, or empty.
+  final String checkedAt;
+
+  /// The [capabilityFingerprint] they were checked against, or empty.
+  ///
+  /// What a check found is about one model behind one endpoint. Once the
+  /// fields say something else, the modes describe a configuration that is
+  /// no longer this one, and the provider's defaults stand in until the next
+  /// check — see [_enabled].
+  final String checkedFor;
+
   Map<String, String> toMap() => {
     'provider': provider.wireName,
     'apiKey': apiKey,
@@ -169,6 +205,9 @@ class AiProviderConfig {
     'images': images.name,
     'audio': audio.name,
     'embeddings': embeddings.name,
+    'video': video.name,
+    'checkedAt': checkedAt,
+    'checkedFor': checkedFor,
   };
 
   factory AiProviderConfig.fromMap(Map<String, String> raw) {
@@ -188,16 +227,50 @@ class AiProviderConfig {
       images: mode('images'),
       audio: mode('audio'),
       embeddings: mode('embeddings'),
+      video: mode('video'),
+      checkedAt: raw['checkedAt'] ?? '',
+      checkedFor: raw['checkedFor'] ?? '',
     );
   }
 
-  bool _enabled(AiCapabilityMode mode, bool fallback) => switch (mode) {
-    AiCapabilityMode.automatic => fallback,
-    AiCapabilityMode.enabled => true,
-    AiCapabilityMode.disabled => false,
-  };
+  bool _enabled(AiCapabilityMode mode, bool fallback) =>
+      // A check about another model says nothing about this one.
+      checkedFor.isNotEmpty && checkedFor != capabilityFingerprint
+      ? fallback
+      : switch (mode) {
+          AiCapabilityMode.automatic => fallback,
+          AiCapabilityMode.enabled => true,
+          AiCapabilityMode.disabled => false,
+        };
+
+  /// Everything a capability check depends on, the key aside: the provider,
+  /// where it is reached, and the chat, speech and embedding models.
+  ///
+  /// The key is left out on purpose. This is stored in plain preferences, and
+  /// nothing derived from a credential belongs there; a new key is tested,
+  /// and so checked, before it is saved anyway.
+  String get capabilityFingerprint => [
+    provider.wireName,
+    provider == AiProvider.custom ? customEndpoint : resolvedBaseUrl,
+    resolvedModel,
+    resolvedTranscriptionModel,
+    transcriptionEndpoint ?? '',
+    embeddingSpace,
+  ].join('|');
+
+  /// When [checkedFor] still describes these fields, the time of that check.
+  DateTime? get checkedTime =>
+      checkedFor.isNotEmpty && checkedFor == capabilityFingerprint
+      ? DateTime.tryParse(checkedAt)
+      : null;
+
   bool get supportsImages =>
       provider != AiProvider.none && _enabled(images, provider.readsImages);
+
+  /// Whether a YouTube video can be handed over by its address. Only Gemini
+  /// fetches one; the rest would be given a link they cannot open.
+  bool get supportsVideo =>
+      provider == AiProvider.gemini && _enabled(video, true);
   bool get supportsEmbeddings =>
       _enabled(embeddings, provider.embeds) && embeddingEndpoint != null;
   String get resolvedTranscriptionModel => transcriptionModel.trim().isNotEmpty
@@ -263,11 +336,29 @@ class AiProviderConfig {
       '${provider.wireName}|${provider == AiProvider.custom && embeddingUrl.trim().isNotEmpty ? embeddingEndpoint : resolvedBaseUrl}|$embeddingModel';
 
   String get resolvedBaseUrl {
-    final value = baseUrl.trim().isEmpty
+    var value = baseUrl.trim().isEmpty
         ? provider.defaultBaseUrl
         : baseUrl.trim();
-    return value.endsWith('/') ? value.substring(0, value.length - 1) : value;
+    while (value.endsWith('/')) {
+      value = value.substring(0, value.length - 1);
+    }
+    if (provider == AiProvider.gemini) {
+      // A gateway gives its address the way its own docs do, with the
+      // version on the end — and every request here adds `/v1beta/…`.
+      for (final suffix in const ['/models', '/v1beta']) {
+        if (value.endsWith(suffix)) {
+          value = value.substring(0, value.length - suffix.length);
+        }
+      }
+    }
+    return value;
   }
+
+  /// The host of a Gemini gateway, when one is set; null for Google's own.
+  String? get gatewayHost =>
+      provider == AiProvider.gemini && baseUrl.trim().isNotEmpty
+      ? Uri.tryParse(resolvedBaseUrl)?.host
+      : null;
 
   /// Custom's address, exactly as it was typed.
   ///
@@ -325,6 +416,9 @@ class AiProviderConfig {
     AiCapabilityMode? images,
     AiCapabilityMode? audio,
     AiCapabilityMode? embeddings,
+    AiCapabilityMode? video,
+    String? checkedAt,
+    String? checkedFor,
   }) => AiProviderConfig(
     provider: provider ?? this.provider,
     apiKey: apiKey ?? this.apiKey,
@@ -337,6 +431,9 @@ class AiProviderConfig {
     images: images ?? this.images,
     audio: audio ?? this.audio,
     embeddings: embeddings ?? this.embeddings,
+    video: video ?? this.video,
+    checkedAt: checkedAt ?? this.checkedAt,
+    checkedFor: checkedFor ?? this.checkedFor,
   );
 }
 
@@ -981,6 +1078,9 @@ class CloudAIAdapter implements AIAdapter {
   String? get localFailure => _preferLocal ? _lastFailure?.message : null;
   int? get lastFailureStatus => _lastFailure?.status;
 
+  /// The provider's own words the last time it refused, when it gave any.
+  String? get lastFailureMessage => _lastFailure?.message;
+
   /// One turn, with optional inline media, normalised across all three shapes.
   /// A null [maxTokens] leaves the ceiling to the provider: omitted where the
   /// API allows that, and Anthropic's required field set generously.
@@ -994,6 +1094,9 @@ class CloudAIAdapter implements AIAdapter {
     String? modelOverride,
     bool requireComplete = false,
     bool preserveMarkup = false,
+    String? fileUri,
+    bool lowMediaResolution = false,
+    double? videoFps,
   }) async {
     lastReplyTruncated = false;
     if (!config.isUsable) {
@@ -1066,6 +1169,16 @@ class CloudAIAdapter implements AIAdapter {
           {
             'role': 'user',
             'parts': [
+              // A file the provider fetches itself — a YouTube video, by its
+              // address — before the words about it, which is the order
+              // Google's own examples use.
+              if (fileUri != null)
+                {
+                  'file_data': {'file_uri': fileUri},
+                  'video_metadata': ?(videoFps == null
+                      ? null
+                      : {'fps': videoFps}),
+                },
               if (base64Media != null)
                 {
                   'inline_data': {
@@ -1077,7 +1190,10 @@ class CloudAIAdapter implements AIAdapter {
             ],
           },
         ],
-        'generationConfig': {'maxOutputTokens': ?maxTokens},
+        'generationConfig': {
+          'maxOutputTokens': ?maxTokens,
+          if (lowMediaResolution) 'mediaResolution': 'MEDIA_RESOLUTION_LOW',
+        },
       },
       AiWireFormat.openai => {
         'model': config.resolvedModel,
@@ -1116,7 +1232,10 @@ class CloudAIAdapter implements AIAdapter {
           headers: _headers,
           body: jsonEncode(body),
         )
-        .timeout(timeout ?? (media == null ? _textTimeout : _mediaTimeout));
+        .timeout(
+          timeout ??
+              (media == null && fileUri == null ? _textTimeout : _mediaTimeout),
+        );
     if (response.statusCode != 200) {
       _lastFailure = (
         status: response.statusCode,
@@ -1424,6 +1543,180 @@ class CloudAIAdapter implements AIAdapter {
         final summary = await _summarize(text);
         return summary.text.isEmpty ? null : summary.text;
       }, purpose: DisclosurePurpose.summary);
+
+  /// Whether this provider can watch a YouTube video from its address.
+  ///
+  /// Gemini only, today: it fetches a public YouTube video by URL and reads
+  /// its picture and sound. The others would be handed a link to a page
+  /// they cannot open, and answer from the title — a summary of a video
+  /// nobody watched.
+  bool get canWatchYouTube => watchesYouTube(config);
+
+  /// [canWatchYouTube] for a configuration, without opening a client.
+  /// A Gemini model the check found cannot watch one is left out (2.1.8).
+  static bool watchesYouTube(AiProviderConfig config) =>
+      config.isUsable && config.supportsVideo;
+
+  /// How long watching a video may take. Longer than a photo's budget: the
+  /// provider fetches the video and reads every sampled frame before it
+  /// writes a word, and a half-hour talk can take minutes (2.1.9).
+  static const videoTimeout = Duration(minutes: 5);
+
+  /// Frames per second a video is sampled at (2.1.9). Gemini's default is
+  /// one, at its default resolution about 300 tokens for every second of
+  /// video: a twenty-minute talk is some 350,000 tokens, past what a free
+  /// plan allows in a minute, so long videos failed every time. Half the
+  /// frames at low resolution — sound is kept whole — is about a fifth of
+  /// that, and still enough to say what a talk or a tutorial shows.
+  static const videoFps = 0.5;
+
+  /// One video request, the way every video request is made: low media
+  /// resolution and [videoFps]. A model or gateway that refuses those two
+  /// settings by name is asked again plainly, so they never cost anyone a
+  /// video they could watch before.
+  Future<String?> _watchVideo(
+    String system,
+    String user, {
+    required String url,
+    int? maxTokens,
+    bool preserveMarkup = false,
+    Duration? timeout,
+  }) async {
+    final reply = await _complete(
+      system,
+      user,
+      fileUri: url,
+      maxTokens: maxTokens,
+      preserveMarkup: preserveMarkup,
+      timeout: timeout,
+      lowMediaResolution: true,
+      videoFps: videoFps,
+    );
+    final failure = _lastFailure;
+    if (reply != null ||
+        failure == null ||
+        failure.status != 400 ||
+        !RegExp(
+          r'media_?resolution|video_?metadata|\bfps\b|unknown name|'
+          r'invalid json payload',
+          caseSensitive: false,
+        ).hasMatch(failure.message ?? '')) {
+      return reply;
+    }
+    return _complete(
+      system,
+      user,
+      fileUri: url,
+      maxTokens: maxTokens,
+      preserveMarkup: preserveMarkup,
+      timeout: timeout,
+    );
+  }
+
+  /// What is in a YouTube video somebody saved (2.1.7), in a few lines: what
+  /// it is, its main points in order with timestamps, and who it is for.
+  ///
+  /// Null when this provider cannot watch one, [url] is not a video, or no
+  /// answer came back. [title] is the page title the note already has, given
+  /// as a hint only — the prompt says to report what is in the video.
+  Future<String?> analyzeYouTubeVideo(
+    String url, {
+    String title = '',
+    Iterable<String> notes = const [],
+  }) => NexDisclosureLog.about(
+    () async {
+      final watch = nexYouTubeWatchUrl(url);
+      if (!canWatchYouTube || watch == null) return null;
+      final reply = await _watchVideo(
+        '${outputLanguage.leadRule} '
+        'You watch a YouTube video for someone who saved it in their notes, '
+        'and tell them what is in it so they can keep what matters without '
+        'watching it again. First one sentence saying what the video is. '
+        'Then up to seven short lines, each starting with "- ", with its main '
+        'points, steps or claims in the order they come, with a timestamp '
+        '(m:ss) where it helps. Last, one line on who it is for or what to do '
+        'with it, if that is clear from the video. Only what is in the video: '
+        'nothing guessed from the title, no opinions of your own. If you '
+        'cannot watch it, say so in one sentence and nothing else. Plain '
+        'text: no headings, no bold, no markdown other than the "- ". '
+        '${outputLanguage.promptRule}',
+        title.trim().isEmpty
+            ? 'The video is attached.'
+            : 'The video is attached. Its page title, as a hint only: '
+                  '${title.trim()}',
+        url: watch,
+        // No ceiling: a model that thinks first spends its budget before it
+        // writes, and a cut-off analysis is worse than a long one.
+        maxTokens: null,
+        preserveMarkup: true,
+        timeout: videoTimeout,
+      );
+      final text = reply?.trim() ?? '';
+      return text.isEmpty ? null : text;
+    },
+    purpose: DisclosurePurpose.summary,
+    notes: notes,
+    content: {DisclosureContent.text},
+  );
+
+  /// A portrait of the person who wrote [source] — lines from
+  /// `nexPortraitSource` — asked for from their profile (2.1.7).
+  ///
+  /// A reflection, not an assessment, and the prompt draws that line hard:
+  /// no psychology labels or test types, nothing on health, religion,
+  /// politics, sexuality or money troubles unless it is plainly a theme of
+  /// the notes themselves, and no private details repeated back. [facts] are
+  /// the counts the app already made (when they write, what they keep), so
+  /// the model does not have to guess them from a sample.
+  ///
+  /// Null when there is no answer, or the answer is not a whole portrait.
+  Future<NexPortrait?> writePortrait(
+    String source, {
+    required String facts,
+    required int basedOn,
+    Iterable<String> notes = const [],
+    DateTime? now,
+  }) => NexDisclosureLog.about(
+    () async {
+      if (!canAnswerText || source.trim().isEmpty) return null;
+      final reply = await _complete(
+        '${outputLanguage.leadRule} '
+            'You write a short, warm and perceptive portrait of a person from a '
+            'sample of their own notes: what they write about, how they plan and '
+            'follow through, what they care about, how they think. It is a '
+            'reflection for them to enjoy and recognise themselves in, not an '
+            'assessment. Never use psychology labels, disorders or personality '
+            'test types. Say nothing about health, religion, politics, sexuality, '
+            'money troubles or relationships unless it is plainly a theme they '
+            'write about themselves, and then gently. Never repeat private '
+            'details: no names, numbers, addresses, passwords or quotes. Ground '
+            'every claim in a pattern across the notes, not one note. Be '
+            'specific and kind, never flattering, never harsh. '
+            'Reply with one JSON object and nothing else, no markdown: '
+            '{"headline": "2 to 6 words naming who they are as someone who '
+            'writes things down", "portrait": "3 or 4 sentences, speaking to them '
+            'as you", "traits": [exactly 5 of {"name": "one or two words", '
+            '"score": 0 to 100 for how strongly it shows, "line": "one short '
+            'sentence of evidence"}], "strengths": [3 short phrases], '
+            '"invitation": "one gentle, practical suggestion"}. Every text value '
+            'in the language of your reply. ${outputLanguage.promptRule}',
+        'Counted on the device:\n$facts\n\n'
+            'The notes, spread across their library, one per line as '
+            '`when | kind | text`:\n$source',
+        maxTokens: null,
+        requireComplete: true,
+        preserveMarkup: true,
+      );
+      return NexPortrait.parse(
+        reply,
+        writtenAt: (now ?? DateTime.now()).toUtc(),
+        basedOn: basedOn,
+      );
+    },
+    purpose: DisclosurePurpose.portrait,
+    notes: notes,
+    content: {DisclosureContent.text},
+  );
 
   Future<Summary> _summarize(String text) async {
     final reply = await _complete(
@@ -2745,6 +3038,7 @@ class CloudAIAdapter implements AIAdapter {
   }
 
   Future<Vector> _embed(String text) async {
+    _lastFailure = null;
     if (config.provider.format == AiWireFormat.gemini) {
       final response = await _client
           .post(
@@ -2774,6 +3068,12 @@ class CloudAIAdapter implements AIAdapter {
           )
           .timeout(_textTimeout);
       if (response.statusCode != 200) {
+        // Kept, as every other path keeps it, so the capability check can
+        // tell a model that does not embed from a minute of rate limiting.
+        _lastFailure = (
+          status: response.statusCode,
+          message: _extractError(_bodyText(response)),
+        );
         throw const AiUnavailableException();
       }
       final decoded = jsonDecode(_bodyText(response));
@@ -2796,6 +3096,10 @@ class CloudAIAdapter implements AIAdapter {
         )
         .timeout(_textTimeout);
     if (response.statusCode != 200) {
+      _lastFailure = (
+        status: response.statusCode,
+        message: _extractError(_bodyText(response)),
+      );
       throw const AiUnavailableException();
     }
     final decoded = jsonDecode(_bodyText(response));

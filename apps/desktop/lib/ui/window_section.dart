@@ -76,15 +76,21 @@ class _SectionHeader extends StatelessWidget {
       _ => l.capture,
     };
     final small = MediaQuery.sizeOf(context).width < 760;
-    return Container(
+    final style = Theme.of(context).textTheme.titleMedium?.copyWith(
+      fontWeight: FontWeight.w700,
+      letterSpacing: -.2,
+    );
+    void search() => showCommandPalette(
+      context,
+      controller: controller,
+      features: NexScope.maybeOf(context),
+    );
+    return Padding(
       padding: EdgeInsetsDirectional.fromSTEB(
-        small ? 16 : 20,
-        8,
-        small ? 16 : 20,
-        8,
-      ),
-      decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: c.outlineVariant)),
+        small ? 18 : 22,
+        small ? 10 : 12,
+        small ? 10 : 16,
+        6,
       ),
       child: Row(
         children: [
@@ -104,41 +110,41 @@ class _SectionHeader extends StatelessWidget {
               title,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: Theme.of(
-                context,
-              ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+              style: style,
             ),
           ),
           if (NexScope.maybeOf(context)?.recordingAt != null)
             RecordStopButton(controller: controller),
           const SizedBox(width: 8),
-          OutlinedButton.icon(
-            key: const ValueKey('workspace-command'),
-            onPressed: () => showCommandPalette(
-              context,
-              controller: controller,
-              features: NexScope.maybeOf(context),
+          if (small)
+            IconButton.filledTonal(
+              key: const ValueKey('workspace-command'),
+              tooltip: '${l.workspaceSearch} (Ctrl+K)',
+              onPressed: search,
+              icon: const Icon(Icons.search_rounded, size: 20),
+            )
+          else
+            OutlinedButton.icon(
+              key: const ValueKey('workspace-command'),
+              onPressed: search,
+              icon: const Icon(Icons.search_outlined, size: 15),
+              label: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(l.workspaceSearch),
+                  const SizedBox(width: 10),
+                  const NexShortcutHint('Ctrl+K'),
+                ],
+              ),
+              style: OutlinedButton.styleFrom(
+                backgroundColor: c.surfaceContainerLowest,
+                foregroundColor: c.onSurfaceVariant,
+                side: BorderSide(color: c.outlineVariant),
+                shape: const StadiumBorder(),
+                minimumSize: const Size(0, 32),
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+              ),
             ),
-            icon: const Icon(Icons.search_outlined, size: 15),
-            label: small
-                ? const NexShortcutHint('Ctrl+K')
-                : Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(l.workspaceSearch),
-                      const SizedBox(width: 10),
-                      const NexShortcutHint('Ctrl+K'),
-                    ],
-                  ),
-            style: OutlinedButton.styleFrom(
-              backgroundColor: c.surfaceContainerLowest,
-              foregroundColor: c.onSurfaceVariant,
-              side: BorderSide(color: c.outlineVariant),
-              shape: const StadiumBorder(),
-              minimumSize: const Size(0, 32),
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-            ),
-          ),
         ],
       ),
     );
