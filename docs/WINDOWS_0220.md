@@ -76,3 +76,12 @@ close to tray and Open, a second monitor, 125%/150% scaling.
 - Needs a Windows check: scheduled toasts with the installed shortcut
   (AUMID `Nex.Desktop.App`), the history check, click-through to the note,
   recurring toasts after the app was exited. See `docs/TEST_0220.md`.
+
+## Visual baselines
+
+Window-mode screenshots change with the look. `refresh-visual-baselines.yml`
+regenerates them on a Windows runner when
+`.github/refresh-baselines-request.txt` is changed on a `windows/**` branch,
+and commits them to that branch (a bot commit does not start CI by itself; push
+any ordinary commit after it). Review the changed images in the PR before
+merging. The comparison gate in `desktop.yml` is unchanged.
