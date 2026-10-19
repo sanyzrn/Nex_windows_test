@@ -94,10 +94,13 @@ while ($window -eq [IntPtr]::Zero) {
 }
 # The runner shows its window only after Flutter's first-frame callback.
 $result | Add-Member normalGuiFirstFrame $true
+# Diagnostics only: window frame at first frame (compact window vs edge panel).
+$result | Add-Member normalGuiFrameAtStart ([NexWindowProbe]::Frame($window))
 # Exercise the normal capture event route after the real hotkey was probed above.
 [void][NexWindowProbe]::PostMessage($window, 0x0312, [IntPtr]1, [IntPtr]::Zero)
 Start-Sleep -Milliseconds 500
 $result | Add-Member normalGuiAliveAfterCapture (-not $normal.HasExited)
+$result | Add-Member normalGuiFrameBeforeClose ([NexWindowProbe]::Frame($window))
 # Title-bar close hides to tray instead of stopping the reminder coordinator.
 [void][NexWindowProbe]::PostMessage($window, 0x0010, [IntPtr]::Zero, [IntPtr]::Zero)
 $hideUntil = [DateTime]::UtcNow.AddSeconds(3)
