@@ -156,6 +156,20 @@ void main() {
           final c = await bootReview(t, shot, store);
           try {
             final l = AppLocalizations.of(t.element(find.byType(Scaffold)))!;
+            for (final section in [
+              'assistant',
+              'library',
+              'tools',
+              'settings',
+              'capture',
+            ]) {
+              c.selectWindowSection(section);
+              await t.pump();
+              expectFullSizeLabel(
+                t,
+                find.byKey(const ValueKey('window-section-title')),
+              );
+            }
             expectFullSizeLabel(
               t,
               find.byKey(const ValueKey('window-section-title')),

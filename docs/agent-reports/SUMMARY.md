@@ -1,7 +1,7 @@
 # Windows 0.23 agent work — review summary
 
 Working branch: `windows/0.23-agent`; base `2076ad4`. App stays **0.22.0+16**.
-Implementation commits: `7173404`, `9cd6bdb`, `5c79990`; Windows visual refreshes: `a4f487c`, `13d34a1`.
+Implementation commits: `7173404`, `9cd6bdb`, `5c79990`, `d9e9211`; Windows visual refreshes: `a4f487c`, `13d34a1`.
 A2 refresh run `39455265050` passed with no baseline changes.
 
 | Item | Status | Evidence / remaining work |

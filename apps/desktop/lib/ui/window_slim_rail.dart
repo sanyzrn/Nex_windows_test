@@ -27,7 +27,7 @@ class _SlimRail extends StatelessWidget {
       for (final label in [
         l.navCapture,
         l.library,
-        AiStrings.of(context).t('ai'),
+        AiStrings.of(context).t('assistant'),
         l.navTools,
         l.settings,
         l.toolMore,
@@ -122,7 +122,7 @@ class _SlimRail extends StatelessWidget {
                         'assistant',
                         Icons.auto_awesome_outlined,
                         Icons.auto_awesome_rounded,
-                        AiStrings.of(context).t('ai'),
+                        AiStrings.of(context).t('assistant'),
                       ),
                       tile(
                         'tools',
