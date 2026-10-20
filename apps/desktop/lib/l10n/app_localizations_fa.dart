@@ -157,7 +157,7 @@ class AppLocalizationsFa extends AppLocalizations {
   String get about => 'درباره / مجوزها';
 
   @override
-  String get tools => 'ابزارهای پنل';
+  String get tools => 'ابزارهای پنل کناری';
 
   @override
   String get library => 'کتابخانه';
@@ -221,10 +221,10 @@ class AppLocalizationsFa extends AppLocalizations {
   String get utility12 => 'جست‌وجوی ایموجی…';
 
   @override
-  String get utility13 => 'یک ابزار را روی نوار بکشید';
+  String get utility13 => 'یک ابزار را روی داک بکش';
 
   @override
-  String get utility14 => 'ابزارها را از نوار به اینجا بکشید';
+  String get utility14 => 'ابزارها را از داک به اینجا بکش';
 
   @override
   String get utility15 => 'ابزارها';
@@ -533,12 +533,12 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String utility106(Object value) {
-    return 'نوار به لبهٔ $value منتقل شد';
+    return 'پنل کناری به لبهٔ $value منتقل شد';
   }
 
   @override
   String utility107(Object value) {
-    return '$value ← نوار';
+    return '$value ← داک';
   }
 
   @override
@@ -719,7 +719,7 @@ class AppLocalizationsFa extends AppLocalizations {
       'ابتدا تصویری کپی کن یا «افزودن تصویر» را بزن.';
 
   @override
-  String get recording => 'در حال ضبط… برای ذخیره، توقف را بزنید.';
+  String get recording => 'در حال ضبط… برای ذخیره، توقف را بزن.';
 
   @override
   String get backToLibrary => 'بازگشت به کتابخانه';
@@ -774,14 +774,14 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get modeDescription =>
-      'پنجرهٔ دسکتاپ تجربهٔ اصلی است و نوار لبه برای ثبت سریع در دسترس می‌ماند. هر دو حالت از همان یادداشت‌ها، رسانه‌ها و تنظیمات استفاده می‌کنند.';
+      'پنجرهٔ دسکتاپ تجربهٔ اصلی است و پنل کناری برای ثبت سریع در دسترس می‌ماند. هر دو حالت از همان یادداشت‌ها، رسانه‌ها و تنظیمات استفاده می‌کنند.';
 
   @override
   String get edgePanelOnly =>
       'این تنظیم مخصوص پنل کناری است؛ برای استفاده، حالت نمایش را عوض کن.';
 
   @override
-  String get switchToPanel => 'تغییر به نوار لبه';
+  String get switchToPanel => 'تغییر به پنل کناری';
 
   @override
   String get switchToWindow => 'تغییر به پنجره';
