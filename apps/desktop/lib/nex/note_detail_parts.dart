@@ -12,6 +12,7 @@ import 'package:nex_ui/nex_ui.dart';
 
 import '../l10n/app_localizations.dart';
 import 'features_state.dart';
+import '../ui/desktop_accessibility.dart';
 
 /// Header row: back, type badge, pin, and the edit toggle riding with the
 /// actions so text-note headers do not show one lone pencil at the far end.
@@ -233,34 +234,30 @@ class _ToolAction extends StatelessWidget {
     final tone = danger ? scheme.error : (accent ?? scheme.onSurfaceVariant);
     final disabled = onPressed == null;
     final color = disabled ? scheme.onSurface.withValues(alpha: .38) : tone;
-    return Semantics(
-      button: true,
-      enabled: !disabled,
+    return DesktopAction(
       label: label,
       excludeSemantics: true,
-      child: InkWell(
-        onTap: onPressed,
-        borderRadius: BorderRadius.circular(NexRadius.md),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, size: 20, color: color),
-              const SizedBox(height: 3),
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text(
-                  label,
-                  maxLines: 1,
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: color,
-                    fontWeight: FontWeight.w600,
-                  ),
+      material: true,
+      onTap: onPressed,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 20, color: color),
+            const SizedBox(height: 3),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                label,
+                maxLines: 1,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: color,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

@@ -136,75 +136,79 @@ class _NexWindowShellState extends State<NexWindowShell> {
       );
     }
 
-    return Scaffold(
-      // transparentScaffold is for the floating edge panel; the desktop
-      // window must paint an opaque surface.
-      backgroundColor: nexWindowTint(scheme),
-      body: LiquidScope(
-        controller: c,
-        palette: c.palette,
-        dir: 1,
-        child: Focus(
-          autofocus: true,
-          onKeyEvent: (node, event) {
-            if (event is KeyDownEvent) {
-              final isCtrl = HardwareKeyboard.instance.isControlPressed;
-              final isShift = HardwareKeyboard.instance.isShiftPressed;
+    return FocusTraversalGroup(
+      policy: WidgetOrderTraversalPolicy(),
+      child: Scaffold(
+        // transparentScaffold is for the floating edge panel; the desktop
+        // window must paint an opaque surface.
+        backgroundColor: nexWindowTint(scheme),
+        body: LiquidScope(
+          controller: c,
+          palette: c.palette,
+          dir: 1,
+          child: Focus(
+            skipTraversal: true,
+            autofocus: true,
+            onKeyEvent: (node, event) {
+              if (event is KeyDownEvent) {
+                final isCtrl = HardwareKeyboard.instance.isControlPressed;
+                final isShift = HardwareKeyboard.instance.isShiftPressed;
 
-              if (event.logicalKey == LogicalKeyboardKey.f1 ||
-                  (isCtrl && event.logicalKey == LogicalKeyboardKey.slash)) {
-                showShortcutsDialog(context);
-                return KeyEventResult.handled;
-              }
-
-              if (isCtrl && event.logicalKey == LogicalKeyboardKey.keyK) {
-                unawaited(
-                  showCommandPalette(
-                    context,
-                    controller: c,
-                    features: widget.features,
-                  ),
-                );
-                return KeyEventResult.handled;
-              }
-
-              if (isCtrl && event.logicalKey == LogicalKeyboardKey.keyL) {
-                c.selectWindowSection('library');
-                return KeyEventResult.handled;
-              }
-
-              if (isCtrl && event.logicalKey == LogicalKeyboardKey.comma) {
-                c.selectWindowSection('settings');
-                return KeyEventResult.handled;
-              }
-
-              if (isCtrl && event.logicalKey == LogicalKeyboardKey.keyN) {
-                c.selectWindowSection('capture');
-                if (widget.features != null) {
-                  unawaited(widget.features!.fresh(asChecklist: isShift));
-                }
-                return KeyEventResult.handled;
-              }
-
-              if (event.logicalKey == LogicalKeyboardKey.escape) {
-                final tool = c.windowTool.value;
-                if (tool != null) {
-                  c.windowTool.value = null;
-                  c.refresh();
+                if (event.logicalKey == LogicalKeyboardKey.f1 ||
+                    (isCtrl && event.logicalKey == LogicalKeyboardKey.slash)) {
+                  showShortcutsDialog(context);
                   return KeyEventResult.handled;
                 }
+
+                if (isCtrl && event.logicalKey == LogicalKeyboardKey.keyK) {
+                  unawaited(
+                    showCommandPalette(
+                      context,
+                      controller: c,
+                      features: widget.features,
+                    ),
+                  );
+                  return KeyEventResult.handled;
+                }
+
+                if (isCtrl && event.logicalKey == LogicalKeyboardKey.keyL) {
+                  c.selectWindowSection('library');
+                  return KeyEventResult.handled;
+                }
+
+                if (isCtrl && event.logicalKey == LogicalKeyboardKey.comma) {
+                  c.selectWindowSection('settings');
+                  return KeyEventResult.handled;
+                }
+
+                if (isCtrl && event.logicalKey == LogicalKeyboardKey.keyN) {
+                  c.selectWindowSection('capture');
+                  if (widget.features != null) {
+                    unawaited(widget.features!.fresh(asChecklist: isShift));
+                  }
+                  return KeyEventResult.handled;
+                }
+
+                if (event.logicalKey == LogicalKeyboardKey.escape) {
+                  final tool = c.windowTool.value;
+                  if (tool != null) {
+                    c.windowTool.value = null;
+                    c.refresh();
+                    return KeyEventResult.handled;
+                  }
+                }
               }
-            }
-            return KeyEventResult.ignored;
-          },
-          // Recording/import/error states live in NexFeatures; the shell
-          // must repaint when they change (badge, stop button, progress).
-          child: widget.features == null
-              ? Builder(builder: (context) => buildSurface(context, null))
-              : ListenableBuilder(
-                  listenable: widget.features!,
-                  builder: buildSurface,
-                ),
+              return KeyEventResult.ignored;
+            },
+            // Recording/import/error states live in NexFeatures; the shell
+            // must repaint when they change (badge, stop button, progress).
+            child: widget.features == null
+                ? Builder(builder: (context) => buildSurface(context, null))
+                : ListenableBuilder(
+                    listenable: widget.features!,
+                    builder: buildSurface,
+                  ),
+          ),
         ),
       ),
     );

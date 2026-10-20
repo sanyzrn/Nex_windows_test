@@ -8,6 +8,10 @@ import 'package:nex_ui/nex_ui.dart';
 
 import '../core/controller.dart';
 import '../core/theme_defs.dart';
+import '../l10n/app_localizations.dart';
+import 'desktop_accessibility.dart';
+
+export 'desktop_accessibility.dart';
 
 part 'widgets_chips.dart';
 part 'widgets_forms.dart';

@@ -194,6 +194,7 @@ class _NexToolOrganizerState extends State<NexToolOrganizer> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       IconButton(
+                        tooltip: l.previousPage,
                         onPressed: current == 0
                             ? null
                             : () => setState(() => page = current - 1),
@@ -201,6 +202,7 @@ class _NexToolOrganizerState extends State<NexToolOrganizer> {
                       ),
                       Text('${current + 1} / $pages'),
                       IconButton(
+                        tooltip: l.nextPage,
                         onPressed: current + 1 == pages
                             ? null
                             : () => setState(() => page = current + 1),

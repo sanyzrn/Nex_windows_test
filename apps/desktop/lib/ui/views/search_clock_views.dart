@@ -1,3 +1,4 @@
+import '../../l10n/app_localizations.dart';
 import '../../l10n/utility_strings.dart';
 import 'dart:async';
 import '../../core/world_clock.dart';
@@ -10,7 +11,6 @@ import '../../core/controller.dart';
 import '../../core/data.dart';
 import '../flyout.dart';
 import '../widgets.dart';
-
 
 // ================= Web search =================
 
@@ -287,7 +287,9 @@ class _SmallXState extends State<_SmallX> {
     return MouseRegion(
       onEnter: (_) => setState(() => _hover = true),
       onExit: (_) => setState(() => _hover = false),
-      child: GestureDetector(
+      child: DesktopAction(
+        excludeSemantics: true,
+        label: AppLocalizations.of(context)!.remove,
         onTap: widget.onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 100),

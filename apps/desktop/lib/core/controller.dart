@@ -323,10 +323,32 @@ abstract class PanelStateBase extends ChangeNotifier implements PanelHoldable {
         ),
       ),
       iconButtonTheme: IconButtonThemeData(
-        style: IconButton.styleFrom(
-          minimumSize: const Size(36, 36),
-          maximumSize: const Size(48, 48),
-          padding: const EdgeInsets.all(8),
+        style:
+            IconButton.styleFrom(
+              minimumSize: const Size(36, 36),
+              maximumSize: const Size(48, 48),
+              padding: const EdgeInsets.all(8),
+            ).copyWith(
+              side: WidgetStateProperty.resolveWith(
+                (states) => states.contains(WidgetState.focused)
+                    ? BorderSide(
+                        color: scheme.primary,
+                        width: nexFocusRingWidth,
+                      )
+                    : BorderSide.none,
+              ),
+            ),
+      ),
+      switchTheme: base.switchTheme.copyWith(
+        trackOutlineColor: WidgetStateProperty.resolveWith(
+          (states) => states.contains(WidgetState.focused)
+              ? scheme.primary
+              : base.switchTheme.trackOutlineColor?.resolve(states),
+        ),
+        trackOutlineWidth: WidgetStateProperty.resolveWith(
+          (states) => states.contains(WidgetState.focused)
+              ? nexFocusRingWidth
+              : base.switchTheme.trackOutlineWidth?.resolve(states),
         ),
       ),
       tooltipTheme: base.tooltipTheme.copyWith(

@@ -144,6 +144,8 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
             children: [
               Expanded(
                 child: Focus(
+                  canRequestFocus: false,
+                  skipTraversal: true,
                   onFocusChange: (focused) {
                     final c = NexPanelScope.maybeOf(context);
                     if (focused) {
@@ -177,6 +179,7 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
                       prefixIcon: const Icon(Icons.search_rounded, size: 18),
                       suffixIcon: query.text.isNotEmpty
                           ? IconButton(
+                              tooltip: l.clearSearch,
                               icon: const Icon(Icons.close_rounded, size: 16),
                               onPressed: () {
                                 query.clear();

@@ -236,6 +236,7 @@ abstract class _LibraryStateBase extends State<NexLibraryView> {
     return NexCardDensityScope(
       density: NexCardDensity.fromWire(c?.S.cardDensity),
       child: Focus(
+        skipTraversal: true,
         focusNode: _libraryFocusNode,
         autofocus: true,
         onKeyEvent: _handleKeyEvent,

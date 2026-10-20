@@ -6,7 +6,7 @@ import shutil
 import tempfile
 import unittest
 
-from check_l10n_parity import ROOT, check, check_visible_literals, dart_map
+from check_l10n_parity import ROOT, check, check_icon_labels, check_visible_literals, dart_map
 
 
 class LocalizationParityTest(unittest.TestCase):
@@ -107,6 +107,18 @@ class LocalizationParityTest(unittest.TestCase):
         Text(l.capture); Text('•'); Text('$count'); Text('×'); Text('۱۲');
         label: s.t('images'); /* tooltip: 'comment' */'''
         self.assertEqual(check_visible_literals(source), [])
+
+    def test_icon_buttons_require_tooltips_in_all_constructor_styles(self):
+        source = '''IconButton(icon: Icon(Icons.add), onPressed: run);
+        IconButton.filledTonal(icon: Icon(Icons.add), onPressed: run);
+        IconButton.outlined(tooltip: null, icon: Icon(Icons.add));'''
+        self.assertEqual(check_icon_labels(source), [1, 2, 3])
+
+    def test_named_icon_labels_ignore_style_helpers_comments_and_parentheses(self):
+        source = '''// IconButton(icon: Icon(Icons.add))
+        IconButton(tooltip: l.add, icon: Icon(Icons.add), style: IconButton.styleFrom());
+        IconButton.filled(tooltip: l.label('(value)'), icon: Icon(Icons.add));'''
+        self.assertEqual(check_icon_labels(source), [])
 
 
 if __name__ == '__main__':

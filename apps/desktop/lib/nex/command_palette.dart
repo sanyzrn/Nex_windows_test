@@ -332,6 +332,7 @@ class _CommandPaletteDialogState extends State<_CommandPaletteDialog> {
                     )
                   : (_query.text.isNotEmpty
                         ? IconButton(
+                            tooltip: l.clearSearch,
                             icon: const Icon(Icons.close_rounded, size: 18),
                             onPressed: () {
                               _query.clear();

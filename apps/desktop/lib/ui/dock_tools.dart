@@ -137,8 +137,11 @@ class ToolVisualState extends State<ToolVisual> {
         onEnter: _enter,
         onHover: _hoverMove,
         onExit: _exit,
-        child: GestureDetector(
+        child: DesktopAction(
           behavior: HitTestBehavior.opaque,
+          label: utilityLabelForText(context, info.name),
+          selected: widget.active,
+          excludeSemantics: true,
           onTap: _tap,
           onTapDown: _down,
           child: Listener(
@@ -189,8 +192,11 @@ class ToolVisualState extends State<ToolVisual> {
       onEnter: _enter,
       onHover: _hoverMove,
       onExit: _exit,
-      child: GestureDetector(
+      child: DesktopAction(
         behavior: HitTestBehavior.opaque,
+        label: utilityLabelForText(context, info.name),
+        selected: widget.active,
+        excludeSemantics: true,
         onTap: _tap,
         onTapDown: _down,
         child: Listener(

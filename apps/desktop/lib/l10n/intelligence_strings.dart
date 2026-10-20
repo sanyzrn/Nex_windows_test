@@ -26,6 +26,8 @@ class AiStrings {
     'stop': ['Stop', 'توقف'],
     'thinking': ['Thinking…', 'در حال فکر…'],
     'provider': ['Provider', 'ارائه‌دهنده'],
+    'showKey': ['Show API key', 'نمایش کلید API'],
+    'hideKey': ['Hide API key', 'پنهان کردن کلید API'],
     'apiKey': ['API key', 'کلید API'],
     'model': ['Model', 'مدل'],
     'endpoint': ['API endpoint', 'آدرس API'],

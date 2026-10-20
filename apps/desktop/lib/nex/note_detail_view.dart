@@ -15,6 +15,7 @@ import 'package:nex_core/nex_core.dart';
 import 'package:nex_ui/nex_ui.dart';
 
 import '../l10n/app_localizations.dart';
+import '../ui/desktop_accessibility.dart';
 import 'features_state.dart';
 import 'note_copy.dart';
 import 'notices.dart';
@@ -279,14 +280,16 @@ class _NexNoteDetailState extends State<NexNoteDetail> {
                               i < parseChecklist(note.content ?? '').length;
                               i++
                             )
-                              CheckboxListTile(
-                                value: parseChecklist(
-                                  note.content ?? '',
-                                )[i].done,
-                                title: Text(
-                                  parseChecklist(note.content ?? '')[i].text,
+                              DesktopFocusRing(
+                                child: CheckboxListTile(
+                                  value: parseChecklist(
+                                    note.content ?? '',
+                                  )[i].done,
+                                  title: Text(
+                                    parseChecklist(note.content ?? '')[i].text,
+                                  ),
+                                  onChanged: (_) => run('check', {'index': i}),
                                 ),
-                                onChanged: (_) => run('check', {'index': i}),
                               ),
                         ],
                         if (note.type == NoteType.voice &&

@@ -104,7 +104,9 @@ class _EmojiViewState extends State<EmojiView> {
                         crossAxisCount: 7,
                         childAspectRatio: 36 / 36,
                         padding: const EdgeInsets.only(bottom: 10),
-                        children: [for (final e in list) _EmojiButton(emoji: e)],
+                        children: [
+                          for (final e in list) _EmojiButton(emoji: e),
+                        ],
                       ),
                     ),
                     // Audit defect 10: the last row dissolved into a hard
@@ -120,10 +122,7 @@ class _EmojiViewState extends State<EmojiView> {
                             gradient: LinearGradient(
                               begin: Alignment.topCenter,
                               end: Alignment.bottomCenter,
-                              colors: [
-                                p.liquid.withValues(alpha: 0),
-                                p.liquid,
-                              ],
+                              colors: [p.liquid.withValues(alpha: 0), p.liquid],
                             ),
                           ),
                         ),
@@ -166,7 +165,11 @@ class _CatButtonState extends State<_CatButton> {
       child: MouseRegion(
         onEnter: (_) => setState(() => _hover = true),
         onExit: (_) => setState(() => _hover = false),
-        child: GestureDetector(
+        child: DesktopAction(
+          label:
+              '${AppLocalizations.of(context)!.emojiCategory} ${widget.emoji}',
+          selected: widget.on,
+          excludeSemantics: true,
           onTap: widget.onTap,
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 150),
@@ -217,7 +220,9 @@ class _EmojiButtonState extends State<_EmojiButton> {
     return MouseRegion(
       onEnter: (_) => setState(() => _hover = true),
       onExit: (_) => setState(() => _hover = false),
-      child: GestureDetector(
+      child: DesktopAction(
+        label: widget.emoji,
+        excludeSemantics: true,
         onTap: () {
           c.pushRecentEmoji(widget.emoji);
           c.deliver(widget.emoji);

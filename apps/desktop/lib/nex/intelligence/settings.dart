@@ -1,3 +1,4 @@
+import '../../ui/desktop_accessibility.dart';
 import 'package:flutter/material.dart';
 import 'package:nex_ai/cloud.dart';
 import 'package:nex_ui/nex_ui.dart';
@@ -27,6 +28,7 @@ Future<void> showIntelligenceSettings(BuildContext context) => showDialog<void>(
                     ),
                   ),
                   IconButton(
+                    tooltip: AiStrings.of(context).t('close'),
                     onPressed: () => Navigator.pop(dialogContext),
                     icon: const Icon(Icons.close),
                   ),
@@ -154,6 +156,7 @@ class _SettingsState extends State<DesktopIntelligenceSettings> {
               labelText: s.t(key),
               suffixIcon: secret
                   ? IconButton(
+                      tooltip: s.t(_obscure ? 'showKey' : 'hideKey'),
                       onPressed: () => setState(() => _obscure = !_obscure),
                       icon: Icon(
                         _obscure
@@ -257,44 +260,48 @@ class _SettingsState extends State<DesktopIntelligenceSettings> {
                               ? theme.colorScheme.primary.withValues(alpha: .12)
                               : theme.colorScheme.surfaceContainerLow,
                           borderRadius: BorderRadius.circular(18),
-                          child: ListTile(
-                            key: ValueKey(
-                              'provider-choice-${provider.wireName}',
+                          child: DesktopFocusRing(
+                            child: ListTile(
+                              key: ValueKey(
+                                'provider-choice-${provider.wireName}',
+                              ),
+                              selected: _provider == provider,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(18),
+                              ),
+                              leading: Icon(
+                                provider == AiProvider.none
+                                    ? Icons.cloud_off_outlined
+                                    : Icons.cloud_outlined,
+                              ),
+                              title: Text(
+                                provider == AiProvider.none
+                                    ? s.t('none')
+                                    : provider.label,
+                              ),
+                              subtitle: provider == AiProvider.none
+                                  ? null
+                                  : Text(ai.configFor(provider).resolvedModel),
+                              trailing: _provider == provider
+                                  ? const Icon(Icons.check_circle_rounded)
+                                  : null,
+                              onTap: ai.busy
+                                  ? null
+                                  : () => setState(() => _select(provider)),
                             ),
-                            selected: _provider == provider,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(18),
-                            ),
-                            leading: Icon(
-                              provider == AiProvider.none
-                                  ? Icons.cloud_off_outlined
-                                  : Icons.cloud_outlined,
-                            ),
-                            title: Text(
-                              provider == AiProvider.none
-                                  ? s.t('none')
-                                  : provider.label,
-                            ),
-                            subtitle: provider == AiProvider.none
-                                ? null
-                                : Text(ai.configFor(provider).resolvedModel),
-                            trailing: _provider == provider
-                                ? const Icon(Icons.check_circle_rounded)
-                                : null,
-                            onTap: ai.busy
-                                ? null
-                                : () => setState(() => _select(provider)),
                           ),
                         ),
                       ),
                     const SizedBox(height: 10),
                     NexSoftCard(
-                      child: ListTile(
-                        contentPadding: EdgeInsets.zero,
-                        leading: const Icon(Icons.memory_outlined),
-                        title: Text(s.t('local')),
-                        subtitle: Text(s.t('localHint')),
-                        trailing: Text(s.t('soon')),
+                      child: DesktopFocusRing(
+                        child: ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          leading: const Icon(Icons.memory_outlined),
+                          title: Text(s.t('local')),
+                          subtitle: Text(s.t('localHint')),
+                          trailing: Text(s.t('soon')),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 18),
@@ -363,13 +370,15 @@ class _SettingsState extends State<DesktopIntelligenceSettings> {
                         ),
                       ],
                       const SizedBox(height: 12),
-                      CheckboxListTile(
-                        contentPadding: EdgeInsets.zero,
-                        controlAffinity: ListTileControlAffinity.leading,
-                        title: Text(s.t('cloudConsent')),
-                        value: ai.flag('ai.cloud_opt_in'),
-                        onChanged: (v) => _run(
-                          () => ai.setValue('ai.cloud_opt_in', v ?? false),
+                      DesktopFocusRing(
+                        child: CheckboxListTile(
+                          contentPadding: EdgeInsets.zero,
+                          controlAffinity: ListTileControlAffinity.leading,
+                          title: Text(s.t('cloudConsent')),
+                          value: ai.flag('ai.cloud_opt_in'),
+                          onChanged: (v) => _run(
+                            () => ai.setValue('ai.cloud_opt_in', v ?? false),
+                          ),
                         ),
                       ),
                       const SizedBox(height: 10),
@@ -477,13 +486,16 @@ class _SettingsState extends State<DesktopIntelligenceSettings> {
                     ],
                   ),
                   const SizedBox(height: 20),
-                  CheckboxListTile(
-                    contentPadding: EdgeInsets.zero,
-                    controlAffinity: ListTileControlAffinity.leading,
-                    title: Text(s.t('cloudConsent')),
-                    value: ai.flag('ai.cloud_opt_in'),
-                    onChanged: (v) =>
-                        _run(() => ai.setValue('ai.cloud_opt_in', v ?? false)),
+                  DesktopFocusRing(
+                    child: CheckboxListTile(
+                      contentPadding: EdgeInsets.zero,
+                      controlAffinity: ListTileControlAffinity.leading,
+                      title: Text(s.t('cloudConsent')),
+                      value: ai.flag('ai.cloud_opt_in'),
+                      onChanged: (v) => _run(
+                        () => ai.setValue('ai.cloud_opt_in', v ?? false),
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -518,12 +530,14 @@ class _SettingsState extends State<DesktopIntelligenceSettings> {
                             for (final e
                                 in (snap.data ?? <DisclosureEntry>[]).reversed
                                     .take(20))
-                              ListTile(
-                                dense: true,
-                                contentPadding: EdgeInsets.zero,
-                                title: Text('${e.provider} · ${e.host}'),
-                                subtitle: Text(
-                                  '${e.at.toLocal()} · ${e.purpose.name} · ${e.bytes} B',
+                              DesktopFocusRing(
+                                child: ListTile(
+                                  dense: true,
+                                  contentPadding: EdgeInsets.zero,
+                                  title: Text('${e.provider} · ${e.host}'),
+                                  subtitle: Text(
+                                    '${e.at.toLocal()} · ${e.purpose.name} · ${e.bytes} B',
+                                  ),
                                 ),
                               ),
                           ],

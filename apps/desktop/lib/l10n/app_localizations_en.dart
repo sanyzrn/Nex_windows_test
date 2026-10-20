@@ -1440,4 +1440,43 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get weekdaySundayShort => 'S';
+
+  @override
+  String get previousPage => 'Previous page';
+
+  @override
+  String get nextPage => 'Next page';
+
+  @override
+  String get clearSearch => 'Clear search';
+
+  @override
+  String get mediaPrevious => 'Previous track';
+
+  @override
+  String get mediaNext => 'Next track';
+
+  @override
+  String get mediaPlayPause => 'Play or pause media';
+
+  @override
+  String get volumeDown => 'Decrease volume';
+
+  @override
+  String get volumeUp => 'Increase volume';
+
+  @override
+  String get volumeMute => 'Mute or unmute';
+
+  @override
+  String get chooseColor => 'Choose color';
+
+  @override
+  String get copyColor => 'Copy color code';
+
+  @override
+  String get emojiCategory => 'Emoji category';
+
+  @override
+  String get resizeLibrary => 'Resize library panes';
 }

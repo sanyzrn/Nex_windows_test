@@ -2809,6 +2809,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'S'**
   String get weekdaySundayShort;
+
+  /// No description provided for @previousPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous page'**
+  String get previousPage;
+
+  /// No description provided for @nextPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Next page'**
+  String get nextPage;
+
+  /// No description provided for @clearSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear search'**
+  String get clearSearch;
+
+  /// No description provided for @mediaPrevious.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous track'**
+  String get mediaPrevious;
+
+  /// No description provided for @mediaNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next track'**
+  String get mediaNext;
+
+  /// No description provided for @mediaPlayPause.
+  ///
+  /// In en, this message translates to:
+  /// **'Play or pause media'**
+  String get mediaPlayPause;
+
+  /// No description provided for @volumeDown.
+  ///
+  /// In en, this message translates to:
+  /// **'Decrease volume'**
+  String get volumeDown;
+
+  /// No description provided for @volumeUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Increase volume'**
+  String get volumeUp;
+
+  /// No description provided for @volumeMute.
+  ///
+  /// In en, this message translates to:
+  /// **'Mute or unmute'**
+  String get volumeMute;
+
+  /// No description provided for @chooseColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose color'**
+  String get chooseColor;
+
+  /// No description provided for @copyColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy color code'**
+  String get copyColor;
+
+  /// No description provided for @emojiCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Emoji category'**
+  String get emojiCategory;
+
+  /// No description provided for @resizeLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'Resize library panes'**
+  String get resizeLibrary;
 }
 
 class _AppLocalizationsDelegate

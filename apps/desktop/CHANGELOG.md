@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Make custom tool tiles, media controls and small actions usable with Enter
+  and Space; show clear keyboard focus and announce localized control labels.
+- Keep Tab navigation predictable in both languages and remove the extra focus
+  stop inside the compact rail's More menu.
+
 - Unify Persian terminology and tone across capture, library, settings and AI;
   localize commitment labels, weekdays and native file-picker filters.
 - Keep keyboard shortcut names consistent and readable left-to-right in Persian.

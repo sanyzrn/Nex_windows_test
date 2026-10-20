@@ -43,10 +43,10 @@ class _PasswordViewState extends State<PasswordView> {
     final (p, c, _) = LiquidScope.of(context);
     return Panel(
       children: [
-        Head(
-          onBack: () => _backToMore(c),
-        ),
-        GestureDetector(
+        Head(onBack: () => _backToMore(c)),
+        DesktopAction(
+          label: utilityLabel(context, 'utility18'),
+          excludeSemantics: true,
           onTap: () => c.copy(_pw, 'Password copied'),
           child: Container(
             width: double.infinity,
@@ -233,9 +233,7 @@ class _UnitsViewState extends State<UnitsView> {
     final (p, c, _) = LiquidScope.of(context);
     return Panel(
       children: [
-        Head(
-          onBack: () => _backToMore(c),
-        ),
+        Head(onBack: () => _backToMore(c)),
         Field(
           controller: _input,
           hint: utilityLabel(context, 'utility26'),

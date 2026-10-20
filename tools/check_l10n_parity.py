@@ -16,6 +16,34 @@ TOKEN = re.compile(r"\s+|//[^\n]*|/\*.*?\*/|r?'(?:\\.|[^'\\])*'|r?\"(?:\\.|[^\"\
 VISIBLE_LITERAL = re.compile(
     r'''(?:\b(?:Text|SelectableText)\s*\(\s*|\b(?:tooltip|hintText|labelText|label)\s*:\s*)'''
     r'''(['"])((?:\\.|(?!\1).)*?)\1''', re.S)
+CONTROL_LEXEMES = re.compile(r''' '(?:\\.|[^'\\])*' | "(?:\\.|[^"\\])*" | /\*.*?\*/ | //[^\n]* | [()] ''', re.S | re.X)
+
+
+def check_icon_labels(source):
+    """Every Material IconButton constructor must provide a localized tooltip.
+
+    styleFrom is deliberately excluded: it creates a style, not a button.
+    Values come from ARB/maps and are checked by the localization gate.
+    """
+    # Mask comments and strings for constructor discovery, retaining offsets.
+    masked = CONTROL_LEXEMES.sub(
+        lambda m: m.group() if m.group() in ('(', ')') else re.sub(r'[^\n]', ' ', m.group()), source)
+    missing = []
+    for match in re.finditer(r'\bIconButton(?:\.(?:filled|filledTonal|outlined))?\s*\(', masked):
+        depth = 1
+        end = match.end()
+        for token in CONTROL_LEXEMES.finditer(source, match.end()):
+            if token.group() == '(':
+                depth += 1
+            elif token.group() == ')':
+                depth -= 1
+            if depth == 0:
+                end = token.start()
+                break
+        body = masked[match.end():end]
+        if not re.search(r'\btooltip\s*:', body) or re.search(r'\btooltip\s*:\s*null\b', body):
+            missing.append(source.count('\n', 0, match.start()) + 1)
+    return missing
 
 
 def check_visible_literals(source):
@@ -179,6 +207,8 @@ def check(root):
             continue
         for line, value in check_visible_literals(path.read_text(encoding='utf-8')):
             errors.append(f'{path.relative_to(root)}:{line}: hard-coded UI string {value!r}')
+        for line in check_icon_labels(path.read_text(encoding='utf-8')):
+            errors.append(f'{path.relative_to(root)}:{line}: IconButton needs a localized tooltip')
     return errors
 
 

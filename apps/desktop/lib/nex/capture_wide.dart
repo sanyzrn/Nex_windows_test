@@ -99,6 +99,8 @@ mixin CaptureWide on CaptureViewBase {
                                 unawaited(_pasteIntoComposer(context, f, c)),
                           },
                           child: Focus(
+                            canRequestFocus: false,
+                            skipTraversal: true,
                             onFocusChange: (focused) =>
                                 focused ? c?.focusGained() : c?.focusLost(),
                             child: TextField(
@@ -146,14 +148,18 @@ mixin CaptureWide on CaptureViewBase {
                               Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Switch(
-                                    value: f.checklist,
-                                    onChanged: f.session.id == null && !f.saving
-                                        ? (v) {
-                                            f.checklist = v;
-                                            f.notify();
-                                          }
-                                        : null,
+                                  Semantics(
+                                    label: l.checklist,
+                                    child: Switch(
+                                      value: f.checklist,
+                                      onChanged:
+                                          f.session.id == null && !f.saving
+                                          ? (v) {
+                                              f.checklist = v;
+                                              f.notify();
+                                            }
+                                          : null,
+                                    ),
                                   ),
                                   const SizedBox(width: 2),
                                   Text(
@@ -332,7 +338,10 @@ class _CaptureAction extends StatelessWidget {
                 ),
               ),
               clipBehavior: Clip.antiAlias,
-              child: InkWell(
+              child: DesktopAction(
+                label: label,
+                excludeSemantics: true,
+                material: true,
                 onTap: onPressed,
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
@@ -367,23 +376,31 @@ class _CaptureAction extends StatelessWidget {
         }
         return SizedBox(
           width: width,
-          child: OutlinedButton.icon(
-            onPressed: onPressed,
-            icon: Icon(icon, size: 15),
-            label: Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
-            ),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: scheme.onSurface,
-              backgroundColor: scheme.surfaceContainerLowest,
-              side: BorderSide(color: scheme.outlineVariant),
-              alignment: AlignmentDirectional.centerStart,
-              visualDensity: VisualDensity.standard,
-              minimumSize: const Size(0, 44),
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+          child: DesktopFocusRing(
+            child: OutlinedButton.icon(
+              onPressed: onPressed,
+              icon: Icon(icon, size: 15),
+              label: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: scheme.onSurface,
+                backgroundColor: scheme.surfaceContainerLowest,
+                side: BorderSide(color: scheme.outlineVariant),
+                alignment: AlignmentDirectional.centerStart,
+                visualDensity: VisualDensity.standard,
+                minimumSize: const Size(0, 44),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 8,
+                ),
+              ),
             ),
           ),
         );

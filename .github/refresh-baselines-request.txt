@@ -2,3 +2,4 @@ Change this file on a windows/** branch to regenerate the Windows visual baselin
 request 4: deterministic review pin timestamps
 request 5: A1 Persian terminology, localized commitment copy and shortcut labels
 request 6: complete A1 edge-panel and dock terminology after visual review
+request 7: A2 accessible controls, keyboard focus and semantic labels

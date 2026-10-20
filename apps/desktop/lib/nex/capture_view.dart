@@ -15,6 +15,7 @@ import 'package:nex_core/nex_core.dart' show nexDigits;
 
 import '../core/controller.dart';
 import '../l10n/app_localizations.dart';
+import '../ui/desktop_accessibility.dart';
 import 'features_state.dart';
 part 'capture_wide.dart';
 
@@ -107,6 +108,8 @@ abstract class CaptureViewBase extends StatelessWidget {
                   unawaited(_pasteIntoComposer(context, f, c)),
             },
             child: Focus(
+              canRequestFocus: false,
+              skipTraversal: true,
               onFocusChange: (focused) =>
                   focused ? c?.focusGained() : c?.focusLost(),
               child: TextField(
@@ -134,14 +137,17 @@ abstract class CaptureViewBase extends StatelessWidget {
           ),
           Row(
             children: [
-              Checkbox(
-                value: f.checklist,
-                onChanged: f.session.id == null && !f.saving
-                    ? (v) {
-                        f.checklist = v!;
-                        f.notify();
-                      }
-                    : null,
+              DesktopFocusRing(
+                child: Checkbox(
+                  semanticLabel: l.checklist,
+                  value: f.checklist,
+                  onChanged: f.session.id == null && !f.saving
+                      ? (v) {
+                          f.checklist = v!;
+                          f.notify();
+                        }
+                      : null,
+                ),
               ),
               Text(l.checklist, style: Theme.of(context).textTheme.bodySmall),
             ],

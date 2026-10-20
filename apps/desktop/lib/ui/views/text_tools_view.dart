@@ -33,9 +33,7 @@ class TextToolsView extends StatelessWidget {
     final (_, c, _) = LiquidScope.of(context);
     return Panel(
       children: [
-        Head(
-          onBack: () => _backToMore(c),
-        ),
+        Head(onBack: () => _backToMore(c)),
         Wrap(
           spacing: 8,
           runSpacing: 8,
@@ -90,7 +88,9 @@ class _TextToolButtonState extends State<_TextToolButton> {
       cursor: SystemMouseCursors.click,
       onEnter: (_) => setState(() => _hover = true),
       onExit: (_) => setState(() => _hover = false),
-      child: GestureDetector(
+      child: DesktopAction(
+        excludeSemantics: true,
+        label: utilityLabelForText(context, widget.label),
         onTap: () => _run(widget.controller, widget.op),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 350),
@@ -232,4 +232,3 @@ String transformText(String text, String mode) {
       return text;
   }
 }
-

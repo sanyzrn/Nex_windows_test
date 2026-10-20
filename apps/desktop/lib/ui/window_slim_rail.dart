@@ -46,20 +46,23 @@ class _SlimRail extends StatelessWidget {
                 child: Material(
                   color: c.primary,
                   borderRadius: BorderRadius.circular(NexRadius.md + 4),
-                  child: InkWell(
-                    key: const ValueKey('workspace-new-note'),
-                    borderRadius: BorderRadius.circular(NexRadius.md + 4),
-                    onTap: () {
-                      controller.selectWindowSection('capture');
-                      unawaited(features?.fresh());
-                    },
-                    child: SizedBox(
-                      width: 48,
-                      height: 48,
-                      child: Icon(
-                        Icons.add_rounded,
-                        size: 26,
-                        color: c.onPrimary,
+                  child: DesktopFocusRing(
+                    radius: NexRadius.lg,
+                    child: InkWell(
+                      key: const ValueKey('workspace-new-note'),
+                      borderRadius: BorderRadius.circular(NexRadius.md + 4),
+                      onTap: () {
+                        controller.selectWindowSection('capture');
+                        unawaited(features?.fresh());
+                      },
+                      child: SizedBox(
+                        width: 48,
+                        height: 48,
+                        child: Icon(
+                          Icons.add_rounded,
+                          size: 26,
+                          color: c.onPrimary,
+                        ),
                       ),
                     ),
                   ),
@@ -124,49 +127,55 @@ class _SlimMoreMenu extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context)!;
     final light = controller.palette.isLight;
-    return PopupMenuButton<String>(
-      key: const ValueKey('rail-more'),
-      tooltip: l.toolMore,
-      position: PopupMenuPosition.under,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(NexRadius.lg),
-      ),
-      onSelected: (value) {
-        switch (value) {
-          case 'panel':
-            unawaited(controller.setWindowMode('panel'));
-          case 'theme':
-            controller.S.theme = light ? 'dark' : 'light';
-            controller.save();
-            controller.refresh();
-          case 'keys':
-            showShortcutsDialog(context);
-        }
-      },
-      itemBuilder: (context) => [
-        PopupMenuItem(
-          value: 'panel',
-          child: _MenuRow(Icons.view_sidebar_outlined, l.switchToPanel),
+    return DesktopFocusRing(
+      child: PopupMenuButton<String>(
+        key: const ValueKey('rail-more'),
+        tooltip: l.toolMore,
+        position: PopupMenuPosition.under,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(NexRadius.lg),
         ),
-        PopupMenuItem(
-          value: 'theme',
-          child: _MenuRow(
-            light ? Icons.dark_mode_outlined : Icons.light_mode_outlined,
-            light ? l.dark : l.light,
+        onSelected: (value) {
+          switch (value) {
+            case 'panel':
+              unawaited(controller.setWindowMode('panel'));
+            case 'theme':
+              controller.S.theme = light ? 'dark' : 'light';
+              controller.save();
+              controller.refresh();
+            case 'keys':
+              showShortcutsDialog(context);
+          }
+        },
+        itemBuilder: (context) => [
+          PopupMenuItem(
+            value: 'panel',
+            child: _MenuRow(Icons.view_sidebar_outlined, l.switchToPanel),
           ),
-        ),
-        PopupMenuItem(
-          value: 'keys',
-          child: _MenuRow(Icons.keyboard_outlined, l.keyboardShortcuts),
-        ),
-      ],
-      child: IgnorePointer(
-        child: _RailTile(
-          icon: Icons.more_horiz_rounded,
-          selectedIcon: Icons.more_horiz_rounded,
-          label: l.toolMore,
-          selected: false,
-          onPressed: () {},
+          PopupMenuItem(
+            value: 'theme',
+            child: _MenuRow(
+              light ? Icons.dark_mode_outlined : Icons.light_mode_outlined,
+              light ? l.dark : l.light,
+            ),
+          ),
+          PopupMenuItem(
+            value: 'keys',
+            child: _MenuRow(Icons.keyboard_outlined, l.keyboardShortcuts),
+          ),
+        ],
+        child: ExcludeSemantics(
+          child: ExcludeFocus(
+            child: IgnorePointer(
+              child: _RailTile(
+                icon: Icons.more_horiz_rounded,
+                selectedIcon: Icons.more_horiz_rounded,
+                label: l.toolMore,
+                selected: false,
+                onPressed: () {},
+              ),
+            ),
+          ),
         ),
       ),
     );
@@ -221,7 +230,10 @@ class _RailTileState extends State<_RailTile> {
     return Semantics(
       button: true,
       selected: selected,
+      focusable: true,
+      focused: _focused,
       label: widget.label,
+      onTap: widget.onPressed,
       excludeSemantics: true,
       child: Tooltip(
         message: widget.label,
@@ -271,7 +283,9 @@ class _RailTileState extends State<_RailTile> {
                         fontSize: 11,
                         height: 1.2,
                         color: color,
-                        fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                        fontWeight: selected
+                            ? FontWeight.w700
+                            : FontWeight.w500,
                       ),
                     ),
                   ),

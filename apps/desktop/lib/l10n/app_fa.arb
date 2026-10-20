@@ -642,5 +642,18 @@
         "type": "int"
       }
     }
-  }
+  },
+  "previousPage": "صفحهٔ قبل",
+  "nextPage": "صفحهٔ بعد",
+  "clearSearch": "پاک کردن جست‌وجو",
+  "mediaPrevious": "رسانهٔ قبلی",
+  "mediaNext": "رسانهٔ بعدی",
+  "mediaPlayPause": "پخش یا مکث رسانه",
+  "volumeDown": "کاهش صدا",
+  "volumeUp": "افزایش صدا",
+  "volumeMute": "قطع یا وصل صدا",
+  "chooseColor": "انتخاب رنگ",
+  "copyColor": "کپی کد رنگ",
+  "emojiCategory": "دستهٔ ایموجی",
+  "resizeLibrary": "تغییر اندازهٔ بخش‌های کتابخانه"
 }

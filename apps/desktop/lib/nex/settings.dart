@@ -123,12 +123,14 @@ abstract class _SettingsStateBase extends State<NexSettingsView> {
             ),
             for (var n = 0; n < matching.length; n++) ...[
               if (n != 0) const Divider(height: 1, indent: 56),
-              NexSettingsLink(
-                key: ValueKey('settings-open-${matching[n]}'),
-                icon: icons[matching[n]],
-                title: names[matching[n]],
-                subtitle: d.t(hints[matching[n]]),
-                onTap: () => _openCategory(matching[n]),
+              DesktopFocusRing(
+                child: NexSettingsLink(
+                  key: ValueKey('settings-open-${matching[n]}'),
+                  icon: icons[matching[n]],
+                  title: names[matching[n]],
+                  subtitle: d.t(hints[matching[n]]),
+                  onTap: () => _openCategory(matching[n]),
+                ),
               ),
             ],
           ],
@@ -315,7 +317,10 @@ class _SettingRow extends StatelessWidget {
                 const SizedBox(height: 10),
                 Align(
                   alignment: AlignmentDirectional.centerStart,
-                  child: control,
+                  child: Semantics(
+                    label: title,
+                    child: DesktopFocusRing(child: control),
+                  ),
                 ),
               ],
             );
@@ -324,7 +329,10 @@ class _SettingRow extends StatelessWidget {
             children: [
               Expanded(child: label),
               const SizedBox(width: 14),
-              control,
+              Semantics(
+                label: title,
+                child: DesktopFocusRing(child: control),
+              ),
             ],
           );
         },

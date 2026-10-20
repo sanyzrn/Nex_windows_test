@@ -642,5 +642,18 @@
         "type": "int"
       }
     }
-  }
+  },
+  "previousPage": "Previous page",
+  "nextPage": "Next page",
+  "clearSearch": "Clear search",
+  "mediaPrevious": "Previous track",
+  "mediaNext": "Next track",
+  "mediaPlayPause": "Play or pause media",
+  "volumeDown": "Decrease volume",
+  "volumeUp": "Increase volume",
+  "volumeMute": "Mute or unmute",
+  "chooseColor": "Choose color",
+  "copyColor": "Copy color code",
+  "emojiCategory": "Emoji category",
+  "resizeLibrary": "Resize library panes"
 }

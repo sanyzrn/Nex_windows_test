@@ -16,7 +16,7 @@ instruction requires formatting only after the other A work is complete.
 | Part | Work-order item | Scope | Status |
 | --- | --- | --- | --- |
 | 1 | A1 | Translation parity, visible strings, Persian glossary | Implemented; verification recorded in A1.md |
-| 2 | A2 | Accessible labels, focus rings, LTR/RTL focus-order tests | Awaiting owner approval |
+| 2 | A2 | Accessible labels, focus rings, LTR/RTL focus-order tests | Implemented; verification in A2.md |
 | 3 | A3 | Minimum window and text-scale overflow sweep | Not started |
 | 4 | A4 | Compact review screenshot matrix | Not started |
 | 5 | A5 | Proven dead code, unused strings, stale documentation | Not started |

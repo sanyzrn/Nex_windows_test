@@ -153,7 +153,7 @@ class _BtnState extends State<Btn> {
       cursor: SystemMouseCursors.click,
       onEnter: (_) => setState(() => _hover = true),
       onExit: (_) => setState(() => _hover = false),
-      child: GestureDetector(
+      child: DesktopAction(
         onTap: widget.onPressed,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),

@@ -119,8 +119,10 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(emojiTile);
     await _settle(tester);
-    expect(find.byTooltip('Back to tools'), findsOneWidget);
-    await tester.tap(find.byTooltip('Back to tools'));
+    // The embedded tool's own back control is now labelled too; target the
+    // window header explicitly rather than assuming one tooltip globally.
+    expect(find.byKey(const ValueKey('window-back-to-tools')), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('window-back-to-tools')));
     await _settle(tester);
     expect(emojiTile, findsOneWidget);
 

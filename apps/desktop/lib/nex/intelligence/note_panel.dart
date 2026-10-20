@@ -176,18 +176,16 @@ class _NoteIntelligenceState extends State<NoteIntelligencePanel> {
                   IconData icon,
                   bool available, {
                   Future<void> Function()? action,
-                }) => Tooltip(
-                  message: s.t(task),
-                  child: IconButton.filledTonal(
-                    onPressed: ai.busy || !available
-                        ? null
-                        : () => _run(action ?? () => _process(task)),
-                    style: IconButton.styleFrom(
-                      minimumSize: const Size(52, 52),
-                      padding: const EdgeInsets.all(14),
-                    ),
-                    icon: Icon(icon, size: 23),
+                }) => IconButton.filledTonal(
+                  tooltip: s.t(task),
+                  onPressed: ai.busy || !available
+                      ? null
+                      : () => _run(action ?? () => _process(task)),
+                  style: IconButton.styleFrom(
+                    minimumSize: const Size(52, 52),
+                    padding: const EdgeInsets.all(14),
                   ),
+                  icon: Icon(icon, size: 23),
                 );
                 Future<void> choose(String task) async {
                   final chosen = await showDialog<bool>(

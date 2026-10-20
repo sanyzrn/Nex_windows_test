@@ -96,6 +96,7 @@ class _SectionHeader extends StatelessWidget {
         children: [
           if (section == 'tools' && tool != null) ...[
             IconButton(
+              key: const ValueKey('window-back-to-tools'),
               tooltip: l.backToTools,
               icon: const BackButtonIcon(),
               onPressed: () {

@@ -137,10 +137,12 @@ mixin _SettingsDisplayAppearance on _SettingsStateBase {
           _SettingRow(
             title: l.testNotification,
             subtitle: l.testNotificationHint,
-            control: OutlinedButton(
-              key: const ValueKey('test-notification'),
-              onPressed: () => _sendTestNotification(c, l),
-              child: Text(l.testNotificationRun),
+            control: DesktopFocusRing(
+              child: OutlinedButton(
+                key: const ValueKey('test-notification'),
+                onPressed: () => _sendTestNotification(c, l),
+                child: Text(l.testNotificationRun),
+              ),
             ),
           ),
           const Divider(height: 1),
@@ -461,28 +463,30 @@ class _AppearanceChoice extends StatelessWidget {
     final c = Theme.of(context).colorScheme;
     return Semantics(
       selected: selected,
-      child: OutlinedButton(
-        onPressed: onTap,
-        style: OutlinedButton.styleFrom(
-          padding: const EdgeInsets.all(18),
-          backgroundColor: selected
-              ? c.primary.withValues(alpha: .09)
-              : c.surface,
-          foregroundColor: selected ? c.primary : c.onSurface,
-          side: BorderSide(
-            color: selected ? c.primary : c.outline,
-            width: selected ? 2 : 1,
+      child: DesktopFocusRing(
+        child: OutlinedButton(
+          onPressed: onTap,
+          style: OutlinedButton.styleFrom(
+            padding: const EdgeInsets.all(18),
+            backgroundColor: selected
+                ? c.primary.withValues(alpha: .09)
+                : c.surface,
+            foregroundColor: selected ? c.primary : c.onSurface,
+            side: BorderSide(
+              color: selected ? c.primary : c.outline,
+              width: selected ? 2 : 1,
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
           ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
+          child: Column(
+            children: [
+              Icon(icon, size: 30),
+              const SizedBox(height: 14),
+              Text(label, textAlign: TextAlign.center),
+            ],
           ),
-        ),
-        child: Column(
-          children: [
-            Icon(icon, size: 30),
-            const SizedBox(height: 14),
-            Text(label, textAlign: TextAlign.center),
-          ],
         ),
       ),
     );

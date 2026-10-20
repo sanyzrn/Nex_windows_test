@@ -1442,4 +1442,43 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get weekdaySundayShort => 'ی';
+
+  @override
+  String get previousPage => 'صفحهٔ قبل';
+
+  @override
+  String get nextPage => 'صفحهٔ بعد';
+
+  @override
+  String get clearSearch => 'پاک کردن جست‌وجو';
+
+  @override
+  String get mediaPrevious => 'رسانهٔ قبلی';
+
+  @override
+  String get mediaNext => 'رسانهٔ بعدی';
+
+  @override
+  String get mediaPlayPause => 'پخش یا مکث رسانه';
+
+  @override
+  String get volumeDown => 'کاهش صدا';
+
+  @override
+  String get volumeUp => 'افزایش صدا';
+
+  @override
+  String get volumeMute => 'قطع یا وصل صدا';
+
+  @override
+  String get chooseColor => 'انتخاب رنگ';
+
+  @override
+  String get copyColor => 'کپی کد رنگ';
+
+  @override
+  String get emojiCategory => 'دستهٔ ایموجی';
+
+  @override
+  String get resizeLibrary => 'تغییر اندازهٔ بخش‌های کتابخانه';
 }

@@ -255,7 +255,9 @@ class _FilterPillState extends State<_FilterPill> {
       cursor: SystemMouseCursors.click,
       onEnter: (_) => setState(() => _hover = true),
       onExit: (_) => setState(() => _hover = false),
-      child: GestureDetector(
+      child: DesktopAction(
+        label: widget.label,
+        selected: widget.selected,
         behavior: HitTestBehavior.opaque,
         onTap: widget.onTap,
         child: AnimatedContainer(
@@ -271,17 +273,21 @@ class _FilterPillState extends State<_FilterPill> {
             children: [
               Icon(widget.icon, size: 14, color: fg),
               const SizedBox(width: 5),
-              Text(
-                widget.label,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
-                  color: fg,
+              ExcludeSemantics(
+                child: Text(
+                  widget.label,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+                    color: fg,
+                  ),
                 ),
               ),
               if (widget.onClear != null) ...[
                 const SizedBox(width: 4),
-                GestureDetector(
+                DesktopAction(
+                  label: AppLocalizations.of(context)!.clearSelection,
+                  excludeSemantics: true,
                   behavior: HitTestBehavior.opaque,
                   onTap: widget.onClear,
                   child: Icon(Icons.close, size: 13, color: fg),
