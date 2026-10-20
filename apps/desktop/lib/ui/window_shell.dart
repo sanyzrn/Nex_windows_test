@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:nex_ui/nex_ui.dart';
 
 import '../l10n/app_localizations.dart';
+import '../l10n/shortcut_labels.dart';
 import '../l10n/utility_strings.dart';
 import '../l10n/intelligence_strings.dart';
 import '../core/controller.dart';

@@ -1,2 +1,3 @@
 Change this file on a windows/** branch to regenerate the Windows visual baselines.
 request 4: deterministic review pin timestamps
+request 5: A1 Persian terminology, localized commitment copy and shortcut labels

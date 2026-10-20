@@ -39,7 +39,7 @@ class DesktopStrings {
     ],
     'aiHint': [
       'Provider, abilities and privacy',
-      'پرووایدر، قابلیت‌ها و حریم خصوصی',
+      'ارائه‌دهنده، قابلیت‌ها و حریم خصوصی',
     ],
     'updates': ['App updates', 'به‌روزرسانی برنامه'],
     'automatic': ['Automatic updates', 'به‌روزرسانی خودکار'],
@@ -73,7 +73,7 @@ class DesktopStrings {
     ],
     'updatePrivacy': [
       'Downloads come from the latest stable GitHub release and are checked against SHA256SUMS. Notes and AI keys aren’t sent.',
-      'دانلود از آخرین ریلیز پایدار GitHub است و با SHA256SUMS بررسی می‌شود. یادداشت‌ها و کلیدهای هوش ارسال نمی‌شوند.',
+      'دانلود از آخرین نسخهٔ منتشرشدهٔ پایدار GitHub است و با SHA256SUMS بررسی می‌شود. یادداشت‌ها و کلیدهای هوش ارسال نمی‌شوند.',
     ],
     'retry': ['Try again', 'تلاش دوباره'],
     'installed': ['Installed version', 'نسخهٔ نصب‌شده'],

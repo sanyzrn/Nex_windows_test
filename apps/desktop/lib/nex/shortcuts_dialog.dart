@@ -8,6 +8,7 @@ library;
 import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
+import '../l10n/shortcut_labels.dart';
 
 /// Shows the keyboard shortcuts reference dialog.
 Future<void> showShortcutsDialog(BuildContext context) {
@@ -26,17 +27,17 @@ class _ShortcutsDialog extends StatelessWidget {
     final theme = Theme.of(context);
 
     final shortcuts = [
-      ('Ctrl + N', l.actionNewNote),
-      ('Ctrl + Shift + N', l.actionNewChecklist),
-      ('Ctrl + F', l.actionSearch),
-      ('Ctrl + L', l.actionLibrary),
-      ('Ctrl + ,', l.actionSettings),
-      ('↑ / ↓', l.actionMoveSelection),
-      ('Enter', l.actionOpenNote),
-      ('Esc', l.actionCloseOrClear),
-      ('Delete', l.actionDelete),
-      ('Ctrl + P', l.actionPin),
-      ('Ctrl + C', l.actionCopy),
+      (ShortcutLabels.spaced(ShortcutLabels.newNote), l.actionNewNote),
+      (ShortcutLabels.spaced(ShortcutLabels.newChecklist), l.actionNewChecklist),
+      (ShortcutLabels.spaced(ShortcutLabels.search), l.actionSearch),
+      (ShortcutLabels.spaced(ShortcutLabels.library), l.actionLibrary),
+      (ShortcutLabels.spaced(ShortcutLabels.settings), l.actionSettings),
+      (ShortcutLabels.moveSelection, l.actionMoveSelection),
+      (ShortcutLabels.open, l.actionOpenNote),
+      (ShortcutLabels.close, l.actionCloseOrClear),
+      (ShortcutLabels.delete, l.actionDelete),
+      (ShortcutLabels.spaced(ShortcutLabels.pin), l.actionPin),
+      (ShortcutLabels.spaced(ShortcutLabels.copy), l.actionCopy),
     ];
 
     return AlertDialog(
@@ -58,9 +59,11 @@ class _ShortcutsDialog extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 10),
-          Text(
-            l.keyboardShortcuts,
-            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
+          Expanded(
+            child: Text(
+              l.keyboardShortcuts,
+              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
+            ),
           ),
         ],
       ),
@@ -80,12 +83,15 @@ class _ShortcutsDialog extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    actionLabel,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w500,
+                  Expanded(
+                    child: Text(
+                      actionLabel,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ),
+                  const SizedBox(width: 8),
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 9,
@@ -111,6 +117,7 @@ class _ShortcutsDialog extends StatelessWidget {
                     ),
                     child: Text(
                       keyCombo,
+                      textDirection: TextDirection.ltr,
                       style: TextStyle(
                         fontFamily: 'Inter',
                         fontWeight: FontWeight.w600,

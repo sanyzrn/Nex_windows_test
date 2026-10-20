@@ -463,5 +463,184 @@
   "importNotesDone": "Notes and attachments imported",
   "themePalette": "App theme",
   "hexColor": "HEX color",
-  "backupSaved": "Backup saved"
+  "backupSaved": "Backup saved",
+  "commitmentsTitle": "Commitments & cadences",
+  "commitmentNew": "New commitment",
+  "commitmentEdit": "Edit commitment",
+  "commitmentEmpty": "No commitments recorded yet.",
+  "commitmentFirst": "Add first commitment",
+  "commitmentCompleted": "Mark completed",
+  "commitmentTitle": "Title",
+  "commitmentTitleHint": "e.g., Pay rent, take medicine…",
+  "commitmentCadence": "Cadence",
+  "commitmentEvery": "Every",
+  "commitmentWeekdays": "Weekdays:",
+  "commitmentNotification": "Notification",
+  "cadenceHourly": "Hourly",
+  "cadenceDaily": "Daily",
+  "cadenceWeekly": "Weekly",
+  "cadenceMonthly": "Monthly",
+  "cadenceYearly": "Yearly",
+  "cadenceEveryHours": "Every {count} hours",
+  "cadenceEveryDays": "Every {count} days",
+  "cadenceEveryWeeks": "Every {count} weeks",
+  "cadenceEveryMonths": "Every {count} months",
+  "cadenceEveryYears": "Every {count} years",
+  "backupFileType": "Nex backup",
+  "hexColorHint": "#RRGGBB",
+  "utility141": "Left",
+  "utility142": "Right",
+  "weekdayMonday": "Monday",
+  "weekdayMondayShort": "M",
+  "weekdayTuesday": "Tuesday",
+  "weekdayTuesdayShort": "T",
+  "weekdayWednesday": "Wednesday",
+  "weekdayWednesdayShort": "W",
+  "weekdayThursday": "Thursday",
+  "weekdayThursdayShort": "T",
+  "weekdayFriday": "Friday",
+  "weekdayFridayShort": "F",
+  "weekdaySaturday": "Saturday",
+  "weekdaySaturdayShort": "S",
+  "weekdaySunday": "Sunday",
+  "weekdaySundayShort": "S",
+  "@utility104": {
+    "placeholders": {
+      "value": {
+        "type": "Object"
+      }
+    }
+  },
+  "@utility105": {
+    "placeholders": {
+      "value": {
+        "type": "Object"
+      }
+    }
+  },
+  "@utility106": {
+    "placeholders": {
+      "value": {
+        "type": "Object"
+      }
+    }
+  },
+  "@utility107": {
+    "placeholders": {
+      "value": {
+        "type": "Object"
+      }
+    }
+  },
+  "@utility108": {
+    "placeholders": {
+      "chars": {
+        "type": "Object"
+      },
+      "lines": {
+        "type": "Object"
+      },
+      "words": {
+        "type": "Object"
+      }
+    }
+  },
+  "@utility113": {
+    "placeholders": {
+      "value": {
+        "type": "Object"
+      }
+    }
+  },
+  "@utility114": {
+    "placeholders": {
+      "value": {
+        "type": "Object"
+      }
+    }
+  },
+  "@characters": {
+    "placeholders": {
+      "count": {
+        "type": "Object"
+      }
+    }
+  },
+  "@minutesAgo": {
+    "placeholders": {
+      "count": {
+        "type": "Object"
+      }
+    }
+  },
+  "@hoursAgo": {
+    "placeholders": {
+      "count": {
+        "type": "Object"
+      }
+    }
+  },
+  "@daysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "Object"
+      }
+    }
+  },
+  "@weeksAgo": {
+    "placeholders": {
+      "count": {
+        "type": "Object"
+      }
+    }
+  },
+  "@monthsAgo": {
+    "placeholders": {
+      "count": {
+        "type": "Object"
+      }
+    }
+  },
+  "@yearsAgo": {
+    "placeholders": {
+      "count": {
+        "type": "Object"
+      }
+    }
+  },
+  "@cadenceEveryHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@cadenceEveryDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@cadenceEveryWeeks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@cadenceEveryMonths": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@cadenceEveryYears": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

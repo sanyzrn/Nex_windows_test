@@ -2569,6 +2569,246 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Backup saved'**
   String get backupSaved;
+
+  /// No description provided for @commitmentsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Commitments & cadences'**
+  String get commitmentsTitle;
+
+  /// No description provided for @commitmentNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New commitment'**
+  String get commitmentNew;
+
+  /// No description provided for @commitmentEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit commitment'**
+  String get commitmentEdit;
+
+  /// No description provided for @commitmentEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No commitments recorded yet.'**
+  String get commitmentEmpty;
+
+  /// No description provided for @commitmentFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Add first commitment'**
+  String get commitmentFirst;
+
+  /// No description provided for @commitmentCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark completed'**
+  String get commitmentCompleted;
+
+  /// No description provided for @commitmentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get commitmentTitle;
+
+  /// No description provided for @commitmentTitleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g., Pay rent, take medicine…'**
+  String get commitmentTitleHint;
+
+  /// No description provided for @commitmentCadence.
+  ///
+  /// In en, this message translates to:
+  /// **'Cadence'**
+  String get commitmentCadence;
+
+  /// No description provided for @commitmentEvery.
+  ///
+  /// In en, this message translates to:
+  /// **'Every'**
+  String get commitmentEvery;
+
+  /// No description provided for @commitmentWeekdays.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekdays:'**
+  String get commitmentWeekdays;
+
+  /// No description provided for @commitmentNotification.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification'**
+  String get commitmentNotification;
+
+  /// No description provided for @cadenceHourly.
+  ///
+  /// In en, this message translates to:
+  /// **'Hourly'**
+  String get cadenceHourly;
+
+  /// No description provided for @cadenceDaily.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily'**
+  String get cadenceDaily;
+
+  /// No description provided for @cadenceWeekly.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly'**
+  String get cadenceWeekly;
+
+  /// No description provided for @cadenceMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get cadenceMonthly;
+
+  /// No description provided for @cadenceYearly.
+  ///
+  /// In en, this message translates to:
+  /// **'Yearly'**
+  String get cadenceYearly;
+
+  /// No description provided for @cadenceEveryHours.
+  ///
+  /// In en, this message translates to:
+  /// **'Every {count} hours'**
+  String cadenceEveryHours(int count);
+
+  /// No description provided for @cadenceEveryDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Every {count} days'**
+  String cadenceEveryDays(int count);
+
+  /// No description provided for @cadenceEveryWeeks.
+  ///
+  /// In en, this message translates to:
+  /// **'Every {count} weeks'**
+  String cadenceEveryWeeks(int count);
+
+  /// No description provided for @cadenceEveryMonths.
+  ///
+  /// In en, this message translates to:
+  /// **'Every {count} months'**
+  String cadenceEveryMonths(int count);
+
+  /// No description provided for @cadenceEveryYears.
+  ///
+  /// In en, this message translates to:
+  /// **'Every {count} years'**
+  String cadenceEveryYears(int count);
+
+  /// No description provided for @backupFileType.
+  ///
+  /// In en, this message translates to:
+  /// **'Nex backup'**
+  String get backupFileType;
+
+  /// No description provided for @hexColorHint.
+  ///
+  /// In en, this message translates to:
+  /// **'#RRGGBB'**
+  String get hexColorHint;
+
+  /// No description provided for @utility141.
+  ///
+  /// In en, this message translates to:
+  /// **'Left'**
+  String get utility141;
+
+  /// No description provided for @utility142.
+  ///
+  /// In en, this message translates to:
+  /// **'Right'**
+  String get utility142;
+
+  /// No description provided for @weekdayMonday.
+  ///
+  /// In en, this message translates to:
+  /// **'Monday'**
+  String get weekdayMonday;
+
+  /// No description provided for @weekdayMondayShort.
+  ///
+  /// In en, this message translates to:
+  /// **'M'**
+  String get weekdayMondayShort;
+
+  /// No description provided for @weekdayTuesday.
+  ///
+  /// In en, this message translates to:
+  /// **'Tuesday'**
+  String get weekdayTuesday;
+
+  /// No description provided for @weekdayTuesdayShort.
+  ///
+  /// In en, this message translates to:
+  /// **'T'**
+  String get weekdayTuesdayShort;
+
+  /// No description provided for @weekdayWednesday.
+  ///
+  /// In en, this message translates to:
+  /// **'Wednesday'**
+  String get weekdayWednesday;
+
+  /// No description provided for @weekdayWednesdayShort.
+  ///
+  /// In en, this message translates to:
+  /// **'W'**
+  String get weekdayWednesdayShort;
+
+  /// No description provided for @weekdayThursday.
+  ///
+  /// In en, this message translates to:
+  /// **'Thursday'**
+  String get weekdayThursday;
+
+  /// No description provided for @weekdayThursdayShort.
+  ///
+  /// In en, this message translates to:
+  /// **'T'**
+  String get weekdayThursdayShort;
+
+  /// No description provided for @weekdayFriday.
+  ///
+  /// In en, this message translates to:
+  /// **'Friday'**
+  String get weekdayFriday;
+
+  /// No description provided for @weekdayFridayShort.
+  ///
+  /// In en, this message translates to:
+  /// **'F'**
+  String get weekdayFridayShort;
+
+  /// No description provided for @weekdaySaturday.
+  ///
+  /// In en, this message translates to:
+  /// **'Saturday'**
+  String get weekdaySaturday;
+
+  /// No description provided for @weekdaySaturdayShort.
+  ///
+  /// In en, this message translates to:
+  /// **'S'**
+  String get weekdaySaturdayShort;
+
+  /// No description provided for @weekdaySunday.
+  ///
+  /// In en, this message translates to:
+  /// **'Sunday'**
+  String get weekdaySunday;
+
+  /// No description provided for @weekdaySundayShort.
+  ///
+  /// In en, this message translates to:
+  /// **'S'**
+  String get weekdaySundayShort;
 }
 
 class _AppLocalizationsDelegate

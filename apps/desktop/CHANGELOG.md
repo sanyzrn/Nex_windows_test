@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- Unify Persian terminology and tone across capture, library, settings and AI;
+  localize commitment labels, weekdays and native file-picker filters.
+- Keep keyboard shortcut names consistent and readable left-to-right in Persian.
+- Check translation keys, placeholders and bilingual maps in CI, including
+  multiline UI strings missed by the previous hygiene check.
+
 ## 0.22.0 — 2026-10-19
 
 - Shared packages (core, data, ui, ai) brought level with Android 2.1.9:

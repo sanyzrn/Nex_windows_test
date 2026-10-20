@@ -119,7 +119,7 @@ class _SectionHeader extends StatelessWidget {
           if (small)
             IconButton.filledTonal(
               key: const ValueKey('workspace-command'),
-              tooltip: '${l.workspaceSearch} (Ctrl+K)',
+              tooltip: '${l.workspaceSearch} (${ShortcutLabels.commandPalette})',
               onPressed: search,
               icon: const Icon(Icons.search_rounded, size: 20),
             )
@@ -133,7 +133,7 @@ class _SectionHeader extends StatelessWidget {
                 children: [
                   Text(l.workspaceSearch),
                   const SizedBox(width: 10),
-                  const NexShortcutHint('Ctrl+K'),
+                  const NexShortcutHint(ShortcutLabels.commandPalette),
                 ],
               ),
               style: OutlinedButton.styleFrom(

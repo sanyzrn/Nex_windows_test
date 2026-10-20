@@ -104,7 +104,7 @@ class _WindowNavRail extends StatelessWidget {
                       label: l.navCapture,
                       selected: section == 'capture',
                       compact: !wide,
-                      shortcut: 'Ctrl+N',
+                      shortcut: ShortcutLabels.newNote,
                       onPressed: () =>
                           controller.selectWindowSection('capture'),
                     ),
@@ -114,7 +114,7 @@ class _WindowNavRail extends StatelessWidget {
                       label: l.library,
                       selected: section == 'library',
                       compact: !wide,
-                      shortcut: 'Ctrl+L',
+                      shortcut: ShortcutLabels.library,
                       onPressed: () =>
                           controller.selectWindowSection('library'),
                     ),
@@ -207,13 +207,13 @@ class _WindowNavRail extends StatelessWidget {
                 if (wide) ...[
                   const SizedBox(width: 2),
                   _RailIcon(
-                    tooltip: '${l.keyboardShortcuts} (F1)',
+                    tooltip: '${l.keyboardShortcuts} (${ShortcutLabels.help})',
                     icon: Icons.keyboard_outlined,
                     onPressed: () => showShortcutsDialog(context),
                   ),
                   const SizedBox(width: 2),
                   _RailIcon(
-                    tooltip: '${l.workspaceSearch} (Ctrl+K)',
+                    tooltip: '${l.workspaceSearch} (${ShortcutLabels.commandPalette})',
                     icon: Icons.search_outlined,
                     onPressed: () => showCommandPalette(
                       context,

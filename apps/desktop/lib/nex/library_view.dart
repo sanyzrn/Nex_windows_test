@@ -18,6 +18,7 @@ import 'package:nex_ui/nex_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../l10n/app_localizations.dart';
+import '../l10n/shortcut_labels.dart';
 import '../l10n/intelligence_strings.dart';
 import '../ui/widgets.dart';
 import 'features_state.dart';

@@ -204,7 +204,7 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
                                     ),
                                   ),
                                   child: Text(
-                                    'Ctrl+F',
+                                    ShortcutLabels.search,
                                     style: TextStyle(
                                       fontSize: 10.5,
                                       fontWeight: FontWeight.w600,

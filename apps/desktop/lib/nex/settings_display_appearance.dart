@@ -414,7 +414,7 @@ class _AccentDialogState extends State<_AccentDialog> {
                 textDirection: TextDirection.ltr,
                 decoration: InputDecoration(
                   labelText: l.hexColor,
-                  hintText: '#RRGGBB',
+                  hintText: l.hexColorHint,
                 ),
                 maxLength: 7,
                 onChanged: (v) {

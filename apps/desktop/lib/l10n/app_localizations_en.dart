@@ -1310,4 +1310,134 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get backupSaved => 'Backup saved';
+
+  @override
+  String get commitmentsTitle => 'Commitments & cadences';
+
+  @override
+  String get commitmentNew => 'New commitment';
+
+  @override
+  String get commitmentEdit => 'Edit commitment';
+
+  @override
+  String get commitmentEmpty => 'No commitments recorded yet.';
+
+  @override
+  String get commitmentFirst => 'Add first commitment';
+
+  @override
+  String get commitmentCompleted => 'Mark completed';
+
+  @override
+  String get commitmentTitle => 'Title';
+
+  @override
+  String get commitmentTitleHint => 'e.g., Pay rent, take medicine…';
+
+  @override
+  String get commitmentCadence => 'Cadence';
+
+  @override
+  String get commitmentEvery => 'Every';
+
+  @override
+  String get commitmentWeekdays => 'Weekdays:';
+
+  @override
+  String get commitmentNotification => 'Notification';
+
+  @override
+  String get cadenceHourly => 'Hourly';
+
+  @override
+  String get cadenceDaily => 'Daily';
+
+  @override
+  String get cadenceWeekly => 'Weekly';
+
+  @override
+  String get cadenceMonthly => 'Monthly';
+
+  @override
+  String get cadenceYearly => 'Yearly';
+
+  @override
+  String cadenceEveryHours(int count) {
+    return 'Every $count hours';
+  }
+
+  @override
+  String cadenceEveryDays(int count) {
+    return 'Every $count days';
+  }
+
+  @override
+  String cadenceEveryWeeks(int count) {
+    return 'Every $count weeks';
+  }
+
+  @override
+  String cadenceEveryMonths(int count) {
+    return 'Every $count months';
+  }
+
+  @override
+  String cadenceEveryYears(int count) {
+    return 'Every $count years';
+  }
+
+  @override
+  String get backupFileType => 'Nex backup';
+
+  @override
+  String get hexColorHint => '#RRGGBB';
+
+  @override
+  String get utility141 => 'Left';
+
+  @override
+  String get utility142 => 'Right';
+
+  @override
+  String get weekdayMonday => 'Monday';
+
+  @override
+  String get weekdayMondayShort => 'M';
+
+  @override
+  String get weekdayTuesday => 'Tuesday';
+
+  @override
+  String get weekdayTuesdayShort => 'T';
+
+  @override
+  String get weekdayWednesday => 'Wednesday';
+
+  @override
+  String get weekdayWednesdayShort => 'W';
+
+  @override
+  String get weekdayThursday => 'Thursday';
+
+  @override
+  String get weekdayThursdayShort => 'T';
+
+  @override
+  String get weekdayFriday => 'Friday';
+
+  @override
+  String get weekdayFridayShort => 'F';
+
+  @override
+  String get weekdaySaturday => 'Saturday';
+
+  @override
+  String get weekdaySaturdayShort => 'S';
+
+  @override
+  String get weekdaySunday => 'Sunday';
+
+  @override
+  String get weekdaySundayShort => 'S';
 }

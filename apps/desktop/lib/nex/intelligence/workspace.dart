@@ -179,9 +179,9 @@ class _AssistantState extends State<DesktopAssistant> {
     }
     final files = await openFiles(
       acceptedTypeGroups: [
-        const XTypeGroup(
-          label: 'Images',
-          extensions: ['png', 'jpg', 'jpeg', 'webp'],
+        XTypeGroup(
+          label: s.t('images'),
+          extensions: const ['png', 'jpg', 'jpeg', 'webp'],
         ),
       ],
     );

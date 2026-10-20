@@ -12,7 +12,7 @@ class AppLocalizationsFa extends AppLocalizations {
   String get capture => 'ثبت سریع';
 
   @override
-  String get captureHint => 'هر چه می‌خواهید بنویسید…';
+  String get captureHint => 'هرچه می‌خواهی بنویس…';
 
   @override
   String get newNote => 'یادداشت جدید';
@@ -148,7 +148,7 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get backupInfo =>
-      'قالب نکس: کتابخانه خواندنی است؛ تنظیمات رمزگذاری می‌شوند. کلید بازیابی را نگه دارید.';
+      'قالب نکس: کتابخانه خواندنی است؛ تنظیمات رمزگذاری می‌شوند. کلید بازیابی را نگه دار.';
 
   @override
   String get recoveryKey => 'کلید بازیابی';
@@ -182,7 +182,7 @@ class AppLocalizationsFa extends AppLocalizations {
       'دستیار در این نسخه متصل نیست. ثبت و جست‌وجو آفلاین کار می‌کنند.';
 
   @override
-  String get utility0 => 'هر چیزی را کپی کنید تا اینجا نمایش داده شود';
+  String get utility0 => 'هر چیزی را کپی کن تا اینجا نمایش داده شود';
 
   @override
   String get utility1 => 'کلیپ‌بورد';
@@ -239,7 +239,7 @@ class AppLocalizationsFa extends AppLocalizations {
   String get utility18 => 'کپی';
 
   @override
-  String get utility19 => 'ماشین حساب';
+  String get utility19 => 'ماشین‌حساب';
 
   @override
   String get utility20 => 'مثال: (12.5 * 4) / 3 + 2^3';
@@ -263,14 +263,14 @@ class AppLocalizationsFa extends AppLocalizations {
   String get utility26 => 'مثال: 12 in، 5 km، 70 kg، 30 c';
 
   @override
-  String get utility27 => 'برای چسباندن کلیک کنید';
+  String get utility27 => 'برای چسباندن کلیک کن';
 
   @override
   String get utility28 =>
-      'متن‌های پرکاربرد مثل نشانی، پاسخ و امضا را ذخیره کنید…';
+      'متن‌های پرکاربرد مثل نشانی، پاسخ و امضا را ذخیره کن…';
 
   @override
-  String get utility29 => 'یک شهر اضافه کنید';
+  String get utility29 => 'یک شهر اضافه کن';
 
   @override
   String get utility30 => '＋ افزودن شهر…';
@@ -288,13 +288,13 @@ class AppLocalizationsFa extends AppLocalizations {
   String get utility34 => 'متن‌های آماده';
 
   @override
-  String get utility35 => 'متن آماده را بنویسید و Enter بزنید…';
+  String get utility35 => 'متن آماده را بنویس و Enter بزن…';
 
   @override
   String get utility36 => 'جست‌وجوی وب';
 
   @override
-  String get utility37 => 'جست‌وجو یا نشانی را بنویسید و Enter بزنید';
+  String get utility37 => 'جست‌وجو یا نشانی را بنویس و Enter بزن';
 
   @override
   String get utility38 => 'ساعت جهانی';
@@ -492,7 +492,7 @@ class AppLocalizationsFa extends AppLocalizations {
   String get utility93 => 'شروع خودکار';
 
   @override
-  String get utility94 => 'ابتدا متنی را کپی کنید';
+  String get utility94 => 'ابتدا متنی را کپی کن';
 
   @override
   String get utility95 => 'این متن قابل رمزگشایی نیست';
@@ -700,13 +700,13 @@ class AppLocalizationsFa extends AppLocalizations {
   String get utility140 => 'تغییر وضعیت بیدار نگه‌داشتن انجام نشد';
 
   @override
-  String get dropFiles => 'برای ثبت، فایل یا تصویر را اینجا رها کنید';
+  String get dropFiles => 'برای ثبت، فایل یا تصویر را اینجا رها کن';
 
   @override
-  String get pinPanel => 'باز نگه داشتن پنل';
+  String get pinPanel => 'سنجاق کردن پنل کناری';
 
   @override
-  String get unpinPanel => 'برداشتن پین پنل';
+  String get unpinPanel => 'برداشتن سنجاق پنل کناری';
 
   @override
   String get addImage => 'افزودن تصویر';
@@ -716,7 +716,7 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get noClipboardImage =>
-      'ابتدا تصویری کپی کنید یا «افزودن تصویر» را بزنید.';
+      'ابتدا تصویری کپی کن یا «افزودن تصویر» را بزن.';
 
   @override
   String get recording => 'در حال ضبط… برای ذخیره، توقف را بزنید.';
@@ -763,7 +763,7 @@ class AppLocalizationsFa extends AppLocalizations {
   String get windowMode => 'پنجره';
 
   @override
-  String get panelMode => 'نوار لبه';
+  String get panelMode => 'پنل کناری';
 
   @override
   String get windowRemember => 'به‌خاطر سپردن اندازه و جای پنجره';
@@ -778,7 +778,7 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get edgePanelOnly =>
-      'این تنظیم مخصوص نوار لبه است؛ برای استفاده، حالت نمایش را عوض کنید.';
+      'این تنظیم مخصوص پنل کناری است؛ برای استفاده، حالت نمایش را عوض کن.';
 
   @override
   String get switchToPanel => 'تغییر به نوار لبه';
@@ -790,7 +790,7 @@ class AppLocalizationsFa extends AppLocalizations {
   String get backToTools => 'بازگشت به ابزارها';
 
   @override
-  String get toolsHint => 'یک ابزار را برای باز کردن انتخاب کنید';
+  String get toolsHint => 'یک ابزار را برای باز کردن انتخاب کن';
 
   @override
   String get noEmojiFound => 'ایموجی پیدا نشد';
@@ -841,10 +841,10 @@ class AppLocalizationsFa extends AppLocalizations {
   String get overdue => 'عقب‌افتاده';
 
   @override
-  String get shortcuts => 'کلیدهای میانبر';
+  String get shortcuts => 'میان‌برها';
 
   @override
-  String get keyboardShortcuts => 'کلیدهای میانبر صفحه‌کلید';
+  String get keyboardShortcuts => 'میان‌برهای صفحه‌کلید';
 
   @override
   String get actionNewNote => 'یادداشت جدید';
@@ -853,7 +853,7 @@ class AppLocalizationsFa extends AppLocalizations {
   String get actionNewChecklist => 'فهرست جدید';
 
   @override
-  String get actionSearch => 'جستجو';
+  String get actionSearch => 'جست‌وجو';
 
   @override
   String get actionLibrary => 'کتابخانه';
@@ -868,7 +868,7 @@ class AppLocalizationsFa extends AppLocalizations {
   String get actionOpenNote => 'باز کردن یادداشت';
 
   @override
-  String get actionCloseOrClear => 'بستن یادداشت / پاک کردن جستجو';
+  String get actionCloseOrClear => 'بستن یادداشت / پاک کردن جست‌وجو';
 
   @override
   String get actionDelete => 'حذف';
@@ -877,7 +877,7 @@ class AppLocalizationsFa extends AppLocalizations {
   String get actionPin => 'سنجاق / لغو سنجاق';
 
   @override
-  String get actionCopy => 'رونوشت';
+  String get actionCopy => 'کپی';
 
   @override
   String get noNoteSelected => 'یادداشتی انتخاب نشده است';
@@ -896,7 +896,7 @@ class AppLocalizationsFa extends AppLocalizations {
   }
 
   @override
-  String get emptyLibraryTitle => 'کتابخانه شما خالی است';
+  String get emptyLibraryTitle => 'کتابخانه‌ات خالی است';
 
   @override
   String get emptyLibraryHint =>
@@ -928,10 +928,10 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get paletteHint =>
-      'جستجوی یادداشت‌ها، پرش سریع و اجرای کنش‌ها (Ctrl+K)';
+      'جست‌وجوی یادداشت‌ها، رفتن به صفحه‌ها و اجرای فرمان‌ها (Ctrl+K)';
 
   @override
-  String get paletteSearchHint => 'جستجوی یادداشت‌ها، صفحه‌ها و کنش‌ها…';
+  String get paletteSearchHint => 'جست‌وجوی یادداشت‌ها، صفحه‌ها و فرمان‌ها…';
 
   @override
   String get paletteNoResults => 'چیزی پیدا نشد';
@@ -943,7 +943,7 @@ class AppLocalizationsFa extends AppLocalizations {
   String get paletteSectionGoTo => 'برو به';
 
   @override
-  String get paletteSectionActions => 'کنش‌ها';
+  String get paletteSectionActions => 'فرمان‌ها';
 
   @override
   String get paletteActionNewNote => 'یادداشت جدید';
@@ -959,7 +959,7 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get noNoteSelectedHint =>
-      'برای پیمایش از کلیدهای جهت‌نما و برای یادداشت جدید از Ctrl+N استفاده کنید';
+      'برای پیمایش از کلیدهای جهت‌نما و برای یادداشت جدید از Ctrl+N استفاده کن';
 
   @override
   String get filterAll => 'همه';
@@ -1010,10 +1010,10 @@ class AppLocalizationsFa extends AppLocalizations {
   String get localEngineActive => 'کتابخانهٔ محلی روی همین دستگاه';
 
   @override
-  String get switchToDark => 'تغییر به پوستهٔ تیره';
+  String get switchToDark => 'تغییر به تم تیره';
 
   @override
-  String get switchToLight => 'تغییر به پوستهٔ روشن';
+  String get switchToLight => 'تغییر به تم روشن';
 
   @override
   String get restoreConfirmTitle => 'بازیابی نسخهٔ پشتیبان';
@@ -1029,7 +1029,7 @@ class AppLocalizationsFa extends AppLocalizations {
   String get settingsDisplay => 'نمایش و تعامل';
 
   @override
-  String get settingsAppearance => 'پوسته و ظاهر';
+  String get settingsAppearance => 'تم و ظاهر';
 
   @override
   String get settingsShortcuts => 'میان‌برها و ورودی';
@@ -1055,23 +1055,23 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get libraryUnavailableHint =>
-      'از داک، نمای کتابخانه را باز کنید یا نکس را دوباره اجرا کنید تا یادداشت‌ها بارگذاری شوند.';
+      'از داک، کتابخانه را باز کن یا نکس را دوباره اجرا کن تا یادداشت‌ها بارگذاری شوند.';
 
   @override
-  String get workspaceLabel => 'فضای شما';
+  String get workspaceLabel => 'فضای تو';
 
   @override
   String get workspaceLocal => 'خصوصی؛ روی همین دستگاه';
 
   @override
-  String get workspaceSearch => 'جستجو یا رفتن به…';
+  String get workspaceSearch => 'جست‌وجو یا رفتن به…';
 
   @override
-  String get workspaceCaptureTitle => 'جایی برای\nفکرهای شما.';
+  String get workspaceCaptureTitle => 'جایی برای\nفکرهای تو.';
 
   @override
   String get workspaceCaptureDescription =>
-      'یک فکر، یک فهرست، یک یادآوری کوچک. بنویسید؛ نکس نگهش می‌دارد.';
+      'یک فکر، یک فهرست، یک یادآور کوچک. بنویس؛ نکس نگهش می‌دارد.';
 
   @override
   String get workspaceCaptureFooter => 'ذخیره روی همین دستگاه؛ همیشه در دسترس.';
@@ -1087,7 +1087,7 @@ class AppLocalizationsFa extends AppLocalizations {
   String get workspaceEssentials => 'دم‌دست';
 
   @override
-  String get workspaceAllTools => 'جعبه‌ابزار شما';
+  String get workspaceAllTools => 'جعبه‌ابزار تو';
 
   @override
   String get workspaceUtilityHint => 'باز کردن ابزار';
@@ -1097,7 +1097,7 @@ class AppLocalizationsFa extends AppLocalizations {
       'چیزهایی که کپی کرده‌اید، آمادهٔ استفاده.';
 
   @override
-  String get workspaceAwakeHint => 'صفحه را هنگام کار روشن نگه دارید.';
+  String get workspaceAwakeHint => 'صفحه را هنگام کار روشن نگه دار.';
 
   @override
   String get workspaceTimerHint => 'کمی زمان برای تمرکز.';
@@ -1110,23 +1110,23 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get workspaceSettingsDescription =>
-      'این فضا را به سلیقهٔ خودتان تنظیم کنید.';
+      'این فضا را به سلیقهٔ خودت تنظیم کن.';
 
   @override
   String get workspaceReaderTitle => 'جایی برای برگشتن به فکرها.';
 
   @override
   String get workspaceReaderHint =>
-      'یادداشتی از فهرست انتخاب کنید؛ این صفحه برای خواندن آن است.';
+      'یادداشتی از فهرست انتخاب کن؛ این صفحه برای خواندن آن است.';
 
   @override
-  String get workspaceToolsSearch => 'جستجوی ابزار…';
+  String get workspaceToolsSearch => 'جست‌وجوی ابزار…';
 
   @override
   String get workspaceBrand => 'Nex';
 
   @override
-  String get reminderFutureRequired => 'زمانی در آینده انتخاب کنید.';
+  String get reminderFutureRequired => 'زمانی در آینده انتخاب کن.';
 
   @override
   String get notificationSettings => 'تنظیمات اعلان';
@@ -1147,7 +1147,7 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String testNotificationFailed(String detail) {
-    return 'ویندوز اعلان را نپذیرفت$detail. تنظیمات > سیستم > اعلان‌ها و Focus assist را بررسی کنید.';
+    return 'ویندوز اعلان را نپذیرفت$detail. تنظیمات > سیستم > اعلان‌ها و دستیار تمرکز (Focus assist) را بررسی کن.';
   }
 
   @override
@@ -1158,33 +1158,32 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get reminderDeliveryFailed =>
-      'زمان ذخیره شد، اما ویندوز نتوانست اعلان را زمان‌بندی کند. تنظیمات اعلان ویندوز را بررسی کنید و دوباره تلاش کنید.';
+      'زمان ذخیره شد، اما ویندوز نتوانست اعلان را زمان‌بندی کند. تنظیمات اعلان ویندوز را بررسی کن و دوباره تلاش کن.';
 
   @override
-  String get reminderSaveFailed => 'یادآور ذخیره نشد. دوباره تلاش کنید.';
+  String get reminderSaveFailed => 'یادآور ذخیره نشد. دوباره تلاش کن.';
 
   @override
-  String get workspaceNotebook => 'دفتر یادداشت شما';
+  String get workspaceNotebook => 'دفتر یادداشت تو';
 
   @override
   String get workspaceRecent => 'آخرین تغییرات';
 
   @override
-  String get workspacePinned => 'پین‌شده‌ها';
+  String get workspacePinned => 'سنجاق‌شده‌ها';
 
   @override
   String get workspaceViewAll => 'دیدن همه';
 
   @override
   String get workspaceStartHint =>
-      'یادداشت بعدی از اینجا شروع می‌شود؛ نوشته‌های اخیر هم کنار دست شما هستند.';
+      'یادداشت بعدی از اینجا شروع می‌شود؛ نوشته‌های اخیر هم کنار دست تو هستند.';
 
   @override
-  String get workspaceNoRecent =>
-      'یادداشت‌هایی که ثبت کنید اینجا دیده می‌شوند.';
+  String get workspaceNoRecent => 'یادداشت‌هایی که ثبت کنی اینجا دیده می‌شوند.';
 
   @override
-  String get workspaceNoPinned => 'برای دسترسی سریع، یادداشتی را پین کنید.';
+  String get workspaceNoPinned => 'برای دسترسی سریع، یادداشتی را سنجاق کن.';
 
   @override
   String get workspaceTotal => 'یادداشت';
@@ -1206,14 +1205,14 @@ class AppLocalizationsFa extends AppLocalizations {
   String get applicationName => 'Nex';
 
   @override
-  String get manageTags => 'مدیریت تگ‌ها';
+  String get manageTags => 'مدیریت برچسب‌ها';
 
   @override
   String get tagDeleteHint =>
-      'این تگ از همهٔ یادداشت‌ها حذف شود؟ یادداشت‌ها حفظ می‌شوند.';
+      'این برچسب از همهٔ یادداشت‌ها حذف شود؟ یادداشت‌ها حفظ می‌شوند.';
 
   @override
-  String get tagNameRequired => 'یک نام غیرتکراری برای تگ وارد کن.';
+  String get tagNameRequired => 'یک نام غیرتکراری برای برچسب وارد کن.';
 
   @override
   String get toolDock => 'داک';
@@ -1293,7 +1292,7 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get portableLibraryBackup =>
-      'بکاپ قابل انتقال کتابخانه · تمام نسخه‌های نکس';
+      'پشتیبان قابل انتقال کتابخانه · همهٔ نسخه‌های نکس';
 
   @override
   String get importBackupConfirm =>
@@ -1312,5 +1311,135 @@ class AppLocalizationsFa extends AppLocalizations {
   String get hexColor => 'کد HEX رنگ';
 
   @override
-  String get backupSaved => 'بکاپ ذخیره شد';
+  String get backupSaved => 'نسخهٔ پشتیبان ذخیره شد';
+
+  @override
+  String get commitmentsTitle => 'تعهدات و کارهای تکرارشونده';
+
+  @override
+  String get commitmentNew => 'تعهد جدید';
+
+  @override
+  String get commitmentEdit => 'ویرایش تعهد';
+
+  @override
+  String get commitmentEmpty => 'هنوز تعهد یا کار تکرارشونده‌ای ثبت نشده است.';
+
+  @override
+  String get commitmentFirst => 'افزودن اولین تعهد';
+
+  @override
+  String get commitmentCompleted => 'ثبت انجام تعهد';
+
+  @override
+  String get commitmentTitle => 'عنوان تعهد';
+
+  @override
+  String get commitmentTitleHint => 'مثلاً پرداخت قبض، مصرف دارو…';
+
+  @override
+  String get commitmentCadence => 'دورهٔ تکرار';
+
+  @override
+  String get commitmentEvery => 'هر';
+
+  @override
+  String get commitmentWeekdays => 'روزهای هفته:';
+
+  @override
+  String get commitmentNotification => 'اعلان یادآور';
+
+  @override
+  String get cadenceHourly => 'هر ساعت';
+
+  @override
+  String get cadenceDaily => 'روزانه';
+
+  @override
+  String get cadenceWeekly => 'هفتگی';
+
+  @override
+  String get cadenceMonthly => 'ماهانه';
+
+  @override
+  String get cadenceYearly => 'سالانه';
+
+  @override
+  String cadenceEveryHours(int count) {
+    return 'هر $count ساعت';
+  }
+
+  @override
+  String cadenceEveryDays(int count) {
+    return 'هر $count روز';
+  }
+
+  @override
+  String cadenceEveryWeeks(int count) {
+    return 'هر $count هفته';
+  }
+
+  @override
+  String cadenceEveryMonths(int count) {
+    return 'هر $count ماه';
+  }
+
+  @override
+  String cadenceEveryYears(int count) {
+    return 'هر $count سال';
+  }
+
+  @override
+  String get backupFileType => 'نسخهٔ پشتیبان نکس';
+
+  @override
+  String get hexColorHint => '#RRGGBB';
+
+  @override
+  String get utility141 => 'چپ';
+
+  @override
+  String get utility142 => 'راست';
+
+  @override
+  String get weekdayMonday => 'دوشنبه';
+
+  @override
+  String get weekdayMondayShort => 'د';
+
+  @override
+  String get weekdayTuesday => 'سه‌شنبه';
+
+  @override
+  String get weekdayTuesdayShort => 'س';
+
+  @override
+  String get weekdayWednesday => 'چهارشنبه';
+
+  @override
+  String get weekdayWednesdayShort => 'چ';
+
+  @override
+  String get weekdayThursday => 'پنج‌شنبه';
+
+  @override
+  String get weekdayThursdayShort => 'پ';
+
+  @override
+  String get weekdayFriday => 'جمعه';
+
+  @override
+  String get weekdayFridayShort => 'ج';
+
+  @override
+  String get weekdaySaturday => 'شنبه';
+
+  @override
+  String get weekdaySaturdayShort => 'ش';
+
+  @override
+  String get weekdaySunday => 'یکشنبه';
+
+  @override
+  String get weekdaySundayShort => 'ی';
 }
