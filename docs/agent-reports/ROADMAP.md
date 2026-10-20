@@ -9,33 +9,60 @@ Base: `2076ad466aeb8b31e9fa7caf18a43156ae87b114` (`main`, 0.22.0+16).
 Working branch: `windows/0.23-agent`. Android reference: separate read-only
 `DbsNex` checkout. Existing checkouts and their uncommitted work are untouched.
 
-Each row is a review boundary. A large row can be divided into smaller parts,
-with the same approval boundary. A6 is intentionally last in Track A: its own
-instruction requires formatting only after the other A work is complete.
+## Compact plan — owner revision, 2026-10-21
+
+The owner requested fewer parts, lower token use, related work together, short
+reports and only necessary tests. This replaces the old 21-part schedule without
+dropping required work-order items. Parts 1–3 remain completed. There are now
+**four required parts left**, plus the optional B8 decision. The old part numbers
+4–21 are superseded; A/B identifiers still refer to the original work order.
+
+Each remaining row is one approval boundary. Finish related work in that row,
+write a short report, commit and push, then wait for approval before the next row.
+Do not split a row into more approval steps unless a concrete blocker requires
+an owner decision. Internal commits may separate unrelated changes.
 
 | Part | Work-order item | Scope | Status |
 | --- | --- | --- | --- |
 | 1 | A1 | Translation parity, visible strings, Persian glossary | Implemented; verification recorded in A1.md |
 | 2 | A2 | Accessible labels, focus rings, LTR/RTL focus-order tests | Implemented; verification in A2.md |
 | 3 | A3 | Minimum window and text-scale overflow sweep | Implemented; verification in A3.md |
-| 4 | A4 | Compact review screenshot matrix | Not started |
-| 5 | A5 | Proven dead code, unused strings, stale documentation | Not started |
-| 6 | A7 | Current architecture, README and shortcut documentation | Not started |
-| 7 | A8 | Issue forms and PR/contributor checklists | Not started |
-| 8 | A9 | Persian release notes in the updater | Not started |
-| 9 | A10 | Coverage-driven tests for existing pure logic | Not started |
-| 10 | A11 | Persian digits and calendar consistency | Not started |
-| 11 | A12 | Installer review and safe polish | Not started |
-| 12 | A6 | Standalone formatting commit | Not started |
-| 13 | B0 | Windows verification checklist and triage | Not started; native checks need Windows |
-| 14 | B1 | Mixed Persian/English editing and selection | Not started |
-| 15 | B2 | Close preference, tray lifecycle and corner restoration | Not started |
-| 16 | B3 | Reliable reminder delivery and toast actions | Not started |
-| 17 | B4 | Distinctive Windows appearance and integration | Not started |
-| 18 | B5 | Android AI parity: capabilities, models, YouTube | Not started |
-| 19 | B6 | Backup, onboarding, settings and update handoff | Not started |
-| 20 | B7 | Keyboard/Narrator, performance and localization completeness | Not started |
-| 21 | B8 | Optional modules and Windows extras | Not started; module selection required first |
+| 4 | A5, A7, A8, A10 | Repository cleanup, architecture/README/shortcuts, contributor templates and focused pure-logic coverage | Not started; awaiting owner approval |
+| 5 | A9, A11, A12, A4, A6 | Persian updater notes, digits/calendar consistency, installer polish; complete the screenshot matrix after these changes, then format | Not started; closes Track A |
+| 6 | B0, B1, B2, B3 | Triage remaining Windows checks; mixed-language editing, close/tray lifecycle, corner restoration, reminders and toast actions | Not started; native checks need Windows |
+| 7 | B4, B5, B6, B7 | Windows appearance/integration, Android AI parity including models/YouTube, backup/onboarding/settings/update handoff, final accessibility/performance/localization checks | Not started; closes Track B |
+| Optional | B8 | Owner-selected modules and Windows extras | Deferred; selection and approval required before implementation |
+
+A6 stays last in Track A and remains a standalone formatting commit inside Part 5.
+A4 still covers all requested settings subpages, reader variants and states; batch
+generation and concise contact-sheet review avoid repeating the same captures.
+Part 7 includes the final B7 check after its feature changes. B0 records unresolved
+native checks early, and later parts update that same checklist.
+
+## Lean execution and verification
+
+- Read only the files and original requirements needed for the current bundle.
+  Reuse recorded findings and fixtures; avoid repeating completed audits.
+- Run checks for the changed behavior and its affected callers. Add a regression
+  only for a reproduced defect or material risk. For A10, use existing coverage
+  to choose important uncovered pure logic; do not chase a coverage percentage.
+- Skip redundant test runs, duplicate scenarios, cosmetic-only tests and tests
+  that merely mirror implementation. Preserve existing useful regression tests;
+  do not delete them just to reduce test counts or remove a failing check.
+- For documentation-only changes, check links, scope mapping and diff hygiene;
+  do not run Flutter tests. For source changes, analyze affected packages and run
+  focused tests. Broaden only for shared-code impact, failures or unresolved risk.
+- Consolidate broader regression checks at track completion when needed; do not
+  repeat unchanged suites after every edit. Keep required repository/CI checks.
+  Batch Windows visual refreshes after relevant UI changes stabilize.
+- Use a short report per bundle: changes, verification actually run, remaining
+  blockers and commit. Keep evidence where it helps review; no repeated long
+  narratives, duplicate screenshots or extra report files for routine steps.
+- Report unavailable Windows/manual checks honestly and carry them forward.
+  Required native verification is not removed to save tokens.
+
+This roadmap-only revision does not start Part 4. Wait for the owner's approval
+of this compact schedule before implementation resumes.
 
 No data schema or backup format changes. No version bump until requested.
 Draft PRs are due at the end of each track, as specified in the work order.

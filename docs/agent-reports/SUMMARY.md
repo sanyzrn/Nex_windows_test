@@ -10,8 +10,8 @@ A3 final refresh run `39498530568` passed; all 52 updated images were reviewed.
 | A1 translation audit | Implemented; local tests and Windows visual refresh passed | [Report](A1.md), 191 desktop tests, 16 checker tests, shared-package checks, 16 renders |
 | A2 accessibility | Implemented; local tests and Windows visual refresh passed | [Report](A2.md), 205 desktop tests, 18 checker tests, shared-package checks, 16 focus renders; no Windows baseline changes |
 | A3 minimum size/text scale | Implemented; local tests and Windows visual refresh passed | [Report](A3.md), 551 desktop tests including 336 layout cases and 10 scaled-control regressions; 52 Windows review additions; 44 before/after renders |
-| A4–A12 | Not started | [Ordered parts](ROADMAP.md); A6 formatting last |
-| B0–B7 | Not started | Native verification needs Windows; no Windows success inferred from Linux |
+| A4–A12 | Not started; bundled into Parts 4–5 | [Compact plan](ROADMAP.md); A6 formatting last in a standalone commit |
+| B0–B7 | Not started; bundled into Parts 6–7 | Native verification needs Windows; no Windows success inferred from Linux |
 | B8 optional modules | Not started | Ask the owner which modules before implementation |
 
 Source, tests, glossary, changelog and reports are committed together and pushed
@@ -22,5 +22,10 @@ Windows-generated screenshots were reviewed. Full Windows comparison/build/nativ
 smoke and real DPI/installer/notification/Narrator checks remain open; refresh-mode
 success does not imply those checks passed.
 
-Owner approved Part 3; it is implemented. Approve Part 4 (A4: compact review screenshot matrix) before work continues.
+Owner approved Part 3; it is implemented. On 2026-10-21 the owner requested a
+compact schedule: four required bundles remain, plus optional B8. Related work
+runs together, reports stay short and verification targets relevant risks without
+repeated unnecessary runs. No feature work started in this planning revision.
+Approve the revised Part 4 (cleanup, documentation, templates and focused logic
+coverage) before work continues.
 No PR, merge, release or version bump was performed by this agent.
