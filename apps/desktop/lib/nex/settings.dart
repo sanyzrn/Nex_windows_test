@@ -154,18 +154,36 @@ abstract class _SettingsStateBase extends State<NexSettingsView> {
               if (widget.windowLayout)
                 NexSoftCard(
                   accent: scheme.primary,
-                  child: Row(
-                    children: [
-                      const NexIconBadge(icon: Icons.tune_rounded, size: 54),
-                      const SizedBox(width: 18),
-                      Expanded(
-                        child: NexWorkspaceIntro(
-                          title: d.t('settingsIntro'),
-                          description: d.t('settingsHint'),
-                          compact: true,
-                        ),
-                      ),
-                    ],
+                  child: LayoutBuilder(
+                    builder: (context, box) {
+                      final intro = NexWorkspaceIntro(
+                        title: d.t('settingsIntro'),
+                        description: d.t('settingsHint'),
+                        compact: true,
+                      );
+                      const icon = NexIconBadge(
+                        icon: Icons.tune_rounded,
+                        size: 54,
+                      );
+                      final scale = MediaQuery.textScalerOf(context).scale(1);
+                      if (scale > 1 && box.maxWidth / scale < 180) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            icon,
+                            const SizedBox(height: NexSpacing.md),
+                            intro,
+                          ],
+                        );
+                      }
+                      return Row(
+                        children: [
+                          icon,
+                          const SizedBox(width: 18),
+                          Expanded(child: intro),
+                        ],
+                      );
+                    },
                   ),
                 ),
               TextField(

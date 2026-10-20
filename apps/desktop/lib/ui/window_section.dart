@@ -92,61 +92,90 @@ class _SectionHeader extends StatelessWidget {
         small ? 10 : 16,
         6,
       ),
-      child: Row(
-        children: [
-          if (section == 'tools' && tool != null) ...[
-            IconButton(
-              key: const ValueKey('window-back-to-tools'),
-              tooltip: l.backToTools,
-              icon: const BackButtonIcon(),
-              onPressed: () {
-                controller.windowTool.value = null;
-                controller.refresh();
-              },
-            ),
+      child: LayoutBuilder(
+        builder: (context, box) {
+          final stacked =
+              small &&
+              box.maxWidth / MediaQuery.textScalerOf(context).scale(1) < 180;
+          final heading = Text(
+            title,
+            key: const ValueKey('window-section-title'),
+            style: style,
+          );
+          final leading = <Widget>[
+            if (section == 'tools' && tool != null) ...[
+              IconButton(
+                key: const ValueKey('window-back-to-tools'),
+                tooltip: l.backToTools,
+                icon: const BackButtonIcon(),
+                onPressed: () {
+                  controller.windowTool.value = null;
+                  controller.refresh();
+                },
+              ),
+              const SizedBox(width: 8),
+            ],
+          ];
+          final actions = <Widget>[
+            if (NexScope.maybeOf(context)?.recordingAt != null)
+              RecordStopButton(controller: controller),
             const SizedBox(width: 8),
-          ],
-          Expanded(
-            child: Text(
-              title,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: style,
-            ),
-          ),
-          if (NexScope.maybeOf(context)?.recordingAt != null)
-            RecordStopButton(controller: controller),
-          const SizedBox(width: 8),
-          if (small)
-            IconButton.filledTonal(
-              key: const ValueKey('workspace-command'),
-              tooltip: '${l.workspaceSearch} (${ShortcutLabels.commandPalette})',
-              onPressed: search,
-              icon: const Icon(Icons.search_rounded, size: 20),
-            )
-          else
-            OutlinedButton.icon(
-              key: const ValueKey('workspace-command'),
-              onPressed: search,
-              icon: const Icon(Icons.search_outlined, size: 15),
-              label: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(l.workspaceSearch),
-                  const SizedBox(width: 10),
-                  const NexShortcutHint(ShortcutLabels.commandPalette),
-                ],
+            if (small)
+              IconButton.filledTonal(
+                key: const ValueKey('workspace-command'),
+                tooltip:
+                    '${l.workspaceSearch} (${ShortcutLabels.commandPalette})',
+                onPressed: search,
+                icon: const Icon(Icons.search_rounded, size: 20),
+              )
+            else
+              OutlinedButton.icon(
+                key: const ValueKey('workspace-command'),
+                onPressed: search,
+                icon: const Icon(Icons.search_outlined, size: 15),
+                label: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(l.workspaceSearch),
+                    const SizedBox(width: 10),
+                    const NexShortcutHint(ShortcutLabels.commandPalette),
+                  ],
+                ),
+                style: OutlinedButton.styleFrom(
+                  backgroundColor: c.surfaceContainerLowest,
+                  foregroundColor: c.onSurfaceVariant,
+                  side: BorderSide(color: c.outlineVariant),
+                  shape: const StadiumBorder(),
+                  minimumSize: const Size(0, 32),
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                ),
               ),
-              style: OutlinedButton.styleFrom(
-                backgroundColor: c.surfaceContainerLowest,
-                foregroundColor: c.onSurfaceVariant,
-                side: BorderSide(color: c.outlineVariant),
-                shape: const StadiumBorder(),
-                minimumSize: const Size(0, 32),
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-              ),
-            ),
-        ],
+          ];
+          if (stacked) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  children: [
+                    ...leading,
+                    Expanded(child: heading),
+                  ],
+                ),
+                Align(
+                  alignment: AlignmentDirectional.centerEnd,
+                  child: Row(mainAxisSize: MainAxisSize.min, children: actions),
+                ),
+              ],
+            );
+          }
+          return Row(
+            children: [
+              ...leading,
+              Expanded(child: heading),
+              ...actions,
+            ],
+          );
+        },
       ),
     );
   }

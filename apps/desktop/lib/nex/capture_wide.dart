@@ -162,9 +162,11 @@ mixin CaptureWide on CaptureViewBase {
                                     ),
                                   ),
                                   const SizedBox(width: 2),
-                                  Text(
-                                    l.checklist,
-                                    style: theme.textTheme.labelMedium,
+                                  Flexible(
+                                    child: Text(
+                                      l.checklist,
+                                      style: theme.textTheme.labelMedium,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -321,7 +323,12 @@ class _CaptureAction extends StatelessWidget {
         // across: six wide text buttons in two columns were three rows of the
         // card's height spent on things that are not writing.
         final tiles = constraints.maxWidth < 520;
-        final columns = tiles || constraints.maxWidth >= 680 ? 3 : 2;
+        final scale = MediaQuery.textScalerOf(context).scale(1);
+        final columns = scale >= 1.5
+            ? (constraints.maxWidth / scale >= 160 ? 2 : 1)
+            : tiles || constraints.maxWidth >= 680
+            ? 3
+            : 2;
         final width = (constraints.maxWidth - (columns - 1) * 8) / columns;
         if (tiles) {
           final color = onPressed == null
@@ -353,19 +360,16 @@ class _CaptureAction extends StatelessWidget {
                     children: [
                       Icon(icon, size: 21, color: color),
                       const SizedBox(height: 4),
-                      FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Text(
-                          label,
-                          maxLines: 1,
-                          style: Theme.of(context).textTheme.labelMedium
-                              ?.copyWith(
-                                color: onPressed == null
-                                    ? color
-                                    : scheme.onSurface,
-                                fontWeight: FontWeight.w500,
-                              ),
-                        ),
+                      Text(
+                        label,
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.labelMedium
+                            ?.copyWith(
+                              color: onPressed == null
+                                  ? color
+                                  : scheme.onSurface,
+                              fontWeight: FontWeight.w500,
+                            ),
                       ),
                     ],
                   ),
@@ -382,8 +386,6 @@ class _CaptureAction extends StatelessWidget {
               icon: Icon(icon, size: 15),
               label: Text(
                 label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w500,

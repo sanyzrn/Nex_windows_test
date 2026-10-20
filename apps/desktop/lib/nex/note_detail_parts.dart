@@ -36,51 +36,84 @@ class NoteDetailHeader extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final canEdit =
         note.type == NoteType.text || note.type == NoteType.checklist;
-    return Row(
-      children: [
-        IconButton(
-          tooltip: l.backToLibrary,
-          onPressed: onClose,
-          icon: const BackButtonIcon(),
-        ),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          decoration: BoxDecoration(
-            color: scheme.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                nexNoteTypeIcon(note.type.wireName),
-                size: 16,
-                color: scheme.primary,
-              ),
-              const SizedBox(width: 6),
-              Text(
-                noteTypeLabel(l, note.type),
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 12.5,
-                  color: scheme.onSurface,
-                ),
-              ),
-            ],
-          ),
-        ),
-        if (note.pinnedAt != null) ...[
-          const SizedBox(width: 8),
-          Icon(Icons.push_pin, size: 16, color: scheme.primary),
-        ],
-        const Spacer(),
-        if (canEdit && onToggleEdit != null)
-          IconButton(
+    final back = IconButton(
+      tooltip: l.backToLibrary,
+      onPressed: onClose,
+      icon: const BackButtonIcon(),
+    );
+    final edit = canEdit && onToggleEdit != null
+        ? IconButton(
             tooltip: editing ? l.readNote : l.editNote,
             onPressed: onToggleEdit,
             icon: Icon(editing ? Icons.done_rounded : Icons.edit_outlined),
+          )
+        : null;
+    final pin = note.pinnedAt != null
+        ? Icon(Icons.push_pin, size: 16, color: scheme.primary)
+        : null;
+    final badge = Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            nexNoteTypeIcon(note.type.wireName),
+            size: 16,
+            color: scheme.primary,
           ),
-      ],
+          const SizedBox(width: 6),
+          Flexible(
+            child: Text(
+              noteTypeLabel(l, note.type),
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 12.5,
+                color: scheme.onSurface,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+    return LayoutBuilder(
+      builder: (context, box) {
+        final scaledWidth =
+            box.maxWidth / MediaQuery.textScalerOf(context).scale(1);
+        if (scaledWidth < 180) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  back,
+                  const Spacer(),
+                  if (pin != null) pin,
+                  if (edit != null) edit,
+                ],
+              ),
+              badge,
+            ],
+          );
+        }
+        return Row(
+          children: [
+            back,
+            Expanded(
+              child: Row(
+                children: [
+                  Flexible(child: badge),
+                  if (pin != null) ...[const SizedBox(width: 8), pin],
+                ],
+              ),
+            ),
+            if (edit != null) edit,
+          ],
+        );
+      },
     );
   }
 }
@@ -196,8 +229,8 @@ class NoteActionBar extends StatelessWidget {
           onPressed: onOpenMedia,
         ),
     ];
-    // One tonal dock: every action gets an equal share of the width, so none
-    // is ever clipped and the row reads the same at 440 px and at 1200.
+    // Preserve the compact tonal row at normal text size; larger text gets
+    // two columns and wrapping labels instead of a shrunken font.
     return DecoratedBox(
       decoration: BoxDecoration(
         color: scheme.surfaceContainerHigh,
@@ -205,8 +238,19 @@ class NoteActionBar extends StatelessWidget {
       ),
       child: Padding(
         padding: const EdgeInsets.all(4),
-        child: Row(
-          children: [for (final cell in cells) Expanded(child: cell)],
+        child: LayoutBuilder(
+          builder: (context, box) {
+            final scale = MediaQuery.textScalerOf(context).scale(1);
+            final columns = scale >= 1.5
+                ? (box.maxWidth / scale < 120 ? 1 : 2)
+                : cells.length;
+            return Wrap(
+              children: [
+                for (final cell in cells)
+                  SizedBox(width: box.maxWidth / columns, child: cell),
+              ],
+            );
+          },
         ),
       ),
     );
@@ -246,15 +290,12 @@ class _ToolAction extends StatelessWidget {
           children: [
             Icon(icon, size: 20, color: color),
             const SizedBox(height: 3),
-            FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Text(
-                label,
-                maxLines: 1,
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: color,
-                  fontWeight: FontWeight.w600,
-                ),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: color,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ],

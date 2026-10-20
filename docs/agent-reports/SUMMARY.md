@@ -8,7 +8,8 @@ A2 refresh run `39455265050` passed with no baseline changes.
 | --- | --- | --- |
 | A1 translation audit | Implemented; local tests and Windows visual refresh passed | [Report](A1.md), 191 desktop tests, 16 checker tests, shared-package checks, 16 renders |
 | A2 accessibility | Implemented; local tests and Windows visual refresh passed | [Report](A2.md), 205 desktop tests, 18 checker tests, shared-package checks, 16 focus renders; no Windows baseline changes |
-| A3–A12 | Not started | [Ordered parts](ROADMAP.md); A6 formatting last |
+| A3 minimum size/text scale | Implemented; verification in progress | [Report](A3.md), 336 layout cases, 10 scaled-control regressions and 52 Windows review additions |
+| A4–A12 | Not started | [Ordered parts](ROADMAP.md); A6 formatting last |
 | B0–B7 | Not started | Native verification needs Windows; no Windows success inferred from Linux |
 | B8 optional modules | Not started | Ask the owner which modules before implementation |
 
@@ -20,5 +21,5 @@ Windows-generated screenshots were reviewed. Full Windows comparison/build/nativ
 smoke and real DPI/installer/notification/Narrator checks remain open; refresh-mode
 success does not imply those checks passed.
 
-Owner decision: approve Part 3 (A3: minimum-size and text-scale sweep) before work continues.
-Part 2 was approved and implemented. The owner need not create or merge a PR now.
+Owner approved Part 3; it is implemented. Approve Part 4 (A4: compact review screenshot matrix) before work continues.
+No PR, merge, release or version bump was performed by this agent.

@@ -327,23 +327,34 @@ class _AssistantState extends State<DesktopAssistant> {
                         spacing: 12,
                         runSpacing: 8,
                         children: [
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.auto_awesome,
-                                color: c.primary,
-                                size: 22,
-                              ),
-                              const SizedBox(width: 10),
-                              Text(
-                                s.t('ai'),
-                                style: theme.textTheme.titleLarge?.copyWith(
-                                  fontWeight: FontWeight.w700,
+                          // The window section already names this page. Give
+                          // short, scaled windows room for chat and setup.
+                          if (!(NexPanelScope.maybeOf(context)?.isWindowMode ==
+                                  true &&
+                              box.maxHeight /
+                                      MediaQuery.textScalerOf(
+                                        context,
+                                      ).scale(1) <
+                                  220))
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.auto_awesome,
+                                  color: c.primary,
+                                  size: 22,
                                 ),
-                              ),
-                            ],
-                          ),
+                                const SizedBox(width: 10),
+                                Flexible(
+                                  child: Text(
+                                    s.t('ai'),
+                                    style: theme.textTheme.titleLarge?.copyWith(
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [

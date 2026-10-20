@@ -14,11 +14,41 @@ class _WindowNavRail extends StatelessWidget {
     final l = AppLocalizations.of(context)!;
     final c = Theme.of(context).colorScheme;
     final wide = MediaQuery.sizeOf(context).width >= 960;
+    var railWidth = wide ? 206.0 : 64.0;
+    final scaler = MediaQuery.textScalerOf(context);
+    if (wide && scaler.scale(1) > 1) {
+      for (final label in [
+        l.navCapture,
+        l.library,
+        AiStrings.of(context).t('ai'),
+        l.navTools,
+        l.settings,
+        l.switchToPanel,
+        l.newNote,
+      ]) {
+        for (final word in label.split(RegExp(r'\s+'))) {
+          final painter = TextPainter(
+            text: TextSpan(
+              text: word,
+              style: DefaultTextStyle.of(
+                context,
+              ).style.copyWith(fontSize: 13, fontWeight: FontWeight.w600),
+            ),
+            textScaler: scaler,
+            textDirection: Directionality.of(context),
+          )..layout();
+          // Outer padding + button padding + icon/gap, with a rounding guard.
+          final needed = painter.width.ceilToDouble() + 82;
+          if (needed > railWidth) railWidth = needed;
+          painter.dispose();
+        }
+      }
+    }
     return ValueListenableBuilder<String>(
       valueListenable: controller.windowSection,
       builder: (context, section, _) => Container(
         key: const ValueKey('workspace-sidebar'),
-        width: wide ? 206 : 64,
+        width: railWidth,
         margin: const EdgeInsetsDirectional.fromSTEB(8, 0, 8, 10),
         padding: EdgeInsets.symmetric(horizontal: wide ? 12 : 10),
         child: Column(
@@ -84,13 +114,7 @@ class _WindowNavRail extends StatelessWidget {
                               children: [
                                 const Icon(Icons.add_rounded, size: 19),
                                 const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    l.newNote,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
+                                Expanded(child: Text(l.newNote)),
                               ],
                             )
                           : Tooltip(
@@ -213,7 +237,8 @@ class _WindowNavRail extends StatelessWidget {
                   ),
                   const SizedBox(width: 2),
                   _RailIcon(
-                    tooltip: '${l.workspaceSearch} (${ShortcutLabels.commandPalette})',
+                    tooltip:
+                        '${l.workspaceSearch} (${ShortcutLabels.commandPalette})',
                     icon: Icons.search_outlined,
                     onPressed: () => showCommandPalette(
                       context,

@@ -19,6 +19,36 @@ class _SlimRail extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context)!;
     final c = Theme.of(context).colorScheme;
+    final scaler = MediaQuery.textScalerOf(context);
+    var railWidth = width;
+    if (scaler.scale(1) > 1) {
+      // Keep full words readable at the requested size instead of fitting the
+      // font back down or splitting a destination name into fragments.
+      for (final label in [
+        l.navCapture,
+        l.library,
+        AiStrings.of(context).t('ai'),
+        l.navTools,
+        l.settings,
+        l.toolMore,
+      ]) {
+        final painter = TextPainter(
+          text: TextSpan(
+            text: label,
+            style: DefaultTextStyle.of(context).style.copyWith(
+              fontSize: 11,
+              height: 1.2,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          textScaler: scaler,
+          textDirection: Directionality.of(context),
+        )..layout();
+        final needed = painter.width.ceilToDouble() + NexSpacing.lg;
+        if (needed > railWidth) railWidth = needed;
+        painter.dispose();
+      }
+    }
     return ValueListenableBuilder<String>(
       valueListenable: controller.windowSection,
       builder: (context, section, _) {
@@ -37,63 +67,73 @@ class _SlimRail extends StatelessWidget {
         );
         return SizedBox(
           key: const ValueKey('workspace-sidebar'),
-          width: _SlimRail.width,
+          width: railWidth,
           child: Column(
             children: [
-              const SizedBox(height: NexSpacing.sm),
-              Tooltip(
-                message: l.newNote,
-                child: Material(
-                  color: c.primary,
-                  borderRadius: BorderRadius.circular(NexRadius.md + 4),
-                  child: DesktopFocusRing(
-                    radius: NexRadius.lg,
-                    child: InkWell(
-                      key: const ValueKey('workspace-new-note'),
-                      borderRadius: BorderRadius.circular(NexRadius.md + 4),
-                      onTap: () {
-                        controller.selectWindowSection('capture');
-                        unawaited(features?.fresh());
-                      },
-                      child: SizedBox(
-                        width: 48,
-                        height: 48,
-                        child: Icon(
-                          Icons.add_rounded,
-                          size: 26,
-                          color: c.onPrimary,
+              Expanded(
+                child: SingleChildScrollView(
+                  primary: false,
+                  child: Column(
+                    children: [
+                      const SizedBox(height: NexSpacing.sm),
+                      Tooltip(
+                        message: l.newNote,
+                        child: Material(
+                          color: c.primary,
+                          borderRadius: BorderRadius.circular(NexRadius.md + 4),
+                          child: DesktopFocusRing(
+                            radius: NexRadius.lg,
+                            child: InkWell(
+                              key: const ValueKey('workspace-new-note'),
+                              borderRadius: BorderRadius.circular(
+                                NexRadius.md + 4,
+                              ),
+                              onTap: () {
+                                controller.selectWindowSection('capture');
+                                unawaited(features?.fresh());
+                              },
+                              child: SizedBox(
+                                width: 48,
+                                height: 48,
+                                child: Icon(
+                                  Icons.add_rounded,
+                                  size: 26,
+                                  color: c.onPrimary,
+                                ),
+                              ),
+                            ),
+                          ),
                         ),
                       ),
-                    ),
+                      const SizedBox(height: NexSpacing.contentGap),
+                      tile(
+                        'capture',
+                        Icons.edit_note_outlined,
+                        Icons.edit_note_rounded,
+                        l.navCapture,
+                      ),
+                      tile(
+                        'library',
+                        Icons.auto_stories_outlined,
+                        Icons.auto_stories_rounded,
+                        l.library,
+                      ),
+                      tile(
+                        'assistant',
+                        Icons.auto_awesome_outlined,
+                        Icons.auto_awesome_rounded,
+                        AiStrings.of(context).t('ai'),
+                      ),
+                      tile(
+                        'tools',
+                        Icons.grid_view_outlined,
+                        Icons.grid_view_rounded,
+                        l.navTools,
+                      ),
+                    ],
                   ),
                 ),
               ),
-              const SizedBox(height: NexSpacing.contentGap),
-              tile(
-                'capture',
-                Icons.edit_note_outlined,
-                Icons.edit_note_rounded,
-                l.navCapture,
-              ),
-              tile(
-                'library',
-                Icons.auto_stories_outlined,
-                Icons.auto_stories_rounded,
-                l.library,
-              ),
-              tile(
-                'assistant',
-                Icons.auto_awesome_outlined,
-                Icons.auto_awesome_rounded,
-                AiStrings.of(context).t('ai'),
-              ),
-              tile(
-                'tools',
-                Icons.grid_view_outlined,
-                Icons.grid_view_rounded,
-                l.navTools,
-              ),
-              const Spacer(),
               if (features?.recordingAt != null) ...[
                 RecordStopButton(controller: controller),
                 const SizedBox(height: NexSpacing.sm),
@@ -198,8 +238,8 @@ class _MenuRow extends StatelessWidget {
   );
 }
 
-/// One slim-rail destination: an icon in a pill over a one-line label. The
-/// whole 76×62 tile is the target; keyboard focus draws a ring around it.
+/// One slim-rail destination. Its label wraps at the requested text size;
+/// keyboard focus outlines the whole tile.
 class _RailTile extends StatefulWidget {
   const _RailTile({
     super.key,
@@ -242,7 +282,8 @@ class _RailTileState extends State<_RailTile> {
           onFocusChange: (value) => setState(() => _focused = value),
           borderRadius: BorderRadius.circular(NexRadius.lg),
           child: Container(
-            width: _SlimRail.width - 8,
+            width: double.infinity,
+            margin: const EdgeInsets.symmetric(horizontal: 4),
             padding: const EdgeInsets.symmetric(vertical: 5),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(NexRadius.lg),
@@ -274,19 +315,14 @@ class _RailTileState extends State<_RailTile> {
                 const SizedBox(height: 3),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Text(
-                      widget.label,
-                      maxLines: 1,
-                      style: TextStyle(
-                        fontSize: 11,
-                        height: 1.2,
-                        color: color,
-                        fontWeight: selected
-                            ? FontWeight.w700
-                            : FontWeight.w500,
-                      ),
+                  child: Text(
+                    widget.label,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 11,
+                      height: 1.2,
+                      color: color,
+                      fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
                     ),
                   ),
                 ),

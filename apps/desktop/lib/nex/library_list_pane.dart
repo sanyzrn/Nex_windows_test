@@ -140,115 +140,143 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
           ),
         Padding(
           padding: const EdgeInsetsDirectional.fromSTEB(12, 8, 8, 4),
-          child: Row(
-            children: [
-              Expanded(
-                child: Focus(
-                  canRequestFocus: false,
-                  skipTraversal: true,
-                  onFocusChange: (focused) {
-                    final c = NexPanelScope.maybeOf(context);
-                    if (focused) {
-                      c?.focusGained();
-                    } else {
-                      c?.focusLost();
-                    }
-                  },
-                  child: TextField(
-                    key: const ValueKey('library-search'),
-                    controller: query,
-                    focusNode: _searchFocusNode,
-                    textDirection: nexDirectionOf(query.text),
-                    decoration: InputDecoration(
-                      hintText: l.search,
-                      // The Android app's search fields are capsules; a stadium
-                      // here matches it and separates search from the card edges
-                      // around it.
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(999),
-                        borderSide: BorderSide(color: scheme.outlineVariant),
+          child: LayoutBuilder(
+            builder: (context, box) {
+              final stacked =
+                  box.maxWidth / MediaQuery.textScalerOf(context).scale(1) <
+                  320;
+              final search = Focus(
+                canRequestFocus: false,
+                skipTraversal: true,
+                onFocusChange: (focused) {
+                  final c = NexPanelScope.maybeOf(context);
+                  if (focused) {
+                    c?.focusGained();
+                  } else {
+                    c?.focusLost();
+                  }
+                },
+                child: TextField(
+                  key: const ValueKey('library-search'),
+                  controller: query,
+                  focusNode: _searchFocusNode,
+                  textDirection: nexDirectionOf(query.text),
+                  decoration: InputDecoration(
+                    hintText: l.search,
+                    hintMaxLines: stacked ? 3 : 1,
+                    // The Android app's search fields are capsules; a stadium
+                    // here matches it and separates search from the card edges
+                    // around it.
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(999),
+                      borderSide: BorderSide(color: scheme.outlineVariant),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(999),
+                      borderSide: BorderSide(
+                        color: scheme.primary,
+                        width: nexFocusRingWidth,
                       ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(999),
-                        borderSide: BorderSide(
-                          color: scheme.primary,
-                          width: nexFocusRingWidth,
-                        ),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(vertical: 10),
-                      prefixIcon: const Icon(Icons.search_rounded, size: 18),
-                      suffixIcon: query.text.isNotEmpty
-                          ? IconButton(
-                              tooltip: l.clearSearch,
-                              icon: const Icon(Icons.close_rounded, size: 16),
-                              onPressed: () {
-                                query.clear();
-                                load();
-                              },
-                            )
-                          : Padding(
-                              padding: const EdgeInsetsDirectional.only(
-                                end: 10,
-                              ),
-                              child: Center(
-                                widthFactor: 1,
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 6,
-                                    vertical: 2,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: scheme.surfaceContainerHighest,
-                                    borderRadius: BorderRadius.circular(4),
-                                    border: Border.all(
-                                      color: scheme.outlineVariant.withValues(
-                                        alpha: 0.5,
-                                      ),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                    prefixIcon: const Icon(Icons.search_rounded, size: 18),
+                    suffixIcon: query.text.isNotEmpty
+                        ? IconButton(
+                            tooltip: l.clearSearch,
+                            icon: const Icon(Icons.close_rounded, size: 16),
+                            onPressed: () {
+                              query.clear();
+                              load();
+                            },
+                          )
+                        : stacked
+                        ? null
+                        : Padding(
+                            padding: const EdgeInsetsDirectional.only(end: 10),
+                            child: Center(
+                              widthFactor: 1,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: scheme.surfaceContainerHighest,
+                                  borderRadius: BorderRadius.circular(4),
+                                  border: Border.all(
+                                    color: scheme.outlineVariant.withValues(
+                                      alpha: 0.5,
                                     ),
                                   ),
-                                  child: Text(
-                                    ShortcutLabels.search,
-                                    style: TextStyle(
-                                      fontSize: 10.5,
-                                      fontWeight: FontWeight.w600,
-                                      color: scheme.onSurfaceVariant,
-                                    ),
+                                ),
+                                child: Text(
+                                  ShortcutLabels.search,
+                                  style: TextStyle(
+                                    fontSize: 10.5,
+                                    fontWeight: FontWeight.w600,
+                                    color: scheme.onSurfaceVariant,
                                   ),
                                 ),
                               ),
                             ),
-                    ),
-                    onChanged: _queryChanged,
+                          ),
                   ),
+                  onChanged: _queryChanged,
                 ),
-              ),
-              const SizedBox(width: 4),
-              IconButton(
-                tooltip: AiStrings.of(context).t('board'),
-                isSelected: board,
-                onPressed: () => setState(() => board = true),
-                icon: const Icon(Icons.grid_view_outlined),
-              ),
-              IconButton(
-                tooltip: AiStrings.of(context).t('list'),
-                isSelected: !board,
-                onPressed: () => setState(() => board = false),
-                icon: const Icon(Icons.view_agenda_outlined),
-              ),
-              IconButton.filledTonal(
-                key: const ValueKey('manage-tags'),
-                tooltip: l.manageTags,
-                icon: const Icon(Icons.sell_outlined, size: 18),
-                onPressed: () async {
-                  await showTagManager(context, NexScope.of(context));
-                  if (!mounted) return;
-                  final all = await store.call<List<Tag>>('tags');
-                  if (!mounted) return;
-                  if (tag != null && !all.any((t) => t.id == tag)) tag = null;
-                  await load();
-                },
-              ),
-            ],
+              );
+              final actions = Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    tooltip: AiStrings.of(context).t('board'),
+                    isSelected: board,
+                    onPressed: () => setState(() => board = true),
+                    icon: const Icon(Icons.grid_view_outlined),
+                  ),
+                  IconButton(
+                    tooltip: AiStrings.of(context).t('list'),
+                    isSelected: !board,
+                    onPressed: () => setState(() => board = false),
+                    icon: const Icon(Icons.view_agenda_outlined),
+                  ),
+                  IconButton.filledTonal(
+                    key: const ValueKey('manage-tags'),
+                    tooltip: l.manageTags,
+                    icon: const Icon(Icons.sell_outlined, size: 18),
+                    onPressed: () async {
+                      await showTagManager(context, NexScope.of(context));
+                      if (!mounted) return;
+                      final all = await store.call<List<Tag>>('tags');
+                      if (!mounted) return;
+                      if (tag != null && !all.any((t) => t.id == tag)) {
+                        tag = null;
+                      }
+                      await load();
+                    },
+                  ),
+                ],
+              );
+              if (stacked) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    search,
+                    const SizedBox(height: NexSpacing.xs),
+                    Align(
+                      alignment: AlignmentDirectional.centerEnd,
+                      child: actions,
+                    ),
+                  ],
+                );
+              }
+              return Row(
+                children: [
+                  Expanded(child: search),
+                  const SizedBox(width: 4),
+                  actions,
+                ],
+              );
+            },
           ),
         ),
         _FilterBar(
@@ -299,35 +327,49 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
           ),
         if (notes.isEmpty && !loading)
           Expanded(
-            child: _isFilteredEmpty
-                ? Center(
-                    child: NexEmptyState(
-                      icon: trash
-                          ? Icons.delete_outline_rounded
-                          : query.text.isNotEmpty
-                          ? Icons.search_off_rounded
-                          : Icons.filter_list_off_rounded,
-                      message: trash
-                          ? '${l.trash}: ${l.empty}'
-                          : query.text.isNotEmpty
-                          ? '${l.search}: ${l.empty}'
-                          : l.empty,
-                      action: TextButton.icon(
-                        icon: const Icon(Icons.refresh_rounded, size: 16),
-                        label: Text(l.clear),
-                        onPressed: () {
-                          query.clear();
-                          type = null;
-                          tag = thread = null;
-                          trash = false;
-                          load();
-                        },
-                      ),
-                    ),
-                  )
-                // Designed first-run state (IDEAS.md): three concrete
-                // actions instead of a bare "empty" line.
-                : _buildFirstRunEmpty(context, l),
+            child: LayoutBuilder(
+              builder: (context, box) => SingleChildScrollView(
+                primary: false,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: box.maxHeight),
+                  child: Padding(
+                    padding: const EdgeInsets.all(NexSpacing.sm),
+                    child: _isFilteredEmpty
+                        ? Center(
+                            child: NexEmptyState(
+                              icon: trash
+                                  ? Icons.delete_outline_rounded
+                                  : query.text.isNotEmpty
+                                  ? Icons.search_off_rounded
+                                  : Icons.filter_list_off_rounded,
+                              message: trash
+                                  ? '${l.trash}: ${l.empty}'
+                                  : query.text.isNotEmpty
+                                  ? '${l.search}: ${l.empty}'
+                                  : l.empty,
+                              action: TextButton.icon(
+                                icon: const Icon(
+                                  Icons.refresh_rounded,
+                                  size: 16,
+                                ),
+                                label: Text(l.clear),
+                                onPressed: () {
+                                  query.clear();
+                                  type = null;
+                                  tag = thread = null;
+                                  trash = false;
+                                  load();
+                                },
+                              ),
+                            ),
+                          )
+                        // Designed first-run state (IDEAS.md): three concrete
+                        // actions instead of a bare "empty" line.
+                        : _buildFirstRunEmpty(context, l),
+                  ),
+                ),
+              ),
+            ),
           )
         else
           Expanded(

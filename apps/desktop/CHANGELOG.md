@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Keep minimum-size windows usable at large text sizes: scroll compact navigation,
+  wrap labels at their requested size, and adapt capture/reader actions to fewer columns.
+- Prevent titles and reader type badges from overflowing narrow windows; keep
+  library search readable and first-run actions reachable by scrolling.
+
 - Make custom tool tiles, media controls and small actions usable with Enter
   and Space; show clear keyboard focus and announce localized control labels.
 - Keep Tab navigation predictable in both languages and remove the extra focus
