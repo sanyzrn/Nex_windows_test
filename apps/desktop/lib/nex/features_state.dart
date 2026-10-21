@@ -294,7 +294,7 @@ class NexFeatures extends ChangeNotifier {
   }
 
   Future<void> close() async {
-    _modules?.dispose();
+    await _modules?.close();
     await _intelligence?.close();
     await _libraryChanges?.cancel();
     while (_pending.isNotEmpty) {

@@ -55,6 +55,12 @@ class DesktopModules extends ChangeNotifier {
     if (!_disposed) notifyListeners();
   }
 
+  Future<void> close() async {
+    privateSession.lock();
+    dispose();
+    await vault.flushed;
+  }
+
   @override
   void dispose() {
     _disposed = true;

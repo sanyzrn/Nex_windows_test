@@ -108,6 +108,10 @@ class VaultStore {
   final FlutterSecureStorage _storage;
   static Future<void>? _writes;
 
+  /// All accepted secure writes, including drafts. Graceful shutdown waits
+  /// for this tail before destroying the platform plugin/engine.
+  Future<void> get flushed => _writes ?? Future<void>.value();
+
   Future<VaultSnapshot> read() async {
     final pending = _writes;
     if (pending != null) await pending;

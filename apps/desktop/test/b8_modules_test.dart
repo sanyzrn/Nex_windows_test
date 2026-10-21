@@ -109,11 +109,13 @@ void main() {
         fields: {'title': id, 'password': 'synthetic-password'},
         updatedAt: DateTime(2026),
       );
-      await Future.wait([
+      final writes = [
         store.save(entry('one')),
         store.save(entry('two')),
         store.saveDraft(entry('draft')),
-      ]);
+      ];
+      await store.flushed;
+      await Future.wait(writes);
       expect((await store.read()).entries.length, 2);
       await store.save(entry('draft'));
       expect((await store.read()).draft, isNull);

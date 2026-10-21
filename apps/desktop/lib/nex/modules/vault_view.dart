@@ -212,6 +212,7 @@ class _VaultEditorState extends State<_VaultEditor> {
     favorite: widget.entry.favorite,
   );
   void changed() {
+    if (!widget.modules.privateSession.isOpen) return;
     widget.modules.privateSession.touch();
     final draft = value;
     pending = widget.modules.vault.saveDraft(draft);
@@ -226,6 +227,7 @@ class _VaultEditorState extends State<_VaultEditor> {
   }
 
   Future<void> save() async {
+    if (!widget.modules.privateSession.isOpen) return;
     final l = AppLocalizations.of(context)!;
     final entry = value;
     if (entry.title.trim().isEmpty ||
