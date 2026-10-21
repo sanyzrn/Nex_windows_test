@@ -38,6 +38,8 @@ dependencies:
   timezone: ^0.10.1
   # Official FFI helpers (malloc/free) for the tiny user32 calls.
   ffi: ^2.1.0
+  # PDFium is bundled at build time; reading never downloads a runtime.
+  pdfrx: ">=2.4.0 <2.5.0"
 
 dev_dependencies:
   flutter_test:

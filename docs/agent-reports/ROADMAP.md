@@ -13,7 +13,7 @@ Working branch: `windows/0.23-agent`. Android reference: separate read-only
 
 The owner requested fewer parts, lower token use, related work together, short
 reports and only necessary tests. This replaces the old 21-part schedule without
-dropping required work-order items. Parts 1–6 are implemented and their Windows checks passed. The owner approved Part 7; its implementation and final verification are tracked below. Optional B8 remains a separate decision. The old part numbers
+dropping required work-order items. Parts 1–6 are implemented and their Windows checks passed. The owner approved Part 7; its implementation and final verification are tracked below. B8's four core modules were explicitly selected on 2026-10-21. The old part numbers
 4–21 are superseded; A/B identifiers still refer to the original work order.
 
 Each remaining row is one approval boundary. Finish related work in that row,
@@ -60,7 +60,7 @@ native checks early, and later parts update that same checklist.
 - Report unavailable Windows/manual checks honestly and carry them forward.
   Required native verification is not removed to save tokens.
 
-The owner approved Part 7. B4–B7 implementation is recorded in PART7.md; final Windows CI and physical-device limits are tracked there. Stop before optional B8.
+The owner approved Part 7. B4–B7 implementation is recorded in PART7.md; final Windows CI and physical-device limits are tracked there. The owner subsequently selected the four core B8 modules; follow [B8](B8.md).
 
 No data schema or backup format changes. The owner has now requested publication; the release version is 0.23.0+17.
 Draft PRs are due at the end of each track, as specified in the work order.

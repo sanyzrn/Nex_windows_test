@@ -4,6 +4,7 @@
 
 #include "native_clipboard.h"
 #include "native_common.h"
+#include "native_private.h"
 
 #include <algorithm>
 #include <cstring>
@@ -70,6 +71,7 @@ bool SetClipboardText(const std::wstring& text) {
 std::string GetClipboardText() {
   if (!OpenClipboard(nullptr)) return std::string();
   std::string out;
+  if (ClipboardIsPrivate()) { CloseClipboard(); return out; }
   HANDLE h = GetClipboardData(CF_UNICODETEXT);
   if (h != nullptr) {
     if (auto* wide = static_cast<const wchar_t*>(GlobalLock(h))) {
@@ -119,6 +121,7 @@ void SetClipboardImage(int w, int h, const std::vector<uint8_t>& rgba) {
 bool ReadRawClipboardImage(std::vector<uint8_t>& out_rgba, uint32_t& out_w, uint32_t& out_h) {
   if (!OpenClipboard(nullptr)) return false;
 
+  if (ClipboardIsPrivate()) { CloseClipboard(); return false; }
   bool ok = false;
   // 1. Try CF_DIBV5 first, then CF_DIB
   HANDLE handle = GetClipboardData(CF_DIBV5);

@@ -19,11 +19,14 @@ import '../core/models.dart' show ClipImage;
 import '../core/controller.dart';
 import '../l10n/app_localizations.dart';
 import 'store.dart';
+import 'modules/module_controller.dart';
 import 'intelligence/controller.dart';
 import '../updates/controller.dart';
 
 class NexFeatures extends ChangeNotifier {
   DesktopUpdates? updates;
+  DesktopModules? _modules;
+  DesktopModules get modules => _modules ??= DesktopModules();
   DesktopIntelligence? _intelligence;
   final DesktopIntelligence Function(DesktopStore)? _intelligenceFactory;
   DesktopIntelligence get intelligence => _intelligence ??=
@@ -291,6 +294,7 @@ class NexFeatures extends ChangeNotifier {
   }
 
   Future<void> close() async {
+    _modules?.dispose();
     await _intelligence?.close();
     await _libraryChanges?.cancel();
     while (_pending.isNotEmpty) {

@@ -1,1 +1,1 @@
-Release 0.23.0+17: refresh visible About/version and finalized bilingual release-history screenshots, 2026-10-21.
+B8 core modules: review 32 new module surfaces and Tools/settings/release-note additions in EN/FA, light/dark, compact/wide; 2026-10-21.

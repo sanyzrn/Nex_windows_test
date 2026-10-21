@@ -28,6 +28,7 @@ if (-not $primary.WaitForExit(10000)) { throw 'Clean shutdown exceeded 10 second
 $exitWatch.Stop()
 $result = Get-Content -LiteralPath $probePath -Raw | ConvertFrom-Json
 $result | Add-Member singleInstance $singleInstance
+if (-not ($result.modules.pdfPages -eq 2 -and $result.modules.pdfRendered -and $result.modules.pdfSearch -and $result.modules.secureStorage -and $result.modules.privateClipboard)) { throw 'B8 native PDF/private checks failed.' }
 $result | Add-Member exitCode $primary.ExitCode
 $result | Add-Member shutdownWaitMs $exitWatch.ElapsedMilliseconds
 $result | Add-Member fullBundle $true

@@ -62,8 +62,7 @@ import 'app_localizations_fa.dart';
 /// be consistent with the languages listed in the AppLocalizations.supportedLocales
 /// property.
 abstract class AppLocalizations {
-  AppLocalizations(String locale)
-    : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+  AppLocalizations(String locale) : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
@@ -71,8 +70,7 @@ abstract class AppLocalizations {
     return Localizations.of<AppLocalizations>(context, AppLocalizations);
   }
 
-  static const LocalizationsDelegate<AppLocalizations> delegate =
-      _AppLocalizationsDelegate();
+  static const LocalizationsDelegate<AppLocalizations> delegate = _AppLocalizationsDelegate();
 
   /// A list of this localizations delegate along with the default localizations
   /// delegates.
@@ -84,18 +82,17 @@ abstract class AppLocalizations {
   /// Additional delegates can be added by appending to this list in
   /// MaterialApp. This list does not have to be used at all if a custom list
   /// of delegates is preferred or required.
-  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
-      <LocalizationsDelegate<dynamic>>[
-        delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-      ];
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
+    delegate,
+    GlobalMaterialLocalizations.delegate,
+    GlobalCupertinoLocalizations.delegate,
+    GlobalWidgetsLocalizations.delegate,
+  ];
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
     Locale('en'),
-    Locale('fa'),
+    Locale('fa')
   ];
 
   /// No description provided for @capture.
@@ -1536,21 +1533,6 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'Remember window size and position'**
-  /// Keep running in tray when I close the window
-  String get windowCloseAction;
-
-  /// Close hides Nex. Open it from the tray; Quit saves and exits.
-  String get windowCloseTrayHint;
-
-  /// Off: closing saves and quits Nex.
-  String get windowCloseQuitHint;
-
-  /// Snooze 10 min
-  String get reminderSnooze;
-
-  /// Done
-  String get reminderDone;
-
   String get windowRemember;
 
   /// No description provided for @windowRememberHint.
@@ -2156,7 +2138,7 @@ abstract class AppLocalizations {
   /// No description provided for @testNotificationSent.
   ///
   /// In en, this message translates to:
-  /// **'Test sent. You should see one notification now and another in 15 seconds.'**
+  /// **'Windows accepted both test notifications. If they do not appear, check notification settings and Do not disturb.'**
   String get testNotificationSent;
 
   /// No description provided for @testNotificationFailed.
@@ -2806,10 +2788,831 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Day'**
   String get calendarDay;
+
+  /// No description provided for @windowCloseAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep running in tray when I close the window'**
+  String get windowCloseAction;
+
+  /// No description provided for @windowCloseTrayHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Close hides Nex. Open it from the tray; Quit saves and exits.'**
+  String get windowCloseTrayHint;
+
+  /// No description provided for @windowCloseQuitHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Off: closing saves and quits Nex.'**
+  String get windowCloseQuitHint;
+
+  /// No description provided for @reminderSnooze.
+  ///
+  /// In en, this message translates to:
+  /// **'Snooze 10 min'**
+  String get reminderSnooze;
+
+  /// No description provided for @reminderDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get reminderDone;
+
+  /// No description provided for @modulesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional modules'**
+  String get modulesTitle;
+
+  /// No description provided for @modulesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the tools you need. Turning one off keeps its data.'**
+  String get modulesHint;
+
+  /// No description provided for @modulePdf.
+  ///
+  /// In en, this message translates to:
+  /// **'PDF reader'**
+  String get modulePdf;
+
+  /// No description provided for @modulePdfHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Read and search documents offline; swipe or jump to a page.'**
+  String get modulePdfHint;
+
+  /// No description provided for @moduleVault.
+  ///
+  /// In en, this message translates to:
+  /// **'Private area'**
+  String get moduleVault;
+
+  /// No description provided for @moduleVaultHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords, bank cards and private messages, protected by Windows Hello.'**
+  String get moduleVaultHint;
+
+  /// No description provided for @modulePortrait.
+  ///
+  /// In en, this message translates to:
+  /// **'Writing portrait'**
+  String get modulePortrait;
+
+  /// No description provided for @modulePortraitHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Your writing in numbers, with an optional reflection written by AI.'**
+  String get modulePortraitHint;
+
+  /// No description provided for @moduleCycle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cycle'**
+  String get moduleCycle;
+
+  /// No description provided for @moduleCycleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'A discreet, locked space for periods and daily observations.'**
+  String get moduleCycleHint;
+
+  /// No description provided for @moduleOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open module'**
+  String get moduleOpen;
+
+  /// No description provided for @moduleDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'This module is turned off. Enable it in Settings → Tools.'**
+  String get moduleDisabled;
+
+  /// No description provided for @privateLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Your private space is locked'**
+  String get privateLocked;
+
+  /// No description provided for @privateHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Use Windows Hello to unlock private tools together. The unlock lasts for two minutes after your last activity. Content is hidden when Nex loses focus.'**
+  String get privateHint;
+
+  /// No description provided for @privateUnlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock with Windows Hello'**
+  String get privateUnlock;
+
+  /// No description provided for @privateReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock your private tools in Nex'**
+  String get privateReason;
+
+  /// No description provided for @privateUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification was cancelled or unavailable. Set up Windows Hello in Windows sign-in options, then try again.'**
+  String get privateUnavailable;
+
+  /// No description provided for @privateLockNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Lock private tools'**
+  String get privateLockNow;
+
+  /// No description provided for @privateCopyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied privately. Nex clears this clipboard item after 30 seconds if it has not been replaced.'**
+  String get privateCopyHint;
+
+  /// No description provided for @privateDeviceOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved only in Windows secure storage. Excluded from notes, search, AI and library backups.'**
+  String get privateDeviceOnly;
+
+  /// No description provided for @privateReadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The private store could not be read. Nothing has been overwritten.'**
+  String get privateReadFailed;
+
+  /// No description provided for @privateDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue saved draft'**
+  String get privateDraft;
+
+  /// No description provided for @privateDraftHint.
+  ///
+  /// In en, this message translates to:
+  /// **'A draft is saved securely while you type.'**
+  String get privateDraftHint;
+
+  /// No description provided for @vaultPasswords.
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords'**
+  String get vaultPasswords;
+
+  /// No description provided for @vaultCards.
+  ///
+  /// In en, this message translates to:
+  /// **'Bank cards'**
+  String get vaultCards;
+
+  /// No description provided for @vaultMessages.
+  ///
+  /// In en, this message translates to:
+  /// **'Private messages'**
+  String get vaultMessages;
+
+  /// No description provided for @vaultTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get vaultTitle;
+
+  /// No description provided for @vaultLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Username or email'**
+  String get vaultLogin;
+
+  /// No description provided for @vaultPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get vaultPassword;
+
+  /// No description provided for @vaultWebsite.
+  ///
+  /// In en, this message translates to:
+  /// **'Website'**
+  String get vaultWebsite;
+
+  /// No description provided for @vaultCardNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Card number'**
+  String get vaultCardNumber;
+
+  /// No description provided for @vaultCardHolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Cardholder'**
+  String get vaultCardHolder;
+
+  /// No description provided for @vaultExpiry.
+  ///
+  /// In en, this message translates to:
+  /// **'Expiry date'**
+  String get vaultExpiry;
+
+  /// No description provided for @vaultCvv.
+  ///
+  /// In en, this message translates to:
+  /// **'CVV2'**
+  String get vaultCvv;
+
+  /// No description provided for @vaultIban.
+  ///
+  /// In en, this message translates to:
+  /// **'IBAN'**
+  String get vaultIban;
+
+  /// No description provided for @vaultMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Message'**
+  String get vaultMessage;
+
+  /// No description provided for @vaultNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes'**
+  String get vaultNotes;
+
+  /// No description provided for @vaultReveal.
+  ///
+  /// In en, this message translates to:
+  /// **'Show private values'**
+  String get vaultReveal;
+
+  /// No description provided for @vaultHide.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide private values'**
+  String get vaultHide;
+
+  /// No description provided for @vaultGenerate.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate password'**
+  String get vaultGenerate;
+
+  /// No description provided for @vaultDeleteConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this private item?'**
+  String get vaultDeleteConfirm;
+
+  /// No description provided for @vaultRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a title and the main value.'**
+  String get vaultRequired;
+
+  /// No description provided for @vaultInvalidCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the card number or IBAN.'**
+  String get vaultInvalidCard;
+
+  /// No description provided for @pdfChoose.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a PDF'**
+  String get pdfChoose;
+
+  /// No description provided for @pdfChooseHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Open a local PDF, or read a PDF attached to a note. Your document stays on this device.'**
+  String get pdfChooseHint;
+
+  /// No description provided for @pdfSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Search this document'**
+  String get pdfSearch;
+
+  /// No description provided for @pdfSearchEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching text. Scanned pages need OCR before text search.'**
+  String get pdfSearchEmpty;
+
+  /// No description provided for @pdfPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Page {page} of {total}'**
+  String pdfPage(String page, String total);
+
+  /// No description provided for @pdfJump.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to page'**
+  String get pdfJump;
+
+  /// No description provided for @pdfPageInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a page number in this document.'**
+  String get pdfPageInvalid;
+
+  /// No description provided for @pdfPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Document password'**
+  String get pdfPassword;
+
+  /// No description provided for @pdfFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The PDF could not be opened or rendered. Check the file and its password, then try again.'**
+  String get pdfFailed;
+
+  /// No description provided for @pdfSearchFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Document search failed. Try again.'**
+  String get pdfSearchFailed;
+
+  /// No description provided for @pdfMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Match {current} of {total}'**
+  String pdfMatch(String current, String total);
+
+  /// No description provided for @pdfZoom.
+  ///
+  /// In en, this message translates to:
+  /// **'Zoom'**
+  String get pdfZoom;
+
+  /// No description provided for @pdfResetZoom.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset zoom'**
+  String get pdfResetZoom;
+
+  /// No description provided for @portraitLocal.
+  ///
+  /// In en, this message translates to:
+  /// **'Counted on this device'**
+  String get portraitLocal;
+
+  /// No description provided for @portraitNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes'**
+  String get portraitNotes;
+
+  /// No description provided for @portraitDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Writing days'**
+  String get portraitDays;
+
+  /// No description provided for @portraitRecent.
+  ///
+  /// In en, this message translates to:
+  /// **'Active days in the last 30'**
+  String get portraitRecent;
+
+  /// No description provided for @portraitMorning.
+  ///
+  /// In en, this message translates to:
+  /// **'Morning'**
+  String get portraitMorning;
+
+  /// No description provided for @portraitAfternoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Afternoon'**
+  String get portraitAfternoon;
+
+  /// No description provided for @portraitEvening.
+  ///
+  /// In en, this message translates to:
+  /// **'Evening'**
+  String get portraitEvening;
+
+  /// No description provided for @portraitNight.
+  ///
+  /// In en, this message translates to:
+  /// **'Night'**
+  String get portraitNight;
+
+  /// No description provided for @portraitKinds.
+  ///
+  /// In en, this message translates to:
+  /// **'What you keep'**
+  String get portraitKinds;
+
+  /// No description provided for @portraitTags.
+  ///
+  /// In en, this message translates to:
+  /// **'Recurring topics'**
+  String get portraitTags;
+
+  /// No description provided for @portraitChecks.
+  ///
+  /// In en, this message translates to:
+  /// **'Checklist completion'**
+  String get portraitChecks;
+
+  /// No description provided for @portraitWrite.
+  ///
+  /// In en, this message translates to:
+  /// **'Write my portrait'**
+  String get portraitWrite;
+
+  /// No description provided for @portraitRewrite.
+  ///
+  /// In en, this message translates to:
+  /// **'Write a new portrait'**
+  String get portraitRewrite;
+
+  /// No description provided for @portraitThreshold.
+  ///
+  /// In en, this message translates to:
+  /// **'A written portrait needs at least 30 notes across 7 days. Your local statistics are always available.'**
+  String get portraitThreshold;
+
+  /// No description provided for @portraitConsentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Send a sample of your notes?'**
+  String get portraitConsentTitle;
+
+  /// No description provided for @portraitConsent.
+  ///
+  /// In en, this message translates to:
+  /// **'Only after you continue, Nex sends up to 80 short note excerpts and local writing statistics to your configured AI provider. Private tools and cycle data are excluded. This is a reflection, not a psychological assessment.'**
+  String get portraitConsent;
+
+  /// No description provided for @portraitAiOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable and test a text AI provider and allow note access in AI settings to write the optional portrait.'**
+  String get portraitAiOff;
+
+  /// No description provided for @portraitFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'A complete portrait was not returned. Your previous portrait is kept.'**
+  String get portraitFailed;
+
+  /// No description provided for @portraitStrengths.
+  ///
+  /// In en, this message translates to:
+  /// **'Strengths in your writing'**
+  String get portraitStrengths;
+
+  /// No description provided for @portraitInvitation.
+  ///
+  /// In en, this message translates to:
+  /// **'A small invitation'**
+  String get portraitInvitation;
+
+  /// No description provided for @portraitRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove written portrait'**
+  String get portraitRemove;
+
+  /// No description provided for @portraitBasedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Based on {count} notes'**
+  String portraitBasedOn(String count);
+
+  /// No description provided for @cyclePrivacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Cycle records stay out of notes and search. Library backups include them; AI access remains a separate opt-in.'**
+  String get cyclePrivacy;
+
+  /// No description provided for @cycleEstimate.
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar estimates only; not a diagnosis or a method of contraception.'**
+  String get cycleEstimate;
+
+  /// No description provided for @cycleDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Cycle day {day}'**
+  String cycleDay(String day);
+
+  /// No description provided for @cycleNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated next period'**
+  String get cycleNext;
+
+  /// No description provided for @cycleNoHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Begin with the first day of your most recent period.'**
+  String get cycleNoHistory;
+
+  /// No description provided for @cycleStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Period started'**
+  String get cycleStart;
+
+  /// No description provided for @cycleEnd.
+  ///
+  /// In en, this message translates to:
+  /// **'Period ended'**
+  String get cycleEnd;
+
+  /// No description provided for @cycleHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Period history'**
+  String get cycleHistory;
+
+  /// No description provided for @cycleEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit period dates'**
+  String get cycleEdit;
+
+  /// No description provided for @cycleDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this period?'**
+  String get cycleDelete;
+
+  /// No description provided for @cycleOngoing.
+  ///
+  /// In en, this message translates to:
+  /// **'Ongoing'**
+  String get cycleOngoing;
+
+  /// No description provided for @cycleStartDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Start date'**
+  String get cycleStartDate;
+
+  /// No description provided for @cycleEndDate.
+  ///
+  /// In en, this message translates to:
+  /// **'End date'**
+  String get cycleEndDate;
+
+  /// No description provided for @cycleOverlap.
+  ///
+  /// In en, this message translates to:
+  /// **'These dates overlap another period.'**
+  String get cycleOverlap;
+
+  /// No description provided for @cycleTypical.
+  ///
+  /// In en, this message translates to:
+  /// **'Typical lengths'**
+  String get cycleTypical;
+
+  /// No description provided for @cycleLength.
+  ///
+  /// In en, this message translates to:
+  /// **'Cycle length (15–60 days)'**
+  String get cycleLength;
+
+  /// No description provided for @cyclePeriodLength.
+  ///
+  /// In en, this message translates to:
+  /// **'Period length (1–15 days)'**
+  String get cyclePeriodLength;
+
+  /// No description provided for @cycleLog.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily observations'**
+  String get cycleLog;
+
+  /// No description provided for @cycleFlow.
+  ///
+  /// In en, this message translates to:
+  /// **'Flow'**
+  String get cycleFlow;
+
+  /// No description provided for @cycleMood.
+  ///
+  /// In en, this message translates to:
+  /// **'Mood'**
+  String get cycleMood;
+
+  /// No description provided for @cycleSymptoms.
+  ///
+  /// In en, this message translates to:
+  /// **'Symptoms'**
+  String get cycleSymptoms;
+
+  /// No description provided for @cycleNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Private daily note'**
+  String get cycleNote;
+
+  /// No description provided for @cycleSpotting.
+  ///
+  /// In en, this message translates to:
+  /// **'Spotting'**
+  String get cycleSpotting;
+
+  /// No description provided for @cycleLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get cycleLight;
+
+  /// No description provided for @cycleMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium'**
+  String get cycleMedium;
+
+  /// No description provided for @cycleHeavy.
+  ///
+  /// In en, this message translates to:
+  /// **'Heavy'**
+  String get cycleHeavy;
+
+  /// No description provided for @cycleLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Low'**
+  String get cycleLow;
+
+  /// No description provided for @cycleSensitive.
+  ///
+  /// In en, this message translates to:
+  /// **'Sensitive'**
+  String get cycleSensitive;
+
+  /// No description provided for @cycleCalm.
+  ///
+  /// In en, this message translates to:
+  /// **'Calm'**
+  String get cycleCalm;
+
+  /// No description provided for @cycleGood.
+  ///
+  /// In en, this message translates to:
+  /// **'Good'**
+  String get cycleGood;
+
+  /// No description provided for @cycleGreat.
+  ///
+  /// In en, this message translates to:
+  /// **'Great'**
+  String get cycleGreat;
+
+  /// No description provided for @cycleCramps.
+  ///
+  /// In en, this message translates to:
+  /// **'Cramps'**
+  String get cycleCramps;
+
+  /// No description provided for @cycleHeadache.
+  ///
+  /// In en, this message translates to:
+  /// **'Headache'**
+  String get cycleHeadache;
+
+  /// No description provided for @cycleBackPain.
+  ///
+  /// In en, this message translates to:
+  /// **'Back pain'**
+  String get cycleBackPain;
+
+  /// No description provided for @cycleBloating.
+  ///
+  /// In en, this message translates to:
+  /// **'Bloating'**
+  String get cycleBloating;
+
+  /// No description provided for @cycleBreastTenderness.
+  ///
+  /// In en, this message translates to:
+  /// **'Breast tenderness'**
+  String get cycleBreastTenderness;
+
+  /// No description provided for @cycleAcne.
+  ///
+  /// In en, this message translates to:
+  /// **'Acne'**
+  String get cycleAcne;
+
+  /// No description provided for @cycleNausea.
+  ///
+  /// In en, this message translates to:
+  /// **'Nausea'**
+  String get cycleNausea;
+
+  /// No description provided for @cycleFatigue.
+  ///
+  /// In en, this message translates to:
+  /// **'Fatigue'**
+  String get cycleFatigue;
+
+  /// No description provided for @cycleCravings.
+  ///
+  /// In en, this message translates to:
+  /// **'Cravings'**
+  String get cycleCravings;
+
+  /// No description provided for @cycleInsomnia.
+  ///
+  /// In en, this message translates to:
+  /// **'Insomnia'**
+  String get cycleInsomnia;
+
+  /// No description provided for @cycleDizziness.
+  ///
+  /// In en, this message translates to:
+  /// **'Dizziness'**
+  String get cycleDizziness;
+
+  /// No description provided for @cycleDischarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Discharge'**
+  String get cycleDischarge;
+
+  /// No description provided for @cyclePeriodStage.
+  ///
+  /// In en, this message translates to:
+  /// **'Period'**
+  String get cyclePeriodStage;
+
+  /// No description provided for @cycleFollicular.
+  ///
+  /// In en, this message translates to:
+  /// **'After the period'**
+  String get cycleFollicular;
+
+  /// No description provided for @cycleFertile.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated fertile window'**
+  String get cycleFertile;
+
+  /// No description provided for @cycleLuteal.
+  ///
+  /// In en, this message translates to:
+  /// **'Before the period'**
+  String get cycleLuteal;
+
+  /// No description provided for @cycleUncertain.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimates become clearer as you log more cycles.'**
+  String get cycleUncertain;
+
+  /// No description provided for @cycleToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get cycleToday;
+
+  /// No description provided for @moduleLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading…'**
+  String get moduleLoading;
+
+  /// No description provided for @moduleBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get moduleBack;
+
+  /// No description provided for @moduleAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get moduleAdd;
+
+  /// No description provided for @moduleCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get moduleCancel;
+
+  /// No description provided for @moduleSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Search private titles'**
+  String get moduleSearch;
 }
 
-class _AppLocalizationsDelegate
-    extends LocalizationsDelegate<AppLocalizations> {
+class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
   const _AppLocalizationsDelegate();
 
   @override
@@ -2818,26 +3621,25 @@ class _AppLocalizationsDelegate
   }
 
   @override
-  bool isSupported(Locale locale) =>
-      <String>['en', 'fa'].contains(locale.languageCode);
+  bool isSupported(Locale locale) => <String>['en', 'fa'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
 }
 
 AppLocalizations lookupAppLocalizations(Locale locale) {
+
+
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
-    case 'en':
-      return AppLocalizationsEn();
-    case 'fa':
-      return AppLocalizationsFa();
+    case 'en': return AppLocalizationsEn();
+    case 'fa': return AppLocalizationsFa();
   }
 
   throw FlutterError(
     'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
     'an issue with the localizations generation tool. Please file an issue '
     'on GitHub with a reproducible sample app and the gen-l10n configuration '
-    'that was used.',
+    'that was used.'
   );
 }

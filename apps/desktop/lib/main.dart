@@ -11,6 +11,7 @@ import 'nex/features.dart';
 import 'nex/welcome.dart';
 import 'nex/store.dart';
 import 'nex/media_smoke.dart';
+import 'nex/modules/module_probe.dart';
 import 'nex/panel_smoke.dart';
 import 'nex/lifecycle_smoke.dart';
 import 'nex/reminder_smoke.dart';
@@ -118,6 +119,7 @@ void main(List<String> arguments) async {
     final native = controller.native as WinNativeHost;
     final startup = await native.startupEnabled();
     final result = await native.diagnostics();
+    result['modules'] = await probeDesktopModules(support.path);
     var captures = 0;
     controller.onCapture = () {
       captures++;

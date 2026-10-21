@@ -20,6 +20,7 @@ mixin _SettingsToolsAbout on _SettingsStateBase {
         iconColor: scheme.primary,
         title: l.settingsTools,
         children: [
+          const NexModulesSettings(),
           NexToolOrganizer(controller: c),
           const Divider(height: 1),
           Padding(

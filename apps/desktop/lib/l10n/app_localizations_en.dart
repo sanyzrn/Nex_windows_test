@@ -147,8 +147,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get backup => 'Complete backup';
 
   @override
-  String get backupInfo =>
-      'Nex format: library is readable; settings are encrypted. Keep the recovery key.';
+  String get backupInfo => 'Nex format: library is readable; settings are encrypted. Keep the recovery key.';
 
   @override
   String get recoveryKey => 'Recovery key';
@@ -259,8 +258,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get utility27 => 'click to paste';
 
   @override
-  String get utility28 =>
-      'Save text you type often: addresses, replies, signatures…';
+  String get utility28 => 'Save text you type often: addresses, replies, signatures…';
 
   @override
   String get utility29 => 'Add a city below';
@@ -761,16 +759,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get windowRemember => 'Remember window size and position';
 
   @override
-  String get windowRememberHint =>
-      'Off: Nex opens as a compact card in the bottom-right corner, always at the same size.';
+  String get windowRememberHint => 'Off: Nex opens as a compact card in the bottom-right corner, always at the same size.';
 
   @override
-  String get modeDescription =>
-      'The desktop window is the main experience; the edge panel stays available for quick capture. Both share the same notes, media and settings.';
+  String get modeDescription => 'The desktop window is the main experience; the edge panel stays available for quick capture. Both share the same notes, media and settings.';
 
   @override
-  String get edgePanelOnly =>
-      'Applies to the edge panel — switch the interface mode to use it.';
+  String get edgePanelOnly => 'Applies to the edge panel — switch the interface mode to use it.';
 
   @override
   String get switchToPanel => 'Switch to edge panel';
@@ -882,8 +877,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get emptyLibraryTitle => 'Your library is empty';
 
   @override
-  String get emptyLibraryHint =>
-      'Capture first, think later. Everything stays on this PC.';
+  String get emptyLibraryHint => 'Capture first, think later. Everything stays on this PC.';
 
   @override
   String get emptyLibraryWrite => 'Write the first note';
@@ -973,8 +967,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get restoreConfirmBody =>
-      'Restoring replaces all current notes, tags and media with this backup. This cannot be undone.';
+  String get restoreConfirmBody => 'Restoring replaces all current notes, tags and media with this backup. This cannot be undone.';
 
   @override
   String get copyKey => 'Copy key';
@@ -1004,8 +997,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appLanguage => 'App language';
 
   @override
-  String get libraryUnavailable =>
-      'The note library is not available on this device yet.';
+  String get libraryUnavailable => 'The note library is not available on this device yet.';
 
   @override
   String get workspaceLocal => 'Private. On this device.';
@@ -1017,19 +1009,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get workspaceCaptureTitle => 'Room for your\nnext thought.';
 
   @override
-  String get workspaceCaptureDescription =>
-      'A thought, a list, a little reminder. Start typing; Nex keeps it.';
+  String get workspaceCaptureDescription => 'A thought, a list, a little reminder. Start typing; Nex keeps it.';
 
   @override
-  String get workspaceCaptureFooter =>
-      'Saved on this device. Always within reach.';
+  String get workspaceCaptureFooter => 'Saved on this device. Always within reach.';
 
   @override
   String get workspaceToolsTitle => 'Your everyday toolkit';
 
   @override
-  String get workspaceToolsDescription =>
-      'Useful desktop tools, all in one place.';
+  String get workspaceToolsDescription => 'Useful desktop tools, all in one place.';
 
   @override
   String get workspaceEssentials => 'Within reach';
@@ -1056,8 +1045,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get workspaceReaderTitle => 'A place to return to.';
 
   @override
-  String get workspaceReaderHint =>
-      'Pick a note on the side. Your words get the whole page.';
+  String get workspaceReaderHint => 'Pick a note on the side. Your words get the whole page.';
 
   @override
   String get workspaceToolsSearch => 'Find a tool…';
@@ -1075,8 +1063,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get testNotification => 'Test notifications';
 
   @override
-  String get testNotificationHint =>
-      'Shows one notification now and a second one 15 seconds later, so you can check both ways Nex delivers reminders.';
+  String get testNotificationHint => 'Shows one notification now and a second one 15 seconds later, so you can check both ways Nex delivers reminders.';
 
   @override
   String get testNotificationRun => 'Send test';
@@ -1093,16 +1080,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get testNotificationBody => 'This is a test notification from Nex.';
 
   @override
-  String get testNotificationLater =>
-      'The scheduled test notification arrived.';
+  String get testNotificationLater => 'The scheduled test notification arrived.';
 
   @override
-  String get reminderDeliveryFailed =>
-      'The time was saved, but Windows could not schedule the notification. Check Windows notification settings and try again.';
+  String get reminderDeliveryFailed => 'The time was saved, but Windows could not schedule the notification. Check Windows notification settings and try again.';
 
   @override
-  String get reminderSaveFailed =>
-      'The reminder could not be saved. Please try again.';
+  String get reminderSaveFailed => 'The reminder could not be saved. Please try again.';
 
   @override
   String get workspaceNotebook => 'Your notebook';
@@ -1117,8 +1101,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get workspaceViewAll => 'View all';
 
   @override
-  String get workspaceStartHint =>
-      'Your next note starts here. Recent notes stay within reach.';
+  String get workspaceStartHint => 'Your next note starts here. Recent notes stay within reach.';
 
   @override
   String get workspaceNoRecent => 'Notes you capture will appear here.';
@@ -1136,8 +1119,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get saving => 'Saving…';
 
   @override
-  String get clipboardSaveFailed =>
-      'Clipboard history could not be saved. These changes are not yet safe after restart.';
+  String get clipboardSaveFailed => 'Clipboard history could not be saved. These changes are not yet safe after restart.';
 
   @override
   String get clipboardRetry => 'Retry saving';
@@ -1149,8 +1131,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get manageTags => 'Manage tags';
 
   @override
-  String get tagDeleteHint =>
-      'Remove this tag from all notes? Your notes will be kept.';
+  String get tagDeleteHint => 'Remove this tag from all notes? Your notes will be kept.';
 
   @override
   String get tagNameRequired => 'Enter a unique tag name.';
@@ -1222,8 +1203,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noteAttachments => 'Attachments';
 
   @override
-  String get backupCompatibility =>
-      'Transfer notes, attachments and appearance between Nex apps. Clipboard, device settings, mobile vault and AI credentials stay on their own device.';
+  String get backupCompatibility => 'Transfer notes, attachments and appearance between Nex apps. Clipboard, device settings, mobile vault and AI credentials stay on their own device.';
 
   @override
   String get scheduledNotes => 'Scheduled notes';
@@ -1235,8 +1215,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get portableLibraryBackup => 'Portable library backup · all Nex apps';
 
   @override
-  String get importBackupConfirm =>
-      'This is a Nex export. Its notes and attachments will be added to your library. Existing notes remain unchanged.';
+  String get importBackupConfirm => 'This is a Nex export. Its notes and attachments will be added to your library. Existing notes remain unchanged.';
 
   @override
   String get importNotes => 'Import notes';
@@ -1427,6 +1406,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get calendarDay => 'Day';
+
   @override
   String get windowCloseAction => 'Keep running in tray when I close the window';
 
@@ -1442,4 +1422,407 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get reminderDone => 'Done';
 
+  @override
+  String get modulesTitle => 'Optional modules';
+
+  @override
+  String get modulesHint => 'Choose the tools you need. Turning one off keeps its data.';
+
+  @override
+  String get modulePdf => 'PDF reader';
+
+  @override
+  String get modulePdfHint => 'Read and search documents offline; swipe or jump to a page.';
+
+  @override
+  String get moduleVault => 'Private area';
+
+  @override
+  String get moduleVaultHint => 'Passwords, bank cards and private messages, protected by Windows Hello.';
+
+  @override
+  String get modulePortrait => 'Writing portrait';
+
+  @override
+  String get modulePortraitHint => 'Your writing in numbers, with an optional reflection written by AI.';
+
+  @override
+  String get moduleCycle => 'Cycle';
+
+  @override
+  String get moduleCycleHint => 'A discreet, locked space for periods and daily observations.';
+
+  @override
+  String get moduleOpen => 'Open module';
+
+  @override
+  String get moduleDisabled => 'This module is turned off. Enable it in Settings → Tools.';
+
+  @override
+  String get privateLocked => 'Your private space is locked';
+
+  @override
+  String get privateHint => 'Use Windows Hello to unlock private tools together. The unlock lasts for two minutes after your last activity. Content is hidden when Nex loses focus.';
+
+  @override
+  String get privateUnlock => 'Unlock with Windows Hello';
+
+  @override
+  String get privateReason => 'Unlock your private tools in Nex';
+
+  @override
+  String get privateUnavailable => 'Verification was cancelled or unavailable. Set up Windows Hello in Windows sign-in options, then try again.';
+
+  @override
+  String get privateLockNow => 'Lock private tools';
+
+  @override
+  String get privateCopyHint => 'Copied privately. Nex clears this clipboard item after 30 seconds if it has not been replaced.';
+
+  @override
+  String get privateDeviceOnly => 'Saved only in Windows secure storage. Excluded from notes, search, AI and library backups.';
+
+  @override
+  String get privateReadFailed => 'The private store could not be read. Nothing has been overwritten.';
+
+  @override
+  String get privateDraft => 'Continue saved draft';
+
+  @override
+  String get privateDraftHint => 'A draft is saved securely while you type.';
+
+  @override
+  String get vaultPasswords => 'Passwords';
+
+  @override
+  String get vaultCards => 'Bank cards';
+
+  @override
+  String get vaultMessages => 'Private messages';
+
+  @override
+  String get vaultTitle => 'Title';
+
+  @override
+  String get vaultLogin => 'Username or email';
+
+  @override
+  String get vaultPassword => 'Password';
+
+  @override
+  String get vaultWebsite => 'Website';
+
+  @override
+  String get vaultCardNumber => 'Card number';
+
+  @override
+  String get vaultCardHolder => 'Cardholder';
+
+  @override
+  String get vaultExpiry => 'Expiry date';
+
+  @override
+  String get vaultCvv => 'CVV2';
+
+  @override
+  String get vaultIban => 'IBAN';
+
+  @override
+  String get vaultMessage => 'Message';
+
+  @override
+  String get vaultNotes => 'Notes';
+
+  @override
+  String get vaultReveal => 'Show private values';
+
+  @override
+  String get vaultHide => 'Hide private values';
+
+  @override
+  String get vaultGenerate => 'Generate password';
+
+  @override
+  String get vaultDeleteConfirm => 'Delete this private item?';
+
+  @override
+  String get vaultRequired => 'Enter a title and the main value.';
+
+  @override
+  String get vaultInvalidCard => 'Check the card number or IBAN.';
+
+  @override
+  String get pdfChoose => 'Choose a PDF';
+
+  @override
+  String get pdfChooseHint => 'Open a local PDF, or read a PDF attached to a note. Your document stays on this device.';
+
+  @override
+  String get pdfSearch => 'Search this document';
+
+  @override
+  String get pdfSearchEmpty => 'No matching text. Scanned pages need OCR before text search.';
+
+  @override
+  String pdfPage(String page, String total) {
+    return 'Page $page of $total';
+  }
+
+  @override
+  String get pdfJump => 'Go to page';
+
+  @override
+  String get pdfPageInvalid => 'Enter a page number in this document.';
+
+  @override
+  String get pdfPassword => 'Document password';
+
+  @override
+  String get pdfFailed => 'The PDF could not be opened or rendered. Check the file and its password, then try again.';
+
+  @override
+  String get pdfSearchFailed => 'Document search failed. Try again.';
+
+  @override
+  String pdfMatch(String current, String total) {
+    return 'Match $current of $total';
+  }
+
+  @override
+  String get pdfZoom => 'Zoom';
+
+  @override
+  String get pdfResetZoom => 'Reset zoom';
+
+  @override
+  String get portraitLocal => 'Counted on this device';
+
+  @override
+  String get portraitNotes => 'Notes';
+
+  @override
+  String get portraitDays => 'Writing days';
+
+  @override
+  String get portraitRecent => 'Active days in the last 30';
+
+  @override
+  String get portraitMorning => 'Morning';
+
+  @override
+  String get portraitAfternoon => 'Afternoon';
+
+  @override
+  String get portraitEvening => 'Evening';
+
+  @override
+  String get portraitNight => 'Night';
+
+  @override
+  String get portraitKinds => 'What you keep';
+
+  @override
+  String get portraitTags => 'Recurring topics';
+
+  @override
+  String get portraitChecks => 'Checklist completion';
+
+  @override
+  String get portraitWrite => 'Write my portrait';
+
+  @override
+  String get portraitRewrite => 'Write a new portrait';
+
+  @override
+  String get portraitThreshold => 'A written portrait needs at least 30 notes across 7 days. Your local statistics are always available.';
+
+  @override
+  String get portraitConsentTitle => 'Send a sample of your notes?';
+
+  @override
+  String get portraitConsent => 'Only after you continue, Nex sends up to 80 short note excerpts and local writing statistics to your configured AI provider. Private tools and cycle data are excluded. This is a reflection, not a psychological assessment.';
+
+  @override
+  String get portraitAiOff => 'Enable and test a text AI provider and allow note access in AI settings to write the optional portrait.';
+
+  @override
+  String get portraitFailed => 'A complete portrait was not returned. Your previous portrait is kept.';
+
+  @override
+  String get portraitStrengths => 'Strengths in your writing';
+
+  @override
+  String get portraitInvitation => 'A small invitation';
+
+  @override
+  String get portraitRemove => 'Remove written portrait';
+
+  @override
+  String portraitBasedOn(String count) {
+    return 'Based on $count notes';
+  }
+
+  @override
+  String get cyclePrivacy => 'Cycle records stay out of notes and search. Library backups include them; AI access remains a separate opt-in.';
+
+  @override
+  String get cycleEstimate => 'Calendar estimates only; not a diagnosis or a method of contraception.';
+
+  @override
+  String cycleDay(String day) {
+    return 'Cycle day $day';
+  }
+
+  @override
+  String get cycleNext => 'Estimated next period';
+
+  @override
+  String get cycleNoHistory => 'Begin with the first day of your most recent period.';
+
+  @override
+  String get cycleStart => 'Period started';
+
+  @override
+  String get cycleEnd => 'Period ended';
+
+  @override
+  String get cycleHistory => 'Period history';
+
+  @override
+  String get cycleEdit => 'Edit period dates';
+
+  @override
+  String get cycleDelete => 'Delete this period?';
+
+  @override
+  String get cycleOngoing => 'Ongoing';
+
+  @override
+  String get cycleStartDate => 'Start date';
+
+  @override
+  String get cycleEndDate => 'End date';
+
+  @override
+  String get cycleOverlap => 'These dates overlap another period.';
+
+  @override
+  String get cycleTypical => 'Typical lengths';
+
+  @override
+  String get cycleLength => 'Cycle length (15–60 days)';
+
+  @override
+  String get cyclePeriodLength => 'Period length (1–15 days)';
+
+  @override
+  String get cycleLog => 'Daily observations';
+
+  @override
+  String get cycleFlow => 'Flow';
+
+  @override
+  String get cycleMood => 'Mood';
+
+  @override
+  String get cycleSymptoms => 'Symptoms';
+
+  @override
+  String get cycleNote => 'Private daily note';
+
+  @override
+  String get cycleSpotting => 'Spotting';
+
+  @override
+  String get cycleLight => 'Light';
+
+  @override
+  String get cycleMedium => 'Medium';
+
+  @override
+  String get cycleHeavy => 'Heavy';
+
+  @override
+  String get cycleLow => 'Low';
+
+  @override
+  String get cycleSensitive => 'Sensitive';
+
+  @override
+  String get cycleCalm => 'Calm';
+
+  @override
+  String get cycleGood => 'Good';
+
+  @override
+  String get cycleGreat => 'Great';
+
+  @override
+  String get cycleCramps => 'Cramps';
+
+  @override
+  String get cycleHeadache => 'Headache';
+
+  @override
+  String get cycleBackPain => 'Back pain';
+
+  @override
+  String get cycleBloating => 'Bloating';
+
+  @override
+  String get cycleBreastTenderness => 'Breast tenderness';
+
+  @override
+  String get cycleAcne => 'Acne';
+
+  @override
+  String get cycleNausea => 'Nausea';
+
+  @override
+  String get cycleFatigue => 'Fatigue';
+
+  @override
+  String get cycleCravings => 'Cravings';
+
+  @override
+  String get cycleInsomnia => 'Insomnia';
+
+  @override
+  String get cycleDizziness => 'Dizziness';
+
+  @override
+  String get cycleDischarge => 'Discharge';
+
+  @override
+  String get cyclePeriodStage => 'Period';
+
+  @override
+  String get cycleFollicular => 'After the period';
+
+  @override
+  String get cycleFertile => 'Estimated fertile window';
+
+  @override
+  String get cycleLuteal => 'Before the period';
+
+  @override
+  String get cycleUncertain => 'Estimates become clearer as you log more cycles.';
+
+  @override
+  String get cycleToday => 'Today';
+
+  @override
+  String get moduleLoading => 'Loading…';
+
+  @override
+  String get moduleBack => 'Back';
+
+  @override
+  String get moduleAdd => 'Add';
+
+  @override
+  String get moduleCancel => 'Cancel';
+
+  @override
+  String get moduleSearch => 'Search private titles';
 }

@@ -14,6 +14,7 @@ import '../core/controller.dart';
 import '../core/registry.dart';
 import '../nex/command_palette.dart';
 import '../nex/features.dart';
+import '../nex/modules/modules.dart';
 import '../nex/workspace_home.dart';
 import '../nex/settings.dart';
 import '../nex/intelligence/workspace.dart';

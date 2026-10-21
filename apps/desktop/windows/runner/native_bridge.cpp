@@ -18,6 +18,7 @@
 #include "native_clipboard.h"
 #include "native_pickers.h"
 #include "native_notifications.h"
+#include "native_private.h"
 #include "resource.h"
 
 #include <windows.h>
@@ -129,7 +130,34 @@ void NativeBridge::HandleMethodCall(
   const auto* args = raw_args ? std::get_if<EncodableMap>(raw_args) : nullptr;
   const std::string& name = call.method_name();
 
-  if (name == "readClipboardImage") {
+  if (name == "privateVerify") {
+    if (picking_.exchange(true)) { result->Success(EncodableValue(false)); return; }
+    auto response = std::shared_ptr<flutter::MethodResult<EncodableValue>>(std::move(result));
+    const auto reason = Utf16FromUtf8(ArgString(args, "reason"));
+    RunWorker([this, response, reason]() {
+      bool verified = false;
+      try { verified = VerifyPrivateTools(window_, reason,
+          [this](int ms) { return WaitOrStop(ms); }); } catch (...) {}
+      picking_.store(false);
+      // FlutterDesktopMessengerSendResponse is explicitly thread-safe.
+      if (!stopping_) response->Success(EncodableValue(verified));
+    });
+  } else if (name == "privateClipboard") {
+    DWORD sequence = 0;
+    const bool copied = SetPrivateClipboard(window_, Utf16FromUtf8(ArgString(args, "text")), &sequence);
+    result->Success(EncodableValue(copied));
+    if (copied) RunWorker([this, sequence]() {
+      if (!WaitOrStop(30000)) ClearPrivateClipboard(window_, sequence);
+    });
+  } else if (name == "privateClipboardSelfTest") {
+    // Dedicated native probe, using a synthetic value only. It never verifies
+    // a real user or bypasses the Dart unlock; no content is returned.
+    DWORD sequence = 0;
+    const bool copied = SetPrivateClipboard(window_, L"Nex private clipboard probe", &sequence);
+    const bool excluded = copied && ClipboardIsPrivate() && GetClipboardText().empty();
+    const bool cleared = copied && ClearPrivateClipboard(window_, sequence);
+    result->Success(EncodableValue(excluded && cleared));
+  } else if (name == "readClipboardImage") {
     ReadClipboardImage(ArgInt(args, "request"));
     result->Success();
   } else if (name == "labels") {
@@ -786,6 +814,7 @@ void NativeBridge::StartClipboardWatch() {
       const uint64_t s = GetClipboardSequenceNumber();
       if (s != seq) {
         seq = s;
+        if (ClipboardIsPrivate()) continue;
         const std::string text = GetClipboardText();
         if (!text.empty() && text.find_first_not_of(" \t\r\n") != std::string::npos &&
             text.size() < 100000) {

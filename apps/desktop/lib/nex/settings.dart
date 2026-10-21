@@ -10,6 +10,7 @@ import '../core/app_meta.dart';
 import '../core/display_identity.dart';
 import '../core/panel_settings.dart';
 import 'tool_organizer.dart';
+import 'modules/modules.dart';
 import 'test_notification.dart';
 import '../ui/widgets.dart';
 import '../l10n/app_localizations.dart';
@@ -114,7 +115,7 @@ abstract class _SettingsStateBase extends State<NexSettingsView> {
       '${l.appLanguage} ${l.light} ${l.dark} ${l.followSystem} ${l.themePalette} ${l.customAccent} ${l.textScale} ${l.solarCalendar} ${l.settingsDensity}',
       '${l.hotkey} ${l.pasteOnClick} ${l.magnify}',
       '${l.restore} ${l.recoveryKey} ${l.importNotes}',
-      '',
+      '${l.modulesTitle} ${l.modulePdf} ${l.moduleVault} ${l.modulePortrait} ${l.moduleCycle}',
       '${l.applicationName} ${d.t('whatsNew')}',
       '${AiStrings.of(context).t('provider')} ${AiStrings.of(context).t('model')} Gemini YouTube',
     ];
