@@ -17,7 +17,7 @@ Base: `bb47bd9`; branch `windows/0.23-agent`. Owner approved this bundle.
   visible focus and remembered windows retain placement. The remember setting
   updates restoration immediately. Tray includes New note and clean draining Quit.
 - B3: localized Snooze 10 min / Done protocol actions, logo and timestamp, grouped
-  occurrence tags. Store-worker revision checks reject stale/replayed actions;
+  occurrence tags. Store-worker reminder fingerprints (time/repeat/content revision) reject stale/replayed actions;
   Done removes the reminder/series, never the note. Snooze retains repetition
   anchored to the new time. Cold actions run without showing the application.
   Queue acceptance is no longer a delivery receipt; fallback acknowledgements are
@@ -34,6 +34,10 @@ Base: `bb47bd9`; branch `windows/0.23-agent`. Owner approved this bundle.
   passed; all 11 changed images reviewed (`d1c7d81`). No tolerance changes.
 - The first full Windows run stopped on two test-only const hints; fixed in
   `2e5e1d4`. Its follow-up passed analysis and entered the desktop suite.
+- The next run exposed three reminder-action fixture failures. The repository
+  inserts base note fields separately from due-time fields and does not bump the
+  content revision for a reminder edit. Fixtures now set reminders through the
+  actual API; action fingerprints include time/repeat as well as content revision.
 - Final source checks: [PR checks](https://github.com/sanyzrn/Nex_windows_test/pull/9/checks).
   CI compares Windows images, runs the regression suites, builds Release and the
   installer, and exercises the real runner. The new native probe asserts close

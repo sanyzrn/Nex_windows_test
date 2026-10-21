@@ -1,5 +1,6 @@
 import 'package:nex_core/nex_core.dart';
 import 'package:nex_data/nex_data.dart';
+import 'reminder_policy.dart';
 
 class ReminderActivation {
   const ReminderActivation(
@@ -64,7 +65,7 @@ bool applyReminderActivation(
   if (note == null ||
       note.deletedAt != null ||
       note.dueAt == null ||
-      note.rev != action.revision ||
+      reminderActionVersion(note) != action.revision ||
       action.occurrence.isBefore(note.dueAt!) ||
       action.occurrence.isAfter(now.add(const Duration(minutes: 1)))) {
     return false;

@@ -248,7 +248,7 @@ class ReminderReconciliationEngine {
                 title: titleText,
                 body: bodyText,
                 occurrence: due,
-                revision: note.rev,
+                revision: reminderActionVersion(note),
               );
               if (shown) {
                 notifiedOverdueIds?.add(receipt);
@@ -263,7 +263,7 @@ class ReminderReconciliationEngine {
             fireAt: due,
             title: titleText,
             body: bodyText,
-            revision: note.rev,
+            revision: reminderActionVersion(note),
           );
         }
       } else {
@@ -276,7 +276,7 @@ class ReminderReconciliationEngine {
             fireAt: fireAt,
             title: titleText,
             body: bodyText,
-            revision: note.rev,
+            revision: reminderActionVersion(note),
           );
           fireAt = computeNextOccurrence(due, note.dueRepeat, fireAt);
         }

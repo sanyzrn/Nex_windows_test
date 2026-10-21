@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:nex_core/nex_core.dart';
 import 'package:nex_data/nex_data.dart';
 import 'package:nex_desktop/nex/reminder_activation.dart';
+import 'package:nex_desktop/nex/reminder_policy.dart';
 
 void main() {
   final now = DateTime.utc(2026, 10, 21, 12);
@@ -43,13 +44,16 @@ void main() {
               syncState: SyncState.pending,
             ),
           );
-          final rev = repo.getById('n1')!.rev;
+          repo.setDueAt('n1', now, repeat: repeat);
+          final rev = reminderActionVersion(repo.getById('n1')!);
           final snooze = ReminderActivation.parse(uri(rev, 'snooze'))!;
           expect(applyReminderActivation(repo, snooze, now), isTrue);
           final note = repo.getById('n1')!;
           expect(note.dueAt, now.add(const Duration(minutes: 10)));
           expect(note.dueRepeat, repeat);
           expect(applyReminderActivation(repo, snooze, now), isFalse);
+          expect(note.rev, 1);
+          expect(reminderActionVersion(note), isNot(rev));
           expect(
             applyReminderActivation(
               repo,
@@ -58,7 +62,12 @@ void main() {
             ),
             isFalse,
           );
-          final done = ReminderActivation('n1', 'done', note.rev, note.dueAt!);
+          final done = ReminderActivation(
+            'n1',
+            'done',
+            reminderActionVersion(note),
+            note.dueAt!,
+          );
           expect(applyReminderActivation(repo, done, note.dueAt!), isTrue);
           expect(repo.getById('n1')!.dueAt, isNull);
           expect(repo.getById('n1')!.content, 'Keep this note');
