@@ -100,11 +100,13 @@ mixin _SettingsDisplayAppearance on _SettingsStateBase {
             title: l.windowRemember,
             subtitle: l.windowRememberHint,
             control: Switch(
+              key: const ValueKey('window-remember'),
               value: c.S.windowRemember,
-              onChanged: (v) {
+              onChanged: (v) async {
                 c.S.windowRemember = v;
                 c.save();
                 c.refresh();
+                await c.native.setCompactRestoration(!v);
               },
             ),
           ),

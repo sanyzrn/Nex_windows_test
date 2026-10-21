@@ -60,6 +60,8 @@ abstract class NativeHost {
   /// Returns false when no real tray icon exists, so close can safely quit.
   Future<bool> hideToTray() async => false;
 
+  Future<void> setCompactRestoration(bool compact) async {}
+
   /// Called after the new Flutter shell has laid out and painted.
   Future<void> surfaceReady(String mode) async {}
   Future<bool> configureHotkey(String key) async => false;
@@ -170,6 +172,9 @@ class WinNativeHost extends NativeHost with _NativePointer {
   @override
   Future<bool> hideToTray() async =>
       await _channel.invokeMethod<bool>('hideToTray') ?? false;
+  @override
+  Future<void> setCompactRestoration(bool compact) =>
+      _channel.invokeMethod('setCompactRestoration', {'compact': compact});
   Future<void> probeDisplayChange() =>
       _channel.invokeMethod('probeDisplayChange');
   @override

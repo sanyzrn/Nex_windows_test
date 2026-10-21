@@ -54,7 +54,7 @@ class _DesktopEditingDirectionState extends State<DesktopEditingDirection> {
     final value = widget.controller.value;
     if (value.composing.isValid && !value.composing.isCollapsed) return;
     if (value.selection.isValid && !value.selection.isCollapsed) return;
-    final next = widget.multiline
+    final next = widget.multiline && value.selection.isValid
         ? desktopEditingDirection(value)
         : nexDirectionOf(value.text);
     // Empty neutral paragraphs retain the writer's last direction.

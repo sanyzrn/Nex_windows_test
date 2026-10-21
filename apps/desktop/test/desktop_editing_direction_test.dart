@@ -108,6 +108,13 @@ void main() {
         TextDirection.ltr,
       );
       expect(c.text, original);
+      c.text = 'سلام'; // Programmatic replacements carry an invalid selection.
+      await t.pump();
+      expect(
+        t.widget<EditableText>(find.byType(EditableText)).textDirection,
+        TextDirection.rtl,
+      );
+      expect(c.selection.isValid, isFalse);
       await t.pumpWidget(const SizedBox());
     },
   );

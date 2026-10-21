@@ -12,7 +12,8 @@ A3 final refresh run `39498530568` passed; all 52 updated images were reviewed.
 | A3 minimum size/text scale | Implemented; local tests and Windows visual refresh passed | [Report](A3.md), 551 desktop tests including 336 layout cases and 10 scaled-control regressions; 52 Windows review additions; 44 before/after renders |
 | A5, A7, A8, A10 | Completed in Part 4 | [Report](PART4.md); cleanup/docs/templates; 552 existing tests + 6 focused additions, analysis and guards passed |
 | A4, A6, A9, A11, A12 | Completed in Part 5; Track A complete | [Report](PART5.md); offline history, digits/calendar, installer review, 76 compact Windows scenes, standalone formatting |
-| B0–B7 | Not started; bundled into Parts 6–7 | Native verification needs Windows; no Windows success inferred from Linux |
+| B0–B3 | Implemented in Part 6; device limits remain | [Report](PART6.md), [34-item manual triage](B0.md), live Windows PR checks |
+| B4–B7 | Not started; Part 7 | Owner approval required |
 | B8 optional modules | Not started | Ask the owner which modules before implementation |
 
 Source, tests, glossary, changelog and reports are committed together and pushed
@@ -23,9 +24,8 @@ Windows-generated screenshots were reviewed. Full Windows comparison/build/nativ
 smoke and real DPI/installer/notification/Narrator checks remain open; refresh-mode
 success does not imply those checks passed.
 
-Parts 1–5 are complete. Two required bundles remain (Parts 6–7), plus optional
-B8. Related work runs together, reports stay short and verification targets
-relevant risks without repeated unnecessary runs. Part 6 (B0–B3) requires owner
-approval. Track A [draft PR #9](https://github.com/sanyzrn/Nex_windows_test/pull/9) is open;
+Parts 1–5 are complete; Part 6 implementation is recorded with its Windows
+checks and explicit manual limitations. Part 7 remains, plus optional B8. Related work runs together, reports stay short and verification targets
+relevant risks without repeated unnecessary runs. Part 7 requires owner approval. Track A [draft PR #9](https://github.com/sanyzrn/Nex_windows_test/pull/9) is open;
 Windows CI and manual limits are recorded in Part 5 and the PR checks.
 No merge, release or version bump was performed.

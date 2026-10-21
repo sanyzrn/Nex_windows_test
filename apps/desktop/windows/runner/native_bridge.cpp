@@ -258,6 +258,9 @@ void NativeBridge::HandleMethodCall(
   } else if (name == "setStartup") {
     SetStartupRegistry(ArgBool(args, "on"));
     result->Success();
+  } else if (name == "setCompactRestoration") {
+    compact_window_ = window_mode_ && ArgBool(args, "compact");
+    result->Success();
   } else if (name == "hideToTray") {
     const bool can_hide = window_mode_ && tray_added_;
     if (can_hide) {
