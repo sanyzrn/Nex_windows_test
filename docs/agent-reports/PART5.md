@@ -39,8 +39,11 @@ Base: `689ac2a`; branch `windows/0.23-agent`. Covers A9, A11, A12, A4 and A6.
   passed; eight affected About/history images reviewed (`2587ef6`). Final build-label
   refresh [39553886246](https://github.com/sanyzrn/Nex_windows_test/actions/runs/39553886246)
   passed; all four changed About images reviewed (`0136023`).
-- Standalone formatting commit: `8720413`. Full Windows comparison/build/native
-  CI is pending the Track A draft PR below.
+- Standalone formatting commit: `8720413`. [Draft PR #9](https://github.com/sanyzrn/Nex_windows_test/pull/9)
+  opens Track A review. Full Windows comparison/build/native CI was running when
+  this report was committed; [current checks](https://github.com/sanyzrn/Nex_windows_test/pull/9/checks)
+  carry the live result. The PR body records its final outcome without rerunning
+  the full suite merely to update this document.
 
 Manual installed-app install/uninstall/reinstall with retained notes, Run-dialog
 protocol activation, physical DPI/IME/Narrator and real Android round-trips remain

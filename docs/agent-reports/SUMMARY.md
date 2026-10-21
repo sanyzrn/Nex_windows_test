@@ -26,5 +26,6 @@ success does not imply those checks passed.
 Parts 1–5 are complete. Two required bundles remain (Parts 6–7), plus optional
 B8. Related work runs together, reports stay short and verification targets
 relevant risks without repeated unnecessary runs. Part 6 (B0–B3) requires owner
-approval. Track A draft PR and final Windows CI evidence are recorded in Part 5.
+approval. Track A [draft PR #9](https://github.com/sanyzrn/Nex_windows_test/pull/9) is open;
+Windows CI and manual limits are recorded in Part 5 and the PR checks.
 No merge, release or version bump was performed.
