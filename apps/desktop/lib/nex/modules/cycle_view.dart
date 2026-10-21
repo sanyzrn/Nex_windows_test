@@ -280,6 +280,10 @@ class _DesktopCycleViewState extends State<DesktopCycleView> {
       typicalPeriod: modules.typicalPeriod,
     );
     final open = periods.where((p) => p.isOpen).lastOrNull;
+    final ringSize = (190 * MediaQuery.textScalerOf(context).scale(1)).clamp(
+      190.0,
+      320.0,
+    );
     return ListView(
       padding: const EdgeInsets.all(NexSpacing.md),
       children: [
@@ -290,8 +294,8 @@ class _DesktopCycleViewState extends State<DesktopCycleView> {
         else
           Center(
             child: SizedBox(
-              width: 190,
-              height: 190,
+              width: ringSize,
+              height: ringSize,
               child: Stack(
                 alignment: Alignment.center,
                 children: [

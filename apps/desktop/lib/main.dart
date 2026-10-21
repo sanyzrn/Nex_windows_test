@@ -207,6 +207,9 @@ void main(List<String> arguments) async {
   }
   LicenseRegistry.addLicense(() async* {
     yield LicenseEntryWithLineBreaks([
+      'PDFium',
+    ], await rootBundle.loadString('assets/notices/pdfium.txt'));
+    yield LicenseEntryWithLineBreaks([
       'Right Panel',
     ], await rootBundle.loadString('assets/notices/right-panel.txt'));
     yield LicenseEntryWithLineBreaks([

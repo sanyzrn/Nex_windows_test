@@ -1,1 +1,1 @@
-B8 core modules, compatible image/archive codec pair: review 32 module surfaces plus Tools/settings/release-note additions, 2026-10-21.
+B8 core modules: defer PDF searcher until document attachment; adaptive cycle ring at 2x text; review new module surfaces, 2026-10-21.

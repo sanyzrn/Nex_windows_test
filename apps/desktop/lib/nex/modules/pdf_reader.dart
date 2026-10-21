@@ -8,6 +8,11 @@ import '../../l10n/app_localizations.dart';
 import '../../l10n/desktop_format.dart';
 import '../features_state.dart';
 
+bool desktopPdfWebLink(Uri uri) =>
+    const {'http', 'https'}.contains(uri.scheme.toLowerCase()) &&
+    uri.host.isNotEmpty &&
+    uri.userInfo.isEmpty;
+
 /// PDFium is a native build asset, not a runtime download. Only local files
 /// enter this view; no URI loader or provider request is involved.
 class DesktopPdfReader extends StatefulWidget {
@@ -20,7 +25,7 @@ class DesktopPdfReader extends StatefulWidget {
 
 class _DesktopPdfReaderState extends State<DesktopPdfReader> {
   final controller = PdfViewerController();
-  late final searcher = PdfTextSearcher(controller)..addListener(_changed);
+  PdfTextSearcher? searcher;
   final query = TextEditingController();
   late String? path = widget.initialPath;
   int page = 1, count = 0, revision = 0;
@@ -42,6 +47,9 @@ class _DesktopPdfReaderState extends State<DesktopPdfReader> {
             ],
           );
       if (!mounted || files.isEmpty) return;
+      searcher?.removeListener(_changed);
+      searcher?.dispose();
+      searcher = null;
       setState(() {
         path = files.first.path;
         page = 1;
@@ -50,7 +58,7 @@ class _DesktopPdfReaderState extends State<DesktopPdfReader> {
         revision++;
       });
       query.clear();
-      searcher.resetTextSearch();
+      searcher?.resetTextSearch();
     } catch (_) {
       if (mounted) setState(() => failed = true);
     }
@@ -110,8 +118,8 @@ class _DesktopPdfReaderState extends State<DesktopPdfReader> {
 
   @override
   void dispose() {
-    searcher.removeListener(_changed);
-    searcher.dispose();
+    searcher?.removeListener(_changed);
+    searcher?.dispose();
     query.dispose();
     super.dispose();
   }
@@ -157,18 +165,18 @@ class _DesktopPdfReaderState extends State<DesktopPdfReader> {
                         tooltip: l.clearSelection,
                         onPressed: () {
                           query.clear();
-                          searcher.resetTextSearch();
+                          searcher?.resetTextSearch();
                           setState(() {});
                         },
                         icon: const Icon(Icons.close),
                       ),
               ),
               onChanged: (text) {
-                searcher.startTextSearch(text);
+                searcher?.startTextSearch(text);
                 setState(() {});
               },
               onSubmitted: (text) =>
-                  searcher.startTextSearch(text, searchImmediately: true),
+                  searcher?.startTextSearch(text, searchImmediately: true),
             ),
             if (query.text.isNotEmpty)
               Padding(
@@ -177,32 +185,37 @@ class _DesktopPdfReaderState extends State<DesktopPdfReader> {
                   children: [
                     Expanded(
                       child: Text(
-                        searcher.isSearching
+                        (searcher?.isSearching ?? false)
                             ? l.moduleLoading
-                            : searcher.matches.isEmpty
+                            : (searcher?.matches.isEmpty ?? true)
                             ? l.pdfSearchEmpty
                             : l.pdfMatch(
                                 desktopDigits(
                                   context,
-                                  (searcher.currentIndex ?? 0) + 1,
+                                  (searcher?.currentIndex ?? 0) + 1,
                                 ),
-                                desktopDigits(context, searcher.matches.length),
+                                desktopDigits(
+                                  context,
+                                  (searcher?.matches.length ?? 0),
+                                ),
                               ),
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
                     ),
                     IconButton(
                       tooltip: l.previousPage,
-                      onPressed: !searcher.hasMatches
+                      onPressed: !(searcher?.hasMatches ?? false)
                           ? null
-                          : () => searcher.goToPrevMatch(),
+                          : () => searcher?.goToPrevMatch(),
                       icon: const Icon(Icons.keyboard_arrow_up),
                     ),
                     IconButton(
                       tooltip: l.nextPage,
-                      onPressed: !searcher.hasMatches
+                      onPressed: !(searcher?.hasMatches ?? false)
                           ? null
-                          : () => searcher.goToNextMatch(),
+                          : () => searcher?.goToNextMatch(),
                       icon: const Icon(Icons.keyboard_arrow_down),
                     ),
                   ],
@@ -227,13 +240,35 @@ class _DesktopPdfReaderState extends State<DesktopPdfReader> {
                     // Localized Material copy/selection controls are supplied by the
                     // pre-migration pdfrx line compatible with Flutter 3.44.8.
                     forceEnableTextSemantics: true,
+                    linkHandlerParams: PdfLinkHandlerParams(
+                      linkColor: scheme.primary.withValues(alpha: .12),
+                      onLinkTap: (link) {
+                        if (link.dest != null) {
+                          unawaited(
+                            controller.goToDest(link.dest, duration: duration),
+                          );
+                        } else if (link.url != null &&
+                            desktopPdfWebLink(link.url!)) {
+                          final native = NexPanelScope.maybeOf(context)?.native;
+                          if (native != null)
+                            unawaited(
+                              widget.features.guard(
+                                () => native.launch(link.url.toString()),
+                              ),
+                            );
+                        }
+                      },
+                    ),
                     matchTextColor: scheme.secondaryContainer.withValues(
                       alpha: .65,
                     ),
                     activeMatchTextColor: scheme.tertiaryContainer.withValues(
                       alpha: .8,
                     ),
-                    pagePaintCallbacks: [searcher.pageTextMatchPaintCallback],
+                    pagePaintCallbacks: [
+                      if (searcher != null)
+                        searcher!.pageTextMatchPaintCallback,
+                    ],
                     layoutPages: (pages, params) {
                       final height =
                           pages.fold(0.0, (h, p) => math.max(h, p.height)) +
@@ -262,12 +297,17 @@ class _DesktopPdfReaderState extends State<DesktopPdfReader> {
                     },
                     onViewerReady: (document, _) {
                       if (!mounted) return;
+                      searcher?.removeListener(_changed);
+                      searcher?.dispose();
+                      // pdfrx 2.4 requires an attached, ready controller here.
+                      searcher = PdfTextSearcher(controller)
+                        ..addListener(_changed);
                       setState(() {
                         count = document.pages.length;
                         failed = false;
                       });
                       if (query.text.isNotEmpty)
-                        searcher.startTextSearch(query.text);
+                        searcher?.startTextSearch(query.text);
                     },
                     onPageChanged: (value) {
                       if (mounted && value != null)
