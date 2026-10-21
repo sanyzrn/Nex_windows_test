@@ -17,9 +17,10 @@ menu/contrast tests check the port; Windows visual comparison remains required.
 Modules compared with Android `widgets/pdf_reader.dart`, `screens/cycle/` ring,
 today and calendar, `screens/vault_screen.dart`, and writing portrait code.
 PDF keeps the native PDFium desktop renderer/search/selection rather than porting
-Android's bitmap bridge; adds document identity and Ctrl+O/F/G. Cycle now has an
+Android's bitmap bridge; adds a clear local-open empty state, document identity and Ctrl+O/F/G. Cycle now has an
 inspectable phase ring with keyboard slider and quick mood on the selected date,
-preserving other observations through copyWith. Vault adds per-category counts;
+preserving other observations through copyWith. Ring/calendar sit side by side
+on wide windows and stack on narrow ones. Vault adds counted category cards;
 Portrait uses readable metric cards and refresh. Tool dialogs explain context
 and retain immediate shared private-session locking. These are desktop
 adaptations, not a claim of full Android parity: Android native widgets,

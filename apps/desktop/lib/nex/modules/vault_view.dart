@@ -75,9 +75,25 @@ class _DesktopVaultViewState extends State<DesktopVaultView> {
           children: [
             for (final value in VaultKind.values)
               ChoiceChip(
-                avatar: Icon(icons[value.index], size: 18),
-                label: Text(
-                  '${labels[value.index]}${snapshot == null ? '' : ' · ${desktopDigits(context, snapshot!.entries.where((e) => e.kind == value).length)}'}',
+                avatar: Icon(icons[value.index], size: 24),
+                showCheckmark: false,
+                padding: const EdgeInsets.all(NexSpacing.md),
+                label: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(labels[value.index]),
+                    if (snapshot != null)
+                      Text(
+                        desktopDigits(
+                          context,
+                          snapshot!.entries
+                              .where((e) => e.kind == value)
+                              .length,
+                        ),
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                  ],
                 ),
                 selected: kind == value,
                 onSelected: (_) => setState(() {

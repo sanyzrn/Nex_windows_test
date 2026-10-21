@@ -1,1 +1,1 @@
-0.26.0 revision 2: shared menus, module dashboards, corrected dropdown surface and current docs.
+0.26.0 revision 3: review responsive Cycle dashboard, PDF open state, Vault categories and Portrait metrics.

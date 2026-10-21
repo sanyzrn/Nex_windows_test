@@ -150,14 +150,15 @@ class _DesktopPdfReaderState extends State<DesktopPdfReader> {
         padding: const EdgeInsets.all(NexSpacing.sm),
         child: Column(
           children: [
-            Align(
-              alignment: AlignmentDirectional.centerStart,
-              child: TextButton.icon(
-                onPressed: choose,
-                icon: const Icon(Icons.file_open_outlined),
-                label: Text(l.pdfChoose),
+            if (file != null)
+              Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: TextButton.icon(
+                  onPressed: choose,
+                  icon: const Icon(Icons.file_open_outlined),
+                  label: Text(l.pdfChoose),
+                ),
               ),
-            ),
             if (file != null)
               Padding(
                 padding: const EdgeInsets.symmetric(
@@ -191,9 +192,24 @@ class _DesktopPdfReaderState extends State<DesktopPdfReader> {
             if (file == null)
               Expanded(
                 child: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(NexSpacing.lg),
-                    child: Text(l.pdfChooseHint),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 460),
+                    child: Card(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          NexEmptyState(
+                            icon: Icons.picture_as_pdf_outlined,
+                            message: l.pdfChooseHint,
+                            action: FilledButton.tonalIcon(
+                              onPressed: choose,
+                              icon: const Icon(Icons.file_open_outlined),
+                              label: Text(l.pdfChoose),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               )
