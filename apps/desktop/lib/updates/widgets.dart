@@ -182,3 +182,25 @@ class _BannerState extends State<NexUpdateBanner> {
     );
   }
 }
+
+/// A live update marker; it never starts a network request.
+class NexUpdateDot extends StatelessWidget {
+  const NexUpdateDot({super.key, required this.updates, required this.child});
+  final DesktopUpdates? updates;
+  final Widget child;
+  @override
+  Widget build(BuildContext context) {
+    final service = updates;
+    if (service == null) return child;
+    return ListenableBuilder(
+      listenable: service,
+      child: child,
+      builder: (context, icon) => Badge(
+        isLabelVisible: service.release != null,
+        smallSize: 8,
+        backgroundColor: Theme.of(context).colorScheme.error,
+        child: icon!,
+      ),
+    );
+  }
+}

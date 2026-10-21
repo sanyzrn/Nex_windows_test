@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.25.0 — 2026-10-22
+
+- Delivered one-time reminders leave the Today/overdue strip and lose their Overdue badge; snooze and reminder actions keep working.
+- Hide the unused gallery/list switches in the edge-panel library; window layouts retain both views.
+- Resize only the panel dock and its icons, keeping open cards unchanged. Customize the reveal area's width, height and exact vertical position, with a preview and reset.
+- A red dot on Settings and About indicates a newer available update in both window and panel modes.
+
 ## 0.24.0 — 2026-10-21
 
 - Optional offline PDF reader with document search, horizontal page navigation and a direct page picker.

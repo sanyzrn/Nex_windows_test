@@ -243,6 +243,7 @@ void main(List<String> arguments) async {
   final reminders = ReminderCoordinator(
     features.store,
     NativeReminderScheduler(controller.native),
+    onDeliveredChanged: features.setDeliveredReminders,
     onFailureChanged: (failed) {
       if (features.reminderDeliveryFailed != failed) {
         features.reminderDeliveryFailed = failed;

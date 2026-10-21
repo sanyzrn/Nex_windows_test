@@ -17,6 +17,7 @@ mixin _LibraryWorkspace on _LibraryStateBase {
   /// per build, and calling DateTime.now() inside meant a fresh clock read
   /// per note on a list that grows with every scrolled page.
   bool _dueToday(Note n, DateTime now, DateTime endOfToday) {
+    if (!NexScope.of(context).reminderNeedsAttention(n)) return false;
     final due = n.dueAt == null ? null : _effectiveDue(n);
     if (due == null) return false;
     return due.isBefore(endOfToday);

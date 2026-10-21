@@ -73,9 +73,10 @@ class Flyout extends StatelessWidget {
             : (.25 + .75 * clamp01(gs)) * stY;
         final radius = 22 + (1 - clamp01(gs)) * 60;
 
+        final dockOffset = 78 * controller.S.panelScale + 12;
         return Positioned(
-          left: controller.dir < 0 ? rightOffset : null,
-          right: controller.dir < 0 ? null : rightOffset,
+          left: controller.dir < 0 ? dockOffset : null,
+          right: controller.dir < 0 ? null : dockOffset,
           top: 0,
           width: width,
           // Transforms must precede bounded opacity in the hit-test tree.

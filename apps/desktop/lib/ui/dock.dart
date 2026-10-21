@@ -7,6 +7,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import '../core/controller.dart';
+import '../nex/features_state.dart';
+import '../updates/widgets.dart';
 import '../core/registry.dart';
 import 'svg_icon.dart';
 import 'widgets.dart';
@@ -36,6 +38,7 @@ class Dock extends StatelessWidget {
       valueListenable: controller.frame,
       builder: (context, _, __) {
         final S = controller.S;
+        final dockScale = S.panelScale;
         final visibleDock = S.dock!
             .where((id) => !S.hidden.contains(id))
             .toList();
@@ -43,7 +46,7 @@ class Dock extends StatelessWidget {
         final toolsContentH = 54.0 * n - 2; // 44*n + 10*(n-1) + 4 + 4
         final viewportH = toolsContentH.clamp(
           0.0,
-          maxToolsHeight(MediaQuery.sizeOf(context).height),
+          maxToolsHeight(MediaQuery.sizeOf(context).height / dockScale),
         );
         final bodyH = 22 + viewportH + 25 + 44 + 22;
 
@@ -60,7 +63,7 @@ class Dock extends StatelessWidget {
           44.0,
         );
 
-        return SizedBox(
+        final tab = SizedBox(
           key: controller.tabBoxKey,
           width: tabWidth,
           height: bodyH,
@@ -121,6 +124,11 @@ class Dock extends StatelessWidget {
               ],
             ),
           ),
+        );
+        return SizedBox(
+          width: tabWidth * dockScale,
+          height: bodyH * dockScale,
+          child: FittedBox(fit: BoxFit.fill, child: tab),
         );
       },
     );

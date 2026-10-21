@@ -29,6 +29,10 @@ class Settings {
   bool paste = true;
   bool magnify = true;
   bool panelPinned = false;
+  double panelScale = 1;
+  double edgeTriggerWidth = 2;
+  double edgeTriggerHeight = 120;
+  double edgeTriggerPosition = .5;
 
   /// 'window' = full desktop window (main mode); 'panel' = edge slide-out.
   String windowMode = 'window';
@@ -96,6 +100,10 @@ class Settings {
     'paste': paste,
     'magnify': magnify,
     'panelPinned': panelPinned,
+    'panelScale': panelScale,
+    'edgeTriggerWidth': edgeTriggerWidth,
+    'edgeTriggerHeight': edgeTriggerHeight,
+    'edgeTriggerPosition': edgeTriggerPosition,
     'windowMode': windowMode,
     'cardDensity': cardDensity,
     'windowBounds': windowBounds,
@@ -139,6 +147,17 @@ class Settings {
     s.paste = j['paste'] as bool? ?? true;
     s.magnify = j['magnify'] as bool? ?? true;
     s.panelPinned = j['panelPinned'] as bool? ?? false;
+    double bounded(String key, double fallback, double min, double max) {
+      final value = j[key];
+      return value is num && value.isFinite
+          ? value.clamp(min, max).toDouble()
+          : fallback;
+    }
+
+    s.panelScale = bounded('panelScale', 1, .75, 1.25);
+    s.edgeTriggerWidth = bounded('edgeTriggerWidth', 2, 1, 12);
+    s.edgeTriggerHeight = bounded('edgeTriggerHeight', 120, 24, 400);
+    s.edgeTriggerPosition = bounded('edgeTriggerPosition', .5, 0, 1);
     s.windowMode = (j['windowMode'] as String?) == 'panel' ? 'panel' : 'window';
     s.cardDensity = NexCardDensity.fromWire(j['cardDensity'] as String?).name;
     final bounds = j['windowBounds'];

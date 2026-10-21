@@ -13,10 +13,12 @@ class ReminderCoordinator {
     this.store,
     ReminderScheduler scheduler, {
     this.onFailureChanged,
+    this.onDeliveredChanged,
   }) : _scheduler = _TrackedScheduler(scheduler);
   final DesktopStore store;
   final _TrackedScheduler _scheduler;
   final void Function(bool failed)? onFailureChanged;
+  final void Function(Set<String> receipts)? onDeliveredChanged;
   SharedPreferences? _prefs;
   StreamSubscription<void>? _changes;
   Timer? _timer;
@@ -28,6 +30,7 @@ class ReminderCoordinator {
     _scheduler.receipts.addAll(
       _prefs!.getStringList('nex_reminder_delivered_v2') ?? [],
     );
+    onDeliveredChanged?.call(Set.of(_scheduler.receipts));
     _changes = store.reminderChanges.listen((_) => unawaited(refresh()));
     _timer = Timer.periodic(
       const Duration(seconds: 30),
@@ -63,6 +66,7 @@ class ReminderCoordinator {
           ..clear()
           ..addAll(recent);
         await _prefs?.setStringList('nex_reminder_delivered_v2', recent);
+        onDeliveredChanged?.call(Set.of(_scheduler.receipts));
         onFailureChanged?.call(result.failedCount > 0);
         return result;
       } catch (_) {

@@ -8,7 +8,7 @@ import 'package:nex_ui/nex_ui.dart';
 import 'command_palette.dart' show nexFoldText;
 import '../core/app_meta.dart';
 import '../core/display_identity.dart';
-import '../core/panel_settings.dart';
+import '../core/controller.dart' show PanelController, Settings;
 import 'tool_organizer.dart';
 import 'modules/modules.dart';
 import 'test_notification.dart';
@@ -111,7 +111,7 @@ abstract class _SettingsStateBase extends State<NexSettingsView> {
       'aiHint',
     ];
     final keywords = [
-      '${l.interfaceMode} ${l.windowRemember} ${l.windowCloseAction} ${l.testNotification} ${l.edge}',
+      '${l.interfaceMode} ${l.windowRemember} ${l.windowCloseAction} ${l.testNotification} ${l.edge} ${d.t('panelSize')} ${d.t('edgeArea')} ${d.t('edgeWidth')} ${d.t('edgeHeight')} ${d.t('edgePosition')}',
       '${l.appLanguage} ${l.light} ${l.dark} ${l.followSystem} ${l.themePalette} ${l.customAccent} ${l.textScale} ${l.solarCalendar} ${l.settingsDensity}',
       '${l.hotkey} ${l.pasteOnClick} ${l.magnify}',
       '${l.restore} ${l.recoveryKey} ${l.importNotes}',
@@ -150,6 +150,12 @@ abstract class _SettingsStateBase extends State<NexSettingsView> {
                 child: NexSettingsLink(
                   key: ValueKey('settings-open-${matching[n]}'),
                   icon: icons[matching[n]],
+                  leading: matching[n] == 5
+                      ? NexUpdateDot(
+                          updates: f?.updates,
+                          child: NexIconBadge(icon: icons[5], size: 38),
+                        )
+                      : null,
                   title: names[matching[n]],
                   subtitle: d.t(hints[matching[n]]),
                   onTap: () => _openCategory(matching[n]),

@@ -57,7 +57,10 @@ mixin PanelActions on PanelStateBase {
       if (ctx == null) continue;
       final box = ctx.findRenderObject();
       if (box is RenderBox && box.attached) {
-        final rect = box.localToGlobal(Offset.zero) & box.size;
+        final rect = MatrixUtils.transformRect(
+          box.getTransformTo(null),
+          Offset.zero & box.size,
+        );
         if (rect.inflate(4).contains(p)) return entry.key;
       }
     }
@@ -82,7 +85,10 @@ mixin PanelActions on PanelStateBase {
       final ctx = key?.currentContext;
       final box = ctx?.findRenderObject();
       if (box is RenderBox && box.attached) {
-        final rect = box.localToGlobal(Offset.zero) & box.size;
+        final rect = MatrixUtils.transformRect(
+          box.getTransformTo(null),
+          Offset.zero & box.size,
+        );
         final hit = isGrid
             ? (p.dy < rect.bottom &&
                       (resolvedLanguage == 'fa'

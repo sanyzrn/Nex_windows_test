@@ -131,6 +131,13 @@ class ToolVisualState extends State<ToolVisual> {
       icon = const SizedBox.shrink();
     }
 
+    if (widget.id == 'settings') {
+      icon = NexUpdateDot(
+        updates: NexScope.maybeOf(context)?.updates,
+        child: icon,
+      );
+    }
+
     if (widget.tileStyle) {
       return MouseRegion(
         cursor: SystemMouseCursors.click,
