@@ -19,6 +19,11 @@ void main() {
   String read(String relative) =>
       File('$root/$relative').readAsStringSync().replaceAll('\r\n', '\n');
 
+  test('display version components match the release and resource version', () {
+    expect('$kAppShortVersion+$kAppBuild', kAppVersionString);
+    expect('$kAppShortVersion.$kAppBuild', kAppResourceVersion);
+  });
+
   test('pubspec.yaml declares the same version', () {
     final pubspec = read('pubspec.yaml');
     final match = RegExp(

@@ -15,7 +15,7 @@ const String kAppVersionString = '0.22.0+16';
 const String kAppShortVersion = '0.22.0';
 
 /// The `+n` build number.
-const int kAppBuild = 15;
+const int kAppBuild = 16;
 
 /// Windows resource version `major.minor.patch.build` as written in
 /// `Runner.rc` (`VERSION_AS_NUMBER`) and `nex.iss` (`VersionInfoVersion`).
