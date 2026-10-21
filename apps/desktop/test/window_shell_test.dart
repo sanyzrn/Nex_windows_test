@@ -147,7 +147,12 @@ void main() {
         ),
         isTrue,
       );
-      await f.intelligence.initialize();
+      // The welcome must not enable AI. Do not await a platform credential
+      // read that the already-built widget started in the fake-async zone.
+      expect(
+        (await SharedPreferences.getInstance()).getBool('ai.enabled'),
+        isNot(true),
+      );
       expect(f.intelligence.enabled, isFalse);
     });
     await tester.pumpWidget(const SizedBox.shrink());
