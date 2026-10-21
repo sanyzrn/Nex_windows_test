@@ -28,7 +28,8 @@ non-generated Dart in a standalone commit. Open a draft PR; stop before Part 6.
 
 ## Verification
 
-- Flutter 3.44.8 / Dart 3.12.2; enforced lockfiles unchanged. Final completed
+- Flutter 3.44.8 / Dart 3.12.2; tracked lockfiles unchanged; shared UI local dependency resolution followed
+  by enforced resolution passed under the pinned SDK. Final completed
   Linux suite: **640 passed, 7 existing Windows-only skips**. Six new behavior
   tests cover local-history parity/loading/error/locale changes, calendar route
   preference/leap selection and actual reader digits without altering content.
@@ -55,3 +56,10 @@ assertion or comparison tolerance was removed. A fresh Windows run is required.
 The SDK's CachedImage disposal defers handle release to a post-frame callback;
 the fixture now explicitly pumps that frame after cache eviction, before real
 asynchronous directory deletion. This addresses the handle lifetime itself.
+
+Cache eviction/frame disposal alone did not release Windows' mapped photo in
+runs 39550203063/39550491881. The immutable landscape now lives in the versioned
+fixture directory, outside disposable per-case database/media roots; those roots
+are still deleted and all UI/error assertions remain. This also avoids writing
+76 identical art files. Attachment badges found during review now use Persian
+digits in both shared card layouts, with a focused regression and shared UI checks.

@@ -117,6 +117,18 @@ void main() {
     }
   });
 
+  testWidgets('Persian attachment badges localize counts in both card layouts', (t) async {
+    final at = DateTime(2026, 10, 4);
+    final note = Note(id: 'count', type: NoteType.text, content: 'Original 123',
+      createdAt: at, updatedAt: at, deviceId: 'test', rev: 1,
+      syncState: SyncState.pending, attachmentCount: 2);
+    for (final board in [false, true]) {
+      await t.pumpWidget(_app(SizedBox(width: 360, height: 220, child: NoteCard(note: note, board: board))));
+      expect(find.text(board ? '۲' : '+۲'), findsOneWidget);
+      expect(t.takeException(), isNull);
+    }
+  });
+
   testWidgets('Persian reader localizes its word count without editing note content', (t) async {
     const spec = ReviewShot('compact_digit_regression', mode: 'window', locale: 'fa', size: Size(460, 760), target: 'readerText');
     final store = (await t.runAsync(() => openReviewStore(spec.name, count: 12)))!;

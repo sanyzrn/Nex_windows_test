@@ -109,7 +109,7 @@ Future<ReviewStore> openReviewStore(String name, {int count = 0}) async {
     repo.attachTag(noteId: 'review-$i', tagId: tag.id);
   }
   if (name.startsWith('compact_')) {
-    final image = File('${root.path}/review-image.png')..writeAsBytesSync(base64Decode('iVBORw0KGgoAAAANSUhEUgAAAPAAAACQCAIAAAC5w3GfAAAFO0lEQVR4nO3dPY4bRxCG4VlDgC/li/gGzuxQmeFsQznzDXQG5TqFAkGhEh3AmYM2KIq/M93VXV9VvW8qYFgz+6iWsyTBlw+fv21EWfrJewAiywBNqQI0pQrQlCpAU6oATakCNKUK0JQqQFOqAE2pAjSlCtCUKkBTqgBNqQI0pQrQlCpAU6reeA9Auv3y79/3/unjz7+vnGR/L3wEiy564Pg6NdmApu8donyeDmtA07YNUD5PgTU3hWSj2fA4IwG6erYK3U0DunQz/PmaBnTd5slzNA3oos0252Ua0BVbo83FNKApVYAu18rFuX5JA5pSBeharV+Zix8R0JQqQFOqAF0or78Nr3xcQFOqAE2pAjSlCtCUKkBTqgBNqQI0pQrQlCpAF8rrU9krHxfQlKpyoN+9f/UegSZWC3TTXNn0+mcdix+xEOhzx5VN564Q6IvKml65Mtf/QqgC+ibfsqYTVwL0A7g1Ta9ZnC5/JcwP+ilZTEc8/r2Sg96JFdNRjvy05KD3h2nlY+4vM+ijRjGtdrSO0oLu04lpheOMlPMrKQZd/vHrW6tJYsV3rChmsmXLmt74FiypDJ8zVDbd4nsK/bN9EozpcKW6KTS/pat5jxi6PKAn4cN0rJKAnsoO04HKAHoBOExHKQPoNWE6ROFBr3SGaf1ig14vDNPiBQbtZQvTykUF7asK07JFBe0epjULCVoEk8gYdF480FKMpIahLRxoQUCCI1UuEmhZOrKDFSwSaOUwLVIY0Ppi9Cd82tu/fvMeYbQYoKNYiTLnzZrm6KYDgI6lJNa0p84dhzatDjqij3AzXwuOa1oddNACmb5nN6hpadCBWFwXYvjHaiOa1v3UdwgQT5P93Ph+rK9//jN1EttEN3QOzZvqiRxavbH2tCJoTQTdqZ1OB9BApuVAq/34TdI5qUA0+5IDnTUF0yOao/xP0AKt8FOfl+/ZjYsMYVoIdG7NLa9ztLKob1oFdAXNrfVnaqtQ3LQE6DqaWyvPd4Y/ZdMSoAu2xvQ8ebKm/UFXW8+nZp/4bHOapp1Bl9Xcmnf6a7QJmvZ8L0dxzads3++xHpnUmz3cNjSaTxleCpeVKbWn/Z9D07Zt796/jrN2hKVj2gc06/lmI5fFnZT7AC0H0Gh+UN/FEcGkMMZq0Gh+2tFLpMDolPswS0GjeWf7L5Q7oOt8R+KmULQ9pgU1txwHWwea9Xy0x1dMVrNvi0Cjua97101fs9eEK0CjeaTrq6evueUy5/SXvtFsUnt5PArl8xa/MA7oMH399MV7hM5Wmp77lAPNVsXVvK39xTIRNJqtCq25tcz0LNBotiqB5tYa01NAo9mqNJpbC0zbg0azVck0t2ab5qVv0VJqbk01bQya9WxSYs2teaYtQaPZpPSaW5NMm4FGs0lFNLdmmLYBjWaTSmlumZvmplCir5++FNTcsjVtAJr1PFhZyqcMTY+CRvNgaG5ZmR4CjebB0GxeP2g0D4bmi0yWNDeFPqH5ZuOmO0GznkdC84MGTfeARvNIaH7aiOnDoNE8Epp31m36GGg0j4TmQ/WZ5qZwUWjuqMP0AdCs574qv6w93lHTe0GjuS8oj3fI9C7QaO4LzVbtN/0cNJr7QrNtO01zUzglNM9oj+knoFnPHaF5Xk9NPwKN5o7QPLvHpu+CRnNHaF7TA9O3QaO5IzSv7J7pG6DR3BGaReKvHAah2aWbS/oSNOv5aGh27Nr0D6DRfCjepKHQhenvoNF8KCjrdG76f9BoPhSa1TqZ5qbwcGjWrJl++fD5G+t5f2gW7z//DlEx6qLYmAAAAABJRU5ErkJggg=='));
+    final image = File('test/fixtures/review-landscape.png').absolute;
     repo.insert(Note(id: 'compact-photo', type: NoteType.photo,
       mediaUri: image.path, mediaHash: sha256OfBytes(image.readAsBytesSync()),
       caption: 'A quiet landscape / منظرهٔ آرام', createdAt: _day,
@@ -216,7 +216,7 @@ Future<PanelController> bootReview(
   );
   await _frames(t);
   if (spec.name.startsWith('compact_')) {
-    await t.runAsync(() => precacheImage(FileImage(File('${store.root.path}/review-image.png')), t.element(find.byType(Scaffold))));
+    await t.runAsync(() => precacheImage(FileImage(File('test/fixtures/review-landscape.png').absolute), t.element(find.byType(Scaffold))));
     await t.pump();
   }
   return c;
