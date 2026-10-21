@@ -1,8 +1,48 @@
+import 'package:nex_ui/nex_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nex_desktop/core/controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
+  test(
+    'desktop text clears 4.5 contrast in every light and dark palette',
+    () async {
+      SharedPreferences.setMockInitialValues({});
+      final c = PanelController();
+      await c.bootstrap(preset: Settings(), useNative: false);
+      try {
+        for (final preset in nexThemePresets) {
+          for (final mode in ['light', 'dark']) {
+            c.S.preset = preset.id;
+            c.S.theme = mode;
+            final colors = c.appTheme.colorScheme;
+            for (final background in [
+              colors.surface,
+              colors.surfaceContainerLow,
+            ]) {
+              for (final foreground in [
+                colors.onSurface,
+                colors.onSurfaceVariant,
+              ]) {
+                expect(
+                  nexContrast(foreground, background),
+                  greaterThanOrEqualTo(4.5),
+                  reason: '${preset.id} $mode',
+                );
+              }
+            }
+            expect(
+              nexContrast(colors.onPrimary, colors.primary),
+              greaterThanOrEqualTo(4.5),
+              reason: '${preset.id} $mode primary',
+            );
+          }
+        }
+      } finally {
+        c.dispose();
+      }
+    },
+  );
   test('theme hot path reuses theme and palette allocations', () async {
     SharedPreferences.setMockInitialValues({});
     final controller = PanelController();

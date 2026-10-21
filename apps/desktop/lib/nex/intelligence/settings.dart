@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import '../../l10n/desktop_format.dart';
 import '../../ui/desktop_accessibility.dart';
 import 'package:flutter/material.dart';
@@ -104,9 +105,85 @@ class _SettingsState extends State<DesktopIntelligenceSettings> {
     ..._extra,
     'provider': _provider.wireName,
     'apiKey': _key.text,
-    'baseUrl': _provider.needsBaseUrl ? _url.text : '',
+    'baseUrl': _provider.needsBaseUrl || _provider == AiProvider.gemini
+        ? _url.text
+        : '',
     'model': _model.text,
   });
+  void _invalidate() {
+    _tested = null;
+    _status = null;
+    for (final key in ['images', 'audio', 'embeddings', 'video']) {
+      _extra[key] = 'automatic';
+    }
+    _extra['checkedAt'] = '';
+    _extra['checkedFor'] = '';
+  }
+
+  Future<void> _chooseModel() => _run(() async {
+    final candidate = _current;
+    final models = await _ai!.models(candidate);
+    if (!mounted ||
+        !identical(_ai, NexScope.of(context).intelligence) ||
+        candidate.apiKey != _current.apiKey ||
+        candidate.capabilityFingerprint != _current.capabilityFingerprint)
+      return;
+    final s = AiStrings.of(context);
+    var query = '';
+    final picked = await showDialog<String>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, update) {
+          final matches = models
+              .where((m) => m.toLowerCase().contains(query.toLowerCase()))
+              .toList();
+          return AlertDialog(
+            title: Text(s.t('chooseModel')),
+            content: SizedBox(
+              width: 440,
+              height: 320,
+              child: Column(
+                children: [
+                  TextField(
+                    autofocus: true,
+                    textDirection: TextDirection.ltr,
+                    decoration: InputDecoration(labelText: s.t('searchModels')),
+                    onChanged: (v) => update(() => query = v),
+                  ),
+                  const SizedBox(height: 12),
+                  if (matches.isEmpty) Text(s.t('noModels')),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: matches.length,
+                      itemBuilder: (ctx, i) => ListTile(
+                        title: Text(
+                          matches[i],
+                          textDirection: TextDirection.ltr,
+                        ),
+                        onTap: () => Navigator.pop(ctx, matches[i]),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: Text(s.t('close')),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+    if (mounted && picked != null)
+      setState(() {
+        _model.text = picked;
+        _invalidate();
+      });
+  });
+
   @override
   void dispose() {
     _key.dispose();
@@ -169,8 +246,7 @@ class _SettingsState extends State<DesktopIntelligenceSettings> {
             ),
             onChanged: (v) => setState(() {
               if (controller == null) _extra[key] = v;
-              _tested = null;
-              _status = null;
+              _invalidate();
             }),
           ),
         );
@@ -314,9 +390,24 @@ class _SettingsState extends State<DesktopIntelligenceSettings> {
                     children: [
                       if (_provider != AiProvider.none) ...[
                         field('apiKey', controller: _key, secret: true),
-                        if (_provider.needsBaseUrl)
+                        if (_provider.needsBaseUrl ||
+                            _provider == AiProvider.gemini)
                           field('endpoint', controller: _url),
                         field('model', controller: _model),
+                        Align(
+                          alignment: AlignmentDirectional.centerStart,
+                          child: TextButton.icon(
+                            key: const ValueKey('ai-model-picker'),
+                            onPressed:
+                                ai.busy ||
+                                    !ai.flag('ai.cloud_opt_in') ||
+                                    !_current.isUsable
+                                ? null
+                                : _chooseModel,
+                            icon: const Icon(Icons.manage_search_rounded),
+                            label: Text(s.t('chooseModel')),
+                          ),
+                        ),
                         Text(
                           _provider.defaultModel,
                           style: theme.textTheme.labelSmall,
@@ -336,37 +427,6 @@ class _SettingsState extends State<DesktopIntelligenceSettings> {
                               'embeddingUrl',
                             ])
                               field(name),
-                            for (final key in ['images', 'audio', 'embeddings'])
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 6,
-                                ),
-                                child: DropdownButtonFormField<String>(
-                                  key: ValueKey('$_provider-$key'),
-                                  initialValue: _extra[key] ?? 'automatic',
-                                  decoration: InputDecoration(
-                                    labelText: s.t(key),
-                                  ),
-                                  items: AiCapabilityMode.values
-                                      .map(
-                                        (v) => DropdownMenuItem(
-                                          value: v.name,
-                                          child: Text(
-                                            s.t(
-                                              v == AiCapabilityMode.enabled
-                                                  ? 'on'
-                                                  : v.name,
-                                            ),
-                                          ),
-                                        ),
-                                      )
-                                      .toList(),
-                                  onChanged: (v) => setState(() {
-                                    _extra[key] = v!;
-                                    _tested = null;
-                                  }),
-                                ),
-                              ),
                           ],
                         ),
                       ],
@@ -393,13 +453,26 @@ class _SettingsState extends State<DesktopIntelligenceSettings> {
                                   ? null
                                   : () => _run(() async {
                                       final candidate = _current;
-                                      final tested = await ai.verify(candidate);
+                                      final tested = await ai.verify(
+                                        candidate,
+                                        recheck: true,
+                                      );
                                       if (mounted) {
                                         setState(() {
-                                          _tested = tested.success
+                                          _tested =
+                                              tested.success &&
+                                                  mapEquals(
+                                                    candidate.toMap(),
+                                                    _current.toMap(),
+                                                  )
                                               ? candidate
                                               : null;
-                                          _status = tested.detail;
+                                          _status = tested.detail.replaceAll(
+                                            candidate.apiKey.isEmpty
+                                                ? '\u0000'
+                                                : candidate.apiKey,
+                                            '…',
+                                          );
                                         });
                                       }
                                     }),
@@ -428,6 +501,43 @@ class _SettingsState extends State<DesktopIntelligenceSettings> {
                             ),
                         ],
                       ),
+                      if (_tested != null && ai.capabilityCheck != null) ...[
+                        const SizedBox(height: 12),
+                        Text(
+                          s.t('probeHint'),
+                          style: theme.textTheme.bodySmall,
+                        ),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            for (final entry
+                                in ai.capabilityCheck!.results.entries)
+                              Tooltip(
+                                message: [
+                                  if (entry.value.status != null)
+                                    'HTTP ${entry.value.status}',
+                                  if (entry.value.detail != null)
+                                    entry.value.detail!.replaceAll(
+                                      _key.text.isEmpty ? '\u0000' : _key.text,
+                                      '…',
+                                    ),
+                                ].join(' · '),
+                                child: Chip(
+                                  avatar: Icon(
+                                    entry.value.works
+                                        ? Icons.check_circle_outline
+                                        : Icons.info_outline,
+                                    size: 18,
+                                  ),
+                                  label: Text(
+                                    '${s.t(entry.key.name)}: ${s.t(entry.value.verdict.name)}',
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ],
                       if (_status != null)
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 10),

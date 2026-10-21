@@ -7,6 +7,26 @@ class DesktopStrings {
       DesktopStrings(Localizations.localeOf(context).languageCode == 'fa');
   String t(String key) => (_copy[key] ?? [key, key])[fa ? 1 : 0];
   static const _copy = <String, List<String>>{
+    'writingMode': ['Focus on writing', 'تمرکز روی نوشتن'],
+    'leaveWriting': ['Leave writing mode (Esc)', 'خروج از حالت نوشتن (Esc)'],
+    'wordCount': ['Words', 'واژه‌ها'],
+    'writingSaving': ['Saving…', 'در حال ذخیره…'],
+    'writingSaved': ['Saved locally', 'روی دستگاه ذخیره شد'],
+    'welcomeTitle': ['Make Nex yours', 'نکس را برای خودت تنظیم کن'],
+    'welcomeHint': [
+      'Your notes stay on this device. AI stays off until you choose it in settings. You can change these choices later.',
+      'یادداشت‌ها روی همین دستگاه می‌مانند. هوش تا وقتی در تنظیمات فعالش نکنی خاموش است. این گزینه‌ها را بعداً هم می‌توانی تغییر بدهی.',
+    ],
+    'welcomeSkip': ['Skip setup', 'رد کردن راه‌اندازی'],
+    'welcomeStart': ['Start writing', 'شروع نوشتن'],
+    'welcomeImport': [
+      'Import a backup (optional)',
+      'ورود نسخهٔ پشتیبان (اختیاری)',
+    ],
+    'welcomeKeys': [
+      'Ctrl+N: new note · Ctrl+L: library · Ctrl+K: search · F1: all shortcuts',
+      'Ctrl+N: یادداشت تازه · Ctrl+L: کتابخانه · Ctrl+K: جست‌وجو · F1: همهٔ میان‌برها',
+    ],
     'whatsNew': ["What's new", 'تازه‌های نکس'],
     'releaseNotesError': [
       'Release notes could not be loaded.',

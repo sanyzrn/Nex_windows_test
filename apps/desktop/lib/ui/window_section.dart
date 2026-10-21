@@ -1,8 +1,14 @@
 part of 'window_shell.dart';
 
 class _WindowSection extends StatelessWidget {
-  const _WindowSection({required this.controller});
+  const _WindowSection({
+    required this.controller,
+    required this.writing,
+    required this.toggleWriting,
+  });
   final PanelController controller;
+  final bool writing;
+  final VoidCallback toggleWriting;
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<String>(
@@ -30,6 +36,8 @@ class _WindowSection extends StatelessWidget {
                 controller: controller,
                 section: section,
                 tool: tool,
+                writing: writing,
+                toggleWriting: toggleWriting,
               ),
               Expanded(
                 child: Stack(
@@ -38,12 +46,20 @@ class _WindowSection extends StatelessWidget {
                     // A capture focus/controller must have only one live subtree.
                     KeyedSubtree(
                       key: ValueKey('section-$section-${tool ?? ''}'),
-                      child: body,
+                      child: TweenAnimationBuilder<double>(
+                        tween: Tween(begin: 0, end: 1),
+                        duration: NexMotion.of(context, NexMotion.standard),
+                        curve: NexMotion.curve,
+                        child: body,
+                        builder: (context, value, child) =>
+                            Opacity(opacity: value, child: child),
+                      ),
                     ),
                     _WindowToast(controller: controller),
                   ],
                 ),
               ),
+              if (writing && section == 'capture') const _WritingStatus(),
             ],
           );
         },
@@ -57,10 +73,14 @@ class _SectionHeader extends StatelessWidget {
     required this.controller,
     required this.section,
     required this.tool,
+    required this.writing,
+    required this.toggleWriting,
   });
   final PanelController controller;
   final String section;
   final String? tool;
+  final bool writing;
+  final VoidCallback toggleWriting;
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context)!;
@@ -117,6 +137,19 @@ class _SectionHeader extends StatelessWidget {
             ],
           ];
           final actions = <Widget>[
+            if (section == 'capture' || writing)
+              IconButton(
+                key: const ValueKey('writing-mode'),
+                tooltip: DesktopStrings.of(
+                  context,
+                ).t(writing ? 'leaveWriting' : 'writingMode'),
+                onPressed: toggleWriting,
+                icon: Icon(
+                  writing
+                      ? Icons.fullscreen_exit_rounded
+                      : Icons.fullscreen_rounded,
+                ),
+              ),
             if (NexScope.maybeOf(context)?.recordingAt != null)
               RecordStopButton(controller: controller),
             const SizedBox(width: 8),
@@ -177,6 +210,30 @@ class _SectionHeader extends StatelessWidget {
           );
         },
       ),
+    );
+  }
+}
+
+/// Subscribes only at the small writing receipt, never at the window shell.
+class _WritingStatus extends StatelessWidget {
+  const _WritingStatus();
+  @override
+  Widget build(BuildContext context) {
+    final f = NexScope.maybeOf(context);
+    if (f == null) return const SizedBox.shrink();
+    final s = DesktopStrings.of(context);
+    return ValueListenableBuilder<TextEditingValue>(
+      valueListenable: f.composer,
+      builder: (context, value, _) {
+        final count = RegExp(r'\S+').allMatches(value.text).length;
+        return Padding(
+          padding: const EdgeInsets.all(12),
+          child: Text(
+            '${s.t('wordCount')}: ${desktopDigits(context, count)} · ${s.t(f.saving ? 'writingSaving' : 'writingSaved')}',
+            style: Theme.of(context).textTheme.labelMedium,
+          ),
+        );
+      },
     );
   }
 }

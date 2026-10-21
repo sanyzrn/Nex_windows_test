@@ -229,7 +229,11 @@ Future<PanelController> bootReview(
       key: const ValueKey('review-surface'),
       child: NexCardTimeScope(
         now: DateTime(2026, 10, 18, 12),
-        child: RightPanelApp(controller: c, features: store.features),
+        child: RightPanelApp(
+          controller: c,
+          features: store.features,
+          showWelcome: spec.target == 'welcome',
+        ),
       ),
     ),
   );
@@ -298,6 +302,10 @@ Future<void> goReview(
     final open = find.byKey(ValueKey('settings-open-$settingsCategory'));
     await t.ensureVisible(open);
     await t.tap(open);
+    await _frames(t, 60);
+  }
+  if (spec.target == 'writing') {
+    await t.tap(find.byKey(const ValueKey('writing-mode')));
     await _frames(t, 60);
   }
   if (spec.target == 'releaseNotes') {

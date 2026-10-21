@@ -50,7 +50,33 @@ class DesktopIntelligence extends ChangeNotifier {
   List<String> suggestions = [];
   Map<String, dynamic> conversations = {};
   String conversationId = newUuidV7();
-  AiProviderConfig? _verified;
+  AiProviderConfig? _verified, _detected;
+  AiCapabilityCheck? capabilityCheck;
+  // Credentials participate only in this in-memory cache. Never persist them.
+  final _checks = <String, AiCapabilityCheck>{};
+
+  String _checkIdentity(AiProviderConfig value) =>
+      jsonEncode([value.capabilityFingerprint, value.apiKey]);
+
+  Future<List<String>> models(AiProviderConfig candidate) async {
+    await initialize();
+    if (!flag('ai.cloud_opt_in')) throw StateError('Cloud consent is required');
+    if (busy) throw StateError('Another request is running');
+    final generation = ++_generation;
+    busy = true;
+    _notify();
+    try {
+      final models = await _adapter(candidate).listModels();
+      return generation == _generation ? models : const [];
+    } finally {
+      if (generation == _generation) {
+        _finishAdapter();
+        busy = false;
+        _notify();
+      }
+    }
+  }
+
   Note? focusedNote;
   final attachments = <NexChatAttachment>[];
 
@@ -130,6 +156,12 @@ class DesktopIntelligence extends ChangeNotifier {
           'ai.semantic',
           'cycle.assistant_access',
         }.contains(key)) {
+      if (key == 'ai.cloud_opt_in') {
+        _verified = null;
+        _detected = null;
+        capabilityCheck = null;
+        _checks.clear();
+      }
       cancel();
     }
     _notify();
@@ -151,7 +183,10 @@ class DesktopIntelligence extends ChangeNotifier {
     _activeClient = null;
   }
 
-  Future<AiTestResult> verify(AiProviderConfig candidate) async {
+  Future<AiTestResult> verify(
+    AiProviderConfig candidate, {
+    bool recheck = false,
+  }) async {
     await initialize();
     if (!flag('ai.cloud_opt_in')) throw StateError('Cloud consent is required');
     if (busy) throw StateError('Another request is running');
@@ -159,13 +194,33 @@ class DesktopIntelligence extends ChangeNotifier {
     busy = true;
     error = null;
     _verified = null;
+    _detected = null;
+    capabilityCheck = null;
     _notify();
     try {
       final tested = await _adapter(candidate).test();
       if (generation != _generation) {
         return const AiTestResult.failed('Cancelled');
       }
-      if (tested.success) _verified = candidate;
+      if (tested.success) {
+        final identity = _checkIdentity(candidate);
+        var check = recheck ? null : _checks[identity];
+        if (check == null) {
+          // Explicit connection test only; probes contain no personal content.
+          // The shared client lets cancellation close every concurrent probe.
+          _finishAdapter();
+          _activeClient = clientFactory?.call() ?? http.Client();
+          check = await nexCheckCapabilities(candidate, client: _activeClient);
+          if (generation != _generation || _closed) {
+            return const AiTestResult.failed('Cancelled');
+          }
+          if (_checks.length >= 16) _checks.clear();
+          _checks[identity] = check;
+        }
+        capabilityCheck = check;
+        _verified = candidate;
+        _detected = check.applyTo(candidate);
+      }
       return tested;
     } finally {
       if (generation == _generation) {
@@ -190,6 +245,8 @@ class DesktopIntelligence extends ChangeNotifier {
         (_verified == null || !mapEquals(value.toMap(), _verified!.toMap()))) {
       throw StateError('Test this exact configuration before saving');
     }
+    final before = configFor(value.provider);
+    value = _detected ?? value;
     final wire = value.provider.wireName;
     final oldKey = await secrets.read('ai.key.$wire');
     final previous = {
@@ -198,6 +255,7 @@ class DesktopIntelligence extends ChangeNotifier {
       ))
         'ai.$key.$wire': _prefs!.getString('ai.$key.$wire'),
     };
+    final oldSemantic = _prefs!.getBool('ai.semantic');
     final oldProvider = _prefs!.getString('ai.provider');
     try {
       if (value.apiKey.isEmpty) {
@@ -218,6 +276,12 @@ class DesktopIntelligence extends ChangeNotifier {
       if (!await _prefs!.setString('ai.provider', wire)) {
         throw StateError('Could not activate provider');
       }
+      if (nexNewlyOffered(before, value).contains(AiCapability.embeddings)) {
+        // New search access must not silently start indexing the library.
+        if (!await _prefs!.setBool('ai.semantic', false)) {
+          throw StateError('Could not save search permission');
+        }
+      }
       _keys[wire] = value.apiKey;
       secureAvailable = true;
     } catch (_) {
@@ -226,6 +290,11 @@ class DesktopIntelligence extends ChangeNotifier {
           await secrets.delete('ai.key.$wire');
         } else {
           await secrets.write('ai.key.$wire', oldKey);
+        }
+        if (oldSemantic == null) {
+          await _prefs!.remove('ai.semantic');
+        } else {
+          await _prefs!.setBool('ai.semantic', oldSemantic);
         }
         for (final entry in {...previous, 'ai.provider': oldProvider}.entries) {
           if (entry.value == null) {
@@ -350,6 +419,22 @@ class DesktopIntelligence extends ChangeNotifier {
     try {
       turns.add(ChatMessage(role: ChatRole.user, content: text.trim()));
       await _saveConversation();
+      final video = nexYouTubeWatchUrl(text.trim());
+      if (video != null) {
+        if (!config.supportsVideo) {
+          throw StateError(
+            'YouTube analysis requires a verified Gemini video model',
+          );
+        }
+        final answer = await _adapter().analyzeYouTubeVideo(video);
+        if (generation != _generation || _closed) return;
+        if (answer == null || answer.trim().isEmpty) {
+          throw StateError('The provider could not analyze this video');
+        }
+        turns.add(ChatMessage(role: ChatRole.assistant, content: answer));
+        await _saveConversation();
+        return;
+      }
       var context = await _context(text);
       if (generation != _generation || _closed) return;
       final images = List<NexChatAttachment>.of(attachments);

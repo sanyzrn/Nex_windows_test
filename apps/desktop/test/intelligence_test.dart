@@ -113,6 +113,148 @@ void main() {
   }
 
   test(
+    'capability probes apply exact results and cache only the exact key and fields',
+    () async {
+      await ai.setValue('ai.cloud_opt_in', true);
+      await ai.verify(config);
+      expect(
+        ai.capabilityCheck!.results[AiCapability.images]!.verdict,
+        AiProbeVerdict.refused,
+      );
+      expect(
+        ai.capabilityCheck!.results[AiCapability.video]!.verdict,
+        AiProbeVerdict.absent,
+      );
+      final firstCount = seen.length;
+      await ai.verify(config);
+      expect(
+        seen.length - firstCount,
+        1,
+      ); // Text connection test; cached probes.
+      final beforeChangedKey = seen.length;
+      await ai.verify(config.copyWith(apiKey: 'new-secret'));
+      expect(seen.length - beforeChangedKey, greaterThan(1));
+      await expectLater(ai.saveProvider(config), throwsStateError);
+      await ai.saveProvider(config.copyWith(apiKey: 'new-secret'));
+      expect(ai.config.checkedTime, isNotNull);
+      expect(ai.config.supportsImages, isFalse);
+      final prefs = await SharedPreferences.getInstance();
+      expect(
+        prefs.getKeys().map(prefs.get).join(),
+        isNot(contains('new-secret')),
+      );
+      await ai.setValue('ai.cloud_opt_in', false);
+      await expectLater(
+        ai.saveProvider(config.copyWith(apiKey: 'new-secret')),
+        throwsStateError,
+      );
+    },
+  );
+
+  test(
+    'provider models require consent and use the normalized Gemini address',
+    () async {
+      await expectLater(ai.models(config), throwsStateError);
+      await ai.close();
+      ai = DesktopIntelligence(
+        store,
+        secrets: secrets,
+        clientFactory: () => MockClient((r) async {
+          seen.add(r);
+          return http.Response(
+            jsonEncode({
+              'models': [
+                {
+                  'name': 'models/gemini-b',
+                  'supportedGenerationMethods': ['generateContent'],
+                },
+                {'name': 'models/gemini-a'},
+                {'name': 'models/gemini-a'},
+                {'name': 'models/embedding-test'},
+              ],
+            }),
+            200,
+          );
+        }),
+      );
+      await ai.setValue('ai.cloud_opt_in', true);
+      final models = await ai.models(
+        const AiProviderConfig(
+          provider: AiProvider.gemini,
+          apiKey: 'test-secret',
+          baseUrl: 'https://gateway.example/v1beta',
+        ),
+      );
+      expect(models, ['gemini-a', 'gemini-b']);
+      expect(
+        seen.single.url.toString(),
+        'https://gateway.example/v1beta/models?pageSize=1000',
+      );
+    },
+  );
+
+  test(
+    'assistant sends YouTube as native video without attaching private notes or parsing actions',
+    () async {
+      await ai.close();
+      ai = DesktopIntelligence(
+        store,
+        secrets: secrets,
+        clientFactory: () => MockClient((r) async {
+          seen.add(r);
+          if (r.url.path.contains('embedContent')) {
+            return http.Response(
+              jsonEncode({
+                'embedding': {
+                  'values': [1.0, 0.0],
+                },
+              }),
+              200,
+            );
+          }
+          return http.Response(
+            jsonEncode({
+              'candidates': [
+                {
+                  'content': {
+                    'parts': [
+                      {
+                        'text': r.body.contains('jNQXAC9IVRw')
+                            ? 'elephants'
+                            : 'Video analysis',
+                      },
+                    ],
+                  },
+                },
+              ],
+            }),
+            200,
+          );
+        }),
+      );
+      const gemini = AiProviderConfig(
+        provider: AiProvider.gemini,
+        apiKey: 'video-secret',
+      );
+      await ai.setValue('ai.cloud_opt_in', true);
+      await ai.verify(gemini);
+      await ai.saveProvider(gemini);
+      await ai.setValue('ai.enabled', true);
+      await store.call<Note>('capture', {'text': 'PRIVATE_VIDEO_CONTEXT'});
+      seen.clear();
+      await ai.send('https://youtu.be/abcdefghijk');
+      expect(ai.error, isNull);
+      expect(ai.turns.last.content, 'Video analysis');
+      expect(ai.pending, isEmpty);
+      expect(
+        seen.single.body,
+        contains('https://www.youtube.com/watch?v=abcdefghijk'),
+      );
+      expect(seen.single.body, isNot(contains('PRIVATE_VIDEO_CONTEXT')));
+    },
+  );
+
+  test(
     'master and consent default off; no request escapes before opt in',
     () async {
       expect(ai.enabled, isFalse);

@@ -18,6 +18,37 @@ import 'support/compact_review_cases.dart';
 
 const _matrix = <ReviewShot>[
   ReviewShot(
+    'writing_1200_light_en',
+    mode: 'window',
+    size: Size(1200, 900),
+    target: 'writing',
+  ),
+  ReviewShot(
+    'writing_700_dark_fa_scale2',
+    mode: 'window',
+    size: Size(700, 900),
+    target: 'writing',
+    theme: 'dark',
+    locale: 'fa',
+    textScale: 2,
+  ),
+  ReviewShot(
+    'welcome_700_light_en_scale2',
+    mode: 'window',
+    size: Size(700, 900),
+    target: 'welcome',
+    textScale: 2,
+  ),
+  ReviewShot(
+    'welcome_700_dark_fa_scale2',
+    mode: 'window',
+    size: Size(700, 900),
+    target: 'welcome',
+    theme: 'dark',
+    locale: 'fa',
+    textScale: 2,
+  ),
+  ReviewShot(
     'intelligence_configured_1200_light_en',
     mode: 'window',
     size: Size(1200, 1100),

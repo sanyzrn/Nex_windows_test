@@ -8,6 +8,8 @@ import '../l10n/app_localizations.dart';
 import '../l10n/shortcut_labels.dart';
 import '../l10n/utility_strings.dart';
 import '../l10n/intelligence_strings.dart';
+import '../l10n/desktop_strings.dart';
+import '../l10n/desktop_format.dart';
 import '../core/controller.dart';
 import '../core/registry.dart';
 import '../nex/command_palette.dart';
@@ -64,6 +66,7 @@ class NexWindowShell extends StatefulWidget {
 }
 
 class _NexWindowShellState extends State<NexWindowShell> {
+  bool _writing = false;
   @override
   void initState() {
     super.initState();
@@ -92,10 +95,12 @@ class _NexWindowShellState extends State<NexWindowShell> {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                wide
-                    ? _WindowNavRail(controller: c, features: widget.features)
-                    : _SlimRail(controller: c, features: widget.features),
+                if (!_writing)
+                  wide
+                      ? _WindowNavRail(controller: c, features: widget.features)
+                      : _SlimRail(controller: c, features: widget.features),
                 Expanded(
+                  key: const ValueKey('window-content'),
                   child: Padding(
                     padding: const EdgeInsetsDirectional.only(
                       end: NexSpacing.sm + 2,
@@ -114,7 +119,14 @@ class _NexWindowShellState extends State<NexWindowShell> {
                       child: Column(
                         children: [
                           NexUpdateBanner(updates: widget.features?.updates),
-                          Expanded(child: _WindowSection(controller: c)),
+                          Expanded(
+                            child: _WindowSection(
+                              controller: c,
+                              writing: _writing,
+                              toggleWriting: () =>
+                                  setState(() => _writing = !_writing),
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -190,6 +202,10 @@ class _NexWindowShellState extends State<NexWindowShell> {
                 }
 
                 if (event.logicalKey == LogicalKeyboardKey.escape) {
+                  if (_writing) {
+                    setState(() => _writing = false);
+                    return KeyEventResult.handled;
+                  }
                   final tool = c.windowTool.value;
                   if (tool != null) {
                     c.windowTool.value = null;
@@ -200,14 +216,9 @@ class _NexWindowShellState extends State<NexWindowShell> {
               }
               return KeyEventResult.ignored;
             },
-            // Recording/import/error states live in NexFeatures; the shell
-            // must repaint when they change (badge, stop button, progress).
-            child: widget.features == null
-                ? Builder(builder: (context) => buildSurface(context, null))
-                : ListenableBuilder(
-                    listenable: widget.features!,
-                    builder: buildSurface,
-                  ),
+            // Capture and status widgets subscribe independently. A composer
+            // keystroke must not rebuild the caption, card and navigation.
+            child: Builder(builder: (context) => buildSurface(context, null)),
           ),
         ),
       ),

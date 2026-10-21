@@ -56,6 +56,9 @@ void main() {
           'WP5 Benchmark: First page of timeline (50 notes): ${firstPageMs}ms',
         );
         expect(firstPage.length, 50);
+        // Generous CI ceilings catch regressions without claiming frame rates
+        // or physical-device profiling from a headless test runner.
+        expect(firstPageMs, lessThan(500), reason: '10k first-page budget');
 
         // 3. Measure search latency for common English word
         stopwatch.reset();
@@ -70,6 +73,7 @@ void main() {
           'WP5 Benchmark: English search ("meeting"): ${enSearchMs}ms, found ${enSearch.length} results',
         );
         expect(enSearch.isNotEmpty, isTrue);
+        expect(enSearchMs, lessThan(500), reason: '10k English search budget');
 
         // 4. Measure search latency for Persian word (with Persian folding)
         stopwatch.reset();
@@ -84,6 +88,7 @@ void main() {
           'WP5 Benchmark: Persian search ("کتاب"): ${faSearchMs}ms, found ${faSearch.length} results',
         );
         expect(faSearch.isNotEmpty, isTrue);
+        expect(faSearchMs, lessThan(500), reason: '10k Persian search budget');
 
         // Verify Persian folded search finds notes with Arabic kaf 'كتاب'
         final foldedSearch = await store.call<List<Note>>('search', {

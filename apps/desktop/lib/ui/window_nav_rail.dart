@@ -149,10 +149,16 @@ class _WindowNavRail extends StatelessWidget {
                 ),
               ),
             ),
-            if (features?.recordingAt != null) ...[
-              RecordStopButton(controller: controller),
-              const SizedBox(height: 8),
-            ],
+            if (features != null)
+              ListenableBuilder(
+                listenable: features!,
+                builder: (context, _) => features!.recordingAt == null
+                    ? const SizedBox.shrink()
+                    : Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: RecordStopButton(controller: controller),
+                      ),
+              ),
             NexWorkspaceDestination(
               icon: Icons.settings_outlined,
               label: l.settings,

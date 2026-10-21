@@ -8,6 +8,7 @@ import 'package:nex_core/nex_core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:path_provider/path_provider.dart';
 import 'nex/features.dart';
+import 'nex/welcome.dart';
 import 'nex/store.dart';
 import 'nex/media_smoke.dart';
 import 'nex/panel_smoke.dart';
@@ -263,7 +264,13 @@ void main(List<String> arguments) async {
     // Give capture and the first frame priority. No updater runs in probes.
     unawaited(Future<void>.delayed(const Duration(seconds: 12), updates.start));
   }
-  runApp(RightPanelApp(controller: controller, features: features));
+  runApp(
+    RightPanelApp(
+      controller: controller,
+      features: features,
+      showWelcome: !smokeMode && !arguments.contains('--background'),
+    ),
+  );
   // A manual launch must immediately present a usable, focused capture
   // surface. Startup launches opt into the unobtrusive background mode;
   // the edge panel stays hidden and the window waits in the tray.
@@ -275,7 +282,13 @@ void main(List<String> arguments) async {
 }
 
 class RightPanelApp extends StatelessWidget {
-  const RightPanelApp({super.key, required this.controller, this.features});
+  const RightPanelApp({
+    super.key,
+    required this.controller,
+    this.features,
+    this.showWelcome = false,
+  });
+  final bool showWelcome;
 
   final PanelController controller;
   final NexFeatures? features;
@@ -313,9 +326,14 @@ class RightPanelApp extends StatelessWidget {
           controller: controller,
           child: ListenableBuilder(
             listenable: controller,
-            builder: (context, _) => controller.isWindowMode
-                ? NexWindowShell(controller: controller, features: features)
-                : PanelShell(controller: controller),
+            builder: (context, _) {
+              final shell = controller.isWindowMode
+                  ? NexWindowShell(controller: controller, features: features)
+                  : PanelShell(controller: controller);
+              return showWelcome
+                  ? DesktopWelcome(controller: controller, child: shell)
+                  : shell;
+            },
           ),
         ),
       ),

@@ -11,6 +11,7 @@ import '../core/controller.dart' show PanelController;
 import '../core/display_identity.dart';
 import '../core/panel_settings.dart';
 import 'tool_organizer.dart';
+import 'test_notification.dart';
 import '../ui/widgets.dart';
 import '../l10n/app_localizations.dart';
 import 'features.dart';
@@ -24,7 +25,12 @@ part 'settings_shortcuts_backup.dart';
 part 'settings_tools_about.dart';
 
 class NexSettingsView extends StatefulWidget {
-  const NexSettingsView({super.key, this.windowLayout = false});
+  const NexSettingsView({
+    super.key,
+    this.windowLayout = false,
+    this.initialCategory,
+  });
+  final int? initialCategory;
 
   /// Wide presentation for the desktop window (no flyout-scroll container,
   /// edge/monitor pickers hidden while the window mode is active).
@@ -35,6 +41,12 @@ class NexSettingsView extends StatefulWidget {
 }
 
 abstract class _SettingsStateBase extends State<NexSettingsView> {
+  @override
+  void initState() {
+    super.initState();
+    category = widget.initialCategory;
+  }
+
   String? recoveryKey;
   int? category;
   final search = TextEditingController();
@@ -98,13 +110,22 @@ abstract class _SettingsStateBase extends State<NexSettingsView> {
       'aboutHint',
       'aiHint',
     ];
+    final keywords = [
+      '${l.interfaceMode} ${l.windowRemember} ${l.windowCloseAction} ${l.testNotification} ${l.edge}',
+      '${l.language} ${l.light} ${l.dark} ${l.followSystem}',
+      '${l.hotkey} ${l.pasteOnClick} ${l.magnify}',
+      '${l.restore} ${l.recoveryKey} ${l.importNotes}',
+      '',
+      '${l.applicationName} ${d.t('whatsNew')}',
+      '${AiStrings.of(context).t('provider')} ${AiStrings.of(context).t('model')} Gemini YouTube',
+    ];
     Widget group(List<int> indexes, String title) {
       final matching = indexes
           .where(
             (i) =>
                 i < names.length &&
                 nexFoldText(
-                  '${names[i]} ${d.t(hints[i])}',
+                  '${names[i]} ${d.t(hints[i])} ${keywords[i]}',
                 ).contains(nexFoldText(query)),
           )
           .toList();

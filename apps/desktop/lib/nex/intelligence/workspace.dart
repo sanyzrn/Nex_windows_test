@@ -699,6 +699,10 @@ class _AssistantState extends State<DesktopAssistant> {
                                 onChanged: (_) => setState(() {}),
                                 enabled: !locked,
                                 decoration: InputDecoration(
+                                  helperText: ai.config.supportsVideo
+                                      ? s.t('youtubeHint')
+                                      : null,
+                                  helperMaxLines: 3,
                                   hintText: s.t(
                                     ai.pending.isNotEmpty
                                         ? 'pendingOld'

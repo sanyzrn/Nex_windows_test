@@ -134,10 +134,16 @@ class _SlimRail extends StatelessWidget {
                   ),
                 ),
               ),
-              if (features?.recordingAt != null) ...[
-                RecordStopButton(controller: controller),
-                const SizedBox(height: NexSpacing.sm),
-              ],
+              if (features != null)
+                ListenableBuilder(
+                  listenable: features!,
+                  builder: (context, _) => features!.recordingAt == null
+                      ? const SizedBox.shrink()
+                      : Padding(
+                          padding: const EdgeInsets.only(bottom: NexSpacing.sm),
+                          child: RecordStopButton(controller: controller),
+                        ),
+                ),
               tile(
                 'settings',
                 Icons.settings_outlined,

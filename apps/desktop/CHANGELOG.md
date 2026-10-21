@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- Optional first-run setup for language, theme, accent and window restoration,
+  with a notification test, backup import and keyboard shortcut tour.
+- Focus on writing hides the rail, keeps the current draft and shows word/save
+  status; Escape returns to the workspace. Typing no longer rebuilds window chrome.
+- Browse and search provider models, use a custom Gemini API address and test
+  image/audio/search/video capabilities with synthetic samples. Paste a YouTube
+  video URL in the assistant to analyze it with a capable Gemini model.
+- Settings search includes nested display, backup, shortcut and AI options.
+
+
 - Choose whether closing the window quits Nex or keeps it in the tray; Open
   restores a hidden compact window to the cursor monitor's corner.
 - Snooze a reminder for 10 minutes or remove its reminder from the toast. Repeated

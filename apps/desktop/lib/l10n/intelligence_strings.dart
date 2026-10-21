@@ -11,6 +11,25 @@ class AiStrings {
   }
 
   static const _words = <String, List<String>>{
+    'chooseModel': ['Browse provider models', 'انتخاب از مدل‌های ارائه‌دهنده'],
+    'searchModels': ['Search models', 'جست‌وجوی مدل‌ها'],
+    'noModels': [
+      'No models found. You can enter a model ID manually.',
+      'مدلی پیدا نشد؛ شناسهٔ مدل را می‌توانی دستی بنویسی.',
+    ],
+    'works': ['Works', 'کار می‌کند'],
+    'refused': ['Refused', 'رد شد'],
+    'absent': ['Unavailable', 'ارائه نمی‌شود'],
+    'unknown': ['Unconfirmed', 'نامشخص'],
+    'video': ['Video', 'ویدئو'],
+    'probeHint': [
+      'Connection testing also checks capabilities with synthetic samples. Hover a result for the provider response.',
+      'آزمایش اتصال، قابلیت‌ها را هم با نمونه‌های آزمایشی بررسی می‌کند. برای دیدن پاسخ ارائه‌دهنده روی نتیجه مکث کن.',
+    ],
+    'youtubeHint': [
+      'Paste a YouTube video URL to analyze it with Gemini.',
+      'برای تحلیل با Gemini، پیوند ویدئوی یوتیوب را بفرست.',
+    ],
     'ai': ['Intelligence', 'هوش نکس'],
     'assistant': ['Assistant', 'دستیار'],
     'settings': ['AI settings', 'تنظیمات هوش'],
