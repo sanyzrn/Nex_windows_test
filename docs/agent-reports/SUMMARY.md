@@ -25,8 +25,10 @@ smoke/installer/update checks; the final Part 7 PR checks supply current automat
 evidence. Real DPI/notification/Narrator, Android round trips and representative
 hardware profiling remain open. Refresh success alone is not full sign-off.
 
-Parts 1–6 have passed Windows CI. Part 7 was approved and implemented; its final checks and manual limitations are recorded in PART7.md. Optional B8 is deferred. The [PR #9](https://github.com/sanyzrn/Nex_windows_test/pull/9) is open;
+Parts 1–6 have passed Windows CI. Part 7 was approved and implemented; its final checks and manual limitations are recorded in PART7.md. Optional B8 is deferred. Parts 1–7 are collected in [PR #9](https://github.com/sanyzrn/Nex_windows_test/pull/9);
 Windows CI and manual limits are recorded in Part 5 and the PR checks.
 Release automation publishes only after successful main-branch Windows CI for the exact release commit. Manual testing remains open and is owned by the user.
 
 Final Part 7 source verification: [Windows run 39589605793](https://github.com/sanyzrn/Nex_windows_test/actions/runs/39589605793), commit `4095fd9`: 856 desktop tests, shared UI 280, core 250, data 294 with 14 existing skips, AI 184, desktop without local inference 662; Release/native/installer/update checks passed.
+
+Release preparation: version 0.23.0+17 declarations passed local consistency checks; Windows refresh [39608500545](https://github.com/sanyzrn/Nex_windows_test/actions/runs/39608500545) passed and all eight changed About/history images were reviewed. Final main-branch CI and release URLs are recorded in PR #9.
