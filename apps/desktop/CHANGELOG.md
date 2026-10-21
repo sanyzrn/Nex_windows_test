@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.24.0 — 2026-10-21
 
 - Optional offline PDF reader with document search, horizontal page navigation and a direct page picker.
 - An opt-in private area for passwords, bank cards and messages in Windows secure storage, with one two-minute Windows Hello unlock shared with Cycle.

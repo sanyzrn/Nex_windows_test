@@ -14,7 +14,7 @@ A3 final refresh run `39498530568` passed; all 52 updated images were reviewed.
 | A4, A6, A9, A11, A12 | Completed in Part 5; Track A complete | [Report](PART5.md); offline history, digits/calendar, installer review, 76 compact Windows scenes, standalone formatting |
 | B0–B3 | Implemented in Part 6; device limits remain | [Report](PART6.md), [34-item manual triage](B0.md), live Windows PR checks |
 | B4–B7 | Implemented; full Windows CI passed; manual checks with owner | [Report](PART7.md), final PR checks and explicit device limits |
-| B8 optional modules | Implemented (Unreleased) | Four owner-selected modules; Windows review passed, final build/test gates in PR; [report](B8.md) |
+| B8 optional modules | Implemented; 0.24.0+18 release prepared | Four owner-selected modules; full Windows CI/native/installer/update checks passed; publication explicitly authorized; [report](B8.md) |
 
 Source, tests, glossary, changelog and reports are committed together and pushed
 after each completed part. The owner authorized merging Parts 1–7 and publishing 0.23.0 for manual testing; B8's four core modules were subsequently selected; see [B8](B8.md).

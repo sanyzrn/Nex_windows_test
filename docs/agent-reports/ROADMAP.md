@@ -40,6 +40,10 @@ native checks early, and later parts update that same checklist.
 
 ## B8 continuation — owner selection, 2026-10-21
 
+The owner subsequently authorized merging B8 and publishing **0.24.0+18** for
+manual testing. Full B8 Windows CI passed; the final versioned source must pass
+main-branch Windows CI before release automation publishes its tested installer.
+
 Parts 1–7 were merged and published as 0.23.0. The owner then selected all four
 core B8 modules: PDF reader, private area, writing portrait and cycle. This bundle
 starts at main `fcdea02` on `windows/b8-modules`; Windows-native extras remain

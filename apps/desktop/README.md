@@ -1,6 +1,6 @@
 # Nex Windows application
 
-Declared version: **0.23.0+17**. [Product guide](../../README.md) ·
+Declared version: **0.24.0+18**. [Product guide](../../README.md) ·
 [Current progress](../../docs/agent-reports/SUMMARY.md) ·
 [Shortcuts](../../docs/shortcuts.md) · [Release process](../../docs/RELEASING.md).
 
@@ -62,7 +62,7 @@ calendar, returning the same civil date for UTC persistence.
 `lib/updates` checks stable GitHub
 releases, validates downloads and hands a saved session to Install & restart.
 
-## Optional modules (Unreleased)
+## Optional modules (0.24.0)
 
 `lib/nex/modules` holds four device-opt-in modules. `NexFeatures.modules` owns
 switches and one `DesktopPrivateSession`; Settings and the window Tools shelf
