@@ -28,3 +28,30 @@ Run Flutter commands sequentially within the same package to avoid generated-plu
 For an application version bump, update `pubspec.yaml`, `core/app_meta.dart`, Windows resources, Inno Setup, README and the changelog together; the version-consistency tests check these declarations. Put downloads and checksums in the corresponding GitHub Release.
 
 [Release instructions](docs/RELEASING.md) · [MIT license](LICENSE)
+
+## Efficient local verification
+
+Read the affected feature and reuse existing fixtures. Documentation-only changes
+need link/diff checks, not a Flutter suite. For code changes, analyze the affected
+package and run focused tests for changed behavior and affected callers. Add tests
+for reproduced defects or meaningful uncovered logic, not implementation mirrors
+or cosmetic edits. Broaden for shared-code impact, failures or unresolved risk;
+do not repeatedly run unchanged suites after every edit. Keep existing useful
+regressions and all required CI gates. Windows-only claims require Windows evidence.
+
+The full Windows gates remain analysis, desktop tests/goldens, version consistency,
+localization/UI/package-host checks, affected shared-package checks, Release build
+and relevant native smoke probes. The [PR checklist](.github/pull_request_template.md)
+records results or explicit limitations. [Manual Windows checks](docs/TEST_0220.md)
+cover installed behaviors that widget tests cannot establish.
+
+Generate [the keyboard reference](docs/shortcuts.md) from the actual help dialog:
+`cd apps/desktop` then `dart run tool/generate_shortcuts.dart`. Its regression test
+fails when the rows, shortcut labels or translated descriptions drift. Run
+`python tools/audit_unused_strings.py` from the repository root to list unused-copy
+candidates; it cannot prove the absence of arbitrary dynamic lookups. Review AI
+wire names, utility English-text lookups and IANA-derived city labels first.
+
+Reports can be brief: changes, checks actually run, blockers and commit. Preserve
+historical findings under `docs/archive/`; link current instructions to current
+source. Never claim a version was released just because its source was committed.

@@ -133,9 +133,5 @@ class DesktopStrings {
       'فضایی آرام برای فکر کردن با یادداشت‌هایت.',
     ],
     'noteAi': ['Nex AI', 'هوش نکس'],
-    'writePrompt': [
-      'What would you like to work on?',
-      'دوست داری روی چه چیزی کار کنیم؟',
-    ],
   };
 }

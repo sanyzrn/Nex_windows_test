@@ -2,11 +2,47 @@ name: Feature request / پیشنهاد قابلیت
 description: Describe a daily workflow that Nex could improve.
 labels: [enhancement]
 body:
+  - type: input
+    id: version
+    attributes:
+      label: Nex version
+      placeholder: 0.22.0+16
+    validations:
+      required: true
+  - type: input
+    id: windows
+    attributes:
+      label: Windows version
+      placeholder: Windows 11 25H2, build number from winver
+    validations:
+      required: true
+  - type: input
+    id: scaling
+    attributes:
+      label: Display scaling
+      description: Include each monitor when scales differ.
+      placeholder: 100% / 150%, two monitors
+    validations:
+      required: true
+  - type: dropdown
+    id: language
+    attributes:
+      label: App language
+      options: [English, Persian, Both]
+    validations:
+      required: true
+  - type: dropdown
+    id: mode
+    attributes:
+      label: Interface mode
+      options: [Window, Edge panel, Both]
+    validations:
+      required: true
   - type: textarea
     id: problem
     attributes:
       label: What are you trying to do?
-      description: Describe the current workflow and where it falls short.
+      description: Describe steps in the current workflow, the expected outcome and where it falls short. Do not include private notes or credentials.
     validations:
       required: true
   - type: textarea

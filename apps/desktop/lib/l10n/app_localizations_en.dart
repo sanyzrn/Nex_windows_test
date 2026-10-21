@@ -178,10 +178,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get joinThread => 'Add to thread';
 
   @override
-  String get assistantStub =>
-      'Assistant is not connected in this base. Capture and search work offline.';
-
-  @override
   String get utility0 => 'Copy something and it shows up here';
 
   @override
@@ -249,9 +245,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get utility22 => 'Stopwatch';
-
-  @override
-  String get utility23 => 'Text tools · clipboard';
 
   @override
   String get utility24 => 'Password';
@@ -783,9 +776,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get switchToPanel => 'Switch to edge panel';
 
   @override
-  String get switchToWindow => 'Switch to window';
-
-  @override
   String get backToTools => 'Back to tools';
 
   @override
@@ -823,12 +813,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get repeatWeekly => 'Every week';
-
-  @override
-  String get repeatMonthly => 'Every month';
-
-  @override
-  String get repeatYearly => 'Every year';
 
   @override
   String get clearReminder => 'Clear reminder';
@@ -926,9 +910,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get paletteOpen => 'Command palette';
 
   @override
-  String get paletteHint => 'Search notes, jump anywhere, run actions (Ctrl+K)';
-
-  @override
   String get paletteSearchHint => 'Search notes, screens and actions…';
 
   @override
@@ -938,9 +919,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get paletteSectionNotes => 'Notes';
 
   @override
-  String get paletteSectionGoTo => 'Go to';
-
-  @override
   String get paletteSectionActions => 'Actions';
 
   @override
@@ -948,16 +926,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get paletteActionToggleTheme => 'Toggle light / dark theme';
-
-  @override
-  String get paletteActionOpenTools => 'Open the tools';
-
-  @override
-  String get pasteLinkSaved => 'Link note created';
-
-  @override
-  String get noNoteSelectedHint =>
-      'Use ↑ / ↓ to navigate notes, or Ctrl+N to create';
 
   @override
   String get filterAll => 'All';
@@ -1005,18 +973,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get localEngineActive => 'Local library on this device';
-
-  @override
-  String get switchToDark => 'Switch to dark theme';
-
-  @override
-  String get switchToLight => 'Switch to light theme';
-
-  @override
-  String get restoreConfirmTitle => 'Restore backup';
-
-  @override
   String get restoreConfirmBody =>
       'Restoring replaces all current notes, tags and media with this backup. This cannot be undone.';
 
@@ -1052,13 +1008,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'The note library is not available on this device yet.';
 
   @override
-  String get libraryUnavailableHint =>
-      'Open the library view from the dock, or restart Nex to load your notes.';
-
-  @override
-  String get workspaceLabel => 'YOUR SPACE';
-
-  @override
   String get workspaceLocal => 'Private. On this device.';
 
   @override
@@ -1086,9 +1035,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get workspaceEssentials => 'Within reach';
 
   @override
-  String get workspaceAllTools => 'Your toolbox';
-
-  @override
   String get workspaceUtilityHint => 'Open this tool';
 
   @override
@@ -1105,9 +1051,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get workspaceColorHint => 'Pick a colour from anywhere.';
-
-  @override
-  String get workspaceSettingsDescription => 'Make this space feel like yours.';
 
   @override
   String get workspaceReaderTitle => 'A place to return to.';
@@ -1476,7 +1419,4 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get emojiCategory => 'Emoji category';
-
-  @override
-  String get resizeLibrary => 'Resize library panes';
 }

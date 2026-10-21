@@ -178,10 +178,6 @@ class AppLocalizationsFa extends AppLocalizations {
   String get joinThread => 'افزودن به رشته';
 
   @override
-  String get assistantStub =>
-      'دستیار در این نسخه متصل نیست. ثبت و جست‌وجو آفلاین کار می‌کنند.';
-
-  @override
   String get utility0 => 'هر چیزی را کپی کن تا اینجا نمایش داده شود';
 
   @override
@@ -249,9 +245,6 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get utility22 => 'کرنومتر';
-
-  @override
-  String get utility23 => 'ابزارهای متن · کلیپ‌بورد';
 
   @override
   String get utility24 => 'گذرواژه';
@@ -784,9 +777,6 @@ class AppLocalizationsFa extends AppLocalizations {
   String get switchToPanel => 'تغییر به پنل کناری';
 
   @override
-  String get switchToWindow => 'تغییر به پنجره';
-
-  @override
   String get backToTools => 'بازگشت به ابزارها';
 
   @override
@@ -824,12 +814,6 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get repeatWeekly => 'هر هفته';
-
-  @override
-  String get repeatMonthly => 'هر ماه';
-
-  @override
-  String get repeatYearly => 'هر سال';
 
   @override
   String get clearReminder => 'حذف یادآور';
@@ -927,10 +911,6 @@ class AppLocalizationsFa extends AppLocalizations {
   String get paletteOpen => 'پالت فرمان';
 
   @override
-  String get paletteHint =>
-      'جست‌وجوی یادداشت‌ها، رفتن به صفحه‌ها و اجرای فرمان‌ها (Ctrl+K)';
-
-  @override
   String get paletteSearchHint => 'جست‌وجوی یادداشت‌ها، صفحه‌ها و فرمان‌ها…';
 
   @override
@@ -940,9 +920,6 @@ class AppLocalizationsFa extends AppLocalizations {
   String get paletteSectionNotes => 'یادداشت‌ها';
 
   @override
-  String get paletteSectionGoTo => 'برو به';
-
-  @override
   String get paletteSectionActions => 'فرمان‌ها';
 
   @override
@@ -950,16 +927,6 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get paletteActionToggleTheme => 'تغییر روشن / تاریک';
-
-  @override
-  String get paletteActionOpenTools => 'باز کردن ابزارها';
-
-  @override
-  String get pasteLinkSaved => 'یادداشت پیوند ساخته شد';
-
-  @override
-  String get noNoteSelectedHint =>
-      'برای پیمایش از کلیدهای جهت‌نما و برای یادداشت جدید از Ctrl+N استفاده کن';
 
   @override
   String get filterAll => 'همه';
@@ -1007,18 +974,6 @@ class AppLocalizationsFa extends AppLocalizations {
   }
 
   @override
-  String get localEngineActive => 'کتابخانهٔ محلی روی همین دستگاه';
-
-  @override
-  String get switchToDark => 'تغییر به تم تیره';
-
-  @override
-  String get switchToLight => 'تغییر به تم روشن';
-
-  @override
-  String get restoreConfirmTitle => 'بازیابی نسخهٔ پشتیبان';
-
-  @override
   String get restoreConfirmBody =>
       'بازیابی، همهٔ یادداشت‌ها، برچسب‌ها و رسانه‌های فعلی را با این نسخهٔ پشتیبان جایگزین می‌کند. این کار قابل بازگشت نیست.';
 
@@ -1054,13 +1009,6 @@ class AppLocalizationsFa extends AppLocalizations {
       'کتابخانهٔ یادداشت‌ها هنوز روی این دستگاه در دسترس نیست.';
 
   @override
-  String get libraryUnavailableHint =>
-      'از داک، کتابخانه را باز کن یا نکس را دوباره اجرا کن تا یادداشت‌ها بارگذاری شوند.';
-
-  @override
-  String get workspaceLabel => 'فضای تو';
-
-  @override
   String get workspaceLocal => 'خصوصی؛ روی همین دستگاه';
 
   @override
@@ -1087,9 +1035,6 @@ class AppLocalizationsFa extends AppLocalizations {
   String get workspaceEssentials => 'دم‌دست';
 
   @override
-  String get workspaceAllTools => 'جعبه‌ابزار تو';
-
-  @override
   String get workspaceUtilityHint => 'باز کردن ابزار';
 
   @override
@@ -1107,10 +1052,6 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get workspaceColorHint => 'انتخاب رنگ از هر جای صفحه.';
-
-  @override
-  String get workspaceSettingsDescription =>
-      'این فضا را به سلیقهٔ خودت تنظیم کن.';
 
   @override
   String get workspaceReaderTitle => 'جایی برای برگشتن به فکرها.';
@@ -1478,7 +1419,4 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get emojiCategory => 'دستهٔ ایموجی';
-
-  @override
-  String get resizeLibrary => 'تغییر اندازهٔ بخش‌های کتابخانه';
 }

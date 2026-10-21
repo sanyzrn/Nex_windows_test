@@ -10,7 +10,11 @@ A local-first notebook and desktop toolkit for Windows, with English and Persian
 
 [Download the latest installer](https://github.com/sanyzrn/Nex_windows_test/releases/latest) · [What's new](apps/desktop/CHANGELOG.md) · [Report a bug](https://github.com/sanyzrn/Nex_windows_test/issues/new/choose) · [فارسی](#راهنمای-فارسی)
 
-![Nex Windows notebook with its custom title bar](apps/desktop/test/review_goldens/redesign_window_capture_1600_dark_en.png)
+![Compact capture window at 460×760 with 200% text](apps/desktop/test/review_goldens/note_460_760_en_light_scale2.0.png)
+
+Compact window, 460×760 logical pixels, English/light at 200% text.
+[Persian/dark reader at the same size](apps/desktop/test/review_goldens/reader_460_760_fa_dark_scale2.0.png).
+These are Windows widget snapshots, not installed-app verification.
 
 ## What you can do
 
@@ -21,7 +25,7 @@ A local-first notebook and desktop toolkit for Windows, with English and Persian
 - Switch between the custom desktop window and an edge panel with hover navigation, tray access and a global shortcut.
 - Choose a theme, language and dock layout. Tool selection is searchable and paginated.
 
-The note schema, attachment and backup handling, and 14 palette identities are aligned with [DbsNex Android 2.1.4](https://github.com/sanyzrn/DbsNex/tree/34514226260dc8b1d3da35f91082dbfa9ce46b93). [Cross-platform contract and validation](docs/CROSS_PLATFORM_0150.md). Windows keeps its own version and native integrations.
+The note schema, attachment and backup handling, and 14 palette identities are aligned with the [recorded DbsNex Android source](https://github.com/sanyzrn/DbsNex/tree/34514226260dc8b1d3da35f91082dbfa9ce46b93). [Cross-platform contract and validation](docs/CROSS_PLATFORM_0150.md). Windows keeps its own version and native integrations.
 
 New versions publish automatically to [Releases](https://github.com/sanyzrn/Nex_windows_test/releases/latest) after the full main-branch [Windows CI run](https://github.com/sanyzrn/Nex_windows_test/actions/workflows/desktop.yml) passes. The release contains the verified installer and matching `SHA256SUMS`. While CI is running, Releases continues to show the previous public version.
 
@@ -54,6 +58,8 @@ Generated installers belong in GitHub Release assets. Git tracks source, assets,
 | Choose tools | Settings → Docked tools & apps → Dock / More / Hidden |
 | Keyboard help | `F1` |
 
+[Complete keyboard reference / راهنمای میان‌برها](docs/shortcuts.md).
+
 ## Build and test
 
 Use Windows x64, **Flutter 3.44.8**, and Visual Studio with the **Desktop development with C++** workload. Use the default `pub.dev` package host. The independent Android checkout may use a different SDK; Windows goldens are validated with this pinned version.
@@ -85,11 +91,11 @@ CI runs version checks, package-host/UI checks, analysis, desktop tests and Wind
 
 ## Current limits
 
-The Intelligence workspace supports five cloud providers, conversation history, note actions with review, OCR, transcription, translation, rewriting, summaries and semantic search. AI is off by default, uses your own provider credentials, and stores keys in Windows secure storage. Local models have a clearly marked placeholder. Cloud/LAN sync, Vault, local inference and automatic app updates are not enabled. Further repeating-reminder occurrences need the app to run again; indefinite recurrence while fully exited is not implemented. Physical dual-monitor mixed-DPI/hot-plug behavior, full installed-notification delivery and clean-machine upgrades remain manual validation areas. See the dated validation reports for what was actually tested.
+The Intelligence workspace supports five cloud providers, conversation history, note actions with review, OCR, transcription, translation, rewriting, summaries and semantic search. AI is off by default, uses your own provider credentials, and stores keys in Windows secure storage. Local models have a clearly marked placeholder. Cloud/LAN sync, Vault and local inference are not enabled. The GitHub updater checks stable releases, verifies installer checksums and offers Install & restart; automatic downloads can be disabled in Settings → About Nex. Further repeating-reminder occurrences need the app to run again; indefinite recurrence while fully exited is not implemented. Physical dual-monitor mixed-DPI/hot-plug behavior, full installed-notification delivery and clean-machine upgrades remain manual validation areas. See the dated validation reports for what was actually tested.
 
 ## راهنمای فارسی
 
-نکس ویندوز یک دفتر یادداشت محلی با ابزارهای کاربردی ویندوز است. نسخهٔ فعلی **۰٫۱۴٫۰، بیلد ۱۱** است و دو حالت پنجره و پنل کناری دارد.
+نکس ویندوز یک دفتر یادداشت محلی با ابزارهای کاربردی ویندوز است. نسخهٔ فعلی کد **۰٫۲۲٫۰، بیلد ۱۶** است و دو حالت پنجره و پنل کناری دارد.
 
 - [آخرین نصاب و فایل بررسی SHA-256](https://github.com/sanyzrn/Nex_windows_test/releases/latest) را از بخش Releases دریافت کنید؛ لینک دانلود داخل گزارش‌های قدیمی، نسخهٔ جاری محسوب نمی‌شود.
 - قبل از ارتقا، برنامهٔ باز را از منوی کنار ساعت ببندید. یادداشت‌ها، رسانه‌ها و تنظیمات در مسیر جدا از فایل‌های نصب نگه‌داری می‌شوند.
@@ -101,11 +107,12 @@ The Intelligence workspace supports five cloud providers, conversation history, 
 
 The standalone Windows project uses the [MIT license](LICENSE). Shared packages and the desktop shell retain their upstream notices. Shell references include [raminturne/right-panel](https://github.com/raminturne/right-panel). Fonts, plugins and upstream attribution are listed in [THIRD_PARTY_NOTICES](apps/desktop/THIRD_PARTY_NOTICES.md).
 
-## Windows 0.21.0
+## Automatic updates (since 0.21.0)
 
 The interface follows Android Nex's rounded tonal groups and capability cards.
 Automatic updates check the latest stable GitHub release and download verified
 installers in the background. Choose **Install & restart** when ready; the app
 saves before closing. Toggle automatic downloads or check manually in Settings →
-About Nex. Install 0.21.0 once to get this updater; older versions do not contain it.
+About Nex. When upgrading from a pre-0.21.0 build, install the latest stable
+installer once; those older versions do not contain the updater.
 [Design and update contract](docs/WINDOWS_0210.md).

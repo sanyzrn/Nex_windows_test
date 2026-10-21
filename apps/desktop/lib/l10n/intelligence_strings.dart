@@ -103,10 +103,6 @@ class AiStrings {
     'saveNote': ['Save as a new note', 'ذخیره به‌عنوان یادداشت تازه'],
     'append': ['Add to caption', 'افزودن به توضیح'],
     'replace': ['Replace caption', 'جایگزینی توضیح'],
-    'confirmReplace': [
-      'Replace the existing caption with this result?',
-      'توضیح فعلی با این نتیجه جایگزین شود؟',
-    ],
     'confirm': ['Apply these changes', 'اعمال این تغییرات'],
     'discard': ['Discard', 'صرف‌نظر'],
     'review': ['Review before applying', 'پیش از اجرا بررسی کن'],
@@ -157,7 +153,6 @@ class AiStrings {
     'natural': ['Natural', 'طبیعی'],
     'direct': ['Direct', 'مستقیم'],
     'warm': ['Warm', 'صمیمی'],
-    'analytical': ['Analytical', 'تحلیلی'],
     'gentle': ['Gentle', 'ملایم'],
     'autoStyle': ['Format only', 'فقط مرتب\u200cسازی'],
     'fix': ['Fix writing', 'اصلاح نگارش'],
@@ -210,14 +205,9 @@ class AiStrings {
       'Review or discard the proposed changes first',
       'اول تغییرات پیشنهادی را بررسی یا رد کن',
     ],
-    'clearContext': ['Clear note context', 'پاک کردن زمینهٔ یادداشت'],
     'limitImage': [
       'Use up to 4 images, each smaller than 8 MB',
       'حداکثر ۴ تصویر، هر کدام کوچک\u200cتر از ۸ مگابایت',
-    ],
-    'readFile': [
-      'Text file content can be included in this conversation.',
-      'محتوای فایل متنی می\u200cتواند در این گفت\u200cوگو استفاده شود.',
     ],
     'localHint': [
       'The local runtime and model selection will be completed later. No model is downloaded or executed yet.',
@@ -241,10 +231,6 @@ class AiStrings {
       'ابزاری انتخاب کن. نتیجه تا زمانی که ذخیره\u200cاش کنی در پیش\u200cنمایش می\u200cماند.',
     ],
     'applied': ['Saved to your notes', 'در یادداشت\u200cها ذخیره شد'],
-    'voiceUnavailable': [
-      'Microphone or transcription is unavailable',
-      'میکروفن یا تبدیل صوت در دسترس نیست',
-    ],
     'disclosureHint': [
       'Activity records destination hosts, request purpose and size. It does not record your content or API keys.',
       'فعالیت شامل میزبان مقصد، هدف درخواست و اندازه است؛ محتوا و کلید API ثبت نمی\u200cشود.',

@@ -434,12 +434,6 @@ abstract class AppLocalizations {
   /// **'Add to thread'**
   String get joinThread;
 
-  /// No description provided for @assistantStub.
-  ///
-  /// In en, this message translates to:
-  /// **'Assistant is not connected in this base. Capture and search work offline.'**
-  String get assistantStub;
-
   /// No description provided for @utility0.
   ///
   /// In en, this message translates to:
@@ -577,12 +571,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Stopwatch'**
   String get utility22;
-
-  /// No description provided for @utility23.
-  ///
-  /// In en, this message translates to:
-  /// **'Text tools · clipboard'**
-  String get utility23;
 
   /// No description provided for @utility24.
   ///
@@ -1574,12 +1562,6 @@ abstract class AppLocalizations {
   /// **'Switch to edge panel'**
   String get switchToPanel;
 
-  /// No description provided for @switchToWindow.
-  ///
-  /// In en, this message translates to:
-  /// **'Switch to window'**
-  String get switchToWindow;
-
   /// No description provided for @backToTools.
   ///
   /// In en, this message translates to:
@@ -1657,18 +1639,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Every week'**
   String get repeatWeekly;
-
-  /// No description provided for @repeatMonthly.
-  ///
-  /// In en, this message translates to:
-  /// **'Every month'**
-  String get repeatMonthly;
-
-  /// No description provided for @repeatYearly.
-  ///
-  /// In en, this message translates to:
-  /// **'Every year'**
-  String get repeatYearly;
 
   /// No description provided for @clearReminder.
   ///
@@ -1850,12 +1820,6 @@ abstract class AppLocalizations {
   /// **'Command palette'**
   String get paletteOpen;
 
-  /// No description provided for @paletteHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Search notes, jump anywhere, run actions (Ctrl+K)'**
-  String get paletteHint;
-
   /// No description provided for @paletteSearchHint.
   ///
   /// In en, this message translates to:
@@ -1874,12 +1838,6 @@ abstract class AppLocalizations {
   /// **'Notes'**
   String get paletteSectionNotes;
 
-  /// No description provided for @paletteSectionGoTo.
-  ///
-  /// In en, this message translates to:
-  /// **'Go to'**
-  String get paletteSectionGoTo;
-
   /// No description provided for @paletteSectionActions.
   ///
   /// In en, this message translates to:
@@ -1897,24 +1855,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Toggle light / dark theme'**
   String get paletteActionToggleTheme;
-
-  /// No description provided for @paletteActionOpenTools.
-  ///
-  /// In en, this message translates to:
-  /// **'Open the tools'**
-  String get paletteActionOpenTools;
-
-  /// No description provided for @pasteLinkSaved.
-  ///
-  /// In en, this message translates to:
-  /// **'Link note created'**
-  String get pasteLinkSaved;
-
-  /// No description provided for @noNoteSelectedHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Use ↑ / ↓ to navigate notes, or Ctrl+N to create'**
-  String get noNoteSelectedHint;
 
   /// No description provided for @filterAll.
   ///
@@ -1994,30 +1934,6 @@ abstract class AppLocalizations {
   /// **'{words} words · {chars} characters'**
   String editorCount(int words, int chars);
 
-  /// No description provided for @localEngineActive.
-  ///
-  /// In en, this message translates to:
-  /// **'Local library on this device'**
-  String get localEngineActive;
-
-  /// No description provided for @switchToDark.
-  ///
-  /// In en, this message translates to:
-  /// **'Switch to dark theme'**
-  String get switchToDark;
-
-  /// No description provided for @switchToLight.
-  ///
-  /// In en, this message translates to:
-  /// **'Switch to light theme'**
-  String get switchToLight;
-
-  /// No description provided for @restoreConfirmTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Restore backup'**
-  String get restoreConfirmTitle;
-
   /// No description provided for @restoreConfirmBody.
   ///
   /// In en, this message translates to:
@@ -2084,18 +2000,6 @@ abstract class AppLocalizations {
   /// **'The note library is not available on this device yet.'**
   String get libraryUnavailable;
 
-  /// No description provided for @libraryUnavailableHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Open the library view from the dock, or restart Nex to load your notes.'**
-  String get libraryUnavailableHint;
-
-  /// No description provided for @workspaceLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'YOUR SPACE'**
-  String get workspaceLabel;
-
   /// No description provided for @workspaceLocal.
   ///
   /// In en, this message translates to:
@@ -2144,12 +2048,6 @@ abstract class AppLocalizations {
   /// **'Within reach'**
   String get workspaceEssentials;
 
-  /// No description provided for @workspaceAllTools.
-  ///
-  /// In en, this message translates to:
-  /// **'Your toolbox'**
-  String get workspaceAllTools;
-
   /// No description provided for @workspaceUtilityHint.
   ///
   /// In en, this message translates to:
@@ -2185,12 +2083,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Pick a colour from anywhere.'**
   String get workspaceColorHint;
-
-  /// No description provided for @workspaceSettingsDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Make this space feel like yours.'**
-  String get workspaceSettingsDescription;
 
   /// No description provided for @workspaceReaderTitle.
   ///
@@ -2881,12 +2773,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Emoji category'**
   String get emojiCategory;
-
-  /// No description provided for @resizeLibrary.
-  ///
-  /// In en, this message translates to:
-  /// **'Resize library panes'**
-  String get resizeLibrary;
 }
 
 class _AppLocalizationsDelegate

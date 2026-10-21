@@ -24,3 +24,6 @@ upstream/
 
 **/test/candidate_review/
 **/test/candidate_goldens/
+
+# Local coverage runs; keep curated summaries in docs/agent-reports.
+/apps/desktop/coverage/

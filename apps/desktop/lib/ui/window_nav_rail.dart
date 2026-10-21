@@ -1,7 +1,7 @@
 part of 'window_shell.dart';
 
-/// The window's navigation rail. Two widths only: 204px with labels, 64px
-/// icons-only below the [nexRailWideAt] breakpoint. Shortcut hints live in
+/// Labelled rail used only at or above kWindowWideAt; _SlimRail handles
+/// narrower windows. Width grows for large localized text. Shortcut hints live in
 /// tooltips, not beside every label — a badge on each row was noise the
 /// Android app does not carry, and the F1 dialog lists them all anyway.
 class _WindowNavRail extends StatelessWidget {
@@ -13,10 +13,9 @@ class _WindowNavRail extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context)!;
     final c = Theme.of(context).colorScheme;
-    final wide = MediaQuery.sizeOf(context).width >= 960;
-    var railWidth = wide ? 206.0 : 64.0;
+    var railWidth = 206.0;
     final scaler = MediaQuery.textScalerOf(context);
-    if (wide && scaler.scale(1) > 1) {
+    if (scaler.scale(1) > 1) {
       for (final label in [
         l.navCapture,
         l.library,
@@ -50,7 +49,7 @@ class _WindowNavRail extends StatelessWidget {
         key: const ValueKey('workspace-sidebar'),
         width: railWidth,
         margin: const EdgeInsetsDirectional.fromSTEB(8, 0, 8, 10),
-        padding: EdgeInsets.symmetric(horizontal: wide ? 12 : 10),
+        padding: const EdgeInsets.symmetric(horizontal: 12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -61,9 +60,7 @@ class _WindowNavRail extends StatelessWidget {
                   children: [
                     const SizedBox(height: 16),
                     Row(
-                      mainAxisAlignment: wide
-                          ? MainAxisAlignment.start
-                          : MainAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         Container(
                           width: 32,
@@ -78,18 +75,16 @@ class _WindowNavRail extends StatelessWidget {
                             color: c.onPrimary,
                           ),
                         ),
-                        if (wide) ...[
-                          const SizedBox(width: 10),
-                          Text(
-                            l.workspaceBrand,
-                            style: Theme.of(context).textTheme.titleMedium
-                                ?.copyWith(
-                                  fontSize: 19,
-                                  fontWeight: FontWeight.w700,
-                                  letterSpacing: -.5,
-                                ),
-                          ),
-                        ],
+                        const SizedBox(width: 10),
+                        Text(
+                          l.workspaceBrand,
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(
+                                fontSize: 19,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: -.5,
+                              ),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 24),
@@ -100,8 +95,8 @@ class _WindowNavRail extends StatelessWidget {
                         unawaited(features?.fresh());
                       },
                       style: FilledButton.styleFrom(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: wide ? 12 : 0,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
                           vertical: 12,
                         ),
                         minimumSize: const Size(40, 42),
@@ -109,25 +104,19 @@ class _WindowNavRail extends StatelessWidget {
                           borderRadius: BorderRadius.circular(20),
                         ),
                       ),
-                      child: wide
-                          ? Row(
-                              children: [
-                                const Icon(Icons.add_rounded, size: 19),
-                                const SizedBox(width: 8),
-                                Expanded(child: Text(l.newNote)),
-                              ],
-                            )
-                          : Tooltip(
-                              message: l.newNote,
-                              child: const Icon(Icons.add_rounded, size: 20),
-                            ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.add_rounded, size: 19),
+                          const SizedBox(width: 8),
+                          Expanded(child: Text(l.newNote)),
+                        ],
+                      ),
                     ),
                     const SizedBox(height: 16),
                     NexWorkspaceDestination(
                       icon: Icons.edit_note_outlined,
                       label: l.navCapture,
                       selected: section == 'capture',
-                      compact: !wide,
                       shortcut: ShortcutLabels.newNote,
                       onPressed: () =>
                           controller.selectWindowSection('capture'),
@@ -137,7 +126,6 @@ class _WindowNavRail extends StatelessWidget {
                       icon: Icons.auto_stories_outlined,
                       label: l.library,
                       selected: section == 'library',
-                      compact: !wide,
                       shortcut: ShortcutLabels.library,
                       onPressed: () =>
                           controller.selectWindowSection('library'),
@@ -147,7 +135,6 @@ class _WindowNavRail extends StatelessWidget {
                       icon: Icons.auto_awesome_outlined,
                       label: AiStrings.of(context).t('ai'),
                       selected: section == 'assistant',
-                      compact: !wide,
                       onPressed: () =>
                           controller.selectWindowSection('assistant'),
                     ),
@@ -156,7 +143,6 @@ class _WindowNavRail extends StatelessWidget {
                       icon: Icons.grid_view_outlined,
                       label: l.navTools,
                       selected: section == 'tools',
-                      compact: !wide,
                       onPressed: () => controller.selectWindowSection('tools'),
                     ),
                   ],
@@ -171,49 +157,41 @@ class _WindowNavRail extends StatelessWidget {
               icon: Icons.settings_outlined,
               label: l.settings,
               selected: section == 'settings',
-              compact: !wide,
               onPressed: () => controller.selectWindowSection('settings'),
             ),
             const SizedBox(height: 4),
             NexWorkspaceDestination(
               icon: Icons.view_sidebar_outlined,
               label: l.switchToPanel,
-              compact: !wide,
               onPressed: () => controller.setWindowMode('panel'),
             ),
-            if (wide)
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 12,
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.shield_outlined,
-                      size: 14,
-                      color: c.onSurfaceVariant,
-                    ),
-                    const SizedBox(width: 7),
-                    Expanded(
-                      child: Text(
-                        l.workspaceLocal,
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: c.onSurfaceVariant,
-                          height: 1.5,
-                        ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.shield_outlined,
+                    size: 14,
+                    color: c.onSurfaceVariant,
+                  ),
+                  const SizedBox(width: 7),
+                  Expanded(
+                    child: Text(
+                      l.workspaceLocal,
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: c.onSurfaceVariant,
+                        height: 1.5,
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
+            ),
             const SizedBox(height: 8),
             Divider(color: c.outlineVariant, height: 1),
             const SizedBox(height: 4),
             Row(
-              mainAxisAlignment: wide
-                  ? MainAxisAlignment.start
-                  : MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 _RailIcon(
                   tooltip: controller.palette.isLight ? l.dark : l.light,
@@ -228,25 +206,23 @@ class _WindowNavRail extends StatelessWidget {
                     controller.refresh();
                   },
                 ),
-                if (wide) ...[
-                  const SizedBox(width: 2),
-                  _RailIcon(
-                    tooltip: '${l.keyboardShortcuts} (${ShortcutLabels.help})',
-                    icon: Icons.keyboard_outlined,
-                    onPressed: () => showShortcutsDialog(context),
+                const SizedBox(width: 2),
+                _RailIcon(
+                  tooltip: '${l.keyboardShortcuts} (${ShortcutLabels.help})',
+                  icon: Icons.keyboard_outlined,
+                  onPressed: () => showShortcutsDialog(context),
+                ),
+                const SizedBox(width: 2),
+                _RailIcon(
+                  tooltip:
+                      '${l.workspaceSearch} (${ShortcutLabels.commandPalette})',
+                  icon: Icons.search_outlined,
+                  onPressed: () => showCommandPalette(
+                    context,
+                    controller: controller,
+                    features: features,
                   ),
-                  const SizedBox(width: 2),
-                  _RailIcon(
-                    tooltip:
-                        '${l.workspaceSearch} (${ShortcutLabels.commandPalette})',
-                    icon: Icons.search_outlined,
-                    onPressed: () => showCommandPalette(
-                      context,
-                      controller: controller,
-                      features: features,
-                    ),
-                  ),
-                ],
+                ),
               ],
             ),
             const SizedBox(height: 8),
