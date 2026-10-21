@@ -60,8 +60,9 @@ class NexFeatures extends ChangeNotifier {
           !_deliveredReminders.contains(reminderReceipt(note)));
   void setDeliveredReminders(Set<String> receipts) {
     if (_deliveredReminders.length == receipts.length &&
-        _deliveredReminders.containsAll(receipts))
+        _deliveredReminders.containsAll(receipts)) {
       return;
+    }
     _deliveredReminders = Set.of(receipts);
     notify();
   }
