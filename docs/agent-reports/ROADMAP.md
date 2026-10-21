@@ -3,7 +3,7 @@
 Source: the owner's supplied `WINDOWS_AGENT_PROMPT.md`. The owner explicitly
 authorized adapting Windows-specific setup to this Linux environment, and asked
 for a report, commit and push after each part, followed by approval before the
-next part. No approval to merge, tag or publish a release is implied.
+next part. The owner subsequently authorized merging Parts 1–7 and publishing 0.23.0 for manual testing on 2026-10-21.
 
 Base: `2076ad466aeb8b31e9fa7caf18a43156ae87b114` (`main`, 0.22.0+16).
 Working branch: `windows/0.23-agent`. Android reference: separate read-only
@@ -30,7 +30,7 @@ an owner decision. Internal commits may separate unrelated changes.
 | 5 | A9, A11, A12, A4, A6 | Persian updater notes, digits/calendar consistency, installer polish; complete the screenshot matrix after these changes, then format | Completed; [report](PART5.md); closes Track A |
 | 6 | B0, B1, B2, B3 | Triage remaining Windows checks; mixed-language editing, close/tray lifecycle, corner restoration, reminders and toast actions | Implemented; [report](PART6.md), CI result in PR checks; physical checks in [B0](B0.md) |
 | 7 | B4, B5, B6, B7 | Windows appearance/integration, Android AI parity including models/YouTube, backup/onboarding/settings/update handoff, final accessibility/performance/localization checks | Implemented; [report](PART7.md), final Windows checks tracked in PR |
-| Optional | B8 | Owner-selected modules and Windows extras | Deferred; selection and approval required before implementation |
+| Optional | B8 | Owner-selected modules and Windows extras | Deferred explicitly by owner; no implementation in 0.23.0 |
 
 A6 stays last in Track A and remains a standalone formatting commit inside Part 5.
 A4 still covers all requested settings subpages, reader variants and states; batch
@@ -62,7 +62,7 @@ native checks early, and later parts update that same checklist.
 
 The owner approved Part 7. B4–B7 implementation is recorded in PART7.md; final Windows CI and physical-device limits are tracked there. Stop before optional B8.
 
-No data schema or backup format changes. No version bump until requested.
+No data schema or backup format changes. The owner has now requested publication; the release version is 0.23.0+17.
 Draft PRs are due at the end of each track, as specified in the work order.
 Manual Windows results, Narrator, installer tests and real Android backup
 round-trips cannot be claimed from Linux. Where possible, existing Windows CI

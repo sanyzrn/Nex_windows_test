@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.23.0 — 2026-10-21
+
 - Optional first-run setup for language, theme, accent and window restoration,
   with a notification test, backup import and keyboard shortcut tour.
 - Focus on writing hides the rail, keeps the current draft and shows word/save
