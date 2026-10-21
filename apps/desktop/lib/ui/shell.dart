@@ -118,7 +118,10 @@ class _PanelShellState extends State<PanelShell>
     }
     final tabBox = c.tabBoxKey.currentContext?.findRenderObject();
     if (tabBox is RenderBox && tabBox.attached && tabBox.hasSize) {
-      c.tabRect = tabBox.localToGlobal(Offset.zero) & tabBox.size;
+      c.tabRect = MatrixUtils.transformRect(
+        tabBox.getTransformTo(null),
+        Offset.zero & tabBox.size,
+      );
     }
   }
 
@@ -132,15 +135,16 @@ class _PanelShellState extends State<PanelShell>
     final vpTop = _viewportTop();
     if (vpTop.isNaN) return null;
     final scroll = c.toolScroll.hasClients ? c.toolScroll.offset : 0.0;
+    final scale = S.panelScale;
     if (i >= 0) {
-      return vpTop + 26 + 54.0 * i - scroll;
+      return vpTop + (26 + 54.0 * i - scroll) * scale;
     }
     if (id == 'settings') {
       final viewportH = (54.0 * visible.length - 2).clamp(
         0.0,
-        Dock.maxToolsHeight(MediaQuery.sizeOf(context).height),
+        Dock.maxToolsHeight(MediaQuery.sizeOf(context).height / S.panelScale),
       );
-      return vpTop + viewportH + 47;
+      return vpTop + (viewportH + 47) * scale;
     }
     return null;
   }
@@ -172,7 +176,7 @@ class _PanelShellState extends State<PanelShell>
     final vpTop = _viewportTop();
     final viewportH = (54.0 * visible.length - 2).clamp(
       0.0,
-      Dock.maxToolsHeight(MediaQuery.sizeOf(context).height),
+      Dock.maxToolsHeight(MediaQuery.sizeOf(context).height / S.panelScale),
     );
 
     // ----- icons: staggered in/out + hover magnification -----
@@ -187,14 +191,15 @@ class _PanelShellState extends State<PanelShell>
         if (i < visible.length) {
           centerY =
               vpTop +
-              26 +
-              54.0 * i -
-              (c.toolScroll.hasClients ? c.toolScroll.offset : 0);
+              (26 +
+                      54.0 * i -
+                      (c.toolScroll.hasClients ? c.toolScroll.offset : 0)) *
+                  S.panelScale;
         } else {
-          centerY = vpTop + viewportH + 47;
+          centerY = vpTop + (viewportH + 47) * S.panelScale;
         }
         final d = (centerY - c.hoverY!).abs();
-        m = math.pow(math.max(0, 1 - d / 80), 1.6).toDouble();
+        m = math.pow(math.max(0, 1 - d / (80 * S.panelScale)), 1.6).toDouble();
       }
       c.springsFor(items[i]).mg.t = m;
     }

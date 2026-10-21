@@ -19,6 +19,7 @@ import '../core/models.dart' show ClipImage;
 import '../core/controller.dart';
 import '../l10n/app_localizations.dart';
 import 'store.dart';
+import 'reminder_policy.dart';
 import 'modules/module_controller.dart';
 import 'intelligence/controller.dart';
 import '../updates/controller.dart';
@@ -52,6 +53,19 @@ class NexFeatures extends ChangeNotifier {
   String? error;
   int libraryRevision = 0;
   bool reminderDeliveryFailed = false;
+  Set<String> _deliveredReminders = {};
+  bool reminderNeedsAttention(Note note) =>
+      note.dueAt != null &&
+      (note.dueRepeat != NoteRepeat.once ||
+          !_deliveredReminders.contains(reminderReceipt(note)));
+  void setDeliveredReminders(Set<String> receipts) {
+    if (_deliveredReminders.length == receipts.length &&
+        _deliveredReminders.containsAll(receipts))
+      return;
+    _deliveredReminders = Set.of(receipts);
+    notify();
+  }
+
   Future<void> Function()? synchronizeReminders;
 
   Future<void> remind(String id, DateTime? at, NoteRepeat repeat) async {

@@ -1,7 +1,7 @@
 name: nex_desktop
 description: "Nex for Windows desktop application."
 publish_to: "none"
-version: 0.24.0+18
+version: 0.25.0+19
 
 environment:
   sdk: ^3.12.0

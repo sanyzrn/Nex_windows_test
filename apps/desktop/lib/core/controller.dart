@@ -476,16 +476,21 @@ abstract class PanelStateBase extends ChangeNotifier implements PanelHoldable {
     final (px, py) = pos;
     final pl = placement;
     if (pl == null) return;
-    final (winY, h, edge) = (pl.y, pl.h, pl.edgeX);
+    final edge = pl.edgeX;
+    final areaY = pl.workY ?? pl.y;
+    final areaH = (pl.workHeight ?? pl.h).toDouble();
+    final triggerH = math.min(areaH, S.edgeTriggerHeight * pl.scale);
+    final triggerY = areaY + (areaH - triggerH) * S.edgeTriggerPosition;
+    final triggerW = S.edgeTriggerWidth * pl.scale;
     final left = pl.onLeft;
     final moved = px != _lastX || py != _lastY;
     _lastX = px;
     _lastY = py;
-    final inBand = py >= winY && py < winY + h;
+    final inBand = py >= triggerY && py < triggerY + triggerH;
     final dist = left ? px - edge : edge - 1 - px;
     // a held button usually means dragging something: wait until it rests
     final buttonDown = native.leftDown();
-    if (buttonDown && inBand && dist >= 0 && dist <= 1) {
+    if (buttonDown && inBand && dist >= 0 && dist <= triggerW) {
       _held++;
     } else {
       _held = 0;
@@ -494,13 +499,13 @@ abstract class PanelStateBase extends ChangeNotifier implements PanelHoldable {
     if ((moved || _held == 31) &&
         inBand &&
         dist >= 0 &&
-        dist <= 8 * pl.scale &&
+        dist <= triggerW &&
         (!buttonDown || _held > 30)) {
       unawaited(native.rememberForeground().catchError((_) {}));
       open();
       if (buttonDown) dropHintOn.value = true;
       _near = false;
-    } else if (inBand && dist >= 0 && dist < (160 * pl.scale)) {
+    } else if (inBand && dist >= 0 && dist <= triggerW) {
       _near = true;
       cursor(dist / pl.scale);
     } else if (_near) {

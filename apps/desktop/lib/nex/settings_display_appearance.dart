@@ -7,6 +7,136 @@
 part of 'settings.dart';
 
 mixin _SettingsDisplayAppearance on _SettingsStateBase {
+  List<Widget> _panelControls(BuildContext context, PanelController c) {
+    final d = DesktopStrings.of(context);
+    final scheme = Theme.of(context).colorScheme;
+    Widget slider(
+      String key,
+      double value,
+      double min,
+      double max,
+      int steps,
+      ValueChanged<double> assign, {
+      bool percent = false,
+    }) => _SettingRow(
+      title: d.t(key),
+      subtitle: key == 'panelSize' ? d.t('panelSizeHint') : null,
+      control: SizedBox(
+        width: 260,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              desktopDigits(
+                context,
+                percent
+                    ? '${(value * 100).toStringAsFixed(key == 'edgePosition' ? 1 : 0)}%'
+                    : '${value.round()} px',
+              ),
+            ),
+            Slider(
+              value: value,
+              min: min,
+              max: max,
+              divisions: steps,
+              label: desktopDigits(
+                context,
+                percent ? '${(value * 100).round()}%' : '${value.round()} px',
+              ),
+              onChanged: (next) {
+                assign(next);
+                c.refresh();
+              },
+              onChangeEnd: (_) => c.save(),
+            ),
+          ],
+        ),
+      ),
+    );
+    return [
+      const Divider(height: 1),
+      slider(
+        'panelSize',
+        c.S.panelScale,
+        .75,
+        1.25,
+        10,
+        (v) => c.S.panelScale = v,
+        percent: true,
+      ),
+      const Divider(height: 1),
+      Text(d.t('edgeArea'), style: Theme.of(context).textTheme.titleSmall),
+      Text(d.t('edgeAreaHint'), style: Theme.of(context).textTheme.bodySmall),
+      const SizedBox(height: 12),
+      SizedBox(
+        height: 100,
+        child: LayoutBuilder(
+          builder: (context, box) {
+            final height =
+                c.S.edgeTriggerHeight /
+                ((c.placement?.workHeight ?? c.placement?.h ?? 680) /
+                    (c.placement?.scale ?? 1));
+            final previewH = (height * 100).clamp(2.0, 100.0);
+            return Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: scheme.outlineVariant),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Stack(
+                children: [
+                  Positioned(
+                    top: (100 - previewH) * c.S.edgeTriggerPosition,
+                    left: c.S.edge == 'left' ? 0 : null,
+                    right: c.S.edge == 'left' ? null : 0,
+                    width: c.S.edgeTriggerWidth.clamp(2.0, 12.0),
+                    height: previewH,
+                    child: ColoredBox(color: scheme.primary),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+      slider(
+        'edgeWidth',
+        c.S.edgeTriggerWidth,
+        1,
+        12,
+        11,
+        (v) => c.S.edgeTriggerWidth = v,
+      ),
+      slider(
+        'edgeHeight',
+        c.S.edgeTriggerHeight,
+        24,
+        400,
+        376,
+        (v) => c.S.edgeTriggerHeight = v,
+      ),
+      slider(
+        'edgePosition',
+        c.S.edgeTriggerPosition,
+        0,
+        1,
+        1000,
+        (v) => c.S.edgeTriggerPosition = v,
+        percent: true,
+      ),
+      TextButton(
+        onPressed: () {
+          c.S.panelScale = 1;
+          c.S.edgeTriggerWidth = 2;
+          c.S.edgeTriggerHeight = 120;
+          c.S.edgeTriggerPosition = .5;
+          c.save();
+          c.refresh();
+        },
+        child: Text(d.t('resetPanel')),
+      ),
+    ];
+  }
+
   @override
   List<Widget> _buildDisplayAppearance(BuildContext context) {
     final c = LiquidScope.panelOf(context);
@@ -118,6 +248,7 @@ mixin _SettingsDisplayAppearance on _SettingsStateBase {
               ),
             ],
           ],
+          if (!c.isWindowMode) ..._panelControls(context, c),
           const Divider(height: 1),
           _SettingRow(
             title: l.testNotification,

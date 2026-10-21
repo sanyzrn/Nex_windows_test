@@ -236,18 +236,20 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
               final actions = Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  IconButton(
-                    tooltip: AiStrings.of(context).t('board'),
-                    isSelected: board,
-                    onPressed: () => setState(() => board = true),
-                    icon: const Icon(Icons.grid_view_outlined),
-                  ),
-                  IconButton(
-                    tooltip: AiStrings.of(context).t('list'),
-                    isSelected: !board,
-                    onPressed: () => setState(() => board = false),
-                    icon: const Icon(Icons.view_agenda_outlined),
-                  ),
+                  if (NexPanelScope.maybeOf(context)?.isWindowMode ?? true) ...[
+                    IconButton(
+                      tooltip: AiStrings.of(context).t('board'),
+                      isSelected: board,
+                      onPressed: () => setState(() => board = true),
+                      icon: const Icon(Icons.grid_view_outlined),
+                    ),
+                    IconButton(
+                      tooltip: AiStrings.of(context).t('list'),
+                      isSelected: !board,
+                      onPressed: () => setState(() => board = false),
+                      icon: const Icon(Icons.view_agenda_outlined),
+                    ),
+                  ],
                   IconButton.filledTonal(
                     key: const ValueKey('manage-tags'),
                     tooltip: l.manageTags,
@@ -469,7 +471,11 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
                             note: trash
                                 ? note.copyWith(clearPinnedAt: true)
                                 : note,
-                            showDue: !trash,
+                            showDue:
+                                !trash &&
+                                NexScope.of(
+                                  context,
+                                ).reminderNeedsAttention(note),
                             onChecklistToggle: trash
                                 ? null
                                 : (itemIndex) async {

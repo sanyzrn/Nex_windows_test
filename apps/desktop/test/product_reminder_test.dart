@@ -8,6 +8,7 @@ import 'package:nex_desktop/nex/reminder_picker.dart';
 import 'package:nex_desktop/nex/reminder_policy.dart';
 import 'package:nex_desktop/nex/reminders.dart';
 import 'package:nex_desktop/nex/store.dart';
+import 'package:nex_desktop/nex/features_state.dart';
 import 'package:nex_desktop/nex/note_activation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -257,7 +258,12 @@ void main() {
       );
       final store = await DesktopStore.open(root.path, 'receipts');
       final scheduler = _Scheduler();
-      var runtime = ReminderCoordinator(store, scheduler);
+      final features = NexFeatures(store);
+      var runtime = ReminderCoordinator(
+        store,
+        scheduler,
+        onDeliveredChanged: features.setDeliveredReminders,
+      );
       try {
         final note = await store.call<Note>('capture', {
           'text': 'Missed reminder',
@@ -268,8 +274,26 @@ void main() {
         });
         await runtime.start();
         expect(scheduler.overdueShown.length, 1);
+        final current = (await store.call<Note?>('get', {'id': note.id}))!;
+        expect(
+          current.dueAt,
+          isNotNull,
+        ); // Snooze/Done keep the original occurrence.
+        expect(features.reminderNeedsAttention(current), isFalse);
+        expect(
+          features.reminderNeedsAttention(
+            current.copyWith(
+              dueAt: current.dueAt!.add(const Duration(days: 1)),
+            ),
+          ),
+          isTrue,
+        );
         await runtime.close();
-        runtime = ReminderCoordinator(store, scheduler);
+        runtime = ReminderCoordinator(
+          store,
+          scheduler,
+          onDeliveredChanged: features.setDeliveredReminders,
+        );
         await runtime.start();
         expect(scheduler.overdueShown.length, 1);
         await store.call('remind', {
@@ -280,7 +304,7 @@ void main() {
         expect(scheduler.overdueShown.length, 2);
       } finally {
         await runtime.close();
-        await store.close();
+        await features.close();
         await root.delete(recursive: true);
       }
     },

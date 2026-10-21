@@ -112,9 +112,12 @@ class Placement {
     required this.edgeX,
     required this.scale,
     required this.onLeft,
+    this.workY,
+    this.workHeight,
   });
 
   final int x, y, w, h, edgeX;
+  final int? workY, workHeight;
   final double scale;
   final bool onLeft;
 
@@ -126,6 +129,8 @@ class Placement {
     edgeX: ((m['edgeX'] as num?) ?? 0).toInt(),
     scale: ((m['scale'] as num?) ?? 1.0).toDouble(),
     onLeft: (m['onLeft'] as bool?) ?? false,
+    workY: (m['workY'] as num?)?.toInt(),
+    workHeight: (m['workHeight'] as num?)?.toInt(),
   );
 }
 

@@ -312,10 +312,15 @@ class _RailTileState extends State<_RailTile> {
                         : Colors.transparent,
                     borderRadius: BorderRadius.circular(15),
                   ),
-                  child: Icon(
-                    selected ? widget.selectedIcon : widget.icon,
-                    size: 22,
-                    color: color,
+                  child: NexUpdateDot(
+                    updates: widget.icon == Icons.settings_outlined
+                        ? NexScope.maybeOf(context)?.updates
+                        : null,
+                    child: Icon(
+                      selected ? widget.selectedIcon : widget.icon,
+                      size: 22,
+                      color: color,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 3),

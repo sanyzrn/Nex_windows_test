@@ -127,6 +127,8 @@ flutter::EncodableMap ComputePlacement(HWND window, const std::string& edge,
   out[EncodableValue("y")] = EncodableValue(y);
   out[EncodableValue("w")] = EncodableValue(w);
   out[EncodableValue("h")] = EncodableValue(hClamped);
+  out[EncodableValue("workY")] = EncodableValue(m.y);
+  out[EncodableValue("workHeight")] = EncodableValue(m.h);
   out[EncodableValue("edgeX")] = EncodableValue(left ? m.x : m.x + m.w);
   out[EncodableValue("scale")] = EncodableValue(scale);
   out[EncodableValue("onLeft")] = EncodableValue(left);

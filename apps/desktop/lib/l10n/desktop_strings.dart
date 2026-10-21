@@ -7,6 +7,21 @@ class DesktopStrings {
       DesktopStrings(Localizations.localeOf(context).languageCode == 'fa');
   String t(String key) => (_copy[key] ?? [key, key])[fa ? 1 : 0];
   static const _copy = <String, List<String>>{
+    'panelSize': ['Panel size', 'اندازهٔ نوار پنل'],
+    'panelSizeHint': [
+      'Only the dock and its icons change size; open cards keep their size.',
+      'فقط نوار و آیکون‌ها تغییر اندازه می‌دهند؛ کارت‌های باز ثابت می‌مانند.',
+    ],
+    'edgeArea': ['Reveal area', 'محدودهٔ بازشدن پنل'],
+    'edgeAreaHint': [
+      'Only this area on the chosen screen edge reveals the panel.',
+      'پنل فقط با رفتن نشانگر به این محدوده از لبهٔ انتخابی باز می‌شود.',
+    ],
+    'edgeWidth': ['Area width', 'عرض محدوده'],
+    'edgeHeight': ['Area height', 'ارتفاع محدوده'],
+    'edgePosition': ['Position from top', 'موقعیت از بالا'],
+    'resetPanel': ['Reset panel controls', 'بازنشانی تنظیمات پنل'],
+
     'writingMode': ['Focus on writing', 'تمرکز روی نوشتن'],
     'leaveWriting': ['Leave writing mode (Esc)', 'خروج از حالت نوشتن (Esc)'],
     'wordCount': ['Words', 'واژه‌ها'],

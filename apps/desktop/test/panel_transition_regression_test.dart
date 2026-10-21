@@ -172,6 +172,16 @@ void main() {
         await mouse.moveTo(t.getCenter(_tool('settings')) + const Offset(1, 1));
         await t.pump();
         expect(c.panel, 'settings');
+        await _frames(t);
+        final contentWidth = t.getSize(find.byKey(c.flyBoxKey)).width;
+        for (final scale in [.75, 1.25]) {
+          c.S.panelScale = scale;
+          c.refresh();
+          await _frames(t, 20);
+          expect(c.tabRect!.width, closeTo(Dock.tabWidth * scale, .1));
+          expect(t.getSize(find.byKey(c.flyBoxKey)).width, contentWidth);
+          expect(t.takeException(), isNull);
+        }
         c.focusLost();
         await mouse.removePointer();
         await t.pumpWidget(const SizedBox());

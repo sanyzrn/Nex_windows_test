@@ -161,6 +161,10 @@ class _WindowNavRail extends StatelessWidget {
               ),
             NexWorkspaceDestination(
               icon: Icons.settings_outlined,
+              iconWidget: NexUpdateDot(
+                updates: features?.updates,
+                child: const Icon(Icons.settings_outlined, size: 19),
+              ),
               label: l.settings,
               selected: section == 'settings',
               onPressed: () => controller.selectWindowSection('settings'),

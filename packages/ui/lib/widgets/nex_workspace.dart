@@ -94,6 +94,7 @@ class NexSettingsLink extends StatelessWidget {
     this.subtitle,
     this.color,
     this.trailing,
+    this.leading,
   });
   final IconData icon;
   final String title;
@@ -101,11 +102,12 @@ class NexSettingsLink extends StatelessWidget {
   final Color? color;
   final VoidCallback? onTap;
   final Widget? trailing;
+  final Widget? leading;
   @override
   Widget build(BuildContext context) => ListTile(
     contentPadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 7),
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-    leading: NexIconBadge(icon: icon, color: color, size: 38),
+    leading: leading ?? NexIconBadge(icon: icon, color: color, size: 38),
     title: Text(title, style: Theme.of(context).textTheme.titleSmall),
     subtitle: subtitle == null ? null : Text(subtitle!),
     trailing: trailing ?? const Icon(Icons.chevron_right_rounded),
@@ -320,6 +322,7 @@ class NexWorkspaceDestination extends StatelessWidget {
     this.selected = false,
     this.compact = false,
     this.shortcut,
+    this.iconWidget,
   });
   final IconData icon;
   final String label;
@@ -327,6 +330,7 @@ class NexWorkspaceDestination extends StatelessWidget {
   final bool selected;
   final bool compact;
   final String? shortcut;
+  final Widget? iconWidget;
 
   @override
   Widget build(BuildContext context) {
@@ -362,10 +366,10 @@ class NexWorkspaceDestination extends StatelessWidget {
                 ),
               ),
           child: compact
-              ? Icon(icon, size: 20)
+              ? (iconWidget ?? Icon(icon, size: 20))
               : Row(
                   children: [
-                    Icon(icon, size: 19),
+                    iconWidget ?? Icon(icon, size: 19),
                     const SizedBox(width: 11),
                     Expanded(
                       child: Text(

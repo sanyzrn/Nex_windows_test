@@ -6,7 +6,7 @@
 
 A local-first notebook and desktop toolkit for Windows, with English and Persian interfaces. Work in a full desktop window or a compact panel at either screen edge.
 
-**Current app version: `0.24.0+18` · Windows 10/11 · x64**
+**Current app version: `0.25.0+19` · Windows 10/11 · x64**
 
 [Download the latest installer](https://github.com/sanyzrn/Nex_windows_test/releases/latest) · [What's new](apps/desktop/CHANGELOG.md) · [Report a bug](https://github.com/sanyzrn/Nex_windows_test/issues/new/choose) · [فارسی](#راهنمای-فارسی)
 
@@ -22,6 +22,7 @@ These are Windows widget snapshots, not installed-app verification.
 - Organize notes with tags, threads, pins and reminders. Recently deleted notes can be restored.
 - Keep the last **50 distinct clipboard text/image entries** across restarts, with separate favorites.
 - Use Windows tools such as Keep Awake, screenshots, window pinning, clipboard and app/folder launchers.
+- In panel mode, resize the icon dock independently and adjust the edge reveal area in Settings → Display.
 - Switch between the custom desktop window and an edge panel with hover navigation, tray access and a global shortcut.
 - Choose a theme, language, calendar and dock layout. Tool selection is searchable and paginated.
 - Read the full English/Persian release history offline from Settings → About Nex.

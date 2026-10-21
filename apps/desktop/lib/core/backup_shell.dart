@@ -27,7 +27,15 @@ void validateBackupShell(Object? value) {
     'updates',
     'solarCalendar',
   };
-  const numbers = {'monitor', 'lastCheck', 'uiScale'};
+  const numbers = {
+    'monitor',
+    'lastCheck',
+    'uiScale',
+    'panelScale',
+    'edgeTriggerWidth',
+    'edgeTriggerHeight',
+    'edgeTriggerPosition',
+  };
   const lists = {
     'recentEmoji',
     'recentColors',
