@@ -370,8 +370,6 @@ class NexWorkspaceDestination extends StatelessWidget {
                     Expanded(
                       child: Text(
                         label,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: selected

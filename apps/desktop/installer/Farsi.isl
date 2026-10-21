@@ -1,4 +1,4 @@
-; *** Inno Setup version 6.5.0+ Farsi messages ***
+﻿; *** Inno Setup version 6.5.0+ Farsi messages ***
 ;
 ; To download user-contributed translations of this file, go to:
 ;   https://jrsoftware.org/files/istrans/
@@ -14,7 +14,7 @@
 [LangOptions]
 ; The following three entries are very important. Be sure to read and 
 ; understand the '[LangOptions] section' topic in the help file.
-LanguageName=Farsi
+LanguageName=فارسی
 LanguageID=$0429
 LanguageCodePage=1256
 RightToLeft=yes

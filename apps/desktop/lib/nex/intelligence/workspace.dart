@@ -1,3 +1,4 @@
+import '../../l10n/desktop_format.dart';
 import 'dart:async';
 import 'dart:io';
 import 'package:file_selector/file_selector.dart';
@@ -179,9 +180,9 @@ class _AssistantState extends State<DesktopAssistant> {
     }
     final files = await openFiles(
       acceptedTypeGroups: [
-        const XTypeGroup(
-          label: 'Images',
-          extensions: ['png', 'jpg', 'jpeg', 'webp'],
+        XTypeGroup(
+          label: s.t('images'),
+          extensions: const ['png', 'jpg', 'jpeg', 'webp'],
         ),
       ],
     );
@@ -327,23 +328,34 @@ class _AssistantState extends State<DesktopAssistant> {
                         spacing: 12,
                         runSpacing: 8,
                         children: [
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.auto_awesome,
-                                color: c.primary,
-                                size: 22,
-                              ),
-                              const SizedBox(width: 10),
-                              Text(
-                                s.t('ai'),
-                                style: theme.textTheme.titleLarge?.copyWith(
-                                  fontWeight: FontWeight.w700,
+                          // The window section already names this page. Give
+                          // short, scaled windows room for chat and setup.
+                          if (!(NexPanelScope.maybeOf(context)?.isWindowMode ==
+                                  true &&
+                              box.maxHeight /
+                                      MediaQuery.textScalerOf(
+                                        context,
+                                      ).scale(1) <
+                                  220))
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.auto_awesome,
+                                  color: c.primary,
+                                  size: 22,
                                 ),
-                              ),
-                            ],
-                          ),
+                                const SizedBox(width: 10),
+                                Flexible(
+                                  child: Text(
+                                    s.t('ai'),
+                                    style: theme.textTheme.titleLarge?.copyWith(
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
@@ -660,7 +672,9 @@ class _AssistantState extends State<DesktopAssistant> {
                                   )
                                     InputChip(
                                       avatar: const Icon(Icons.image_outlined),
-                                      label: Text('${i + 1}'),
+                                      label: Text(
+                                        desktopDigits(context, i + 1),
+                                      ),
                                       onDeleted: locked
                                           ? null
                                           : () => ai.removeAttachment(i),
@@ -685,6 +699,10 @@ class _AssistantState extends State<DesktopAssistant> {
                                 onChanged: (_) => setState(() {}),
                                 enabled: !locked,
                                 decoration: InputDecoration(
+                                  helperText: ai.config.supportsVideo
+                                      ? s.t('youtubeHint')
+                                      : null,
+                                  helperMaxLines: 3,
                                   hintText: s.t(
                                     ai.pending.isNotEmpty
                                         ? 'pendingOld'
@@ -844,9 +862,18 @@ class _ActionReview extends StatelessWidget {
                       if (a.commitmentName != null) a.commitmentName!,
                       if (a.settingKey != null)
                         '${a.settingKey}: ${a.settingValue}',
-                      if (a.at != null) a.at!.toLocal().toString(),
+                      if (a.at != null)
+                        nexDisplayDate(
+                          a.at!,
+                          solar:
+                              NexPanelScope.maybeOf(context)?.S.solarCalendar ??
+                              s.fa,
+                          persian: s.fa,
+                          time: true,
+                        ),
                       if (a.flag != null) '${a.flag}',
-                      if (a.index != null) '#${a.index! + 1}',
+                      if (a.index != null)
+                        desktopDigits(context, '#${a.index! + 1}'),
                       if (a.addTags.isNotEmpty) '+ ${a.addTags.join(', ')}',
                       if (a.removeTags.isNotEmpty)
                         '− ${a.removeTags.join(', ')}',

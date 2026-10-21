@@ -1,49 +1,100 @@
 # Nex Windows application
 
-Current version: **0.13.0+10**. This repository includes the application's relative package dependencies. [Product overview](../../README.md) · [Release process](../../docs/RELEASING.md) · [0.13.0 validation](../../docs/WINDOWS_0130_REVIEW.md).
+Declared version: **0.23.0+17**. [Product guide](../../README.md) ·
+[Current progress](../../docs/agent-reports/SUMMARY.md) ·
+[Shortcuts](../../docs/shortcuts.md) · [Release process](../../docs/RELEASING.md).
 
-## Interface modes
+## Shells and state
 
-- **Window:** custom caption with native drag, minimize, maximize/restore, close and system menu; Capture / Library / Tools / Settings navigation. The library uses two panes when its available width is at least 900 logical pixels. Normal bounds and maximize state persist, including when quitting while minimized. Maximized content fits the monitor work area.
-- **Edge panel:** edge reveal, dock, hover navigation, flyouts, pinning, tray and global shortcut. Reader holds suppress automatic hiding but permit hover switching and explicit outside-click dismissal. Explicit pin, active drags, modal menus/dialogs and native pickers remain protected.
+- `lib/ui/window_shell.dart` composes the native caption, section header and content
+  card. `kWindowWideAt` (960 logical px) chooses the labelled rail or slim rail.
+  The default window is 460×760 dip with a 380×520 minimum; size/position memory
+  is optional. Large text can widen rails and wrap/scroll content.
+- The panel shell provides edge reveal, dock, hover navigation and flyouts. Holds
+  protect recordings, native pickers, active drags and modal operations. Both modes
+  share a controller, note feature state and storage; mode transitions reveal the
+  native surface after the new Flutter frame. Closing quits by default; Settings → Display can retain Nex in the tray.
+- `lib/core/controller.dart` composes `PanelLifecycle`, `PanelTimers`, `PanelWiring`,
+  `PanelDismissal`, `PanelWindowTransitions`, `PanelActions` and `PanelClipboardOps`.
+  Its `part` files belong to the same library; do not import them independently.
+- `lib/nex/features.dart` exports feature modules. `NexFeatures` in
+  `features_state.dart` coordinates capture, media, selection and note mutations;
+  `NexScope`/`NexPanelScope` expose shared state and panel holds to the views.
 
-Both surfaces share the same controller, feature state, database worker and settings. Mode changes wait for the new Flutter frame before revealing the native window. Display labels use the actual Windows device number; a saved device name keeps selection stable when enumeration order changes.
+## Native bridge and reminders
 
-## Architecture and persistence
+`lib/core/native.dart` defines the host interface and `WinNativeHost` method/event
+channel bridge. `windows/runner` owns window placement/caption, tray, hotkeys,
+clipboard, startup, pickers, updater handoff and WinRT toast scheduling.
 
-`lib/core` owns shell state, geometry, holds, utilities and native bindings. `lib/ui` renders the two shells. `lib/nex` contains capture, library, detail, tag management, reminders, backups and settings. The C++ runner separates native window/caption, clipboard, hotkeys, tray, notifications, pickers and startup operations.
+Reminder edits store UTC, while pickers and repeat rules use local wall-clock
+values. `reminder_coordinator.dart` serializes startup, mutation and timer refresh;
+`reminders.dart` reconciles desired notifications with the native queue;
+`reminder_policy.dart` derives stable IDs and future occurrences. Daily repeats
+queue seven occurrences, weekly repeats eight. The runner uses AUMID
+`Nex.Desktop.App`; protocol activation routes back to the selected note. A finite
+queue does not replenish indefinitely while Nex is fully exited. See
+[the 0.22 reminder contract](../../docs/WINDOWS_0220.md) and
+[manual notification checks](../../docs/TEST_0220.md).
 
-`DesktopStore` runs the shared Nex SQLite repositories in a dedicated isolate with FIFO commands. Notes, revisions, tags, threads, tombstones and FTS stay in the domain repositories. Saves are submitted without a view-owned debounce and pending work drains before exit. Shared UI includes an optional desktop checklist-preview callback; done-item sorting retains original source indexes.
+## Storage, backup and intelligence
 
-The application-support directory contains `nex.sqlite` and `media/`. Shell preferences and clipboard storage live under `%APPDATA%\NexDesktopShell`. Clipboard persistence stores the most recent 50 distinct text/image entries and separate favorites, with atomic commits and save/retry reporting. Live clipboard preview capture may downscale images; the feature is not a promise to archive the original full-resolution source image.
+`DesktopStore` (`lib/nex/store.dart`) runs SQLite repositories in a dedicated
+isolate with FIFO commands. Notes, revisions, tags, threads, tombstones and FTS
+remain in the shared domain repositories. Pending writes drain before exit.
+The application-support directory holds `nex.sqlite` and `media/`; shell settings
+and `clipboard.sqlite` live separately under `%APPDATA%\NexDesktopShell`.
 
-## Localization and reminders
+`ClipboardStore` has one isolate writer, FULL WAL commits, 50 distinct recent
+text/image entries and separately ordered favorites. It migrates legacy pins
+once and reports save/retry errors. Live image capture may downscale previews.
+Backups retain the existing `.nexbak`/`.nexfull` formats, checked staging and atomic
+replacement; encrypted private settings use a recovery key. Do not alter schema
+or archive formats as part of UI cleanup.
 
-The UI supports English and Persian, bundled Inter/Vazirmatn fonts, Persian-aware search and RTL text. After changing ARBs, run `flutter gen-l10n` here; utility translations are generated with `python tools/generate_utility_strings.py` when that source changes.
+`lib/nex/intelligence` adds opt-in cloud providers, conversation history, note
+context/actions, OCR, transcription and semantic search through `nex_ai`.
+Provider keys use Windows secure storage. Local inference is a placeholder;
+cloud/LAN sync and Vault are not enabled. Release history is bundled in English/Persian and opens offline from About Nex
+or the update card. The reminder picker follows the chosen Solar/Gregorian
+calendar, returning the same civil date for UTC persistence.
 
-Reminder times are stored in UTC and edited/displayed in local time using a 24-hour picker. A serial coordinator schedules/cancels Windows toast notifications with `Nex.Desktop.App`, refreshes on startup and mutations, and routes note activation. Native probe testing verified schedule/change/cancel; full installed delivery after exit/reboot remains a separate manual check. Indefinite repeat replenishment while the app is fully exited is not implemented.
+`lib/updates` checks stable GitHub
+releases, validates downloads and hands a saved session to Install & restart.
 
-Backups support Nex `.nexbak` / `.nexfull` archives, checked staging and atomic replacement. Full-backup private settings use authenticated encryption and a recovery key. Link reading is bounded and note opening permits only supported schemes. Cloud/LAN sync, OCR, assistant/Vault, local LLM and automatic updates are not included.
+## Localization and development
 
-## Build and verify
-
-Use **Flutter 3.44.8**, default `pub.dev`, and Visual Studio with Desktop development with C++. Run from this directory:
+English/Persian use bundled Inter/Vazirmatn fonts and RTL-aware text. Keep both
+ARBs and the desktop/intelligence/utility maps in parity. From this directory:
 
 ```powershell
 flutter pub get --enforce-lockfile
+flutter gen-l10n
 flutter analyze --no-pub
 flutter test --no-pub
 flutter build windows --release --no-pub
 ```
 
-[Installer packaging](installer/README.md) requires Inno Setup **6.7.3**. Distribute the whole Release bundle or the installer. Build outputs and caches are ignored by Git.
+Use Flutter **3.44.8** / Dart **3.12.2**, default package hosts, and Visual Studio's
+Desktop development with C++ workload for Windows builds. Run package commands
+sequentially. [Contributor guidance](../../CONTRIBUTING.md) describes focused
+local checks and CI gates. [Installer packaging](installer/README.md) pins Inno
+Setup **6.7.3**. Distribute the whole Release bundle or installer.
 
-Windows tests compare bundled-font snapshots and the review matrix. Non-emoji views are pixel exact. Four explicitly named emoji grids allow at most **0.05%** pixel drift for Windows 11/Server emoji rasterization; dimensions and larger differences still fail. CI uploads failure images and the reviewed matrix.
+Regenerate shortcut documentation with `dart run tool/generate_shortcuts.dart`.
+Utility maps derive from ARBs with `python tools/generate_utility_strings.py`.
+`../../tools/audit_unused_strings.py` lists cleanup candidates; inspect dynamic
+lookups (AI enum keys and IANA city names) before deleting a translation.
 
-The explicit `--panel-smoke <report.json>` probe uses an isolated temporary database and separate instance identity. It tests repeated window/panel transitions, focused/held/pinned hover, native sizing, minimize/maximize/restore and saved bounds. Other probes and their limits are described in the dated validation reports.
-
-Physical mixed-DPI/hot-plug monitors, live microphone/playback, external drag/drop and installed notification/upgrade paths need hardware or clean-machine checks. Automated snapshots and fake-host tests do not establish those behaviors.
+Windows CI compares golden/review snapshots using the pinned SDK. Only explicitly
+listed emoji grids have a small font-raster allowance; other comparisons remain
+exact. Refresh intended changes on Windows and review all changed images.
+Widget tests do not verify real DPI/monitor hot-plug, IME/Narrator, microphone,
+installed toasts, uninstall/reinstall or clean-machine upgrades. Probe entry points
+use isolated data; historical results are indexed in [verification](../../docs/TEST_RESULTS.md).
 
 ## Attribution
 
-The shared package base and historical transfer patches are documented in [INTEGRATION](../../docs/INTEGRATION.md). Original shell and font/plugin notices are retained in [THIRD_PARTY_NOTICES](THIRD_PARTY_NOTICES.md).
+[Integration history](../../docs/INTEGRATION.md) and historical transfer patches
+record the vendored package base; do not reapply patches. Existing shell/font/plugin
+notices remain in [THIRD_PARTY_NOTICES](THIRD_PARTY_NOTICES.md).

@@ -43,7 +43,7 @@ class _ItemRowState extends State<ItemRow> {
       cursor: SystemMouseCursors.click,
       onEnter: (_) => setState(() => _hover = true),
       onExit: (_) => setState(() => _hover = false),
-      child: GestureDetector(
+      child: DesktopAction(
         behavior: HitTestBehavior.opaque,
         onTap: widget.onTap,
         child: AnimatedContainer(
@@ -98,11 +98,16 @@ class _ItemRowState extends State<ItemRow> {
 
 /// The tiny 22x22 action square inside `.item .acts`.
 class ItemAction extends StatefulWidget {
-  const ItemAction({super.key, required this.child, this.onTap, this.tooltip});
+  const ItemAction({
+    super.key,
+    required this.child,
+    this.onTap,
+    required this.tooltip,
+  });
 
   final Widget child;
   final VoidCallback? onTap;
-  final String? tooltip;
+  final String tooltip;
 
   @override
   State<ItemAction> createState() => _ItemActionState();
@@ -159,9 +164,15 @@ class Hint extends StatelessWidget {
 
 /// iOS-style `.toggle` switch.
 class Toggle extends StatefulWidget {
-  const Toggle({super.key, required this.on, required this.onChanged});
+  const Toggle({
+    super.key,
+    required this.on,
+    required this.onChanged,
+    required this.label,
+  });
 
   final bool on;
+  final String label;
   final ValueChanged<bool> onChanged;
 
   @override
@@ -171,7 +182,10 @@ class Toggle extends StatefulWidget {
 class _ToggleState extends State<Toggle> {
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return DesktopAction(
+      label: widget.label,
+      toggled: widget.on,
+      excludeSemantics: true,
       onTap: () => widget.onChanged(!widget.on),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 250),

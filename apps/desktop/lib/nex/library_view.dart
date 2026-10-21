@@ -10,14 +10,17 @@
 /// library_filter_widgets.dart.
 library;
 
+import '../l10n/desktop_format.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'desktop_editing_direction.dart';
 import 'package:flutter/services.dart';
 import 'package:nex_core/nex_core.dart';
 import 'package:nex_ui/nex_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../l10n/app_localizations.dart';
+import '../l10n/shortcut_labels.dart';
 import '../l10n/intelligence_strings.dart';
 import '../ui/widgets.dart';
 import 'features_state.dart';
@@ -235,6 +238,7 @@ abstract class _LibraryStateBase extends State<NexLibraryView> {
     return NexCardDensityScope(
       density: NexCardDensity.fromWire(c?.S.cardDensity),
       child: Focus(
+        skipTraversal: true,
         focusNode: _libraryFocusNode,
         autofocus: true,
         onKeyEvent: _handleKeyEvent,

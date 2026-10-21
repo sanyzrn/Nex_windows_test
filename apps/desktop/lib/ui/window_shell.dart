@@ -5,8 +5,11 @@ import 'package:flutter/services.dart';
 import 'package:nex_ui/nex_ui.dart';
 
 import '../l10n/app_localizations.dart';
+import '../l10n/shortcut_labels.dart';
 import '../l10n/utility_strings.dart';
 import '../l10n/intelligence_strings.dart';
+import '../l10n/desktop_strings.dart';
+import '../l10n/desktop_format.dart';
 import '../core/controller.dart';
 import '../core/registry.dart';
 import '../nex/command_palette.dart';
@@ -44,6 +47,21 @@ Color nexWindowTint(ColorScheme scheme) => Color.alphaBlend(
   scheme.surfaceContainerLow,
 );
 
+/// The classic accent is an icon/focus color. Navigation labels need a
+/// stronger ink over the tinted rail and its selected wash.
+ThemeData nexDesktopRailTheme(ThemeData base) {
+  final colors = base.colorScheme;
+  final selected = Color.alphaBlend(
+    colors.primary.withValues(alpha: .09),
+    nexWindowTint(colors),
+  );
+  return base.copyWith(
+    colorScheme: colors.copyWith(
+      primary: nexReadableOn(colors.primary, selected, ratio: 5),
+    ),
+  );
+}
+
 /// The full desktop window shell — the app's main mode. A navigation rail on
 /// the leading edge switches between Capture, Library, Tools and Settings;
 /// the edge slide-out panel remains available as an optional mode and both
@@ -63,6 +81,7 @@ class NexWindowShell extends StatefulWidget {
 }
 
 class _NexWindowShellState extends State<NexWindowShell> {
+  bool _writing = false;
   @override
   void initState() {
     super.initState();
@@ -91,10 +110,18 @@ class _NexWindowShellState extends State<NexWindowShell> {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                wide
-                    ? _WindowNavRail(controller: c, features: widget.features)
-                    : _SlimRail(controller: c, features: widget.features),
+                if (!_writing)
+                  Theme(
+                    data: nexDesktopRailTheme(Theme.of(context)),
+                    child: wide
+                        ? _WindowNavRail(
+                            controller: c,
+                            features: widget.features,
+                          )
+                        : _SlimRail(controller: c, features: widget.features),
+                  ),
                 Expanded(
+                  key: const ValueKey('window-content'),
                   child: Padding(
                     padding: const EdgeInsetsDirectional.only(
                       end: NexSpacing.sm + 2,
@@ -113,7 +140,14 @@ class _NexWindowShellState extends State<NexWindowShell> {
                       child: Column(
                         children: [
                           NexUpdateBanner(updates: widget.features?.updates),
-                          Expanded(child: _WindowSection(controller: c)),
+                          Expanded(
+                            child: _WindowSection(
+                              controller: c,
+                              writing: _writing,
+                              toggleWriting: () =>
+                                  setState(() => _writing = !_writing),
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -135,75 +169,78 @@ class _NexWindowShellState extends State<NexWindowShell> {
       );
     }
 
-    return Scaffold(
-      // transparentScaffold is for the floating edge panel; the desktop
-      // window must paint an opaque surface.
-      backgroundColor: nexWindowTint(scheme),
-      body: LiquidScope(
-        controller: c,
-        palette: c.palette,
-        dir: 1,
-        child: Focus(
-          autofocus: true,
-          onKeyEvent: (node, event) {
-            if (event is KeyDownEvent) {
-              final isCtrl = HardwareKeyboard.instance.isControlPressed;
-              final isShift = HardwareKeyboard.instance.isShiftPressed;
+    return FocusTraversalGroup(
+      policy: WidgetOrderTraversalPolicy(),
+      child: Scaffold(
+        // transparentScaffold is for the floating edge panel; the desktop
+        // window must paint an opaque surface.
+        backgroundColor: nexWindowTint(scheme),
+        body: LiquidScope(
+          controller: c,
+          palette: c.palette,
+          dir: 1,
+          child: Focus(
+            skipTraversal: true,
+            autofocus: true,
+            onKeyEvent: (node, event) {
+              if (event is KeyDownEvent) {
+                final isCtrl = HardwareKeyboard.instance.isControlPressed;
+                final isShift = HardwareKeyboard.instance.isShiftPressed;
 
-              if (event.logicalKey == LogicalKeyboardKey.f1 ||
-                  (isCtrl && event.logicalKey == LogicalKeyboardKey.slash)) {
-                showShortcutsDialog(context);
-                return KeyEventResult.handled;
-              }
-
-              if (isCtrl && event.logicalKey == LogicalKeyboardKey.keyK) {
-                unawaited(
-                  showCommandPalette(
-                    context,
-                    controller: c,
-                    features: widget.features,
-                  ),
-                );
-                return KeyEventResult.handled;
-              }
-
-              if (isCtrl && event.logicalKey == LogicalKeyboardKey.keyL) {
-                c.selectWindowSection('library');
-                return KeyEventResult.handled;
-              }
-
-              if (isCtrl && event.logicalKey == LogicalKeyboardKey.comma) {
-                c.selectWindowSection('settings');
-                return KeyEventResult.handled;
-              }
-
-              if (isCtrl && event.logicalKey == LogicalKeyboardKey.keyN) {
-                c.selectWindowSection('capture');
-                if (widget.features != null) {
-                  unawaited(widget.features!.fresh(asChecklist: isShift));
-                }
-                return KeyEventResult.handled;
-              }
-
-              if (event.logicalKey == LogicalKeyboardKey.escape) {
-                final tool = c.windowTool.value;
-                if (tool != null) {
-                  c.windowTool.value = null;
-                  c.refresh();
+                if (event.logicalKey == LogicalKeyboardKey.f1 ||
+                    (isCtrl && event.logicalKey == LogicalKeyboardKey.slash)) {
+                  showShortcutsDialog(context);
                   return KeyEventResult.handled;
                 }
+
+                if (isCtrl && event.logicalKey == LogicalKeyboardKey.keyK) {
+                  unawaited(
+                    showCommandPalette(
+                      context,
+                      controller: c,
+                      features: widget.features,
+                    ),
+                  );
+                  return KeyEventResult.handled;
+                }
+
+                if (isCtrl && event.logicalKey == LogicalKeyboardKey.keyL) {
+                  c.selectWindowSection('library');
+                  return KeyEventResult.handled;
+                }
+
+                if (isCtrl && event.logicalKey == LogicalKeyboardKey.comma) {
+                  c.selectWindowSection('settings');
+                  return KeyEventResult.handled;
+                }
+
+                if (isCtrl && event.logicalKey == LogicalKeyboardKey.keyN) {
+                  c.selectWindowSection('capture');
+                  if (widget.features != null) {
+                    unawaited(widget.features!.fresh(asChecklist: isShift));
+                  }
+                  return KeyEventResult.handled;
+                }
+
+                if (event.logicalKey == LogicalKeyboardKey.escape) {
+                  if (_writing) {
+                    setState(() => _writing = false);
+                    return KeyEventResult.handled;
+                  }
+                  final tool = c.windowTool.value;
+                  if (tool != null) {
+                    c.windowTool.value = null;
+                    c.refresh();
+                    return KeyEventResult.handled;
+                  }
+                }
               }
-            }
-            return KeyEventResult.ignored;
-          },
-          // Recording/import/error states live in NexFeatures; the shell
-          // must repaint when they change (badge, stop button, progress).
-          child: widget.features == null
-              ? Builder(builder: (context) => buildSurface(context, null))
-              : ListenableBuilder(
-                  listenable: widget.features!,
-                  builder: buildSurface,
-                ),
+              return KeyEventResult.ignored;
+            },
+            // Capture and status widgets subscribe independently. A composer
+            // keystroke must not rebuild the caption, card and navigation.
+            child: Builder(builder: (context) => buildSurface(context, null)),
+          ),
         ),
       ),
     );

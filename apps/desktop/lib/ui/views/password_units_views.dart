@@ -1,3 +1,4 @@
+import '../../l10n/desktop_format.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/utility_strings.dart';
 import 'dart:math' as math;
@@ -43,10 +44,10 @@ class _PasswordViewState extends State<PasswordView> {
     final (p, c, _) = LiquidScope.of(context);
     return Panel(
       children: [
-        Head(
-          onBack: () => _backToMore(c),
-        ),
-        GestureDetector(
+        Head(onBack: () => _backToMore(c)),
+        DesktopAction(
+          label: utilityLabel(context, 'utility18'),
+          excludeSemantics: true,
           onTap: () => c.copy(_pw, 'Password copied'),
           child: Container(
             width: double.infinity,
@@ -68,7 +69,10 @@ class _PasswordViewState extends State<PasswordView> {
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 4),
           child: Text(
-            'Length ${_len.round()}',
+            desktopDigits(
+              context,
+              AppLocalizations.of(context)!.characters(_len.round()),
+            ),
             style: TextStyle(
               fontFamily: Theme.of(context).textTheme.bodyMedium?.fontFamily,
               fontFamilyFallback: const ['Segoe UI'],
@@ -233,9 +237,7 @@ class _UnitsViewState extends State<UnitsView> {
     final (p, c, _) = LiquidScope.of(context);
     return Panel(
       children: [
-        Head(
-          onBack: () => _backToMore(c),
-        ),
+        Head(onBack: () => _backToMore(c)),
         Field(
           controller: _input,
           hint: utilityLabel(context, 'utility26'),
@@ -258,7 +260,7 @@ class _UnitsViewState extends State<UnitsView> {
                       child: ItemRow(
                         plain: true,
                         onTap: () => c.copy('${fmtUnit(v)} $n'),
-                        child: Text('${fmtUnit(v)} $n'),
+                        child: Text(desktopDigits(context, '${fmtUnit(v)} $n')),
                       ),
                     ),
                 ],

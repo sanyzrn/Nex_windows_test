@@ -1,3 +1,4 @@
+import '../../l10n/app_localizations.dart';
 import '../../l10n/utility_strings.dart';
 import 'package:flutter/material.dart';
 
@@ -88,7 +89,9 @@ class _ColorViewState extends State<ColorView> {
         ),
         Row(
           children: [
-            GestureDetector(
+            DesktopAction(
+              label: AppLocalizations.of(context)!.chooseColor,
+              excludeSemantics: true,
               onTap: () => c.pickCustomColorFor('color'),
               child: Container(
                 width: 64,
@@ -204,7 +207,8 @@ class _FmtRowState extends State<_FmtRow> {
       cursor: SystemMouseCursors.click,
       onEnter: (_) => setState(() => _hover = true),
       onExit: (_) => setState(() => _hover = false),
-      child: GestureDetector(
+      child: DesktopAction(
+        label: AppLocalizations.of(context)!.copyColor,
         onTap: widget.onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 120),
@@ -281,7 +285,10 @@ class _SwatchState extends State<_Swatch> {
       cursor: SystemMouseCursors.click,
       onEnter: (_) => setState(() => _hover = true),
       onExit: (_) => setState(() => _hover = false),
-      child: GestureDetector(
+      child: DesktopAction(
+        label:
+            '${AppLocalizations.of(context)!.chooseColor} #${widget.color.toARGB32().toRadixString(16).padLeft(8, '0').substring(2).toUpperCase()}',
+        excludeSemantics: true,
         onTap: () => widget.onTap(widget.color),
         child: AnimatedScale(
           scale: _hover ? 1.25 : 1,

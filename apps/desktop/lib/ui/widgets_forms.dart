@@ -82,7 +82,10 @@ class _SegTabState extends State<_SegTab> {
     final p = LiquidScope.paletteOf(context);
     return MouseRegion(
       cursor: SystemMouseCursors.click,
-      child: GestureDetector(
+      child: DesktopAction(
+        label: widget.label,
+        selected: widget.on,
+        excludeSemantics: true,
         onTap: widget.onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 250),

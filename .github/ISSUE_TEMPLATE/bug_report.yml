@@ -7,14 +7,29 @@ body:
     attributes:
       label: Nex version
       description: Find the version under Settings → About.
-      placeholder: 0.12.1+9
+      placeholder: 0.22.0+16
     validations:
       required: true
   - type: input
-    id: environment
+    id: windows
     attributes:
-      label: Windows and display setup
-      placeholder: Windows 11, two monitors, 100% / 150% scaling, Persian UI
+      label: Windows version
+      placeholder: Windows 11 25H2, build number from winver
+    validations:
+      required: true
+  - type: input
+    id: scaling
+    attributes:
+      label: Display scaling
+      description: Include each monitor when scales differ.
+      placeholder: 100% / 150%, two monitors
+    validations:
+      required: true
+  - type: dropdown
+    id: language
+    attributes:
+      label: App language
+      options: [English, Persian, Both]
     validations:
       required: true
   - type: dropdown

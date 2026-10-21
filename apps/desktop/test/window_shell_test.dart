@@ -1,4 +1,4 @@
-﻿import 'dart:io';
+import 'dart:io';
 
 import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:flutter/material.dart';
@@ -13,6 +13,10 @@ import 'package:nex_desktop/nex/store.dart';
 import 'package:nex_desktop/ui/dock.dart';
 import 'package:nex_desktop/ui/shell.dart';
 import 'package:nex_desktop/ui/window_shell.dart';
+import 'package:nex_desktop/ui/window_caption.dart';
+import 'package:nex_desktop/nex/welcome.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/services.dart';
 
 class _RecordingNative extends NativeHost {
   final List<String> modes = [];
@@ -52,6 +56,7 @@ class _RecordingNative extends NativeHost {
 Future<(PanelController, NexFeatures, _RecordingNative)> _bootWindow(
   WidgetTester tester, {
   String language = 'en',
+  bool showWelcome = false,
 }) async {
   tester.view.physicalSize = const Size(2360, 1560);
   tester.view.devicePixelRatio = 2.0;
@@ -71,7 +76,11 @@ Future<(PanelController, NexFeatures, _RecordingNative)> _bootWindow(
     useNative: false,
   );
   await tester.pumpWidget(
-    RightPanelApp(controller: controller, features: features),
+    RightPanelApp(
+      controller: controller,
+      features: features,
+      showWelcome: showWelcome,
+    ),
   );
   await tester.pump(const Duration(milliseconds: 50));
   addTearDown(() async {
@@ -91,6 +100,70 @@ Future<void> _settle(WidgetTester tester, [int frames = 10]) async {
 }
 
 void main() {
+  testWidgets(
+    'typing leaves window chrome allocated and writing mode preserves the draft',
+    (tester) async {
+      final (_, f, _) = await _bootWindow(tester);
+      await _settle(tester);
+      final caption = tester.widget(find.byType(NexWindowCaption));
+      // Writes use a real store worker. Keep the asynchronous edit and flush
+      // in runAsync, as the durability regression below already does.
+      await tester.runAsync(() async {
+        await tester.enterText(
+          find.byKey(const ValueKey('capture-field')),
+          'A quiet draft متن فارسی',
+        );
+        await f.session.flushed;
+      });
+      await _settle(tester);
+      expect(
+        identical(caption, tester.widget(find.byType(NexWindowCaption))),
+        isTrue,
+      );
+      await tester.tap(find.byKey(const ValueKey('writing-mode')));
+      await _settle(tester);
+      expect(find.byKey(const ValueKey('workspace-sidebar')), findsNothing);
+      expect(f.composer.text, 'A quiet draft متن فارسی');
+      expect(find.textContaining('Words: 5'), findsOneWidget);
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+      await _settle(tester);
+      expect(find.byKey(const ValueKey('workspace-sidebar')), findsOneWidget);
+      expect(f.composer.text, 'A quiet draft متن فارسی');
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets('welcome is skippable once and leaves AI off', (tester) async {
+    SharedPreferences.setMockInitialValues({});
+    final (c, f, _) = await _bootWindow(tester, showWelcome: true);
+    await _settle(tester);
+    expect(find.byKey(const ValueKey('desktop-welcome')), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('welcome-skip')));
+    await _settle(tester);
+    await tester.runAsync(() async {
+      expect(
+        (await SharedPreferences.getInstance()).getBool(
+          DesktopWelcome.completedKey,
+        ),
+        isTrue,
+      );
+      // The welcome must not enable AI. Do not await a platform credential
+      // read that the already-built widget started in the fake-async zone.
+      expect(
+        (await SharedPreferences.getInstance()).getBool('ai.enabled'),
+        isNot(true),
+      );
+      expect(f.intelligence.enabled, isFalse);
+    });
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pumpWidget(
+      RightPanelApp(controller: c, features: f, showWelcome: true),
+    );
+    await _settle(tester);
+    expect(find.byKey(const ValueKey('desktop-welcome')), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('window shell renders sections and navigates', (tester) async {
     final (controller, _, _) = await _bootWindow(tester);
 
@@ -119,8 +192,10 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(emojiTile);
     await _settle(tester);
-    expect(find.byTooltip('Back to tools'), findsOneWidget);
-    await tester.tap(find.byTooltip('Back to tools'));
+    // The embedded tool's own back control is now labelled too; target the
+    // window header explicitly rather than assuming one tooltip globally.
+    expect(find.byKey(const ValueKey('window-back-to-tools')), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('window-back-to-tools')));
     await _settle(tester);
     expect(emojiTile, findsOneWidget);
 

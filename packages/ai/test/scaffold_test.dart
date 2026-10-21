@@ -10,9 +10,6 @@ void main() {
     // stored and then shown to the user under a "semantic matches" heading.
     // The field is gone with the function that needed it.
     expect(adapter.embed('anything'), isNull);
-    expect(
-      adapter.transcribe(const AudioRef(mediaUri: 'a')),
-      isNull,
-    );
+    expect(adapter.transcribe(const AudioRef(mediaUri: 'a')), isNull);
   });
 }

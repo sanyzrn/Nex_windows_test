@@ -100,7 +100,12 @@ void main() {
 
   group('link', () {
     test('turns the selection into a link and selects the whole of it', () {
-      final out = NexTextFormatting.link('see docs here', 4, 8, 'https://x.dev');
+      final out = NexTextFormatting.link(
+        'see docs here',
+        4,
+        8,
+        'https://x.dev',
+      );
       expect(out.text, 'see [docs](https://x.dev) here');
       expect(out.text.substring(out.start, out.end), '[docs](https://x.dev)');
     });
@@ -150,7 +155,9 @@ void main() {
   group('NexMarkdownText.plain', () {
     test('strips the markers a card must not show', () {
       expect(
-        NexMarkdownText.plain('# Plan\n\n**do** the `thing` [now](https://a.b)'),
+        NexMarkdownText.plain(
+          '# Plan\n\n**do** the `thing` [now](https://a.b)',
+        ),
         'Plan\n\ndo the thing now',
       );
     });

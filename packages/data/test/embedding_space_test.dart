@@ -49,8 +49,10 @@ void main() {
     repo.setEmbedding('n1', [0.1, 0.2, 0.3]);
 
     expect(repo.embeddingSpace, isNull);
-    expect(repo.setEmbeddingSpace('openai|https://api.openai.com/v1|small'),
-        isFalse);
+    expect(
+      repo.setEmbeddingSpace('openai|https://api.openai.com/v1|small'),
+      isFalse,
+    );
     expect(repo.embeddingSpace, 'openai|https://api.openai.com/v1|small');
     expect(repo.getEmbedding('n1'), isNotNull, reason: 'nothing changed');
   });
@@ -62,8 +64,10 @@ void main() {
 
     // Every launch calls this. If it cleared on a match, the library would
     // re-embed itself from scratch on every single start.
-    expect(repo.setEmbeddingSpace('openai|https://api.openai.com/v1|small'),
-        isFalse);
+    expect(
+      repo.setEmbeddingSpace('openai|https://api.openai.com/v1|small'),
+      isFalse,
+    );
     expect(repo.getEmbedding('n1'), isNotNull);
   });
 
@@ -119,10 +123,9 @@ void main() {
     repo.setEmbedding('n1', [1, 0, 0]);
     repo.setEmbedding('same', [1, 0, 0]);
 
-    expect(
-      (await service.relatedNotes('n1')).map((hit) => hit.noteId),
-      ['same'],
-    );
+    expect((await service.relatedNotes('n1')).map((hit) => hit.noteId), [
+      'same',
+    ]);
 
     // Now the mismatch. Same leading values, four dimensions: under
     // truncation this scored a perfect 1.0 and came back as the closest

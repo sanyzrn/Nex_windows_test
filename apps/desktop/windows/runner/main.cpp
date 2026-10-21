@@ -27,6 +27,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
                            command_line_arguments[0] == "--clipboard-smoke") ||
                           (command_line_arguments.size() == 2 &&
                           (command_line_arguments[0] == "--panel-smoke" ||
+                           command_line_arguments[0] == "--lifecycle-smoke" ||
                            command_line_arguments[0] == "--reminder-smoke"));
   // The diagnostic runner uses isolated data and does not activate or replace
   // an existing user instance. Normal launches keep the singleton contract.

@@ -56,7 +56,6 @@
   "pause": "Pause",
   "remove": "Remove",
   "joinThread": "Add to thread",
-  "assistantStub": "Assistant is not connected in this base. Capture and search work offline.",
   "utility0": "Copy something and it shows up here",
   "utility1": "Clipboard",
   "utility2": "Clear",
@@ -80,7 +79,6 @@
   "utility20": "e.g. (12.5 * 4) / 3 + 2^3",
   "utility21": "Timer",
   "utility22": "Stopwatch",
-  "utility23": "Text tools · clipboard",
   "utility24": "Password",
   "utility25": "Units",
   "utility26": "e.g. 12 in, 5 km, 70 kg, 30 c",
@@ -253,7 +251,6 @@
   "modeDescription": "The desktop window is the main experience; the edge panel stays available for quick capture. Both share the same notes, media and settings.",
   "edgePanelOnly": "Applies to the edge panel — switch the interface mode to use it.",
   "switchToPanel": "Switch to edge panel",
-  "switchToWindow": "Switch to window",
   "backToTools": "Back to tools",
   "toolsHint": "Pick a tool to open it",
   "noEmojiFound": "No emoji found",
@@ -267,8 +264,6 @@
   "noRepeat": "Does not repeat",
   "repeatDaily": "Every day",
   "repeatWeekly": "Every week",
-  "repeatMonthly": "Every month",
-  "repeatYearly": "Every year",
   "clearReminder": "Clear reminder",
   "reminderSet": "Reminder set",
   "overdue": "Overdue",
@@ -313,17 +308,12 @@
   "densityStandard": "Standard",
   "densityReadable": "Readable",
   "paletteOpen": "Command palette",
-  "paletteHint": "Search notes, jump anywhere, run actions (Ctrl+K)",
   "paletteSearchHint": "Search notes, screens and actions…",
   "paletteNoResults": "Nothing matches",
   "paletteSectionNotes": "Notes",
-  "paletteSectionGoTo": "Go to",
   "paletteSectionActions": "Actions",
   "paletteActionNewNote": "New note",
   "paletteActionToggleTheme": "Toggle light / dark theme",
-  "paletteActionOpenTools": "Open the tools",
-  "pasteLinkSaved": "Link note created",
-  "noNoteSelectedHint": "Use ↑ / ↓ to navigate notes, or Ctrl+N to create",
   "filterAll": "All",
   "filterAllTypes": "All types",
   "filterAllTags": "All tags",
@@ -361,10 +351,6 @@
       }
     }
   },
-  "localEngineActive": "Local library on this device",
-  "switchToDark": "Switch to dark theme",
-  "switchToLight": "Switch to light theme",
-  "restoreConfirmTitle": "Restore backup",
   "restoreConfirmBody": "Restoring replaces all current notes, tags and media with this backup. This cannot be undone.",
   "copyKey": "Copy key",
   "settingsDisplay": "Display & interface",
@@ -376,8 +362,6 @@
   "colorMode": "Colour mode",
   "appLanguage": "App language",
   "libraryUnavailable": "The note library is not available on this device yet.",
-  "libraryUnavailableHint": "Open the library view from the dock, or restart Nex to load your notes.",
-  "workspaceLabel": "YOUR SPACE",
   "workspaceLocal": "Private. On this device.",
   "workspaceSearch": "Find or jump to…",
   "workspaceCaptureTitle": "Room for your\nnext thought.",
@@ -386,14 +370,12 @@
   "workspaceToolsTitle": "Your everyday toolkit",
   "workspaceToolsDescription": "Useful desktop tools, all in one place.",
   "workspaceEssentials": "Within reach",
-  "workspaceAllTools": "Your toolbox",
   "workspaceUtilityHint": "Open this tool",
   "workspaceClipboardHint": "What you copied, ready to use.",
   "workspaceAwakeHint": "Keep your screen with you.",
   "workspaceTimerHint": "A little time to focus.",
   "workspaceCalculatorHint": "Work out the little things.",
   "workspaceColorHint": "Pick a colour from anywhere.",
-  "workspaceSettingsDescription": "Make this space feel like yours.",
   "workspaceReaderTitle": "A place to return to.",
   "workspaceReaderHint": "Pick a note on the side. Your words get the whole page.",
   "workspaceToolsSearch": "Find a tool…",
@@ -403,7 +385,7 @@
   "testNotification": "Test notifications",
   "testNotificationHint": "Shows one notification now and a second one 15 seconds later, so you can check both ways Nex delivers reminders.",
   "testNotificationRun": "Send test",
-  "testNotificationSent": "Test sent. You should see one notification now and another in 15 seconds.",
+  "testNotificationSent": "Windows accepted both test notifications. If they do not appear, check notification settings and Do not disturb.",
   "testNotificationFailed": "Windows did not accept the notification{detail}. Check Settings > System > Notifications and Focus assist.",
   "@testNotificationFailed": {
     "placeholders": {
@@ -463,5 +445,204 @@
   "importNotesDone": "Notes and attachments imported",
   "themePalette": "App theme",
   "hexColor": "HEX color",
-  "backupSaved": "Backup saved"
+  "backupSaved": "Backup saved",
+  "commitmentsTitle": "Commitments & cadences",
+  "commitmentNew": "New commitment",
+  "commitmentEdit": "Edit commitment",
+  "commitmentEmpty": "No commitments recorded yet.",
+  "commitmentFirst": "Add first commitment",
+  "commitmentCompleted": "Mark completed",
+  "commitmentTitle": "Title",
+  "commitmentTitleHint": "e.g., Pay rent, take medicine…",
+  "commitmentCadence": "Cadence",
+  "commitmentEvery": "Every",
+  "commitmentWeekdays": "Weekdays:",
+  "commitmentNotification": "Notification",
+  "cadenceHourly": "Hourly",
+  "cadenceDaily": "Daily",
+  "cadenceWeekly": "Weekly",
+  "cadenceMonthly": "Monthly",
+  "cadenceYearly": "Yearly",
+  "cadenceEveryHours": "Every {count} hours",
+  "cadenceEveryDays": "Every {count} days",
+  "cadenceEveryWeeks": "Every {count} weeks",
+  "cadenceEveryMonths": "Every {count} months",
+  "cadenceEveryYears": "Every {count} years",
+  "backupFileType": "Nex backup",
+  "hexColorHint": "#RRGGBB",
+  "utility141": "Left",
+  "utility142": "Right",
+  "weekdayMonday": "Monday",
+  "weekdayMondayShort": "M",
+  "weekdayTuesday": "Tuesday",
+  "weekdayTuesdayShort": "T",
+  "weekdayWednesday": "Wednesday",
+  "weekdayWednesdayShort": "W",
+  "weekdayThursday": "Thursday",
+  "weekdayThursdayShort": "T",
+  "weekdayFriday": "Friday",
+  "weekdayFridayShort": "F",
+  "weekdaySaturday": "Saturday",
+  "weekdaySaturdayShort": "S",
+  "weekdaySunday": "Sunday",
+  "weekdaySundayShort": "S",
+  "@utility104": {
+    "placeholders": {
+      "value": {
+        "type": "Object"
+      }
+    }
+  },
+  "@utility105": {
+    "placeholders": {
+      "value": {
+        "type": "Object"
+      }
+    }
+  },
+  "@utility106": {
+    "placeholders": {
+      "value": {
+        "type": "Object"
+      }
+    }
+  },
+  "@utility107": {
+    "placeholders": {
+      "value": {
+        "type": "Object"
+      }
+    }
+  },
+  "@utility108": {
+    "placeholders": {
+      "chars": {
+        "type": "Object"
+      },
+      "lines": {
+        "type": "Object"
+      },
+      "words": {
+        "type": "Object"
+      }
+    }
+  },
+  "@utility113": {
+    "placeholders": {
+      "value": {
+        "type": "Object"
+      }
+    }
+  },
+  "@utility114": {
+    "placeholders": {
+      "value": {
+        "type": "Object"
+      }
+    }
+  },
+  "@characters": {
+    "placeholders": {
+      "count": {
+        "type": "Object"
+      }
+    }
+  },
+  "@minutesAgo": {
+    "placeholders": {
+      "count": {
+        "type": "Object"
+      }
+    }
+  },
+  "@hoursAgo": {
+    "placeholders": {
+      "count": {
+        "type": "Object"
+      }
+    }
+  },
+  "@daysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "Object"
+      }
+    }
+  },
+  "@weeksAgo": {
+    "placeholders": {
+      "count": {
+        "type": "Object"
+      }
+    }
+  },
+  "@monthsAgo": {
+    "placeholders": {
+      "count": {
+        "type": "Object"
+      }
+    }
+  },
+  "@yearsAgo": {
+    "placeholders": {
+      "count": {
+        "type": "Object"
+      }
+    }
+  },
+  "@cadenceEveryHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@cadenceEveryDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@cadenceEveryWeeks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@cadenceEveryMonths": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@cadenceEveryYears": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "previousPage": "Previous page",
+  "nextPage": "Next page",
+  "clearSearch": "Clear search",
+  "mediaPrevious": "Previous track",
+  "mediaNext": "Next track",
+  "mediaPlayPause": "Play or pause media",
+  "volumeDown": "Decrease volume",
+  "volumeUp": "Increase volume",
+  "volumeMute": "Mute or unmute",
+  "chooseColor": "Choose color",
+  "copyColor": "Copy color code",
+  "emojiCategory": "Emoji category",
+  "calendarYear": "Year",
+  "calendarMonth": "Month",
+  "calendarDay": "Day",
+  "windowCloseAction": "Keep running in tray when I close the window",
+  "windowCloseTrayHint": "Close hides Nex. Open it from the tray; Quit saves and exits.",
+  "windowCloseQuitHint": "Off: closing saves and quits Nex.",
+  "reminderSnooze": "Snooze 10 min",
+  "reminderDone": "Done"
 }

@@ -1,6 +1,6 @@
 # Windows CI and releases
 
-Current application: **0.22.0+16**, release tag **v0.22.0** (after green CI). `main` contains
+Current application: **0.23.0+17**, release tag **v0.23.0** (after green CI). `main` contains
 one current source tree at the repository root. Build caches and installer
 EXEs are excluded from Git; installers belong in Releases.
 

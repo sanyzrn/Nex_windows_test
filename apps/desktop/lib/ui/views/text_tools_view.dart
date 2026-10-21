@@ -1,3 +1,4 @@
+import '../../l10n/desktop_format.dart';
 import '../../l10n/utility_strings.dart';
 import 'dart:convert';
 
@@ -33,9 +34,7 @@ class TextToolsView extends StatelessWidget {
     final (_, c, _) = LiquidScope.of(context);
     return Panel(
       children: [
-        Head(
-          onBack: () => _backToMore(c),
-        ),
+        Head(onBack: () => _backToMore(c)),
         Wrap(
           spacing: 8,
           runSpacing: 8,
@@ -90,7 +89,9 @@ class _TextToolButtonState extends State<_TextToolButton> {
       cursor: SystemMouseCursors.click,
       onEnter: (_) => setState(() => _hover = true),
       onExit: (_) => setState(() => _hover = false),
-      child: GestureDetector(
+      child: DesktopAction(
+        excludeSemantics: true,
+        label: utilityLabelForText(context, widget.label),
         onTap: () => _run(widget.controller, widget.op),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 350),
@@ -154,9 +155,9 @@ class _TextToolButtonState extends State<_TextToolButton> {
           final words = RegExp(r'\S+').allMatches(t.trim()).length;
           c.toast(
             c.message('{words} words · {chars} chars · {lines} lines', {
-              'words': '$words',
-              'chars': '${t.length}',
-              'lines': '${t.split('\n').length}',
+              'words': desktopDigits(context, words),
+              'chars': desktopDigits(context, t.length),
+              'lines': desktopDigits(context, t.split('\n').length),
             }),
           );
           return;
@@ -232,4 +233,3 @@ String transformText(String text, String mode) {
       return text;
   }
 }
-

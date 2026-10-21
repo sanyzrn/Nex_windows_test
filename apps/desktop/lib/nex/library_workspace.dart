@@ -63,7 +63,9 @@ mixin _LibraryWorkspace on _LibraryStateBase {
               ),
               const SizedBox(width: 6),
               Text(
-                overdue > 0 ? l.overdueCount(overdue) : l.dueCount(due.length),
+                overdue > 0
+                    ? desktopDigits(context, l.overdueCount(overdue))
+                    : desktopDigits(context, l.dueCount(due.length)),
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
                   fontWeight: FontWeight.w600,
                   color: overdue > 0 ? scheme.error : scheme.primary,
@@ -206,36 +208,39 @@ class _LibraryReaderEmpty extends StatelessWidget {
       color: theme.colorScheme.surfaceContainerLowest,
       alignment: Alignment.center,
       padding: const EdgeInsets.all(32),
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 320),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(
-              Icons.auto_stories_outlined,
-              size: 40,
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-            const SizedBox(height: 28),
-            Text(
-              l.workspaceReaderTitle,
-              style: theme.textTheme.headlineSmall?.copyWith(
-                height: 1.35,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(l.noNoteSelected, style: theme.textTheme.titleSmall),
-            const SizedBox(height: 8),
-            Text(
-              l.workspaceReaderHint,
-              style: theme.textTheme.bodyMedium?.copyWith(
+      child: SingleChildScrollView(
+        primary: false,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 320),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(
+                Icons.auto_stories_outlined,
+                size: 40,
                 color: theme.colorScheme.onSurfaceVariant,
-                height: 1.7,
               ),
-            ),
-          ],
+              const SizedBox(height: 28),
+              Text(
+                l.workspaceReaderTitle,
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  height: 1.35,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(l.noNoteSelected, style: theme.textTheme.titleSmall),
+              const SizedBox(height: 8),
+              Text(
+                l.workspaceReaderHint,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                  height: 1.7,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

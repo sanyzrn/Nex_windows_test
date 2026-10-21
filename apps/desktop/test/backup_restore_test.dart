@@ -32,57 +32,60 @@ void main() {
     if (tmp.existsSync()) tmp.deleteSync(recursive: true);
   });
 
-  test('NexBackupArchive create and restore round-trip preserves notes, due dates and repeats', () {
-    final now = DateTime.now().toUtc();
-    final note1 = repo.insert(
-      Note(
-        id: 'n1',
-        type: NoteType.text,
-        content: 'Note 1 content',
-        createdAt: now,
-        updatedAt: now,
-        deviceId: 'device-a',
-        rev: 1,
-        syncState: SyncState.pending,
-      ),
-    );
-    final due = now.add(const Duration(days: 3));
-    repo.setDueAt(note1.id, due, repeat: NoteRepeat.daily);
+  test(
+    'NexBackupArchive create and restore round-trip preserves notes, due dates and repeats',
+    () {
+      final now = DateTime.now().toUtc();
+      final note1 = repo.insert(
+        Note(
+          id: 'n1',
+          type: NoteType.text,
+          content: 'Note 1 content',
+          createdAt: now,
+          updatedAt: now,
+          deviceId: 'device-a',
+          rev: 1,
+          syncState: SyncState.pending,
+        ),
+      );
+      final due = now.add(const Duration(days: 3));
+      repo.setDueAt(note1.id, due, repeat: NoteRepeat.daily);
 
-    // Create backup archive (.nexbak)
-    final archiveFile = NexBackupArchive.create(
-      database: db,
-      mediaDir: mediaDir,
-      backupDir: backupDir,
-    );
-    expect(archiveFile.existsSync(), isTrue);
+      // Create backup archive (.nexbak)
+      final archiveFile = NexBackupArchive.create(
+        database: db,
+        mediaDir: mediaDir,
+        backupDir: backupDir,
+      );
+      expect(archiveFile.existsSync(), isTrue);
 
-    // Close db and clear active database
-    db.close();
-    File(p.join(tmp.path, 'nex.sqlite')).deleteSync();
+      // Close db and clear active database
+      db.close();
+      File(p.join(tmp.path, 'nex.sqlite')).deleteSync();
 
-    // Restore into live database
-    NexBackupArchive.restore(
-      liveDbPath: p.join(tmp.path, 'nex.sqlite'),
-      mediaDir: mediaDir,
-      backupFile: archiveFile.path,
-    );
+      // Restore into live database
+      NexBackupArchive.restore(
+        liveDbPath: p.join(tmp.path, 'nex.sqlite'),
+        mediaDir: mediaDir,
+        backupFile: archiveFile.path,
+      );
 
-    // Reopen and verify
-    final restoredDb = NexDatabase.open(p.join(tmp.path, 'nex.sqlite'));
-    final restoredRepo = SqliteNoteRepository(restoredDb);
+      // Reopen and verify
+      final restoredDb = NexDatabase.open(p.join(tmp.path, 'nex.sqlite'));
+      final restoredRepo = SqliteNoteRepository(restoredDb);
 
-    final restoredNote = restoredRepo.getById('n1');
-    expect(restoredNote, isNotNull);
-    expect(restoredNote!.content, 'Note 1 content');
-    expect(restoredNote.dueRepeat, NoteRepeat.daily);
-    expect(
-      restoredNote.dueAt!.millisecondsSinceEpoch,
-      closeTo(due.millisecondsSinceEpoch, 1000),
-    );
+      final restoredNote = restoredRepo.getById('n1');
+      expect(restoredNote, isNotNull);
+      expect(restoredNote!.content, 'Note 1 content');
+      expect(restoredNote.dueRepeat, NoteRepeat.daily);
+      expect(
+        restoredNote.dueAt!.millisecondsSinceEpoch,
+        closeTo(due.millisecondsSinceEpoch, 1000),
+      );
 
-    restoredDb.close();
-  });
+      restoredDb.close();
+    },
+  );
 
   test('FullBackup create and unpack round-trip with encrypted settings', () {
     final now = DateTime.now().toUtc();

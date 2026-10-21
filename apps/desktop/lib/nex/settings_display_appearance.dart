@@ -7,42 +7,6 @@
 part of 'settings.dart';
 
 mixin _SettingsDisplayAppearance on _SettingsStateBase {
-  /// One toast now, one queued with Windows for 15 seconds later — the two
-  /// ways reminders reach the screen — and Windows' own reason if it refuses.
-  Future<void> _sendTestNotification(
-    PanelController c,
-    AppLocalizations l,
-  ) async {
-    final native = c.native;
-    var shown = false, queued = false;
-    try {
-      shown = await native.showOverdueReminder(
-        id: 'nextest',
-        noteId: '',
-        title: l.applicationName,
-        body: l.testNotificationBody,
-      );
-      queued = await native.scheduleReminder(
-        id: 'nextest2',
-        noteId: '',
-        title: l.applicationName,
-        body: l.testNotificationLater,
-        fireAt: DateTime.now().add(const Duration(seconds: 15)),
-      );
-    } catch (_) {}
-    if (shown && queued) {
-      c.toast(l.testNotificationSent);
-      return;
-    }
-    String? why;
-    try {
-      why = await native.reminderDiagnosticError();
-    } catch (_) {}
-    c.toast(
-      l.testNotificationFailed(why == null || why.isEmpty ? '' : ' ($why)'),
-    );
-  }
-
   @override
   List<Widget> _buildDisplayAppearance(BuildContext context) {
     final c = LiquidScope.panelOf(context);
@@ -81,14 +45,32 @@ mixin _SettingsDisplayAppearance on _SettingsStateBase {
           ),
           const Divider(height: 1),
           _SettingRow(
+            title: l.windowCloseAction,
+            subtitle: c.S.closeToTray
+                ? l.windowCloseTrayHint
+                : l.windowCloseQuitHint,
+            control: Switch(
+              key: const ValueKey('close-to-tray'),
+              value: c.S.closeToTray,
+              onChanged: (v) {
+                c.S.closeToTray = v;
+                c.save();
+                c.refresh();
+              },
+            ),
+          ),
+          const Divider(height: 1),
+          _SettingRow(
             title: l.windowRemember,
             subtitle: l.windowRememberHint,
             control: Switch(
+              key: const ValueKey('window-remember'),
               value: c.S.windowRemember,
-              onChanged: (v) {
+              onChanged: (v) async {
                 c.S.windowRemember = v;
                 c.save();
                 c.refresh();
+                await c.native.setCompactRestoration(!v);
               },
             ),
           ),
@@ -122,7 +104,10 @@ mixin _SettingsDisplayAppearance on _SettingsStateBase {
                       DropdownMenuItem(
                         value: i,
                         child: Text(
-                          '${l.monitor} ${displayNumber(c.screens[i], i)}',
+                          desktopDigits(
+                            context,
+                            '${l.monitor} ${displayNumber(c.screens[i], i)}',
+                          ),
                         ),
                       ),
                   ],
@@ -137,10 +122,23 @@ mixin _SettingsDisplayAppearance on _SettingsStateBase {
           _SettingRow(
             title: l.testNotification,
             subtitle: l.testNotificationHint,
-            control: OutlinedButton(
-              key: const ValueKey('test-notification'),
-              onPressed: () => _sendTestNotification(c, l),
-              child: Text(l.testNotificationRun),
+            control: DesktopFocusRing(
+              child: Wrap(
+                spacing: NexSpacing.sm,
+                runSpacing: NexSpacing.sm,
+                children: [
+                  OutlinedButton(
+                    key: const ValueKey('test-notification'),
+                    onPressed: () => sendDesktopTestNotification(c, l),
+                    child: Text(l.testNotificationRun),
+                  ),
+                  TextButton(
+                    onPressed: () =>
+                        c.native.launch('ms-settings:notifications'),
+                    child: Text(l.notificationSettings),
+                  ),
+                ],
+              ),
             ),
           ),
           const Divider(height: 1),
@@ -319,7 +317,10 @@ mixin _SettingsDisplayAppearance on _SettingsStateBase {
                 max: 3,
                 divisions: 25,
                 value: c.S.uiScale,
-                label: '${(c.S.uiScale * 100).round()}%',
+                label: desktopDigits(
+                  context,
+                  '${(c.S.uiScale * 100).round()}%',
+                ),
                 onChanged: (v) {
                   c.S.uiScale = v;
                   c.refresh();
@@ -414,7 +415,7 @@ class _AccentDialogState extends State<_AccentDialog> {
                 textDirection: TextDirection.ltr,
                 decoration: InputDecoration(
                   labelText: l.hexColor,
-                  hintText: '#RRGGBB',
+                  hintText: l.hexColorHint,
                 ),
                 maxLength: 7,
                 onChanged: (v) {
@@ -461,28 +462,30 @@ class _AppearanceChoice extends StatelessWidget {
     final c = Theme.of(context).colorScheme;
     return Semantics(
       selected: selected,
-      child: OutlinedButton(
-        onPressed: onTap,
-        style: OutlinedButton.styleFrom(
-          padding: const EdgeInsets.all(18),
-          backgroundColor: selected
-              ? c.primary.withValues(alpha: .09)
-              : c.surface,
-          foregroundColor: selected ? c.primary : c.onSurface,
-          side: BorderSide(
-            color: selected ? c.primary : c.outline,
-            width: selected ? 2 : 1,
+      child: DesktopFocusRing(
+        child: OutlinedButton(
+          onPressed: onTap,
+          style: OutlinedButton.styleFrom(
+            padding: const EdgeInsets.all(18),
+            backgroundColor: selected
+                ? c.primary.withValues(alpha: .09)
+                : c.surface,
+            foregroundColor: selected ? c.primary : c.onSurface,
+            side: BorderSide(
+              color: selected ? c.primary : c.outline,
+              width: selected ? 2 : 1,
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
           ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
+          child: Column(
+            children: [
+              Icon(icon, size: 30),
+              const SizedBox(height: 14),
+              Text(label, textAlign: TextAlign.center),
+            ],
           ),
-        ),
-        child: Column(
-          children: [
-            Icon(icon, size: 30),
-            const SizedBox(height: 14),
-            Text(label, textAlign: TextAlign.center),
-          ],
         ),
       ),
     );

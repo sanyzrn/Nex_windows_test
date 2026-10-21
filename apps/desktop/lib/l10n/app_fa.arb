@@ -1,7 +1,7 @@
 {
   "@@locale": "fa",
   "capture": "ثبت سریع",
-  "captureHint": "هر چه می‌خواهید بنویسید…",
+  "captureHint": "هرچه می‌خواهی بنویس…",
   "newNote": "یادداشت جدید",
   "checklist": "فهرست کارها",
   "clipboard": "متن کلیپ‌بورد ← یادداشت",
@@ -46,18 +46,17 @@
   "startup": "شروع با ویندوز",
   "hotkey": "میان‌بر ثبت: Ctrl + Alt + کلید انتخاب‌شده",
   "backup": "پشتیبان کامل",
-  "backupInfo": "قالب نکس: کتابخانه خواندنی است؛ تنظیمات رمزگذاری می‌شوند. کلید بازیابی را نگه دارید.",
+  "backupInfo": "قالب نکس: کتابخانه خواندنی است؛ تنظیمات رمزگذاری می‌شوند. کلید بازیابی را نگه دار.",
   "recoveryKey": "کلید بازیابی",
   "about": "درباره / مجوزها",
-  "tools": "ابزارهای پنل",
+  "tools": "ابزارهای پنل کناری",
   "library": "کتابخانه",
   "remind": "یادآوری",
   "play": "پخش",
   "pause": "توقف",
   "remove": "برداشتن",
   "joinThread": "افزودن به رشته",
-  "assistantStub": "دستیار در این نسخه متصل نیست. ثبت و جست‌وجو آفلاین کار می‌کنند.",
-  "utility0": "هر چیزی را کپی کنید تا اینجا نمایش داده شود",
+  "utility0": "هر چیزی را کپی کن تا اینجا نمایش داده شود",
   "utility1": "کلیپ‌بورد",
   "utility2": "پاک کردن",
   "utility3": "جست‌وجوی تاریخچه…",
@@ -70,31 +69,30 @@
   "utility10": "پالت",
   "utility11": "اخیر",
   "utility12": "جست‌وجوی ایموجی…",
-  "utility13": "یک ابزار را روی نوار بکشید",
-  "utility14": "ابزارها را از نوار به اینجا بکشید",
+  "utility13": "یک ابزار را روی داک بکش",
+  "utility14": "ابزارها را از داک به اینجا بکش",
   "utility15": "ابزارها",
   "utility16": "بازنشانی",
   "utility17": "تولید دوباره",
   "utility18": "کپی",
-  "utility19": "ماشین حساب",
+  "utility19": "ماشین‌حساب",
   "utility20": "مثال: (12.5 * 4) / 3 + 2^3",
   "utility21": "زمان‌سنج",
   "utility22": "کرنومتر",
-  "utility23": "ابزارهای متن · کلیپ‌بورد",
   "utility24": "گذرواژه",
   "utility25": "واحدها",
   "utility26": "مثال: 12 in، 5 km، 70 kg، 30 c",
-  "utility27": "برای چسباندن کلیک کنید",
-  "utility28": "متن‌های پرکاربرد مثل نشانی، پاسخ و امضا را ذخیره کنید…",
-  "utility29": "یک شهر اضافه کنید",
+  "utility27": "برای چسباندن کلیک کن",
+  "utility28": "متن‌های پرکاربرد مثل نشانی، پاسخ و امضا را ذخیره کن…",
+  "utility29": "یک شهر اضافه کن",
   "utility30": "＋ افزودن شهر…",
   "utility31": "رسانه و صدا",
   "utility32": "تولید و چسباندن",
   "utility33": "پوشه‌ها",
   "utility34": "متن‌های آماده",
-  "utility35": "متن آماده را بنویسید و Enter بزنید…",
+  "utility35": "متن آماده را بنویس و Enter بزن…",
   "utility36": "جست‌وجوی وب",
-  "utility37": "جست‌وجو یا نشانی را بنویسید و Enter بزنید",
+  "utility37": "جست‌وجو یا نشانی را بنویس و Enter بزن",
   "utility38": "ساعت جهانی",
   "utility39": "کتابخانه",
   "utility40": "ایموجی",
@@ -160,7 +158,7 @@
   "utility91": "این رایانه",
   "utility92": "سطل بازیافت",
   "utility93": "شروع خودکار",
-  "utility94": "ابتدا متنی را کپی کنید",
+  "utility94": "ابتدا متنی را کپی کن",
   "utility95": "این متن قابل رمزگشایی نیست",
   "utility96": "کلیپ‌بورد به‌روز شد",
   "utility97": "گذرواژه کپی شد",
@@ -172,8 +170,8 @@
   "utility103": "پنجره‌ای برای سنجاق کردن نیست",
   "utility104": "{value} اضافه شد",
   "utility105": "{value} انتخاب شد",
-  "utility106": "نوار به لبهٔ {value} منتقل شد",
-  "utility107": "{value} ← نوار",
+  "utility106": "پنل کناری به لبهٔ {value} منتقل شد",
+  "utility107": "{value} ← داک",
   "utility108": "{words} واژه · {chars} نویسه · {lines} خط",
   "utility109": "دقیقه",
   "utility110": "فاصله",
@@ -220,13 +218,13 @@
   "utility138": "قاهره",
   "utility139": "لاگوس",
   "utility140": "تغییر وضعیت بیدار نگه‌داشتن انجام نشد",
-  "dropFiles": "برای ثبت، فایل یا تصویر را اینجا رها کنید",
-  "pinPanel": "باز نگه داشتن پنل",
-  "unpinPanel": "برداشتن پین پنل",
+  "dropFiles": "برای ثبت، فایل یا تصویر را اینجا رها کن",
+  "pinPanel": "سنجاق کردن پنل کناری",
+  "unpinPanel": "برداشتن سنجاق پنل کناری",
   "addImage": "افزودن تصویر",
   "addAudio": "افزودن صدا",
-  "noClipboardImage": "ابتدا تصویری کپی کنید یا «افزودن تصویر» را بزنید.",
-  "recording": "در حال ضبط… برای ذخیره، توقف را بزنید.",
+  "noClipboardImage": "ابتدا تصویری کپی کن یا «افزودن تصویر» را بزن.",
+  "recording": "در حال ضبط… برای ذخیره، توقف را بزن.",
   "backToLibrary": "بازگشت به کتابخانه",
   "editNote": "ویرایش یادداشت",
   "readNote": "نمایش یادداشت",
@@ -247,15 +245,14 @@
   "navTools": "ابزارها",
   "interfaceMode": "حالت نمایش",
   "windowMode": "پنجره",
-  "panelMode": "نوار لبه",
+  "panelMode": "پنل کناری",
   "windowRemember": "به‌خاطر سپردن اندازه و جای پنجره",
   "windowRememberHint": "خاموش: نکس همیشه با همان اندازه و در گوشهٔ پایین‌راست صفحه باز می‌شود.",
-  "modeDescription": "پنجرهٔ دسکتاپ تجربهٔ اصلی است و نوار لبه برای ثبت سریع در دسترس می‌ماند. هر دو حالت از همان یادداشت‌ها، رسانه‌ها و تنظیمات استفاده می‌کنند.",
-  "edgePanelOnly": "این تنظیم مخصوص نوار لبه است؛ برای استفاده، حالت نمایش را عوض کنید.",
-  "switchToPanel": "تغییر به نوار لبه",
-  "switchToWindow": "تغییر به پنجره",
+  "modeDescription": "پنجرهٔ دسکتاپ تجربهٔ اصلی است و پنل کناری برای ثبت سریع در دسترس می‌ماند. هر دو حالت از همان یادداشت‌ها، رسانه‌ها و تنظیمات استفاده می‌کنند.",
+  "edgePanelOnly": "این تنظیم مخصوص پنل کناری است؛ برای استفاده، حالت نمایش را عوض کن.",
+  "switchToPanel": "تغییر به پنل کناری",
   "backToTools": "بازگشت به ابزارها",
-  "toolsHint": "یک ابزار را برای باز کردن انتخاب کنید",
+  "toolsHint": "یک ابزار را برای باز کردن انتخاب کن",
   "noEmojiFound": "ایموجی پیدا نشد",
   "nothingYet": "هنوز چیزی نیست",
   "unknownUnit": "واحد ناشناخته",
@@ -267,29 +264,27 @@
   "noRepeat": "بدون تکرار",
   "repeatDaily": "هر روز",
   "repeatWeekly": "هر هفته",
-  "repeatMonthly": "هر ماه",
-  "repeatYearly": "هر سال",
   "clearReminder": "حذف یادآور",
   "reminderSet": "یادآور تنظیم شد",
   "overdue": "عقب‌افتاده",
-  "shortcuts": "کلیدهای میانبر",
-  "keyboardShortcuts": "کلیدهای میانبر صفحه‌کلید",
+  "shortcuts": "میان‌برها",
+  "keyboardShortcuts": "میان‌برهای صفحه‌کلید",
   "actionNewNote": "یادداشت جدید",
   "actionNewChecklist": "فهرست جدید",
-  "actionSearch": "جستجو",
+  "actionSearch": "جست‌وجو",
   "actionLibrary": "کتابخانه",
   "actionSettings": "تنظیمات",
   "actionMoveSelection": "حرکت بین یادداشت‌ها",
   "actionOpenNote": "باز کردن یادداشت",
-  "actionCloseOrClear": "بستن یادداشت / پاک کردن جستجو",
+  "actionCloseOrClear": "بستن یادداشت / پاک کردن جست‌وجو",
   "actionDelete": "حذف",
   "actionPin": "سنجاق / لغو سنجاق",
-  "actionCopy": "رونوشت",
+  "actionCopy": "کپی",
   "noNoteSelected": "یادداشتی انتخاب نشده است",
   "todayTitle": "امروز",
   "dueCount": "{count} سررسید امروز",
   "overdueCount": "{count} گذشته از موعد",
-  "emptyLibraryTitle": "کتابخانه شما خالی است",
+  "emptyLibraryTitle": "کتابخانه‌ات خالی است",
   "emptyLibraryHint": "اول ثبت، بعد فکر کردن. همه‌چیز روی همین رایانه می‌ماند.",
   "emptyLibraryWrite": "نوشتن اولین یادداشت",
   "emptyLibraryTools": "مرور ابزارها",
@@ -299,17 +294,12 @@
   "densityStandard": "استاندارد",
   "densityReadable": "خوانا",
   "paletteOpen": "پالت فرمان",
-  "paletteHint": "جستجوی یادداشت‌ها، پرش سریع و اجرای کنش‌ها (Ctrl+K)",
-  "paletteSearchHint": "جستجوی یادداشت‌ها، صفحه‌ها و کنش‌ها…",
+  "paletteSearchHint": "جست‌وجوی یادداشت‌ها، صفحه‌ها و فرمان‌ها…",
   "paletteNoResults": "چیزی پیدا نشد",
   "paletteSectionNotes": "یادداشت‌ها",
-  "paletteSectionGoTo": "برو به",
-  "paletteSectionActions": "کنش‌ها",
+  "paletteSectionActions": "فرمان‌ها",
   "paletteActionNewNote": "یادداشت جدید",
   "paletteActionToggleTheme": "تغییر روشن / تاریک",
-  "paletteActionOpenTools": "باز کردن ابزارها",
-  "pasteLinkSaved": "یادداشت پیوند ساخته شد",
-  "noNoteSelectedHint": "برای پیمایش از کلیدهای جهت‌نما و برای یادداشت جدید از Ctrl+N استفاده کنید",
   "filterAll": "همه",
   "filterAllTypes": "همه انواع",
   "filterAllTags": "همه برچسب‌ها",
@@ -340,14 +330,10 @@
       }
     }
   },
-  "localEngineActive": "کتابخانهٔ محلی روی همین دستگاه",
-  "switchToDark": "تغییر به پوستهٔ تیره",
-  "switchToLight": "تغییر به پوستهٔ روشن",
-  "restoreConfirmTitle": "بازیابی نسخهٔ پشتیبان",
   "restoreConfirmBody": "بازیابی، همهٔ یادداشت‌ها، برچسب‌ها و رسانه‌های فعلی را با این نسخهٔ پشتیبان جایگزین می‌کند. این کار قابل بازگشت نیست.",
   "copyKey": "کپی کلید",
   "settingsDisplay": "نمایش و تعامل",
-  "settingsAppearance": "پوسته و ظاهر",
+  "settingsAppearance": "تم و ظاهر",
   "settingsShortcuts": "میان‌برها و ورودی",
   "settingsBackup": "پشتیبان‌گیری و امنیت داده‌ها",
   "settingsTools": "ابزارهای داک و برنامه‌ها",
@@ -355,35 +341,31 @@
   "colorMode": "حالت رنگی",
   "appLanguage": "زبان برنامه",
   "libraryUnavailable": "کتابخانهٔ یادداشت‌ها هنوز روی این دستگاه در دسترس نیست.",
-  "libraryUnavailableHint": "از داک، نمای کتابخانه را باز کنید یا نکس را دوباره اجرا کنید تا یادداشت‌ها بارگذاری شوند.",
-  "workspaceLabel": "فضای شما",
   "workspaceLocal": "خصوصی؛ روی همین دستگاه",
-  "workspaceSearch": "جستجو یا رفتن به…",
-  "workspaceCaptureTitle": "جایی برای\nفکرهای شما.",
-  "workspaceCaptureDescription": "یک فکر، یک فهرست، یک یادآوری کوچک. بنویسید؛ نکس نگهش می‌دارد.",
+  "workspaceSearch": "جست‌وجو یا رفتن به…",
+  "workspaceCaptureTitle": "جایی برای\nفکرهای تو.",
+  "workspaceCaptureDescription": "یک فکر، یک فهرست، یک یادآور کوچک. بنویس؛ نکس نگهش می‌دارد.",
   "workspaceCaptureFooter": "ذخیره روی همین دستگاه؛ همیشه در دسترس.",
   "workspaceToolsTitle": "جعبه‌ابزار روزمرهٔ تو",
   "workspaceToolsDescription": "ابزارهای کاربردی ویندوز، یک‌جا و در دسترس.",
   "workspaceEssentials": "دم‌دست",
-  "workspaceAllTools": "جعبه‌ابزار شما",
   "workspaceUtilityHint": "باز کردن ابزار",
   "workspaceClipboardHint": "چیزهایی که کپی کرده‌اید، آمادهٔ استفاده.",
-  "workspaceAwakeHint": "صفحه را هنگام کار روشن نگه دارید.",
+  "workspaceAwakeHint": "صفحه را هنگام کار روشن نگه دار.",
   "workspaceTimerHint": "کمی زمان برای تمرکز.",
   "workspaceCalculatorHint": "حساب‌های کوچک روزمره.",
   "workspaceColorHint": "انتخاب رنگ از هر جای صفحه.",
-  "workspaceSettingsDescription": "این فضا را به سلیقهٔ خودتان تنظیم کنید.",
   "workspaceReaderTitle": "جایی برای برگشتن به فکرها.",
-  "workspaceReaderHint": "یادداشتی از فهرست انتخاب کنید؛ این صفحه برای خواندن آن است.",
-  "workspaceToolsSearch": "جستجوی ابزار…",
+  "workspaceReaderHint": "یادداشتی از فهرست انتخاب کن؛ این صفحه برای خواندن آن است.",
+  "workspaceToolsSearch": "جست‌وجوی ابزار…",
   "workspaceBrand": "Nex",
-  "reminderFutureRequired": "زمانی در آینده انتخاب کنید.",
+  "reminderFutureRequired": "زمانی در آینده انتخاب کن.",
   "notificationSettings": "تنظیمات اعلان",
   "testNotification": "آزمایش اعلان‌ها",
   "testNotificationHint": "یک اعلان همین حالا و یکی دیگر ۱۵ ثانیه بعد نشان می‌دهد تا هر دو راه رساندن یادآورها را بسنجید.",
   "testNotificationRun": "ارسال آزمایشی",
-  "testNotificationSent": "آزمایش فرستاده شد. باید همین حالا یک اعلان و ۱۵ ثانیه بعد اعلان دیگری ببینید.",
-  "testNotificationFailed": "ویندوز اعلان را نپذیرفت{detail}. تنظیمات > سیستم > اعلان‌ها و Focus assist را بررسی کنید.",
+  "testNotificationSent": "ویندوز هر دو اعلان آزمایشی را پذیرفت. اگر نمایش داده نشدند، تنظیمات اعلان‌ها و حالت مزاحم نشوید را بررسی کن.",
+  "testNotificationFailed": "ویندوز اعلان را نپذیرفت{detail}. تنظیمات > سیستم > اعلان‌ها و دستیار تمرکز (Focus assist) را بررسی کن.",
   "@testNotificationFailed": {
     "placeholders": {
       "detail": {
@@ -393,24 +375,24 @@
   },
   "testNotificationBody": "این یک اعلان آزمایشی از نکس است.",
   "testNotificationLater": "اعلان زمان‌بندی‌شدهٔ آزمایشی رسید.",
-  "reminderDeliveryFailed": "زمان ذخیره شد، اما ویندوز نتوانست اعلان را زمان‌بندی کند. تنظیمات اعلان ویندوز را بررسی کنید و دوباره تلاش کنید.",
-  "reminderSaveFailed": "یادآور ذخیره نشد. دوباره تلاش کنید.",
-  "workspaceNotebook": "دفتر یادداشت شما",
+  "reminderDeliveryFailed": "زمان ذخیره شد، اما ویندوز نتوانست اعلان را زمان‌بندی کند. تنظیمات اعلان ویندوز را بررسی کن و دوباره تلاش کن.",
+  "reminderSaveFailed": "یادآور ذخیره نشد. دوباره تلاش کن.",
+  "workspaceNotebook": "دفتر یادداشت تو",
   "workspaceRecent": "آخرین تغییرات",
-  "workspacePinned": "پین‌شده‌ها",
+  "workspacePinned": "سنجاق‌شده‌ها",
   "workspaceViewAll": "دیدن همه",
-  "workspaceStartHint": "یادداشت بعدی از اینجا شروع می‌شود؛ نوشته‌های اخیر هم کنار دست شما هستند.",
-  "workspaceNoRecent": "یادداشت‌هایی که ثبت کنید اینجا دیده می‌شوند.",
-  "workspaceNoPinned": "برای دسترسی سریع، یادداشتی را پین کنید.",
+  "workspaceStartHint": "یادداشت بعدی از اینجا شروع می‌شود؛ نوشته‌های اخیر هم کنار دست تو هستند.",
+  "workspaceNoRecent": "یادداشت‌هایی که ثبت کنی اینجا دیده می‌شوند.",
+  "workspaceNoPinned": "برای دسترسی سریع، یادداشتی را سنجاق کن.",
   "workspaceTotal": "یادداشت",
   "workspaceMedia": "پیوست",
   "saving": "در حال ذخیره…",
   "clipboardSaveFailed": "ذخیرهٔ تاریخچهٔ کلیپ‌بورد انجام نشد. این تغییرها هنوز پس از اجرای دوباره محفوظ نیستند.",
   "clipboardRetry": "تلاش دوباره برای ذخیره",
   "applicationName": "Nex",
-  "manageTags": "مدیریت تگ‌ها",
-  "tagDeleteHint": "این تگ از همهٔ یادداشت‌ها حذف شود؟ یادداشت‌ها حفظ می‌شوند.",
-  "tagNameRequired": "یک نام غیرتکراری برای تگ وارد کن.",
+  "manageTags": "مدیریت برچسب‌ها",
+  "tagDeleteHint": "این برچسب از همهٔ یادداشت‌ها حذف شود؟ یادداشت‌ها حفظ می‌شوند.",
+  "tagNameRequired": "یک نام غیرتکراری برای برچسب وارد کن.",
   "toolDock": "داک",
   "toolMore": "بیشتر",
   "toolHidden": "پنهان",
@@ -436,11 +418,231 @@
   "backupCompatibility": "یادداشت‌ها، پیوست‌ها و ظاهر بین نسخه‌های نکس منتقل می‌شوند. کلیپ‌بورد، تنظیمات دستگاه، خزانهٔ موبایل و کلیدهای هوش روی دستگاه خود می‌مانند.",
   "scheduledNotes": "یادداشت‌های زمان‌بندی‌شده",
   "releaseNow": "نمایش همین حالا",
-  "portableLibraryBackup": "بکاپ قابل انتقال کتابخانه · تمام نسخه‌های نکس",
+  "portableLibraryBackup": "پشتیبان قابل انتقال کتابخانه · همهٔ نسخه‌های نکس",
   "importBackupConfirm": "این فایل خروجی نکس است. یادداشت‌ها و پیوست‌های آن به کتابخانه اضافه می‌شوند و یادداشت‌های فعلی حفظ می‌شوند.",
   "importNotes": "ورود یادداشت‌ها",
   "importNotesDone": "یادداشت‌ها و پیوست‌ها وارد شدند",
   "themePalette": "تم برنامه",
   "hexColor": "کد HEX رنگ",
-  "backupSaved": "بکاپ ذخیره شد"
+  "backupSaved": "نسخهٔ پشتیبان ذخیره شد",
+  "commitmentsTitle": "تعهدات و کارهای تکرارشونده",
+  "commitmentNew": "تعهد جدید",
+  "commitmentEdit": "ویرایش تعهد",
+  "commitmentEmpty": "هنوز تعهد یا کار تکرارشونده‌ای ثبت نشده است.",
+  "commitmentFirst": "افزودن اولین تعهد",
+  "commitmentCompleted": "ثبت انجام تعهد",
+  "commitmentTitle": "عنوان تعهد",
+  "commitmentTitleHint": "مثلاً پرداخت قبض، مصرف دارو…",
+  "commitmentCadence": "دورهٔ تکرار",
+  "commitmentEvery": "هر",
+  "commitmentWeekdays": "روزهای هفته:",
+  "commitmentNotification": "اعلان یادآور",
+  "cadenceHourly": "هر ساعت",
+  "cadenceDaily": "روزانه",
+  "cadenceWeekly": "هفتگی",
+  "cadenceMonthly": "ماهانه",
+  "cadenceYearly": "سالانه",
+  "cadenceEveryHours": "هر {count} ساعت",
+  "cadenceEveryDays": "هر {count} روز",
+  "cadenceEveryWeeks": "هر {count} هفته",
+  "cadenceEveryMonths": "هر {count} ماه",
+  "cadenceEveryYears": "هر {count} سال",
+  "backupFileType": "نسخهٔ پشتیبان نکس",
+  "hexColorHint": "#RRGGBB",
+  "utility141": "چپ",
+  "utility142": "راست",
+  "weekdayMonday": "دوشنبه",
+  "weekdayMondayShort": "د",
+  "weekdayTuesday": "سه‌شنبه",
+  "weekdayTuesdayShort": "س",
+  "weekdayWednesday": "چهارشنبه",
+  "weekdayWednesdayShort": "چ",
+  "weekdayThursday": "پنج‌شنبه",
+  "weekdayThursdayShort": "پ",
+  "weekdayFriday": "جمعه",
+  "weekdayFridayShort": "ج",
+  "weekdaySaturday": "شنبه",
+  "weekdaySaturdayShort": "ش",
+  "weekdaySunday": "یکشنبه",
+  "weekdaySundayShort": "ی",
+  "@utility104": {
+    "placeholders": {
+      "value": {
+        "type": "Object"
+      }
+    }
+  },
+  "@utility105": {
+    "placeholders": {
+      "value": {
+        "type": "Object"
+      }
+    }
+  },
+  "@utility106": {
+    "placeholders": {
+      "value": {
+        "type": "Object"
+      }
+    }
+  },
+  "@utility107": {
+    "placeholders": {
+      "value": {
+        "type": "Object"
+      }
+    }
+  },
+  "@utility108": {
+    "placeholders": {
+      "chars": {
+        "type": "Object"
+      },
+      "lines": {
+        "type": "Object"
+      },
+      "words": {
+        "type": "Object"
+      }
+    }
+  },
+  "@utility113": {
+    "placeholders": {
+      "value": {
+        "type": "Object"
+      }
+    }
+  },
+  "@utility114": {
+    "placeholders": {
+      "value": {
+        "type": "Object"
+      }
+    }
+  },
+  "@characters": {
+    "placeholders": {
+      "count": {
+        "type": "Object"
+      }
+    }
+  },
+  "@minutesAgo": {
+    "placeholders": {
+      "count": {
+        "type": "Object"
+      }
+    }
+  },
+  "@hoursAgo": {
+    "placeholders": {
+      "count": {
+        "type": "Object"
+      }
+    }
+  },
+  "@daysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "Object"
+      }
+    }
+  },
+  "@weeksAgo": {
+    "placeholders": {
+      "count": {
+        "type": "Object"
+      }
+    }
+  },
+  "@monthsAgo": {
+    "placeholders": {
+      "count": {
+        "type": "Object"
+      }
+    }
+  },
+  "@yearsAgo": {
+    "placeholders": {
+      "count": {
+        "type": "Object"
+      }
+    }
+  },
+  "@dueCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@overdueCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@selectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@cadenceEveryHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@cadenceEveryDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@cadenceEveryWeeks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@cadenceEveryMonths": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@cadenceEveryYears": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "previousPage": "صفحهٔ قبل",
+  "nextPage": "صفحهٔ بعد",
+  "clearSearch": "پاک کردن جست‌وجو",
+  "mediaPrevious": "رسانهٔ قبلی",
+  "mediaNext": "رسانهٔ بعدی",
+  "mediaPlayPause": "پخش یا مکث رسانه",
+  "volumeDown": "کاهش صدا",
+  "volumeUp": "افزایش صدا",
+  "volumeMute": "قطع یا وصل صدا",
+  "chooseColor": "انتخاب رنگ",
+  "copyColor": "کپی کد رنگ",
+  "emojiCategory": "دستهٔ ایموجی",
+  "calendarYear": "سال",
+  "calendarMonth": "ماه",
+  "calendarDay": "روز",
+  "windowCloseAction": "پس از بستن پنجره در سینی سیستم فعال بماند",
+  "windowCloseTrayHint": "بستن، پنجره را پنهان می‌کند. از سینی سیستم بازش کن؛ خروج، داده‌ها را ذخیره می‌کند و برنامه را می‌بندد.",
+  "windowCloseQuitHint": "خاموش: بستن پنجره، داده‌ها را ذخیره می‌کند و از نکس خارج می‌شود.",
+  "reminderSnooze": "۱۰ دقیقه بعد",
+  "reminderDone": "انجام شد"
 }

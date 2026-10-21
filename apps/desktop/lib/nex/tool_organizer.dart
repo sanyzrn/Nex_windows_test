@@ -1,3 +1,4 @@
+import '../l10n/desktop_format.dart';
 import 'package:flutter/material.dart';
 import '../core/controller.dart';
 import '../core/registry.dart';
@@ -95,7 +96,10 @@ class _NexToolOrganizerState extends State<NexToolOrganizer> {
             for (final entry in labels.entries)
               ChoiceChip(
                 label: Text(
-                  '${entry.value} · ${tools.where((t) => placement(t.id) == entry.key).length}',
+                  desktopDigits(
+                    context,
+                    '${entry.value} · ${tools.where((t) => placement(t.id) == entry.key).length}',
+                  ),
                 ),
                 selected: filter == entry.key,
                 onSelected: (_) => setState(() {
@@ -194,13 +198,15 @@ class _NexToolOrganizerState extends State<NexToolOrganizer> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       IconButton(
+                        tooltip: l.previousPage,
                         onPressed: current == 0
                             ? null
                             : () => setState(() => page = current - 1),
                         icon: const Icon(Icons.chevron_left),
                       ),
-                      Text('${current + 1} / $pages'),
+                      Text(desktopDigits(context, '${current + 1} / $pages')),
                       IconButton(
+                        tooltip: l.nextPage,
                         onPressed: current + 1 == pages
                             ? null
                             : () => setState(() => page = current + 1),

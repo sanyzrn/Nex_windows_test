@@ -53,17 +53,22 @@ mixin _SettingsToolsAbout on _SettingsStateBase {
           if (NexScope.maybeOf(context)?.updates case final updates?) ...[
             NexUpdateCard(updates: updates),
             const SizedBox(height: 18),
-          ],
-          Row(
+          ] else
+            const ReleaseNotesButton(),
+          Text(
+            desktopDigits(
+              context,
+              'Nex Windows v$kAppShortVersion (Build $kAppBuild)',
+            ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
             children: [
-              Expanded(
-                child: Text(
-                  'Nex Windows v$kAppShortVersion (Build $kAppBuild)',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: scheme.onSurfaceVariant,
-                  ),
-                ),
-              ),
               TextButton(
                 onPressed: () => showLicensePage(
                   context: context,
@@ -72,7 +77,6 @@ mixin _SettingsToolsAbout on _SettingsStateBase {
                 ),
                 child: Text(l.about),
               ),
-              const SizedBox(width: 8),
               FilledButton.tonal(
                 style: FilledButton.styleFrom(
                   backgroundColor: scheme.errorContainer,

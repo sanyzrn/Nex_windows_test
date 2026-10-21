@@ -8,6 +8,12 @@ import 'package:nex_desktop/main.dart';
 class _Native extends NativeHost {
   _Native({this.accept = true});
   final bool accept;
+  bool? compact;
+  @override
+  Future<void> setCompactRestoration(bool value) async {
+    compact = value;
+  }
+
   final shown = <String>[];
   final queued = <String>[];
   @override
@@ -17,6 +23,7 @@ class _Native extends NativeHost {
     required String title,
     required String body,
     DateTime? occurrence,
+    int? revision,
   }) async {
     shown.add(body);
     return accept;
@@ -29,6 +36,7 @@ class _Native extends NativeHost {
     required String title,
     required String body,
     required DateTime fireAt,
+    int? revision,
   }) async {
     queued.add(body);
     return accept;
@@ -93,5 +101,22 @@ void main() {
     );
     await t.pumpAndSettle(const Duration(seconds: 4));
     expect(t.takeException(), isNull);
+  });
+  testWidgets('remembering position updates tray restoration immediately', (
+    t,
+  ) async {
+    final (c, native) = await _boot(t);
+    final control = find.byKey(const ValueKey('window-remember'));
+    await t.ensureVisible(control);
+    await t.tap(control);
+    await t.pump();
+    expect(c.S.windowRemember, isTrue);
+    expect(native.compact, isFalse);
+    await t.tap(control);
+    await t.pump();
+    expect(c.S.windowRemember, isFalse);
+    expect(native.compact, isTrue);
+    await t.pumpWidget(const SizedBox());
+    c.dispose();
   });
 }

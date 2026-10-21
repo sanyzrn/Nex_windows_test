@@ -1,3 +1,5 @@
+import '../l10n/desktop_format.dart';
+import '../updates/release_notes.dart';
 import 'package:flutter/material.dart';
 import 'package:nex_data/schema/backup_kind.dart';
 import 'package:flutter/services.dart';
@@ -5,10 +7,10 @@ import 'package:file_selector/file_selector.dart';
 import 'package:nex_ui/nex_ui.dart';
 import 'command_palette.dart' show nexFoldText;
 import '../core/app_meta.dart';
-import '../core/controller.dart' show PanelController;
 import '../core/display_identity.dart';
 import '../core/panel_settings.dart';
 import 'tool_organizer.dart';
+import 'test_notification.dart';
 import '../ui/widgets.dart';
 import '../l10n/app_localizations.dart';
 import 'features.dart';
@@ -22,7 +24,12 @@ part 'settings_shortcuts_backup.dart';
 part 'settings_tools_about.dart';
 
 class NexSettingsView extends StatefulWidget {
-  const NexSettingsView({super.key, this.windowLayout = false});
+  const NexSettingsView({
+    super.key,
+    this.windowLayout = false,
+    this.initialCategory,
+  });
+  final int? initialCategory;
 
   /// Wide presentation for the desktop window (no flyout-scroll container,
   /// edge/monitor pickers hidden while the window mode is active).
@@ -33,6 +40,12 @@ class NexSettingsView extends StatefulWidget {
 }
 
 abstract class _SettingsStateBase extends State<NexSettingsView> {
+  @override
+  void initState() {
+    super.initState();
+    category = widget.initialCategory;
+  }
+
   String? recoveryKey;
   int? category;
   final search = TextEditingController();
@@ -96,13 +109,22 @@ abstract class _SettingsStateBase extends State<NexSettingsView> {
       'aboutHint',
       'aiHint',
     ];
+    final keywords = [
+      '${l.interfaceMode} ${l.windowRemember} ${l.windowCloseAction} ${l.testNotification} ${l.edge}',
+      '${l.appLanguage} ${l.light} ${l.dark} ${l.followSystem} ${l.themePalette} ${l.customAccent} ${l.textScale} ${l.solarCalendar} ${l.settingsDensity}',
+      '${l.hotkey} ${l.pasteOnClick} ${l.magnify}',
+      '${l.restore} ${l.recoveryKey} ${l.importNotes}',
+      '',
+      '${l.applicationName} ${d.t('whatsNew')}',
+      '${AiStrings.of(context).t('provider')} ${AiStrings.of(context).t('model')} Gemini YouTube',
+    ];
     Widget group(List<int> indexes, String title) {
       final matching = indexes
           .where(
             (i) =>
                 i < names.length &&
                 nexFoldText(
-                  '${names[i]} ${d.t(hints[i])}',
+                  '${names[i]} ${d.t(hints[i])} ${keywords[i]}',
                 ).contains(nexFoldText(query)),
           )
           .toList();
@@ -123,12 +145,14 @@ abstract class _SettingsStateBase extends State<NexSettingsView> {
             ),
             for (var n = 0; n < matching.length; n++) ...[
               if (n != 0) const Divider(height: 1, indent: 56),
-              NexSettingsLink(
-                key: ValueKey('settings-open-${matching[n]}'),
-                icon: icons[matching[n]],
-                title: names[matching[n]],
-                subtitle: d.t(hints[matching[n]]),
-                onTap: () => _openCategory(matching[n]),
+              DesktopFocusRing(
+                child: NexSettingsLink(
+                  key: ValueKey('settings-open-${matching[n]}'),
+                  icon: icons[matching[n]],
+                  title: names[matching[n]],
+                  subtitle: d.t(hints[matching[n]]),
+                  onTap: () => _openCategory(matching[n]),
+                ),
               ),
             ],
           ],
@@ -152,18 +176,36 @@ abstract class _SettingsStateBase extends State<NexSettingsView> {
               if (widget.windowLayout)
                 NexSoftCard(
                   accent: scheme.primary,
-                  child: Row(
-                    children: [
-                      const NexIconBadge(icon: Icons.tune_rounded, size: 54),
-                      const SizedBox(width: 18),
-                      Expanded(
-                        child: NexWorkspaceIntro(
-                          title: d.t('settingsIntro'),
-                          description: d.t('settingsHint'),
-                          compact: true,
-                        ),
-                      ),
-                    ],
+                  child: LayoutBuilder(
+                    builder: (context, box) {
+                      final intro = NexWorkspaceIntro(
+                        title: d.t('settingsIntro'),
+                        description: d.t('settingsHint'),
+                        compact: true,
+                      );
+                      const icon = NexIconBadge(
+                        icon: Icons.tune_rounded,
+                        size: 54,
+                      );
+                      final scale = MediaQuery.textScalerOf(context).scale(1);
+                      if (scale > 1 && box.maxWidth / scale < 180) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            icon,
+                            const SizedBox(height: NexSpacing.md),
+                            intro,
+                          ],
+                        );
+                      }
+                      return Row(
+                        children: [
+                          icon,
+                          const SizedBox(width: 18),
+                          Expanded(child: intro),
+                        ],
+                      );
+                    },
                   ),
                 ),
               TextField(
@@ -315,7 +357,10 @@ class _SettingRow extends StatelessWidget {
                 const SizedBox(height: 10),
                 Align(
                   alignment: AlignmentDirectional.centerStart,
-                  child: control,
+                  child: Semantics(
+                    label: title,
+                    child: DesktopFocusRing(child: control),
+                  ),
                 ),
               ],
             );
@@ -324,7 +369,10 @@ class _SettingRow extends StatelessWidget {
             children: [
               Expanded(child: label),
               const SizedBox(width: 14),
-              control,
+              Semantics(
+                label: title,
+                child: DesktopFocusRing(child: control),
+              ),
             ],
           );
         },

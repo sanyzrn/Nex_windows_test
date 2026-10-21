@@ -1,3 +1,4 @@
+import '../../l10n/app_localizations.dart';
 import '../../l10n/utility_strings.dart';
 import 'dart:math' as math;
 
@@ -8,7 +9,6 @@ import '../../core/registry.dart';
 import '../flyout.dart';
 import '../svg_icon.dart';
 import '../widgets.dart';
-
 
 // ================= Media =================
 
@@ -26,11 +26,13 @@ class MediaView extends StatelessWidget {
           children: [
             _MediaButton(
               icon: kMediaIcons['prev']!,
+              label: AppLocalizations.of(context)!.mediaPrevious,
               onTap: () => c.native.pressKey('prev'),
             ),
             const SizedBox(width: 12),
             _MediaButton(
               icon: kMediaIcons['play']!,
+              label: AppLocalizations.of(context)!.mediaPlayPause,
               big: true,
               filled: true,
               onTap: () => c.native.pressKey('play'),
@@ -38,6 +40,7 @@ class MediaView extends StatelessWidget {
             const SizedBox(width: 12),
             _MediaButton(
               icon: kMediaIcons['next']!,
+              label: AppLocalizations.of(context)!.mediaNext,
               onTap: () => c.native.pressKey('next'),
             ),
           ],
@@ -47,16 +50,19 @@ class MediaView extends StatelessWidget {
           children: [
             _MediaButton(
               icon: kMediaIcons['voldown']!,
+              label: AppLocalizations.of(context)!.volumeDown,
               onTap: () => c.native.pressKey('voldown'),
             ),
             const SizedBox(width: 12),
             _MediaButton(
               icon: kMediaIcons['mute']!,
+              label: AppLocalizations.of(context)!.volumeMute,
               onTap: () => c.native.pressKey('mute'),
             ),
             const SizedBox(width: 12),
             _MediaButton(
               icon: kMediaIcons['volup']!,
+              label: AppLocalizations.of(context)!.volumeUp,
               onTap: () => c.native.pressKey('volup'),
             ),
           ],
@@ -73,12 +79,14 @@ class MediaView extends StatelessWidget {
 class _MediaButton extends StatefulWidget {
   const _MediaButton({
     required this.icon,
+    required this.label,
     required this.onTap,
     this.big = false,
     this.filled = false,
   });
 
   final String icon;
+  final String label;
   final VoidCallback onTap;
   final bool big;
   final bool filled;
@@ -102,7 +110,9 @@ class _MediaButtonState extends State<_MediaButton> {
         _hover = false;
         _down = false;
       }),
-      child: GestureDetector(
+      child: DesktopAction(
+        label: widget.label,
+        excludeSemantics: true,
         onTap: widget.onTap,
         onTapDown: (_) => setState(() => _down = true),
         onTapUp: (_) => setState(() => _down = false),
@@ -222,4 +232,3 @@ class _GenerateViewState extends State<GenerateView> {
     c.backToTools();
   }
 }
-

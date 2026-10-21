@@ -86,22 +86,25 @@ void main() {
     expect(File(p.join(mediaDir, 'old.jpg')).existsSync(), isFalse);
   });
 
-  test('a restore the process died in the middle of is undone on next open', () {
-    // No rollBack, no commit: the app was killed. The journal is all that is
-    // left to say a restore was under way, and opening the database is the
-    // first thing the next launch does.
-    final staged = prepare();
-    final transaction = RestoreTransaction.begin(
-      liveDbPath: dbPath,
-      mediaDir: mediaDir,
-    );
-    transaction.installDatabase(staged.stagedDb);
-    transaction.installMedia(staged.stagedMedia);
+  test(
+    'a restore the process died in the middle of is undone on next open',
+    () {
+      // No rollBack, no commit: the app was killed. The journal is all that is
+      // left to say a restore was under way, and opening the database is the
+      // first thing the next launch does.
+      final staged = prepare();
+      final transaction = RestoreTransaction.begin(
+        liveDbPath: dbPath,
+        mediaDir: mediaDir,
+      );
+      transaction.installDatabase(staged.stagedDb);
+      transaction.installMedia(staged.stagedMedia);
 
-    expect(readNote(dbPath), 'the live edit');
-    expect(File(p.join(mediaDir, 'live.jpg')).existsSync(), isTrue);
-    expect(File('$dbPath.restore-journal').existsSync(), isFalse);
-  });
+      expect(readNote(dbPath), 'the live edit');
+      expect(File(p.join(mediaDir, 'live.jpg')).existsSync(), isTrue);
+      expect(File('$dbPath.restore-journal').existsSync(), isFalse);
+    },
+  );
 
   test('dying between the two swaps is undone too', () {
     // The exact window the audit named: the database already replaced, the

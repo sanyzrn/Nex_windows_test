@@ -63,20 +63,30 @@ void main() {
             store,
             secrets: _Secrets(),
             clientFactory: () => MockClient(
-              (_) async => http.Response(
-                jsonEncode({
-                  'choices': [
-                    {
-                      'message': {
-                        'content':
-                            'A proposed note.\n```nex\n{"action":"create","text":"A confirmed idea"}\n```',
-                      },
-                      'finish_reason': 'stop',
-                    },
-                  ],
-                }),
-                200,
-              ),
+              (request) async => request.method == 'GET'
+                  ? http.Response(
+                      jsonEncode({
+                        'data': [
+                          {'id': 'gpt-test-alpha'},
+                          {'id': 'gpt-test-beta'},
+                        ],
+                      }),
+                      200,
+                    )
+                  : http.Response(
+                      jsonEncode({
+                        'choices': [
+                          {
+                            'message': {
+                              'content':
+                                  'A proposed note.\n```nex\n{"action":"create","text":"A confirmed idea"}\n```',
+                            },
+                            'finish_reason': 'stop',
+                          },
+                        ],
+                      }),
+                      200,
+                    ),
             ),
           ),
         ),
@@ -103,6 +113,22 @@ void main() {
       await t.pumpAndSettle();
       expect(find.text('AI settings'), findsWidgets);
       expect(t.takeException(), isNull);
+      final providerLink = find.byKey(const ValueKey('ai-provider-open'));
+      await t.ensureVisible(providerLink);
+      await t.tap(providerLink);
+      await t.pumpAndSettle();
+      final picker = find.byKey(const ValueKey('ai-model-picker'));
+      await t.ensureVisible(picker);
+      await t.tap(picker);
+      await _wait(t, find.text('gpt-test-beta'));
+      await t.enterText(find.byKey(const ValueKey('ai-model-search')), 'beta');
+      await t.pump();
+      expect(find.text('gpt-test-alpha'), findsNothing);
+      await t.tap(find.text('gpt-test-beta'));
+      await t.pumpAndSettle();
+      expect(find.text('gpt-test-beta'), findsOneWidget);
+      // Picking an ID edits the candidate; it never activates an untested model.
+      expect(features.intelligence.config.model, isEmpty);
       await t.tap(find.byIcon(Icons.close).last);
       await t.pumpAndSettle();
       await t.enterText(

@@ -9,12 +9,14 @@ library;
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'desktop_editing_direction.dart';
 import 'package:flutter/services.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:nex_core/nex_core.dart';
 import 'package:nex_ui/nex_ui.dart';
 
 import '../l10n/app_localizations.dart';
+import '../ui/desktop_accessibility.dart';
 import 'features_state.dart';
 import 'note_copy.dart';
 import 'notices.dart';
@@ -190,12 +192,17 @@ class _NexNoteDetailState extends State<NexNoteDetail> {
                         if (editing &&
                             (note.type == NoteType.text ||
                                 note.type == NoteType.checklist))
-                          TextField(
+                          DesktopEditingDirection(
                             controller: editor,
-                            minLines: 3,
-                            maxLines: 10,
-                            textDirection: nexDirectionOf(editor.text),
-                            onChanged: (text) => run('capture', {'text': text}),
+                            multiline: true,
+                            builder: (context, direction) => TextField(
+                              controller: editor,
+                              minLines: 3,
+                              maxLines: 10,
+                              textDirection: direction,
+                              onChanged: (text) =>
+                                  run('capture', {'text': text}),
+                            ),
                           ),
                         if (note.type != NoteType.text &&
                             note.type != NoteType.checklist) ...[
@@ -239,12 +246,17 @@ class _NexNoteDetailState extends State<NexNoteDetail> {
                                 note.type != NoteType.checklist) ||
                             note.caption?.trim().isNotEmpty == true) ...[
                           const SizedBox(height: 12),
-                          TextField(
+                          DesktopEditingDirection(
                             controller: caption,
-                            focusNode: captionFocus,
-                            textDirection: nexDirectionOf(caption.text),
-                            decoration: InputDecoration(hintText: l.caption),
-                            onChanged: (text) => run('caption', {'text': text}),
+                            multiline: true,
+                            builder: (context, direction) => TextField(
+                              controller: caption,
+                              focusNode: captionFocus,
+                              textDirection: direction,
+                              decoration: InputDecoration(hintText: l.caption),
+                              onChanged: (text) =>
+                                  run('caption', {'text': text}),
+                            ),
                           ),
                         ],
                         if (!editing && note.type == NoteType.text)
@@ -279,14 +291,16 @@ class _NexNoteDetailState extends State<NexNoteDetail> {
                               i < parseChecklist(note.content ?? '').length;
                               i++
                             )
-                              CheckboxListTile(
-                                value: parseChecklist(
-                                  note.content ?? '',
-                                )[i].done,
-                                title: Text(
-                                  parseChecklist(note.content ?? '')[i].text,
+                              DesktopFocusRing(
+                                child: CheckboxListTile(
+                                  value: parseChecklist(
+                                    note.content ?? '',
+                                  )[i].done,
+                                  title: Text(
+                                    parseChecklist(note.content ?? '')[i].text,
+                                  ),
+                                  onChanged: (_) => run('check', {'index': i}),
                                 ),
-                                onChanged: (_) => run('check', {'index': i}),
                               ),
                         ],
                         if (note.type == NoteType.voice &&
@@ -408,7 +422,7 @@ class _NexNoteDetailState extends State<NexNoteDetail> {
                               label: Text(
                                 fa
                                     ? '${nexDisplayDate(shownDue!, solar: NexPanelScope.maybeOf(context)?.S.solarCalendar ?? true, persian: true)} ${nexDigits(_hhmm(shownDue), persian: true)}${note.dueRepeat != NoteRepeat.once ? ' (${note.dueRepeat == NoteRepeat.daily ? l.repeatDaily : l.repeatWeekly})' : ''}'
-                                    : '${nexDisplayDate(shownDue!)} ${_hhmm(shownDue)}${note.dueRepeat != NoteRepeat.once ? ' (${note.dueRepeat == NoteRepeat.daily ? l.repeatDaily : l.repeatWeekly})' : ''}',
+                                    : '${nexDisplayDate(shownDue!, solar: NexPanelScope.maybeOf(context)?.S.solarCalendar ?? false)} ${_hhmm(shownDue)}${note.dueRepeat != NoteRepeat.once ? ' (${note.dueRepeat == NoteRepeat.daily ? l.repeatDaily : l.repeatWeekly})' : ''}',
                               ),
                               onPressed: () => showReminderPicker(
                                 context,
@@ -455,25 +469,33 @@ class _NexNoteDetailState extends State<NexNoteDetail> {
                           title: Text(l.tagsAndThreads),
                           tilePadding: EdgeInsets.zero,
                           children: [
-                            TextField(
+                            DesktopEditingDirection(
                               controller: tag,
-                              textDirection: nexDirectionOf(tag.text),
-                              decoration: InputDecoration(hintText: l.addTag),
-                              onSubmitted: (name) async {
-                                await run('tag', {'name': name});
-                                tag.clear();
-                              },
-                            ),
-                            TextField(
-                              controller: thread,
-                              textDirection: nexDirectionOf(thread.text),
-                              decoration: InputDecoration(
-                                hintText: l.addThread,
+                              multiline: false,
+                              builder: (context, direction) => TextField(
+                                controller: tag,
+                                textDirection: direction,
+                                decoration: InputDecoration(hintText: l.addTag),
+                                onSubmitted: (name) async {
+                                  await run('tag', {'name': name});
+                                  tag.clear();
+                                },
                               ),
-                              onSubmitted: (name) async {
-                                await run('thread', {'name': name});
-                                thread.clear();
-                              },
+                            ),
+                            DesktopEditingDirection(
+                              controller: thread,
+                              multiline: false,
+                              builder: (context, direction) => TextField(
+                                controller: thread,
+                                textDirection: direction,
+                                decoration: InputDecoration(
+                                  hintText: l.addThread,
+                                ),
+                                onSubmitted: (name) async {
+                                  await run('thread', {'name': name});
+                                  thread.clear();
+                                },
+                              ),
                             ),
                             Wrap(
                               children: memberships

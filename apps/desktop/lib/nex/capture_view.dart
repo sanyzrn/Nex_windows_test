@@ -6,8 +6,10 @@
 /// Owns [NexCaptureView] and capture action buttons.
 library;
 
+import '../l10n/desktop_format.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'desktop_editing_direction.dart';
 import 'package:flutter/services.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:nex_ui/nex_ui.dart';
@@ -15,6 +17,7 @@ import 'package:nex_core/nex_core.dart' show nexDigits;
 
 import '../core/controller.dart';
 import '../l10n/app_localizations.dart';
+import '../ui/desktop_accessibility.dart';
 import 'features_state.dart';
 part 'capture_wide.dart';
 
@@ -107,41 +110,50 @@ abstract class CaptureViewBase extends StatelessWidget {
                   unawaited(_pasteIntoComposer(context, f, c)),
             },
             child: Focus(
+              canRequestFocus: false,
+              skipTraversal: true,
               onFocusChange: (focused) =>
                   focused ? c?.focusGained() : c?.focusLost(),
-              child: TextField(
-                key: const ValueKey('capture-field'),
+              child: DesktopEditingDirection(
                 controller: f.composer,
-                focusNode: f.focus,
-                autofocus: true,
-                minLines: 5,
-                maxLines: 9,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyLarge?.copyWith(fontSize: 15, height: 1.6),
-                textDirection: nexDirectionOf(f.composer.text),
-                decoration: InputDecoration(
-                  hintText: l.captureHint,
-                  filled: true,
-                  fillColor: Theme.of(
+                multiline: true,
+                builder: (context, direction) => TextField(
+                  key: const ValueKey('capture-field'),
+                  controller: f.composer,
+                  focusNode: f.focus,
+                  autofocus: true,
+                  minLines: 5,
+                  maxLines: 9,
+                  style: Theme.of(
                     context,
-                  ).colorScheme.surfaceContainerLowest,
-                  contentPadding: const EdgeInsets.all(14),
+                  ).textTheme.bodyLarge?.copyWith(fontSize: 15, height: 1.6),
+                  textDirection: direction,
+                  decoration: InputDecoration(
+                    hintText: l.captureHint,
+                    filled: true,
+                    fillColor: Theme.of(
+                      context,
+                    ).colorScheme.surfaceContainerLowest,
+                    contentPadding: const EdgeInsets.all(14),
+                  ),
+                  onChanged: f.write,
                 ),
-                onChanged: f.write,
               ),
             ),
           ),
           Row(
             children: [
-              Checkbox(
-                value: f.checklist,
-                onChanged: f.session.id == null && !f.saving
-                    ? (v) {
-                        f.checklist = v!;
-                        f.notify();
-                      }
-                    : null,
+              DesktopFocusRing(
+                child: Checkbox(
+                  semanticLabel: l.checklist,
+                  value: f.checklist,
+                  onChanged: f.session.id == null && !f.saving
+                      ? (v) {
+                          f.checklist = v!;
+                          f.notify();
+                        }
+                      : null,
+                ),
               ),
               Text(l.checklist, style: Theme.of(context).textTheme.bodySmall),
             ],
@@ -164,7 +176,9 @@ abstract class CaptureViewBase extends StatelessWidget {
             TextButton.icon(
               onPressed: c == null ? null : () => c.openWidget('timeline'),
               icon: const Icon(Icons.check_circle_outline_rounded, size: 18),
-              label: Text(l.mediaAdded(f.importedCount)),
+              label: Text(
+                desktopDigits(context, l.mediaAdded(f.importedCount)),
+              ),
             ),
           if (f.error != null)
             Text(

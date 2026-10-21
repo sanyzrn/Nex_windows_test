@@ -15,6 +15,7 @@ abstract interface class ReminderScheduler {
     required String title,
     required String body,
     required DateTime fireAt,
+    int? revision,
   });
 
   Future<bool> cancel(String id);
@@ -25,6 +26,7 @@ abstract interface class ReminderScheduler {
     required String title,
     required String body,
     DateTime? occurrence,
+    int? revision,
   });
 
   Future<Set<String>> listScheduledIds();
@@ -43,12 +45,14 @@ class NativeReminderScheduler implements ReminderScheduler {
     required String title,
     required String body,
     required DateTime fireAt,
+    int? revision,
   }) => _host.scheduleReminder(
     id: id,
     noteId: noteId,
     title: title,
     body: body,
     fireAt: fireAt,
+    revision: revision,
   );
 
   @override
@@ -61,12 +65,14 @@ class NativeReminderScheduler implements ReminderScheduler {
     required String title,
     required String body,
     DateTime? occurrence,
+    int? revision,
   }) => _host.showOverdueReminder(
     id: id,
     noteId: noteId,
     title: title,
     body: body,
     occurrence: occurrence,
+    revision: revision,
   );
 
   @override
@@ -105,6 +111,7 @@ class FakeReminderScheduler implements ReminderScheduler {
     required String title,
     required String body,
     required DateTime fireAt,
+    int? revision,
   }) async {
     scheduled[id] = ScheduledReminderEntry(
       id: id,
@@ -130,6 +137,7 @@ class FakeReminderScheduler implements ReminderScheduler {
     required String title,
     required String body,
     DateTime? occurrence,
+    int? revision,
   }) async {
     overdueShown.add(
       ScheduledReminderEntry(
@@ -198,7 +206,10 @@ class ReminderReconciliationEngine {
     final now = (nowOverride ?? DateTime.now()).toUtc();
 
     final targetMap =
-        <String, ({DateTime fireAt, String title, String body})>{};
+        <
+          String,
+          ({DateTime fireAt, String title, String body, int revision})
+        >{};
     final noteIds = <String, String>{
       for (final note in notes)
         for (var i = 0; i < reminderLookahead(note.dueRepeat); i++)
@@ -237,6 +248,7 @@ class ReminderReconciliationEngine {
                 title: titleText,
                 body: bodyText,
                 occurrence: due,
+                revision: reminderActionVersion(note),
               );
               if (shown) {
                 notifiedOverdueIds?.add(receipt);
@@ -247,7 +259,12 @@ class ReminderReconciliationEngine {
             }
           }
         } else {
-          targetMap[id] = (fireAt: due, title: titleText, body: bodyText);
+          targetMap[id] = (
+            fireAt: due,
+            title: titleText,
+            body: bodyText,
+            revision: reminderActionVersion(note),
+          );
         }
       } else {
         final nextFire = computeNextOccurrence(due, note.dueRepeat, now);
@@ -259,6 +276,7 @@ class ReminderReconciliationEngine {
             fireAt: fireAt,
             title: titleText,
             body: bodyText,
+            revision: reminderActionVersion(note),
           );
           fireAt = computeNextOccurrence(due, note.dueRepeat, fireAt);
         }
@@ -286,6 +304,7 @@ class ReminderReconciliationEngine {
         title: entry.value.title,
         body: entry.value.body,
         fireAt: entry.value.fireAt,
+        revision: entry.value.revision,
       );
       if (scheduled) {
         scheduledCount++;

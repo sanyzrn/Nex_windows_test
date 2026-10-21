@@ -1,3 +1,4 @@
+import '../../l10n/app_localizations.dart';
 import '../../l10n/utility_strings.dart';
 
 import 'package:flutter/material.dart';
@@ -8,7 +9,6 @@ import '../../core/registry.dart';
 import '../flyout.dart';
 import '../svg_icon.dart';
 import '../widgets.dart';
-
 
 // ================= Folders =================
 
@@ -73,7 +73,9 @@ class _FolderTileState extends State<_FolderTile> {
       cursor: SystemMouseCursors.click,
       onEnter: (_) => setState(() => _hover = true),
       onExit: (_) => setState(() => _hover = false),
-      child: GestureDetector(
+      child: DesktopAction(
+        excludeSemantics: true,
+        label: utilityLabelForText(context, widget.name),
         onTap: widget.onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 350),
@@ -178,6 +180,7 @@ class _SnippetsViewState extends State<SnippetsView> {
                           child: ItemRow(
                             onTap: () => c.deliver(c.S.snippets[i]),
                             trailing: ItemAction(
+                              tooltip: AppLocalizations.of(context)!.delete,
                               child: const Text('×'),
                               onTap: () {
                                 c.S.snippets.removeAt(i);
@@ -212,4 +215,3 @@ class _SnippetsViewState extends State<SnippetsView> {
     c.backToTools();
   }
 }
-

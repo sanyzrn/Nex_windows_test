@@ -7,6 +7,36 @@ class DesktopStrings {
       DesktopStrings(Localizations.localeOf(context).languageCode == 'fa');
   String t(String key) => (_copy[key] ?? [key, key])[fa ? 1 : 0];
   static const _copy = <String, List<String>>{
+    'writingMode': ['Focus on writing', 'تمرکز روی نوشتن'],
+    'leaveWriting': ['Leave writing mode (Esc)', 'خروج از حالت نوشتن (Esc)'],
+    'wordCount': ['Words', 'واژه‌ها'],
+    'writingSaving': ['Saving…', 'در حال ذخیره…'],
+    'writingFailed': [
+      'Could not save — check the error message',
+      'ذخیره نشد؛ پیام خطا را بررسی کن',
+    ],
+    'writingReady': ['Ready to write', 'آمادهٔ نوشتن'],
+    'writingSaved': ['Saved locally', 'روی دستگاه ذخیره شد'],
+    'welcomeTitle': ['Make Nex yours', 'نکس را برای خودت تنظیم کن'],
+    'welcomeHint': [
+      'Your notes stay on this device. AI stays off until you choose it in settings. You can change these choices later.',
+      'یادداشت‌ها روی همین دستگاه می‌مانند. هوش تا وقتی در تنظیمات فعالش نکنی خاموش است. این گزینه‌ها را بعداً هم می‌توانی تغییر بدهی.',
+    ],
+    'welcomeSkip': ['Skip setup', 'رد کردن راه‌اندازی'],
+    'welcomeStart': ['Start writing', 'شروع نوشتن'],
+    'welcomeImport': [
+      'Import a backup (optional)',
+      'ورود نسخهٔ پشتیبان (اختیاری)',
+    ],
+    'welcomeKeys': [
+      'Ctrl+N: new note · Ctrl+L: library · Ctrl+K: search · F1: all shortcuts',
+      'Ctrl+N: یادداشت تازه · Ctrl+L: کتابخانه · Ctrl+K: جست‌وجو · F1: همهٔ میان‌برها',
+    ],
+    'whatsNew': ["What's new", 'تازه‌های نکس'],
+    'releaseNotesError': [
+      'Release notes could not be loaded.',
+      'یادداشت‌های انتشار بارگذاری نشد.',
+    ],
     'searchSettings': ['Search settings', 'جست‌وجوی تنظیمات'],
     'settingsIntro': ['Make Nex feel like you.', 'نکس را به سلیقهٔ خودت بساز.'],
     'settingsHint': [
@@ -39,7 +69,7 @@ class DesktopStrings {
     ],
     'aiHint': [
       'Provider, abilities and privacy',
-      'پرووایدر، قابلیت‌ها و حریم خصوصی',
+      'ارائه‌دهنده، قابلیت‌ها و حریم خصوصی',
     ],
     'updates': ['App updates', 'به‌روزرسانی برنامه'],
     'automatic': ['Automatic updates', 'به‌روزرسانی خودکار'],
@@ -73,7 +103,7 @@ class DesktopStrings {
     ],
     'updatePrivacy': [
       'Downloads come from the latest stable GitHub release and are checked against SHA256SUMS. Notes and AI keys aren’t sent.',
-      'دانلود از آخرین ریلیز پایدار GitHub است و با SHA256SUMS بررسی می‌شود. یادداشت‌ها و کلیدهای هوش ارسال نمی‌شوند.',
+      'دانلود از آخرین نسخهٔ منتشرشدهٔ پایدار GitHub است و با SHA256SUMS بررسی می‌شود. یادداشت‌ها و کلیدهای هوش ارسال نمی‌شوند.',
     ],
     'retry': ['Try again', 'تلاش دوباره'],
     'installed': ['Installed version', 'نسخهٔ نصب‌شده'],
@@ -133,9 +163,5 @@ class DesktopStrings {
       'فضایی آرام برای فکر کردن با یادداشت‌هایت.',
     ],
     'noteAi': ['Nex AI', 'هوش نکس'],
-    'writePrompt': [
-      'What would you like to work on?',
-      'دوست داری روی چه چیزی کار کنیم؟',
-    ],
   };
 }

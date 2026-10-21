@@ -38,11 +38,10 @@ void main() {
     repo.insert(note('a-written-second', 'second'));
 
     for (var read = 0; read < 3; read++) {
-      expect(
-        repo.listTimeline().map((n) => n.content),
-        ['second', 'first'],
-        reason: 'read $read',
-      );
+      expect(repo.listTimeline().map((n) => n.content), [
+        'second',
+        'first',
+      ], reason: 'read $read');
     }
   });
 

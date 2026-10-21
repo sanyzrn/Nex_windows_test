@@ -57,6 +57,11 @@ abstract class NativeHost {
   Future<void> focusWindow() async {}
   Future<void> windowCommand(String command) async {}
 
+  /// Returns false when no real tray icon exists, so close can safely quit.
+  Future<bool> hideToTray() async => false;
+
+  Future<void> setCompactRestoration(bool compact) async {}
+
   /// Called after the new Flutter shell has laid out and painted.
   Future<void> surfaceReady(String mode) async {}
   Future<bool> configureHotkey(String key) async => false;
@@ -69,9 +74,11 @@ abstract class NativeHost {
     required String title,
     required String body,
     required DateTime fireAt,
+    int? revision,
   }) async => false;
 
-  Future<bool> cancelReminder(String id) async => false;
+  Future<bool> cancelReminder(String id, {bool clearDelivered = false}) async =>
+      false;
 
   /// [occurrence] is the instant the reminder was due; a toast Windows already
   /// delivered for it is not shown again.
@@ -81,6 +88,7 @@ abstract class NativeHost {
     required String title,
     required String body,
     DateTime? occurrence,
+    int? revision,
   }) async => false;
 
   Future<List<String>> listScheduledReminders() async => [];
@@ -161,6 +169,12 @@ class WinNativeHost extends NativeHost with _NativePointer {
   @override
   Future<void> windowCommand(String command) =>
       _channel.invokeMethod('windowCommand', {'command': command});
+  @override
+  Future<bool> hideToTray() async =>
+      await _channel.invokeMethod<bool>('hideToTray') ?? false;
+  @override
+  Future<void> setCompactRestoration(bool compact) =>
+      _channel.invokeMethod('setCompactRestoration', {'compact': compact});
   Future<void> probeDisplayChange() =>
       _channel.invokeMethod('probeDisplayChange');
   @override
@@ -413,6 +427,7 @@ class WinNativeHost extends NativeHost with _NativePointer {
     required String title,
     required String body,
     required DateTime fireAt,
+    int? revision,
   }) async {
     final ok = await _channel.invokeMethod('scheduleReminder', {
       'id': id,
@@ -420,13 +435,17 @@ class WinNativeHost extends NativeHost with _NativePointer {
       'title': title,
       'body': body,
       'fireAt': fireAt.millisecondsSinceEpoch,
+      'revision': revision ?? -1,
     });
     return ok == true;
   }
 
   @override
-  Future<bool> cancelReminder(String id) async {
-    final ok = await _channel.invokeMethod('cancelReminder', {'id': id});
+  Future<bool> cancelReminder(String id, {bool clearDelivered = false}) async {
+    final ok = await _channel.invokeMethod('cancelReminder', {
+      'id': id,
+      'clearDelivered': clearDelivered,
+    });
     return ok == true;
   }
 
@@ -437,6 +456,7 @@ class WinNativeHost extends NativeHost with _NativePointer {
     required String title,
     required String body,
     DateTime? occurrence,
+    int? revision,
   }) async {
     final ok = await _channel.invokeMethod('showOverdueReminder', {
       'id': id,
@@ -444,6 +464,7 @@ class WinNativeHost extends NativeHost with _NativePointer {
       'title': title,
       'body': body,
       'occurrence': occurrence?.millisecondsSinceEpoch ?? 0,
+      'revision': revision ?? -1,
     });
     return ok == true;
   }

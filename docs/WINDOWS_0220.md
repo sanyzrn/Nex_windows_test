@@ -13,8 +13,8 @@ already required. Phase 1 gives the desktop window its own form.
   computes the frame.
 - **Always the same.** With the default setting (`windowRemember` off) the saved
   frame is ignored on start and when switching back from the edge panel.
-  (Re-anchoring on a return from the tray was dropped together with the
-  tray-close behaviour, see "Reverted" below.)
+  The Part 6 agent follow-up also re-anchors a hidden compact window on tray
+  Open/left-click and single-instance activation; visible focus never moves it.
 - **Remembering.** `Settings > Display > Remember window size and position`
   restores the last frame (and maximised state) as in 0.21. The saved frame is
   recorded either way, so turning it on later has something to restore.
@@ -22,7 +22,7 @@ already required. Phase 1 gives the desktop window its own form.
 
 ## Layout
 
-- Below 960 logical px the rail is `_SlimRail`: a 76 px column of icon-over-label
+- Below 960 logical px the rail is `_SlimRail`: a 76 px column at text scale 1.0, growing for larger localized text, with icon-over-label
   tiles sitting directly on the window surface. The selected tile gets the filled
   icon and an accent pill. Everything that was in the wide rail's footer (edge
   panel switch, theme, shortcut list) is behind the More tile; search is the
@@ -34,6 +34,11 @@ already required. Phase 1 gives the desktop window its own form.
 
 ## Verifying
 
+The agent branch also has a 336-case sweep across 380×520, 460×760, 700×900
+and 1200×800, scales 1.0/1.5/2.0, both languages and themes;
+[Part 3](agent-reports/A3.md) records results and Windows-only limitations.
+
+
 Layout is checked at 440 px (compact) and 1100 px in English/Persian, light/dark
 through `workspace_redesign_test.dart` and `window_shell_test.dart`. Placement and
 re-anchoring are native code and need a manual check on Windows: first launch,
@@ -44,8 +49,8 @@ closing and reopening, a second monitor, 125%/150% scaling.
 - `NoteCard` (packages/ui) puts the reminder chip and the "+N" files mark in a
   footnote row below the preview. Marked cards are exactly one footnote row taller
   (`nexCardHeightFor(withFootnote: true)`), whatever the marks hold.
-- The library list pane has one search row (search, grid/list switch where a grid
-  fits, tag manager). Date dividers are accent capsules. `_FilterBar` is full width
+- The library list pane has search, grid/list controls and tag management.
+  Narrow/scaled layouts give search its own row and keep the controls reachable. Date dividers are accent capsules. `_FilterBar` is full width
   so its pills align to the leading edge.
 - `NoteActionBar` is a single tonal dock; each action takes an equal share.
 
@@ -53,8 +58,8 @@ closing and reopening, a second monitor, 125%/150% scaling.
 
 - `NexWorkspaceHome` hides the hero line and the counters below 620 px
   (`compactPage`), so the editor starts under the section header.
-- `_CaptureAction` renders as an icon-over-label tile below 520 px, three
-  across; wider layouts keep the outlined buttons.
+- `_CaptureAction` renders as an icon-over-label tile below 520 px. Columns
+  reduce further with large text; labels wrap without shrinking the requested font.
 - Not changed: Ctrl+V is still handled by the composer (it protects a note that
   was started while the clipboard was being read, see
   `usability_regression_test`). Whether mixed Persian/English text in
@@ -93,5 +98,30 @@ before this work started — sixteen commits between 16:26 and 18:58 Tehran on
 2026-10-19: close-to-tray, the reminder recovery/fallback, the Solar Hijri
 reminder picker, the layout-toggle visibility change, their golden updates, the
 0.21.1 bump and the one-off golden workflow — was removed again on this branch
-(`git revert`, history kept; no force push). The tree is 0.21.0 plus the phases
-above. Closing the window quits Nex, as in 0.21.0.
+(`git revert`, history kept; no force push). The 0.22.0 base is 0.21.0 plus the phases
+above; follow-up agent work is recorded in [the progress summary](agent-reports/SUMMARY.md). Closing the window quits Nex, as in 0.21.0.
+
+## Agent Track A follow-up
+
+The agent branch adds offline bilingual release history, Persian application
+counters and a reminder picker that carries the chosen calendar across dialogs.
+Solar selection uses valid year/month/day choices and returns a local civil date;
+reminders still store UTC. The compact review matrix covers every settings
+category and all four reader types. See [Part 5](agent-reports/PART5.md) for actual
+verification and outstanding installed-Windows checks.
+
+## Agent Part 6 follow-up
+
+Settings → Display adds opt-in close-to-tray; the default remains quit. A missing
+real tray icon falls back to a clean quit. Tray Open, New note, Settings and Quit
+are localized. Hidden compact windows return to the cursor monitor's work-area
+corner; remembered windows and mere visible focus retain their frames.
+
+Toast actions Snooze 10 min and Done use a strict protocol plus note revision
+checks. Snooze retains the repeat rule from the new time; Done removes the
+reminder/series, never note content. Queue acceptance is no longer a delivery
+receipt. Mixed-language editing follows the active paragraph while retaining
+Flutter's text controller, IME, undo and selection. Simultaneous per-paragraph
+editing still requires a native editor; read mode already handles paragraphs.
+[Part 6](agent-reports/PART6.md) records automated evidence and
+[B0](agent-reports/B0.md) carries the installed-device checklist.

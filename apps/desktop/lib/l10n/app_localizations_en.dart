@@ -178,10 +178,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get joinThread => 'Add to thread';
 
   @override
-  String get assistantStub =>
-      'Assistant is not connected in this base. Capture and search work offline.';
-
-  @override
   String get utility0 => 'Copy something and it shows up here';
 
   @override
@@ -249,9 +245,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get utility22 => 'Stopwatch';
-
-  @override
-  String get utility23 => 'Text tools · clipboard';
 
   @override
   String get utility24 => 'Password';
@@ -783,9 +776,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get switchToPanel => 'Switch to edge panel';
 
   @override
-  String get switchToWindow => 'Switch to window';
-
-  @override
   String get backToTools => 'Back to tools';
 
   @override
@@ -823,12 +813,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get repeatWeekly => 'Every week';
-
-  @override
-  String get repeatMonthly => 'Every month';
-
-  @override
-  String get repeatYearly => 'Every year';
 
   @override
   String get clearReminder => 'Clear reminder';
@@ -926,9 +910,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get paletteOpen => 'Command palette';
 
   @override
-  String get paletteHint => 'Search notes, jump anywhere, run actions (Ctrl+K)';
-
-  @override
   String get paletteSearchHint => 'Search notes, screens and actions…';
 
   @override
@@ -938,9 +919,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get paletteSectionNotes => 'Notes';
 
   @override
-  String get paletteSectionGoTo => 'Go to';
-
-  @override
   String get paletteSectionActions => 'Actions';
 
   @override
@@ -948,16 +926,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get paletteActionToggleTheme => 'Toggle light / dark theme';
-
-  @override
-  String get paletteActionOpenTools => 'Open the tools';
-
-  @override
-  String get pasteLinkSaved => 'Link note created';
-
-  @override
-  String get noNoteSelectedHint =>
-      'Use ↑ / ↓ to navigate notes, or Ctrl+N to create';
 
   @override
   String get filterAll => 'All';
@@ -1005,18 +973,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get localEngineActive => 'Local library on this device';
-
-  @override
-  String get switchToDark => 'Switch to dark theme';
-
-  @override
-  String get switchToLight => 'Switch to light theme';
-
-  @override
-  String get restoreConfirmTitle => 'Restore backup';
-
-  @override
   String get restoreConfirmBody =>
       'Restoring replaces all current notes, tags and media with this backup. This cannot be undone.';
 
@@ -1052,13 +1008,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'The note library is not available on this device yet.';
 
   @override
-  String get libraryUnavailableHint =>
-      'Open the library view from the dock, or restart Nex to load your notes.';
-
-  @override
-  String get workspaceLabel => 'YOUR SPACE';
-
-  @override
   String get workspaceLocal => 'Private. On this device.';
 
   @override
@@ -1086,9 +1035,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get workspaceEssentials => 'Within reach';
 
   @override
-  String get workspaceAllTools => 'Your toolbox';
-
-  @override
   String get workspaceUtilityHint => 'Open this tool';
 
   @override
@@ -1105,9 +1051,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get workspaceColorHint => 'Pick a colour from anywhere.';
-
-  @override
-  String get workspaceSettingsDescription => 'Make this space feel like yours.';
 
   @override
   String get workspaceReaderTitle => 'A place to return to.';
@@ -1139,8 +1082,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get testNotificationRun => 'Send test';
 
   @override
-  String get testNotificationSent =>
-      'Test sent. You should see one notification now and another in 15 seconds.';
+  String get testNotificationSent => 'Windows accepted both test notifications. If they do not appear, check notification settings and Do not disturb.';
 
   @override
   String testNotificationFailed(String detail) {
@@ -1310,4 +1252,194 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get backupSaved => 'Backup saved';
+
+  @override
+  String get commitmentsTitle => 'Commitments & cadences';
+
+  @override
+  String get commitmentNew => 'New commitment';
+
+  @override
+  String get commitmentEdit => 'Edit commitment';
+
+  @override
+  String get commitmentEmpty => 'No commitments recorded yet.';
+
+  @override
+  String get commitmentFirst => 'Add first commitment';
+
+  @override
+  String get commitmentCompleted => 'Mark completed';
+
+  @override
+  String get commitmentTitle => 'Title';
+
+  @override
+  String get commitmentTitleHint => 'e.g., Pay rent, take medicine…';
+
+  @override
+  String get commitmentCadence => 'Cadence';
+
+  @override
+  String get commitmentEvery => 'Every';
+
+  @override
+  String get commitmentWeekdays => 'Weekdays:';
+
+  @override
+  String get commitmentNotification => 'Notification';
+
+  @override
+  String get cadenceHourly => 'Hourly';
+
+  @override
+  String get cadenceDaily => 'Daily';
+
+  @override
+  String get cadenceWeekly => 'Weekly';
+
+  @override
+  String get cadenceMonthly => 'Monthly';
+
+  @override
+  String get cadenceYearly => 'Yearly';
+
+  @override
+  String cadenceEveryHours(int count) {
+    return 'Every $count hours';
+  }
+
+  @override
+  String cadenceEveryDays(int count) {
+    return 'Every $count days';
+  }
+
+  @override
+  String cadenceEveryWeeks(int count) {
+    return 'Every $count weeks';
+  }
+
+  @override
+  String cadenceEveryMonths(int count) {
+    return 'Every $count months';
+  }
+
+  @override
+  String cadenceEveryYears(int count) {
+    return 'Every $count years';
+  }
+
+  @override
+  String get backupFileType => 'Nex backup';
+
+  @override
+  String get hexColorHint => '#RRGGBB';
+
+  @override
+  String get utility141 => 'Left';
+
+  @override
+  String get utility142 => 'Right';
+
+  @override
+  String get weekdayMonday => 'Monday';
+
+  @override
+  String get weekdayMondayShort => 'M';
+
+  @override
+  String get weekdayTuesday => 'Tuesday';
+
+  @override
+  String get weekdayTuesdayShort => 'T';
+
+  @override
+  String get weekdayWednesday => 'Wednesday';
+
+  @override
+  String get weekdayWednesdayShort => 'W';
+
+  @override
+  String get weekdayThursday => 'Thursday';
+
+  @override
+  String get weekdayThursdayShort => 'T';
+
+  @override
+  String get weekdayFriday => 'Friday';
+
+  @override
+  String get weekdayFridayShort => 'F';
+
+  @override
+  String get weekdaySaturday => 'Saturday';
+
+  @override
+  String get weekdaySaturdayShort => 'S';
+
+  @override
+  String get weekdaySunday => 'Sunday';
+
+  @override
+  String get weekdaySundayShort => 'S';
+
+  @override
+  String get previousPage => 'Previous page';
+
+  @override
+  String get nextPage => 'Next page';
+
+  @override
+  String get clearSearch => 'Clear search';
+
+  @override
+  String get mediaPrevious => 'Previous track';
+
+  @override
+  String get mediaNext => 'Next track';
+
+  @override
+  String get mediaPlayPause => 'Play or pause media';
+
+  @override
+  String get volumeDown => 'Decrease volume';
+
+  @override
+  String get volumeUp => 'Increase volume';
+
+  @override
+  String get volumeMute => 'Mute or unmute';
+
+  @override
+  String get chooseColor => 'Choose color';
+
+  @override
+  String get copyColor => 'Copy color code';
+
+  @override
+  String get emojiCategory => 'Emoji category';
+
+  @override
+  String get calendarYear => 'Year';
+
+  @override
+  String get calendarMonth => 'Month';
+
+  @override
+  String get calendarDay => 'Day';
+  @override
+  String get windowCloseAction => 'Keep running in tray when I close the window';
+
+  @override
+  String get windowCloseTrayHint => 'Close hides Nex. Open it from the tray; Quit saves and exits.';
+
+  @override
+  String get windowCloseQuitHint => 'Off: closing saves and quits Nex.';
+
+  @override
+  String get reminderSnooze => 'Snooze 10 min';
+
+  @override
+  String get reminderDone => 'Done';
+
 }

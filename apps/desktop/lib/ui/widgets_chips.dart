@@ -27,7 +27,10 @@ class _ChipState extends State<PillChip> {
       cursor: SystemMouseCursors.click,
       onEnter: (_) => setState(() => _hover = true),
       onExit: (_) => setState(() => _hover = false),
-      child: GestureDetector(
+      child: DesktopAction(
+        label: widget.label,
+        selected: widget.on,
+        excludeSemantics: true,
         onTap: widget.onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
@@ -120,7 +123,9 @@ class _BackButtonState extends State<PanelBackButton> {
     return MouseRegion(
       onEnter: (_) => setState(() => _hover = true),
       onExit: (_) => setState(() => _hover = false),
-      child: GestureDetector(
+      child: DesktopAction(
+        label: AppLocalizations.of(context)!.backToTools,
+        excludeSemantics: true,
         onTap: widget.onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 150),
@@ -166,7 +171,9 @@ class _LinkButtonState extends State<LinkButton> {
       cursor: SystemMouseCursors.click,
       onEnter: (_) => setState(() => _hover = true),
       onExit: (_) => setState(() => _hover = false),
-      child: GestureDetector(
+      child: DesktopAction(
+        label: widget.label,
+        excludeSemantics: true,
         onTap: widget.onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 150),

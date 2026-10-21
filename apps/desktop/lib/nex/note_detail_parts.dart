@@ -11,7 +11,9 @@ import 'package:nex_core/nex_core.dart';
 import 'package:nex_ui/nex_ui.dart';
 
 import '../l10n/app_localizations.dart';
+import '../l10n/desktop_format.dart';
 import 'features_state.dart';
+import '../ui/desktop_accessibility.dart';
 
 /// Header row: back, type badge, pin, and the edit toggle riding with the
 /// actions so text-note headers do not show one lone pencil at the far end.
@@ -35,51 +37,84 @@ class NoteDetailHeader extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final canEdit =
         note.type == NoteType.text || note.type == NoteType.checklist;
-    return Row(
-      children: [
-        IconButton(
-          tooltip: l.backToLibrary,
-          onPressed: onClose,
-          icon: const BackButtonIcon(),
-        ),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          decoration: BoxDecoration(
-            color: scheme.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                nexNoteTypeIcon(note.type.wireName),
-                size: 16,
-                color: scheme.primary,
-              ),
-              const SizedBox(width: 6),
-              Text(
-                noteTypeLabel(l, note.type),
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 12.5,
-                  color: scheme.onSurface,
-                ),
-              ),
-            ],
-          ),
-        ),
-        if (note.pinnedAt != null) ...[
-          const SizedBox(width: 8),
-          Icon(Icons.push_pin, size: 16, color: scheme.primary),
-        ],
-        const Spacer(),
-        if (canEdit && onToggleEdit != null)
-          IconButton(
+    final back = IconButton(
+      tooltip: l.backToLibrary,
+      onPressed: onClose,
+      icon: const BackButtonIcon(),
+    );
+    final edit = canEdit && onToggleEdit != null
+        ? IconButton(
             tooltip: editing ? l.readNote : l.editNote,
             onPressed: onToggleEdit,
             icon: Icon(editing ? Icons.done_rounded : Icons.edit_outlined),
+          )
+        : null;
+    final pin = note.pinnedAt != null
+        ? Icon(Icons.push_pin, size: 16, color: scheme.primary)
+        : null;
+    final badge = Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            nexNoteTypeIcon(note.type.wireName),
+            size: 16,
+            color: scheme.primary,
           ),
-      ],
+          const SizedBox(width: 6),
+          Flexible(
+            child: Text(
+              noteTypeLabel(l, note.type),
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 12.5,
+                color: scheme.onSurface,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+    return LayoutBuilder(
+      builder: (context, box) {
+        final scaledWidth =
+            box.maxWidth / MediaQuery.textScalerOf(context).scale(1);
+        if (scaledWidth < 180) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  back,
+                  const Spacer(),
+                  if (pin != null) pin,
+                  if (edit != null) edit,
+                ],
+              ),
+              badge,
+            ],
+          );
+        }
+        return Row(
+          children: [
+            back,
+            Expanded(
+              child: Row(
+                children: [
+                  Flexible(child: badge),
+                  if (pin != null) ...[const SizedBox(width: 8), pin],
+                ],
+              ),
+            ),
+            if (edit != null) edit,
+          ],
+        );
+      },
     );
   }
 }
@@ -114,7 +149,11 @@ class NoteMetadataLine extends StatelessWidget {
           Icon(Icons.schedule_rounded, size: 13, color: muted),
           const SizedBox(width: 4),
           Text(
-            nexDisplayDate(note.createdAt, solar: NexPanelScope.maybeOf(context)?.S.solarCalendar ?? fa, persian: fa),
+            nexDisplayDate(
+              note.createdAt,
+              solar: NexPanelScope.maybeOf(context)?.S.solarCalendar ?? fa,
+              persian: fa,
+            ),
             style: style,
           ),
         ],
@@ -127,7 +166,10 @@ class NoteMetadataLine extends StatelessWidget {
       if (note.content?.trim().isNotEmpty == true) ...[
         dot,
         Text(
-          l.wordCount(note.content!.trim().split(RegExp(r'\s+')).length),
+          desktopDigits(
+            context,
+            l.wordCount(note.content!.trim().split(RegExp(r'\s+')).length),
+          ),
           style: style,
         ),
       ],
@@ -195,8 +237,8 @@ class NoteActionBar extends StatelessWidget {
           onPressed: onOpenMedia,
         ),
     ];
-    // One tonal dock: every action gets an equal share of the width, so none
-    // is ever clipped and the row reads the same at 440 px and at 1200.
+    // Preserve the compact tonal row at normal text size; larger text gets
+    // two columns and wrapping labels instead of a shrunken font.
     return DecoratedBox(
       decoration: BoxDecoration(
         color: scheme.surfaceContainerHigh,
@@ -204,8 +246,19 @@ class NoteActionBar extends StatelessWidget {
       ),
       child: Padding(
         padding: const EdgeInsets.all(4),
-        child: Row(
-          children: [for (final cell in cells) Expanded(child: cell)],
+        child: LayoutBuilder(
+          builder: (context, box) {
+            final scale = MediaQuery.textScalerOf(context).scale(1);
+            final columns = scale >= 1.5
+                ? (box.maxWidth / scale < 120 ? 1 : 2)
+                : cells.length;
+            return Wrap(
+              children: [
+                for (final cell in cells)
+                  SizedBox(width: box.maxWidth / columns, child: cell),
+              ],
+            );
+          },
         ),
       ),
     );
@@ -233,34 +286,27 @@ class _ToolAction extends StatelessWidget {
     final tone = danger ? scheme.error : (accent ?? scheme.onSurfaceVariant);
     final disabled = onPressed == null;
     final color = disabled ? scheme.onSurface.withValues(alpha: .38) : tone;
-    return Semantics(
-      button: true,
-      enabled: !disabled,
+    return DesktopAction(
       label: label,
       excludeSemantics: true,
-      child: InkWell(
-        onTap: onPressed,
-        borderRadius: BorderRadius.circular(NexRadius.md),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, size: 20, color: color),
-              const SizedBox(height: 3),
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text(
-                  label,
-                  maxLines: 1,
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: color,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+      material: true,
+      onTap: onPressed,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 20, color: color),
+            const SizedBox(height: 3),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: color,
+                fontWeight: FontWeight.w600,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

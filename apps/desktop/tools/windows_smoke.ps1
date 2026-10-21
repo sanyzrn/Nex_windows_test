@@ -40,9 +40,29 @@ public static class NexWindowProbe {
     private delegate bool EnumProc(IntPtr hwnd, IntPtr unused);
     [DllImport("user32.dll")] private static extern bool EnumWindows(EnumProc callback, IntPtr unused);
     [DllImport("user32.dll")] private static extern uint GetWindowThreadProcessId(IntPtr hwnd, out uint processId);
-    [DllImport("user32.dll")] private static extern bool IsWindowVisible(IntPtr hwnd);
+    [DllImport("user32.dll")] public static extern bool IsWindowVisible(IntPtr hwnd);
     [DllImport("user32.dll")] private static extern int GetClassName(IntPtr hwnd, StringBuilder lpClassName, int nMaxCount);
     [DllImport("user32.dll")] public static extern bool PostMessage(IntPtr hwnd, uint message, IntPtr wparam, IntPtr lparam);
+    [StructLayout(LayoutKind.Sequential)] public struct Rect { public int left, top, right, bottom; }
+    [StructLayout(LayoutKind.Sequential)] public struct Point { public int x, y; }
+    [StructLayout(LayoutKind.Sequential)] public struct MonitorInfo { public uint cbSize; public Rect monitor, work; public uint flags; }
+    [DllImport("user32.dll")] public static extern bool GetWindowRect(IntPtr hwnd, out Rect rect);
+    [DllImport("user32.dll")] public static extern bool MoveWindow(IntPtr hwnd, int x, int y, int w, int h, bool repaint);
+    [DllImport("user32.dll")] public static extern uint GetDpiForWindow(IntPtr hwnd);
+    [DllImport("user32.dll")] private static extern bool GetCursorPos(out Point point);
+    [DllImport("user32.dll")] private static extern IntPtr MonitorFromPoint(Point point, uint flags);
+    [DllImport("user32.dll")] private static extern bool GetMonitorInfo(IntPtr monitor, ref MonitorInfo info);
+    public static Rect Corner(IntPtr hwnd) {
+        Point cursor; GetCursorPos(out cursor);
+        var info = new MonitorInfo(); info.cbSize = (uint)Marshal.SizeOf(info);
+        GetMonitorInfo(MonitorFromPoint(cursor, 1), ref info);
+        double scale = GetDpiForWindow(hwnd) / 96.0;
+        int margin = (int)(12 * scale);
+        int width = Math.Min((int)(460 * scale), info.work.right - info.work.left - 2 * margin);
+        int height = Math.Min((int)(760 * scale), info.work.bottom - info.work.top - 2 * margin);
+        return new Rect { left = info.work.right - margin - width, top = info.work.bottom - margin - height,
+            right = info.work.right - margin, bottom = info.work.bottom - margin };
+    }
     public static IntPtr VisibleWindow(uint processId) {
         IntPtr found = IntPtr.Zero;
         EnumWindows((hwnd, unused) => {
@@ -80,7 +100,66 @@ $result | Add-Member normalGuiAliveAfterCapture (-not $normal.HasExited)
 [void][NexWindowProbe]::PostMessage($window, 0x0010, [IntPtr]::Zero, [IntPtr]::Zero)
 if (-not $normal.WaitForExit(10000)) { throw 'Normal GUI failed to drain and close.' }
 $result | Add-Member normalGuiExitCode $normal.ExitCode
+# Isolated opt-in close/tray run: user preferences and notes are never changed.
+$lifePath = [IO.Path]::ChangeExtension($Output, '.lifecycle.json')
+if (Test-Path -LiteralPath $lifePath) { Remove-Item -LiteralPath $lifePath }
+$life = Start-Process -FilePath $exe -ArgumentList @('--lifecycle-smoke', ('"' + $lifePath + '"')) -WorkingDirectory $Release -PassThru
+function Wait-LifeWindow([bool]$Visible) {
+    $deadline = [DateTime]::UtcNow.AddSeconds(10)
+    do {
+        if ($life.HasExited) { throw 'Tray lifecycle exited before explicit Quit.' }
+        $found = [NexWindowProbe]::VisibleWindow([uint32]$life.Id)
+        if (($found -ne [IntPtr]::Zero) -eq $Visible) { return $found }
+        Start-Sleep -Milliseconds 20
+    } while ([DateTime]::UtcNow -lt $deadline)
+    throw "Lifecycle visibility did not become $Visible."
+}
+function Assert-Corner([IntPtr]$Hwnd) {
+    $frame = New-Object NexWindowProbe+Rect
+    [void][NexWindowProbe]::GetWindowRect($Hwnd, [ref]$frame)
+    $expected = [NexWindowProbe]::Corner($Hwnd)
+    foreach ($side in @('left','top','right','bottom')) {
+        if ([Math]::Abs($frame.$side - $expected.$side) -gt 1) { throw "Tray restore missed compact corner ($side): $($frame.$side) / $($expected.$side)" }
+    }
+}
+try {
+    $hwnd = Wait-LifeWindow $true
+    # A visible focus request must not reset a custom frame.
+    [void][NexWindowProbe]::MoveWindow($hwnd, 40, 40, 600, 600, $true)
+    $before = New-Object NexWindowProbe+Rect
+    [void][NexWindowProbe]::GetWindowRect($hwnd, [ref]$before)
+    [void][NexWindowProbe]::PostMessage($hwnd, 0x0111, [IntPtr]40001, [IntPtr]::Zero)
+    Start-Sleep -Milliseconds 400
+    $after = New-Object NexWindowProbe+Rect
+    [void][NexWindowProbe]::GetWindowRect($hwnd, [ref]$after)
+    foreach ($side in @('left','top','right','bottom')) {
+        if ($before.$side -ne $after.$side) { throw 'Merely focusing moved the visible window.' }
+    }
+    foreach ($route in @('menu','click','activation')) {
+        [void][NexWindowProbe]::PostMessage($hwnd, 0x0010, [IntPtr]::Zero, [IntPtr]::Zero)
+        [void](Wait-LifeWindow $false)
+        if ($route -eq 'menu') {
+            [void][NexWindowProbe]::PostMessage($hwnd, 0x0111, [IntPtr]40001, [IntPtr]::Zero)
+        } elseif ($route -eq 'click') {
+            [void][NexWindowProbe]::PostMessage($hwnd, 0x8001, [IntPtr]::Zero, [IntPtr]0x0202)
+        } else {
+            # Same HWND message emitted by single-instance activation.
+            [void][NexWindowProbe]::PostMessage($hwnd, 0x8005, [IntPtr]::Zero, [IntPtr]::Zero)
+        }
+        $hwnd = Wait-LifeWindow $true
+        Assert-Corner $hwnd
+    }
+    [void][NexWindowProbe]::PostMessage($hwnd, 0x0111, [IntPtr]40005, [IntPtr]::Zero)
+    if (-not $life.WaitForExit(10000)) { throw 'Tray Quit did not drain and exit.' }
+    if ($life.ExitCode -ne 0 -or -not (Test-Path -LiteralPath $lifePath)) { throw 'Tray Quit did not finish cleanly.' }
+    $drain = Get-Content -Raw -LiteralPath $lifePath | ConvertFrom-Json
+    if (-not $drain.drained) { throw 'Tray Quit did not flush the feature store.' }
+    $result | Add-Member trayLifecycle @{ closeHides = $true; processAlive = $true; menuRestores = $true; clickRestores = $true; activationRestores = $true; compactCorner = $true; visibleFocusPreservesFrame = $true; quitExitCode = $life.ExitCode; drained = $true }
+} finally {
+    if (-not $life.HasExited) { Stop-Process -Id $life.Id -Force }
+}
+
 $result | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $Output -Encoding utf8
 $result | ConvertTo-Json -Depth 8
-if (-not ($result.tray -and $result.hotkey -and $result.hotkeyDelivered -and $result.captureOpened -and $result.displayChangeRefresh -and $result.startupToggle -and $result.startupRestored -and $singleInstance -and $primary.ExitCode -eq 0 -and $result.normalGuiAliveAfterCapture -and $result.normalGuiExitCode -eq 0)) { throw 'One or more native checks failed.' }
+if (-not ($result.tray -and $result.reminderActionsMarkup -and $result.hotkey -and $result.hotkeyDelivered -and $result.captureOpened -and $result.displayChangeRefresh -and $result.startupToggle -and $result.startupRestored -and $singleInstance -and $primary.ExitCode -eq 0 -and $result.normalGuiAliveAfterCapture -and $result.normalGuiExitCode -eq 0)) { throw 'One or more native checks failed.' }
 foreach ($position in $result.placements) { if (-not $position.edgeReveal) { throw "Edge reveal failed on monitor $($position.monitor) / $($position.edge)" } }

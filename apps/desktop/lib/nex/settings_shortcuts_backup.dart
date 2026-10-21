@@ -167,9 +167,9 @@ mixin _SettingsShortcutsBackup on _SettingsStateBase {
                               context,
                               () => openFile(
                                 acceptedTypeGroups: [
-                                  const XTypeGroup(
-                                    label: 'Nex Backup',
-                                    extensions: [
+                                  XTypeGroup(
+                                    label: l.backupFileType,
+                                    extensions: const [
                                       'nexbak',
                                       'sqlite',
                                       'nexfull',

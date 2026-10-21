@@ -21,6 +21,7 @@ import 'package:nex_ui/nex_ui.dart';
 
 import '../core/controller.dart';
 import '../l10n/app_localizations.dart';
+import '../l10n/shortcut_labels.dart';
 import 'features_state.dart';
 
 /// Normalises a string for palette matching: case-folded, Arabic/Persian
@@ -331,6 +332,7 @@ class _CommandPaletteDialogState extends State<_CommandPaletteDialog> {
                     )
                   : (_query.text.isNotEmpty
                         ? IconButton(
+                            tooltip: l.clearSearch,
                             icon: const Icon(Icons.close_rounded, size: 18),
                             onPressed: () {
                               _query.clear();
@@ -342,7 +344,7 @@ class _CommandPaletteDialogState extends State<_CommandPaletteDialog> {
                             child: Center(
                               widthFactor: 1,
                               child: Text(
-                                'Ctrl+K',
+                                ShortcutLabels.commandPalette,
                                 style: TextStyle(
                                   fontSize: 10.5,
                                   fontWeight: FontWeight.w600,

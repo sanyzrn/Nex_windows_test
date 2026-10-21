@@ -164,8 +164,7 @@ abstract final class NexTextFormatting {
 
     final quoted = RegExp(r'^\s{0,3}>\s?');
     final content = lines.where((line) => line.trim().isNotEmpty);
-    final allQuoted =
-        content.isNotEmpty && content.every(quoted.hasMatch);
+    final allQuoted = content.isNotEmpty && content.every(quoted.hasMatch);
 
     final rewritten = [
       for (final line in lines)

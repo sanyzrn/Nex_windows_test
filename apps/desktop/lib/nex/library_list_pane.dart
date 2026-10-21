@@ -45,7 +45,10 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
                 const SizedBox(width: 4),
                 Expanded(
                   child: Text(
-                    l.selectedCount(_selectedIds.length),
+                    desktopDigits(
+                      context,
+                      l.selectedCount(_selectedIds.length),
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
@@ -140,25 +143,33 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
           ),
         Padding(
           padding: const EdgeInsetsDirectional.fromSTEB(12, 8, 8, 4),
-          child: Row(
-            children: [
-              Expanded(
-                child: Focus(
-                  onFocusChange: (focused) {
-                    final c = NexPanelScope.maybeOf(context);
-                    if (focused) {
-                      c?.focusGained();
-                    } else {
-                      c?.focusLost();
-                    }
-                  },
-                  child: TextField(
+          child: LayoutBuilder(
+            builder: (context, box) {
+              final stacked =
+                  box.maxWidth / MediaQuery.textScalerOf(context).scale(1) <
+                  320;
+              final search = Focus(
+                canRequestFocus: false,
+                skipTraversal: true,
+                onFocusChange: (focused) {
+                  final c = NexPanelScope.maybeOf(context);
+                  if (focused) {
+                    c?.focusGained();
+                  } else {
+                    c?.focusLost();
+                  }
+                },
+                child: DesktopEditingDirection(
+                  controller: query,
+                  multiline: false,
+                  builder: (context, direction) => TextField(
                     key: const ValueKey('library-search'),
                     controller: query,
                     focusNode: _searchFocusNode,
-                    textDirection: nexDirectionOf(query.text),
+                    textDirection: direction,
                     decoration: InputDecoration(
                       hintText: l.search,
+                      hintMaxLines: stacked ? 3 : 1,
                       // The Android app's search fields are capsules; a stadium
                       // here matches it and separates search from the card edges
                       // around it.
@@ -177,12 +188,15 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
                       prefixIcon: const Icon(Icons.search_rounded, size: 18),
                       suffixIcon: query.text.isNotEmpty
                           ? IconButton(
+                              tooltip: l.clearSearch,
                               icon: const Icon(Icons.close_rounded, size: 16),
                               onPressed: () {
                                 query.clear();
                                 load();
                               },
                             )
+                          : stacked
+                          ? null
                           : Padding(
                               padding: const EdgeInsetsDirectional.only(
                                 end: 10,
@@ -204,7 +218,7 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
                                     ),
                                   ),
                                   child: Text(
-                                    'Ctrl+F',
+                                    ShortcutLabels.search,
                                     style: TextStyle(
                                       fontSize: 10.5,
                                       fontWeight: FontWeight.w600,
@@ -218,34 +232,60 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
                     onChanged: _queryChanged,
                   ),
                 ),
-              ),
-              const SizedBox(width: 4),
-              IconButton(
-                tooltip: AiStrings.of(context).t('board'),
-                isSelected: board,
-                onPressed: () => setState(() => board = true),
-                icon: const Icon(Icons.grid_view_outlined),
-              ),
-              IconButton(
-                tooltip: AiStrings.of(context).t('list'),
-                isSelected: !board,
-                onPressed: () => setState(() => board = false),
-                icon: const Icon(Icons.view_agenda_outlined),
-              ),
-              IconButton.filledTonal(
-                key: const ValueKey('manage-tags'),
-                tooltip: l.manageTags,
-                icon: const Icon(Icons.sell_outlined, size: 18),
-                onPressed: () async {
-                  await showTagManager(context, NexScope.of(context));
-                  if (!mounted) return;
-                  final all = await store.call<List<Tag>>('tags');
-                  if (!mounted) return;
-                  if (tag != null && !all.any((t) => t.id == tag)) tag = null;
-                  await load();
-                },
-              ),
-            ],
+              );
+              final actions = Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    tooltip: AiStrings.of(context).t('board'),
+                    isSelected: board,
+                    onPressed: () => setState(() => board = true),
+                    icon: const Icon(Icons.grid_view_outlined),
+                  ),
+                  IconButton(
+                    tooltip: AiStrings.of(context).t('list'),
+                    isSelected: !board,
+                    onPressed: () => setState(() => board = false),
+                    icon: const Icon(Icons.view_agenda_outlined),
+                  ),
+                  IconButton.filledTonal(
+                    key: const ValueKey('manage-tags'),
+                    tooltip: l.manageTags,
+                    icon: const Icon(Icons.sell_outlined, size: 18),
+                    onPressed: () async {
+                      await showTagManager(context, NexScope.of(context));
+                      if (!mounted) return;
+                      final all = await store.call<List<Tag>>('tags');
+                      if (!mounted) return;
+                      if (tag != null && !all.any((t) => t.id == tag)) {
+                        tag = null;
+                      }
+                      await load();
+                    },
+                  ),
+                ],
+              );
+              if (stacked) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    search,
+                    const SizedBox(height: NexSpacing.xs),
+                    Align(
+                      alignment: AlignmentDirectional.centerEnd,
+                      child: actions,
+                    ),
+                  ],
+                );
+              }
+              return Row(
+                children: [
+                  Expanded(child: search),
+                  const SizedBox(width: 4),
+                  actions,
+                ],
+              );
+            },
           ),
         ),
         _FilterBar(
@@ -296,35 +336,49 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
           ),
         if (notes.isEmpty && !loading)
           Expanded(
-            child: _isFilteredEmpty
-                ? Center(
-                    child: NexEmptyState(
-                      icon: trash
-                          ? Icons.delete_outline_rounded
-                          : query.text.isNotEmpty
-                          ? Icons.search_off_rounded
-                          : Icons.filter_list_off_rounded,
-                      message: trash
-                          ? '${l.trash}: ${l.empty}'
-                          : query.text.isNotEmpty
-                          ? '${l.search}: ${l.empty}'
-                          : l.empty,
-                      action: TextButton.icon(
-                        icon: const Icon(Icons.refresh_rounded, size: 16),
-                        label: Text(l.clear),
-                        onPressed: () {
-                          query.clear();
-                          type = null;
-                          tag = thread = null;
-                          trash = false;
-                          load();
-                        },
-                      ),
-                    ),
-                  )
-                // Designed first-run state (IDEAS.md): three concrete
-                // actions instead of a bare "empty" line.
-                : _buildFirstRunEmpty(context, l),
+            child: LayoutBuilder(
+              builder: (context, box) => SingleChildScrollView(
+                primary: false,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: box.maxHeight),
+                  child: Padding(
+                    padding: const EdgeInsets.all(NexSpacing.sm),
+                    child: _isFilteredEmpty
+                        ? Center(
+                            child: NexEmptyState(
+                              icon: trash
+                                  ? Icons.delete_outline_rounded
+                                  : query.text.isNotEmpty
+                                  ? Icons.search_off_rounded
+                                  : Icons.filter_list_off_rounded,
+                              message: trash
+                                  ? '${l.trash}: ${l.empty}'
+                                  : query.text.isNotEmpty
+                                  ? '${l.search}: ${l.empty}'
+                                  : l.empty,
+                              action: TextButton.icon(
+                                icon: const Icon(
+                                  Icons.refresh_rounded,
+                                  size: 16,
+                                ),
+                                label: Text(l.clear),
+                                onPressed: () {
+                                  query.clear();
+                                  type = null;
+                                  tag = thread = null;
+                                  trash = false;
+                                  load();
+                                },
+                              ),
+                            ),
+                          )
+                        // Designed first-run state (IDEAS.md): three concrete
+                        // actions instead of a bare "empty" line.
+                        : _buildFirstRunEmpty(context, l),
+                  ),
+                ),
+              ),
+            ),
           )
         else
           Expanded(
@@ -441,16 +495,30 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
                               ),
                               relativeTime: (time) => switch (time.unit) {
                                 NexRelativeUnit.now => l.justNow,
-                                NexRelativeUnit.minutes => l.minutesAgo(
-                                  time.count,
+                                NexRelativeUnit.minutes => desktopDigits(
+                                  context,
+                                  l.minutesAgo(time.count),
                                 ),
-                                NexRelativeUnit.hours => l.hoursAgo(time.count),
-                                NexRelativeUnit.days => l.daysAgo(time.count),
-                                NexRelativeUnit.weeks => l.weeksAgo(time.count),
-                                NexRelativeUnit.months => l.monthsAgo(
-                                  time.count,
+                                NexRelativeUnit.hours => desktopDigits(
+                                  context,
+                                  l.hoursAgo(time.count),
                                 ),
-                                NexRelativeUnit.years => l.yearsAgo(time.count),
+                                NexRelativeUnit.days => desktopDigits(
+                                  context,
+                                  l.daysAgo(time.count),
+                                ),
+                                NexRelativeUnit.weeks => desktopDigits(
+                                  context,
+                                  l.weeksAgo(time.count),
+                                ),
+                                NexRelativeUnit.months => desktopDigits(
+                                  context,
+                                  l.monthsAgo(time.count),
+                                ),
+                                NexRelativeUnit.years => desktopDigits(
+                                  context,
+                                  l.yearsAgo(time.count),
+                                ),
                               },
                               dueLabel: (due, repeat) {
                                 due = nextReminderOccurrence(

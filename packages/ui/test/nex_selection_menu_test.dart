@@ -56,9 +56,7 @@ void main() {
     // menu, and no taps left for the links and code spans in the same
     // paragraph. It brings its own area now.
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Scaffold(body: NexMarkdown('a **note**')),
-      ),
+      const MaterialApp(home: Scaffold(body: NexMarkdown('a **note**'))),
     );
     final area = tester.widget<SelectionArea>(find.byType(SelectionArea));
     expect(area.contextMenuBuilder, nexSelectionMenu);

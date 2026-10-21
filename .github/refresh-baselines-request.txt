@@ -1,2 +1,1 @@
-Change this file on a windows/** branch to regenerate the Windows visual baselines.
-request 4: deterministic review pin timestamps
+Release 0.23.0+17: refresh visible About/version and finalized bilingual release-history screenshots, 2026-10-21.

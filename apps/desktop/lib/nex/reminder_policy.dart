@@ -62,3 +62,16 @@ DateTime nextReminderOccurrence(DateTime due, NoteRepeat repeat, DateTime now) {
   }
   return candidate.toUtc();
 }
+
+/// Opaque revision of the reminder itself. setDueAt deliberately does not bump
+/// the note's content revision, so that alone cannot reject edited reminders.
+int reminderActionVersion(Note note) => int.parse(
+  sha256OfBytes(
+    Uint8List.fromList(
+      utf8.encode(
+        '${note.rev}:${note.dueAt?.toUtc().toIso8601String()}:${note.dueRepeat.wireName}',
+      ),
+    ),
+  ).substring(0, 12),
+  radix: 16,
+);

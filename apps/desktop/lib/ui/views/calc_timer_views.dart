@@ -1,3 +1,4 @@
+import '../../l10n/desktop_format.dart';
 import '../../l10n/utility_strings.dart';
 import 'dart:math' as math;
 
@@ -38,9 +39,7 @@ class _CalcViewState extends State<CalcView> {
     final (p, c, _) = LiquidScope.of(context);
     return Panel(
       children: [
-        Head(
-          onBack: () => _backToMore(c),
-        ),
+        Head(onBack: () => _backToMore(c)),
         Field(
           controller: _input,
           hint: utilityLabel(context, 'utility20'),
@@ -59,7 +58,8 @@ class _CalcViewState extends State<CalcView> {
         ),
         MouseRegion(
           cursor: SystemMouseCursors.click,
-          child: GestureDetector(
+          child: DesktopAction(
+            label: utilityLabel(context, 'utility18'),
             onTap: () {
               final v = calcEval(_input.text);
               if (v != null) c.copy(fmtCalcRaw(v));
@@ -69,7 +69,7 @@ class _CalcViewState extends State<CalcView> {
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
               constraints: const BoxConstraints(minHeight: 40),
               child: Text(
-                _out,
+                desktopDigits(context, _out),
                 style: TextStyle(
                   fontFamily: Theme.of(
                     context,
@@ -248,11 +248,9 @@ class TimerView extends StatelessWidget {
     final (p, c, _) = LiquidScope.of(context);
     return Panel(
       children: [
-        Head(
-          onBack: () => _backToMore(c),
-        ),
+        Head(onBack: () => _backToMore(c)),
         Text(
-          fmtTimer(c.tLeft),
+          desktopDigits(context, fmtTimer(c.tLeft)),
           textAlign: TextAlign.center,
           style: TextStyle(
             fontFamily: Theme.of(context).textTheme.bodyMedium?.fontFamily,
@@ -271,7 +269,12 @@ class TimerView extends StatelessWidget {
                   padding: EdgeInsets.only(right: m == 25 ? 0 : 6),
                   child: Btn(
                     onPressed: () => c.timerPreset(m),
-                    child: Text('$m ${utilityLabelForText(context, 'minute')}'),
+                    child: Text(
+                      desktopDigits(
+                        context,
+                        '$m ${utilityLabelForText(context, 'minute')}',
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -322,13 +325,11 @@ class StopwatchView extends StatelessWidget {
     final (p, c, _) = LiquidScope.of(context);
     return Panel(
       children: [
-        Head(
-          onBack: () => _backToMore(c),
-        ),
+        Head(onBack: () => _backToMore(c)),
         ValueListenableBuilder<String>(
           valueListenable: c.swDisplay,
           builder: (context, txt, _) => Text(
-            txt,
+            desktopDigits(context, txt),
             textAlign: TextAlign.center,
             style: TextStyle(
               fontFamily: Theme.of(context).textTheme.bodyMedium?.fontFamily,
@@ -386,9 +387,14 @@ class StopwatchView extends StatelessWidget {
                           child: ItemRow(
                             plain: true,
                             onTap: () => c.copy(fmtSw(c.swLaps[i])),
-                            sub: Text(fmtSw(c.swLaps[i])),
+                            sub: Text(
+                              desktopDigits(context, fmtSw(c.swLaps[i])),
+                            ),
                             child: Text(
-                              '${utilityLabelForText(context, 'Lap')} ${c.swLaps.length - i}',
+                              desktopDigits(
+                                context,
+                                '${utilityLabelForText(context, 'Lap')} ${c.swLaps.length - i}',
+                              ),
                             ),
                           ),
                         ),
@@ -407,4 +413,3 @@ class StopwatchView extends StatelessWidget {
 
 String fmtSw(int ms) =>
     '${(ms ~/ 60000).toString().padLeft(2, '0')}:${((ms ~/ 1000) % 60).toString().padLeft(2, '0')}.${((ms ~/ 10) % 100).toString().padLeft(2, '0')}';
-

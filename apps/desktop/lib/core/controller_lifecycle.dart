@@ -373,7 +373,7 @@ mixin PanelLifecycle on PanelStateBase {
           onCapture?.call();
           break;
         case 'shutdown':
-          unawaited(quit());
+          unawaited(_closeWindow());
           break;
         case 'open':
         case 'settings':
@@ -424,6 +424,22 @@ mixin PanelLifecycle on PanelStateBase {
       case 'quit':
         quit();
         break;
+    }
+  }
+
+  bool _closingWindow = false;
+  Future<void> _closeWindow() async {
+    if (_closingWindow || _quitQueued) return;
+    _closingWindow = true;
+    try {
+      if (S.closeToTray) {
+        await _rememberWindowFrame();
+        save();
+        if (await native.hideToTray()) return;
+      }
+      await quit();
+    } finally {
+      _closingWindow = false;
     }
   }
 

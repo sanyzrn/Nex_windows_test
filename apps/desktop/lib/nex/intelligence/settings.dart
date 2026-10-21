@@ -1,3 +1,6 @@
+import 'package:flutter/foundation.dart';
+import '../../l10n/desktop_format.dart';
+import '../../ui/desktop_accessibility.dart';
 import 'package:flutter/material.dart';
 import 'package:nex_ai/cloud.dart';
 import 'package:nex_ui/nex_ui.dart';
@@ -27,6 +30,7 @@ Future<void> showIntelligenceSettings(BuildContext context) => showDialog<void>(
                     ),
                   ),
                   IconButton(
+                    tooltip: AiStrings.of(context).t('close'),
                     onPressed: () => Navigator.pop(dialogContext),
                     icon: const Icon(Icons.close),
                   ),
@@ -101,9 +105,88 @@ class _SettingsState extends State<DesktopIntelligenceSettings> {
     ..._extra,
     'provider': _provider.wireName,
     'apiKey': _key.text,
-    'baseUrl': _provider.needsBaseUrl ? _url.text : '',
+    'baseUrl': _provider.needsBaseUrl || _provider == AiProvider.gemini
+        ? _url.text
+        : '',
     'model': _model.text,
   });
+  void _invalidate() {
+    _tested = null;
+    _status = null;
+    for (final key in ['images', 'audio', 'embeddings', 'video']) {
+      _extra[key] = 'automatic';
+    }
+    _extra['checkedAt'] = '';
+    _extra['checkedFor'] = '';
+  }
+
+  Future<void> _chooseModel() => _run(() async {
+    final candidate = _current;
+    final models = await _ai!.models(candidate);
+    if (!mounted ||
+        !identical(_ai, NexScope.of(context).intelligence) ||
+        candidate.apiKey != _current.apiKey ||
+        candidate.capabilityFingerprint != _current.capabilityFingerprint) {
+      return;
+    }
+    final s = AiStrings.of(context);
+    var query = '';
+    final picked = await showDialog<String>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, update) {
+          final matches = models
+              .where((m) => m.toLowerCase().contains(query.toLowerCase()))
+              .toList();
+          return AlertDialog(
+            title: Text(s.t('chooseModel')),
+            content: SizedBox(
+              width: 440,
+              height: 320,
+              child: Column(
+                children: [
+                  TextField(
+                    key: const ValueKey('ai-model-search'),
+                    autofocus: true,
+                    textDirection: TextDirection.ltr,
+                    decoration: InputDecoration(labelText: s.t('searchModels')),
+                    onChanged: (v) => update(() => query = v),
+                  ),
+                  const SizedBox(height: 12),
+                  if (matches.isEmpty) Text(s.t('noModels')),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: matches.length,
+                      itemBuilder: (ctx, i) => ListTile(
+                        title: Text(
+                          matches[i],
+                          textDirection: TextDirection.ltr,
+                        ),
+                        onTap: () => Navigator.pop(ctx, matches[i]),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: Text(s.t('close')),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+    if (mounted && picked != null) {
+      setState(() {
+        _model.text = picked;
+        _invalidate();
+      });
+    }
+  });
+
   @override
   void dispose() {
     _key.dispose();
@@ -154,6 +237,7 @@ class _SettingsState extends State<DesktopIntelligenceSettings> {
               labelText: s.t(key),
               suffixIcon: secret
                   ? IconButton(
+                      tooltip: s.t(_obscure ? 'showKey' : 'hideKey'),
                       onPressed: () => setState(() => _obscure = !_obscure),
                       icon: Icon(
                         _obscure
@@ -165,8 +249,7 @@ class _SettingsState extends State<DesktopIntelligenceSettings> {
             ),
             onChanged: (v) => setState(() {
               if (controller == null) _extra[key] = v;
-              _tested = null;
-              _status = null;
+              _invalidate();
             }),
           ),
         );
@@ -196,6 +279,7 @@ class _SettingsState extends State<DesktopIntelligenceSettings> {
             },
           ),
         );
+        final check = ai.checkFor(_current);
         final d = DesktopStrings.of(context);
         final c = theme.colorScheme;
         Widget section(String title, IconData icon, List<Widget> children) =>
@@ -257,44 +341,48 @@ class _SettingsState extends State<DesktopIntelligenceSettings> {
                               ? theme.colorScheme.primary.withValues(alpha: .12)
                               : theme.colorScheme.surfaceContainerLow,
                           borderRadius: BorderRadius.circular(18),
-                          child: ListTile(
-                            key: ValueKey(
-                              'provider-choice-${provider.wireName}',
+                          child: DesktopFocusRing(
+                            child: ListTile(
+                              key: ValueKey(
+                                'provider-choice-${provider.wireName}',
+                              ),
+                              selected: _provider == provider,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(18),
+                              ),
+                              leading: Icon(
+                                provider == AiProvider.none
+                                    ? Icons.cloud_off_outlined
+                                    : Icons.cloud_outlined,
+                              ),
+                              title: Text(
+                                provider == AiProvider.none
+                                    ? s.t('none')
+                                    : provider.label,
+                              ),
+                              subtitle: provider == AiProvider.none
+                                  ? null
+                                  : Text(ai.configFor(provider).resolvedModel),
+                              trailing: _provider == provider
+                                  ? const Icon(Icons.check_circle_rounded)
+                                  : null,
+                              onTap: ai.busy
+                                  ? null
+                                  : () => setState(() => _select(provider)),
                             ),
-                            selected: _provider == provider,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(18),
-                            ),
-                            leading: Icon(
-                              provider == AiProvider.none
-                                  ? Icons.cloud_off_outlined
-                                  : Icons.cloud_outlined,
-                            ),
-                            title: Text(
-                              provider == AiProvider.none
-                                  ? s.t('none')
-                                  : provider.label,
-                            ),
-                            subtitle: provider == AiProvider.none
-                                ? null
-                                : Text(ai.configFor(provider).resolvedModel),
-                            trailing: _provider == provider
-                                ? const Icon(Icons.check_circle_rounded)
-                                : null,
-                            onTap: ai.busy
-                                ? null
-                                : () => setState(() => _select(provider)),
                           ),
                         ),
                       ),
                     const SizedBox(height: 10),
                     NexSoftCard(
-                      child: ListTile(
-                        contentPadding: EdgeInsets.zero,
-                        leading: const Icon(Icons.memory_outlined),
-                        title: Text(s.t('local')),
-                        subtitle: Text(s.t('localHint')),
-                        trailing: Text(s.t('soon')),
+                      child: DesktopFocusRing(
+                        child: ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          leading: const Icon(Icons.memory_outlined),
+                          title: Text(s.t('local')),
+                          subtitle: Text(s.t('localHint')),
+                          trailing: Text(s.t('soon')),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 18),
@@ -306,9 +394,24 @@ class _SettingsState extends State<DesktopIntelligenceSettings> {
                     children: [
                       if (_provider != AiProvider.none) ...[
                         field('apiKey', controller: _key, secret: true),
-                        if (_provider.needsBaseUrl)
+                        if (_provider.needsBaseUrl ||
+                            _provider == AiProvider.gemini)
                           field('endpoint', controller: _url),
                         field('model', controller: _model),
+                        Align(
+                          alignment: AlignmentDirectional.centerStart,
+                          child: TextButton.icon(
+                            key: const ValueKey('ai-model-picker'),
+                            onPressed:
+                                ai.busy ||
+                                    !ai.flag('ai.cloud_opt_in') ||
+                                    !_current.isUsable
+                                ? null
+                                : _chooseModel,
+                            icon: const Icon(Icons.manage_search_rounded),
+                            label: Text(s.t('chooseModel')),
+                          ),
+                        ),
                         Text(
                           _provider.defaultModel,
                           style: theme.textTheme.labelSmall,
@@ -328,48 +431,19 @@ class _SettingsState extends State<DesktopIntelligenceSettings> {
                               'embeddingUrl',
                             ])
                               field(name),
-                            for (final key in ['images', 'audio', 'embeddings'])
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 6,
-                                ),
-                                child: DropdownButtonFormField<String>(
-                                  key: ValueKey('$_provider-$key'),
-                                  initialValue: _extra[key] ?? 'automatic',
-                                  decoration: InputDecoration(
-                                    labelText: s.t(key),
-                                  ),
-                                  items: AiCapabilityMode.values
-                                      .map(
-                                        (v) => DropdownMenuItem(
-                                          value: v.name,
-                                          child: Text(
-                                            s.t(
-                                              v == AiCapabilityMode.enabled
-                                                  ? 'on'
-                                                  : v.name,
-                                            ),
-                                          ),
-                                        ),
-                                      )
-                                      .toList(),
-                                  onChanged: (v) => setState(() {
-                                    _extra[key] = v!;
-                                    _tested = null;
-                                  }),
-                                ),
-                              ),
                           ],
                         ),
                       ],
                       const SizedBox(height: 12),
-                      CheckboxListTile(
-                        contentPadding: EdgeInsets.zero,
-                        controlAffinity: ListTileControlAffinity.leading,
-                        title: Text(s.t('cloudConsent')),
-                        value: ai.flag('ai.cloud_opt_in'),
-                        onChanged: (v) => _run(
-                          () => ai.setValue('ai.cloud_opt_in', v ?? false),
+                      DesktopFocusRing(
+                        child: CheckboxListTile(
+                          contentPadding: EdgeInsets.zero,
+                          controlAffinity: ListTileControlAffinity.leading,
+                          title: Text(s.t('cloudConsent')),
+                          value: ai.flag('ai.cloud_opt_in'),
+                          onChanged: (v) => _run(
+                            () => ai.setValue('ai.cloud_opt_in', v ?? false),
+                          ),
                         ),
                       ),
                       const SizedBox(height: 10),
@@ -383,13 +457,26 @@ class _SettingsState extends State<DesktopIntelligenceSettings> {
                                   ? null
                                   : () => _run(() async {
                                       final candidate = _current;
-                                      final tested = await ai.verify(candidate);
+                                      final tested = await ai.verify(
+                                        candidate,
+                                        recheck: true,
+                                      );
                                       if (mounted) {
                                         setState(() {
-                                          _tested = tested.success
+                                          _tested =
+                                              tested.success &&
+                                                  mapEquals(
+                                                    candidate.toMap(),
+                                                    _current.toMap(),
+                                                  )
                                               ? candidate
                                               : null;
-                                          _status = tested.detail;
+                                          _status = tested.detail.replaceAll(
+                                            candidate.apiKey.isEmpty
+                                                ? '\u0000'
+                                                : candidate.apiKey,
+                                            '…',
+                                          );
                                         });
                                       }
                                     }),
@@ -418,6 +505,69 @@ class _SettingsState extends State<DesktopIntelligenceSettings> {
                             ),
                         ],
                       ),
+                      if (check != null) ...[
+                        const SizedBox(height: 12),
+                        Text(
+                          s.t('probeHint'),
+                          style: theme.textTheme.bodySmall,
+                        ),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            for (final entry in check.results.entries)
+                              Tooltip(
+                                message: [
+                                  if (entry.value.status != null)
+                                    'HTTP ${entry.value.status}',
+                                  if (entry.value.detail != null)
+                                    entry.value.detail!.replaceAll(
+                                      _key.text.isEmpty ? '\u0000' : _key.text,
+                                      '…',
+                                    ),
+                                ].join(' · '),
+                                child: Chip(
+                                  avatar: Icon(
+                                    entry.value.works
+                                        ? Icons.check_circle_outline
+                                        : Icons.info_outline,
+                                    size: 18,
+                                  ),
+                                  label: Text(
+                                    '${s.t(entry.key.name)}: ${s.t(entry.value.verdict.name)}',
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ],
+                      if (check != null)
+                        ExpansionTile(
+                          tilePadding: EdgeInsets.zero,
+                          title: Text(s.t('probeDetails')),
+                          children: [
+                            for (final entry in check.results.entries)
+                              ListTile(
+                                contentPadding: EdgeInsets.zero,
+                                title: Text(
+                                  '${s.t(entry.key.name)}: ${s.t(entry.value.verdict.name)}',
+                                ),
+                                subtitle: SelectableText(
+                                  [
+                                    if (entry.value.status != null)
+                                      'HTTP ${entry.value.status}',
+                                    if (entry.value.detail != null)
+                                      entry.value.detail!.replaceAll(
+                                        _key.text.isEmpty
+                                            ? '\u0000'
+                                            : _key.text,
+                                        '…',
+                                      ),
+                                  ].join(' · '),
+                                ),
+                              ),
+                          ],
+                        ),
                       if (_status != null)
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 10),
@@ -477,13 +627,16 @@ class _SettingsState extends State<DesktopIntelligenceSettings> {
                     ],
                   ),
                   const SizedBox(height: 20),
-                  CheckboxListTile(
-                    contentPadding: EdgeInsets.zero,
-                    controlAffinity: ListTileControlAffinity.leading,
-                    title: Text(s.t('cloudConsent')),
-                    value: ai.flag('ai.cloud_opt_in'),
-                    onChanged: (v) =>
-                        _run(() => ai.setValue('ai.cloud_opt_in', v ?? false)),
+                  DesktopFocusRing(
+                    child: CheckboxListTile(
+                      contentPadding: EdgeInsets.zero,
+                      controlAffinity: ListTileControlAffinity.leading,
+                      title: Text(s.t('cloudConsent')),
+                      value: ai.flag('ai.cloud_opt_in'),
+                      onChanged: (v) => _run(
+                        () => ai.setValue('ai.cloud_opt_in', v ?? false),
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -518,12 +671,14 @@ class _SettingsState extends State<DesktopIntelligenceSettings> {
                             for (final e
                                 in (snap.data ?? <DisclosureEntry>[]).reversed
                                     .take(20))
-                              ListTile(
-                                dense: true,
-                                contentPadding: EdgeInsets.zero,
-                                title: Text('${e.provider} · ${e.host}'),
-                                subtitle: Text(
-                                  '${e.at.toLocal()} · ${e.purpose.name} · ${e.bytes} B',
+                              DesktopFocusRing(
+                                child: ListTile(
+                                  dense: true,
+                                  contentPadding: EdgeInsets.zero,
+                                  title: Text('${e.provider} · ${e.host}'),
+                                  subtitle: Text(
+                                    '${e.at.toLocal()} · ${e.purpose.name} · ${e.bytes} B',
+                                  ),
                                 ),
                               ),
                           ],
@@ -608,7 +763,12 @@ class _SettingsState extends State<DesktopIntelligenceSettings> {
                     FilledButton.tonalIcon(
                       onPressed: ai.busy ? null : () => _run(ai.indexNotes),
                       icon: const Icon(Icons.manage_search_outlined),
-                      label: Text('${s.t('index')} · ${ai.indexed}'),
+                      label: Text(
+                        desktopDigits(
+                          context,
+                          '${s.t('index')} · ${ai.indexed}',
+                        ),
+                      ),
                     ),
                   ],
                 ),

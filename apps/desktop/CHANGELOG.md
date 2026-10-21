@@ -1,5 +1,48 @@
 # Changelog
 
+## Unreleased
+
+## 0.23.0 — 2026-10-21
+
+- Optional first-run setup for language, theme, accent and window restoration,
+  with a notification test, backup import and keyboard shortcut tour.
+- Focus on writing hides the rail, keeps the current draft and shows word/save
+  status; Escape returns to the workspace. Typing no longer rebuilds window chrome.
+- Browse and search provider models, use a custom Gemini API address and test
+  image/audio/search/video capabilities with synthetic samples. Paste a YouTube
+  video URL in the assistant to analyze it with a capable Gemini model.
+- Settings search includes nested display, backup, shortcut and AI options.
+
+
+- Choose whether closing the window quits Nex or keeps it in the tray; Open
+  restores a hidden compact window to the cursor monitor's corner.
+- Snooze a reminder for 10 minutes or remove its reminder from the toast. Repeated
+  or stale actions are ignored; daily/weekly snooze continues from the new time.
+- Recover a missed reminder instead of treating queue acceptance as delivery.
+- Mixed-language editing follows the active paragraph without modifying text;
+  selection and IME composition keep a stable direction while active.
+
+- Read the complete release history in Persian or English from About Nex and the
+  update card, without a network request.
+- Use Persian digits for application counters, timers and update progress, and
+  honor the selected calendar when choosing reminder dates and reviewing AI actions.
+
+- Keep minimum-size windows usable at large text sizes: scroll compact navigation,
+  wrap labels at their requested size, and adapt capture/reader actions to fewer columns.
+- Prevent titles and reader type badges from overflowing narrow windows; keep
+  library search readable and first-run actions reachable by scrolling.
+
+- Make custom tool tiles, media controls and small actions usable with Enter
+  and Space; show clear keyboard focus and announce localized control labels.
+- Keep Tab navigation predictable in both languages and remove the extra focus
+  stop inside the compact rail's More menu.
+
+- Unify Persian terminology and tone across capture, library, settings and AI;
+  localize commitment labels, weekdays and native file-picker filters.
+- Keep keyboard shortcut names consistent and readable left-to-right in Persian.
+- Check translation keys, placeholders and bilingual maps in CI, including
+  multiline UI strings missed by the previous hygiene check.
+
 ## 0.22.0 — 2026-10-19
 
 - Shared packages (core, data, ui, ai) brought level with Android 2.1.9:

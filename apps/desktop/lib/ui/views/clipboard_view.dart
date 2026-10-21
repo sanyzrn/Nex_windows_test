@@ -1,3 +1,4 @@
+import '../../l10n/desktop_format.dart';
 import '../../l10n/app_localizations.dart';
 import 'package:nex_ui/nex_ui.dart';
 import '../../l10n/utility_strings.dart';
@@ -116,7 +117,7 @@ class _TextClipItem extends StatelessWidget {
       child: ItemRow(
         pinned: entry.pinned,
         sub: Text(
-          '${entry.pinned ? AppLocalizations.of(context)!.pinned : ago(context, entry.time)} · ${AppLocalizations.of(context)!.characters((entry.text ?? '').length)}',
+          '${entry.pinned ? AppLocalizations.of(context)!.pinned : ago(context, entry.time)} · ${desktopDigits(context, AppLocalizations.of(context)!.characters((entry.text ?? '').length))}',
         ),
         onTap: () => c.deliver(entry.text ?? ''),
         trailing: Row(
@@ -225,7 +226,7 @@ String ago(BuildContext context, DateTime t) {
   final l = AppLocalizations.of(context)!;
   final s = DateTime.now().difference(t).inSeconds;
   if (s < 60) return l.justNow;
-  if (s < 3600) return l.minutesAgo(s ~/ 60);
-  if (s < 86400) return l.hoursAgo(s ~/ 3600);
-  return l.daysAgo(s ~/ 86400);
+  if (s < 3600) return desktopDigits(context, l.minutesAgo(s ~/ 60));
+  if (s < 86400) return desktopDigits(context, l.hoursAgo(s ~/ 3600));
+  return desktopDigits(context, l.daysAgo(s ~/ 86400));
 }

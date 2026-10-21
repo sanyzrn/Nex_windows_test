@@ -133,15 +133,17 @@ void NativeBridge::HandleMethodCall(
     ReadClipboardImage(ArgInt(args, "request"));
     result->Success();
   } else if (name == "labels") {
+    SetReminderLabels(ArgString(args, "snooze"), ArgString(args, "done"));
     add_app_title_ = Utf16FromUtf8(ArgString(args, "addApp"));
     folder_title_ = Utf16FromUtf8(ArgString(args, "addFolder"));
     apps_label_ = Utf16FromUtf8(ArgString(args, "apps"));
     files_label_ = Utf16FromUtf8(ArgString(args, "files"));
     const std::pair<UINT, const char*> entries[] = {
-      {IDM_TRAY_OPEN, "open"}, {IDM_TRAY_SETTINGS, "settings"},
+      {IDM_TRAY_OPEN, "open"}, {IDM_TRAY_CAPTURE, "newNote"}, {IDM_TRAY_SETTINGS, "settings"},
       {IDM_TRAY_ADDAPP, "addApp"}, {IDM_TRAY_STARTUP, "startup"}, {IDM_TRAY_QUIT, "quit"}};
     for (const auto& entry : entries) {
       const auto label = Utf16FromUtf8(ArgString(args, entry.second));
+      if (label.empty()) continue;
       ModifyMenuW(tray_menu_, entry.first, MF_BYCOMMAND | MF_STRING, entry.first, label.c_str());
     }
     result->Success();
@@ -164,6 +166,7 @@ void NativeBridge::HandleMethodCall(
       {EncodableValue("workWidth"), EncodableValue(static_cast<int32_t>(monitor.rcWork.right - monitor.rcWork.left))},
       {EncodableValue("workHeight"), EncodableValue(static_cast<int32_t>(monitor.rcWork.bottom - monitor.rcWork.top))},
       {EncodableValue("tray"), EncodableValue(tray_added_)},
+      {EncodableValue("reminderActionsMarkup"), EncodableValue(VerifyReminderActionMarkup())},
       {EncodableValue("hotkey"), EncodableValue(hotkey_registered_)},
       {EncodableValue("workers"), EncodableValue(static_cast<int32_t>(workers_.size()))},
       {EncodableValue("monitors"), EncodableValue(static_cast<int32_t>(CollectMonitors().size()))}}));
@@ -255,6 +258,16 @@ void NativeBridge::HandleMethodCall(
   } else if (name == "setStartup") {
     SetStartupRegistry(ArgBool(args, "on"));
     result->Success();
+  } else if (name == "setCompactRestoration") {
+    compact_window_ = window_mode_ && ArgBool(args, "compact");
+    result->Success();
+  } else if (name == "hideToTray") {
+    const bool can_hide = window_mode_ && tray_added_;
+    if (can_hide) {
+      pending_show_ = false;
+      ShowWindow(window_, SW_HIDE);
+    }
+    result->Success(EncodableValue(can_hide));
   } else if (name == "quit") {
     quit_requested_ = true;
     PostMessage(window_, WM_CLOSE, 0, 0);
@@ -296,10 +309,11 @@ void NativeBridge::HandleMethodCall(
         ArgString(args, "noteId"),
         ArgString(args, "title"),
         ArgString(args, "body"),
-        ArgInt64(args, "fireAt"));
+        ArgInt64(args, "fireAt"),
+        ArgString(args, "noteId").empty() ? -1 : ArgInt64(args, "revision"));
     result->Success(EncodableValue(ok));
   } else if (name == "cancelReminder") {
-    const bool ok = CancelScheduledToastNotification(ArgString(args, "id"));
+    const bool ok = CancelScheduledToastNotification(ArgString(args, "id"), ArgBool(args, "clearDelivered"));
     result->Success(EncodableValue(ok));
   } else if (name == "showOverdueReminder") {
     const bool ok = ShowImmediateToast(
@@ -307,7 +321,8 @@ void NativeBridge::HandleMethodCall(
         ArgString(args, "noteId"),
         ArgString(args, "title"),
         ArgString(args, "body"),
-        ArgInt64(args, "occurrence"));
+        ArgInt64(args, "occurrence"),
+        ArgString(args, "noteId").empty() ? -1 : ArgInt64(args, "revision"));
     result->Success(EncodableValue(ok));
   } else if (name == "reminderDiagnosticError") {
     result->Success(EncodableValue(ReminderDiagnosticError()));
@@ -320,7 +335,13 @@ void NativeBridge::HandleMethodCall(
     }
     result->Success(EncodableValue(list));
   } else if (name == "listScheduledReminders") {
-    const auto ids = ListScheduledToastIds();
+    std::vector<std::string> ids;
+    try {
+      ids = ListScheduledToastIds();
+    } catch (...) {
+      result->Error("reminder_queue", ReminderDiagnosticError());
+      return;
+    }
     EncodableList list;
     for (const auto& id : ids) {
       list.push_back(EncodableValue(id));
@@ -517,6 +538,18 @@ void NativeBridge::FocusWindow() {
   if (!surface_ready_) {
     if (window_mode_) pending_show_ = true;
     return;
+  }
+  // Re-anchor only on a real return from hiding. Merely focusing a visible
+  // (including minimized) window must preserve its frame.
+  if (window_mode_ && compact_window_ && !IsWindowVisible(window_)) {
+    POINT cursor{};
+    GetCursorPos(&cursor);
+    const RECT frame = CompactWindowFrame(
+        MonitorFromPoint(cursor, MONITOR_DEFAULTTOPRIMARY));
+    ShowWindow(window_, SW_RESTORE);
+    SetWindowPos(window_, nullptr, frame.left, frame.top,
+                 frame.right - frame.left, frame.bottom - frame.top,
+                 SWP_NOZORDER | SWP_NOACTIVATE);
   }
   FocusWindowTarget(window_);
 }
@@ -818,7 +851,7 @@ bool NativeBridge::OnMessage(HWND hwnd, UINT message, WPARAM wparam, LPARAM lpar
   if (message == WM_APP_SHOW) {
     SetPassthrough(false);
     SetForegroundWindow(window_);
-    PostEvent("tray", EncodableValue(EncodableMap{{EncodableValue("id"), EncodableValue("capture")}}));
+    PostEvent("tray", EncodableValue(EncodableMap{{EncodableValue("id"), EncodableValue("open")}}));
     return true;
   }
   if (message == WM_DISPLAYCHANGE || message == WM_DPICHANGED) {
@@ -893,6 +926,7 @@ bool NativeBridge::OnMessage(HWND hwnd, UINT message, WPARAM wparam, LPARAM lpar
     const char* ev = nullptr;
     switch (id) {
       case IDM_TRAY_OPEN: ev = "open"; break;
+      case IDM_TRAY_CAPTURE: ev = "capture"; break;
       case IDM_TRAY_SETTINGS: ev = "settings"; break;
       case IDM_TRAY_ADDAPP: ev = "addapp"; break;
       case IDM_TRAY_STARTUP: ev = "startup"; break;

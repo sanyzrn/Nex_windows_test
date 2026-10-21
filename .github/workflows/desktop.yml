@@ -57,7 +57,12 @@ jobs:
       - name: UI hygiene check (no colour literals or hard-coded strings)
         working-directory: apps/desktop
         shell: pwsh
-        run: ../../tools/check_ui_hygiene.ps1 -LibDir lib
+        run: |
+          python ../../tools/check_l10n_parity.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python -m unittest discover -s ../../tools -p test_check_l10n_parity.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          ../../tools/check_ui_hygiene.ps1 -LibDir lib
 
       - name: Analyze code
         working-directory: apps/desktop

@@ -8,6 +8,7 @@ import 'package:nex_core/nex_core.dart';
 import 'package:nex_data/nex_data.dart';
 import 'package:path/path.dart' as p;
 import 'reminder_policy.dart';
+import 'reminder_activation.dart';
 import '../core/backup_shell.dart';
 
 class DesktopRestoreResult {
@@ -93,6 +94,7 @@ class DesktopStore {
     return result.future.then((value) {
       if (const {
         'remind',
+        'reminderAction',
         'delete',
         'restore',
         'restoreBackup',
@@ -427,6 +429,12 @@ class DesktopStore {
                   notes,
                   a['now'] as DateTime? ?? DateTime.now(),
                 );
+              case 'reminderAction':
+                final action = ReminderActivation.parse(a['uri'] as String);
+                result =
+                    action != null &&
+                    applyReminderActivation(notes, action, DateTime.now());
+                if (result == true) reply.send([-2, true, null]);
               case 'remind':
                 final repeatStr = a['repeat'] as String?;
                 final repeat = repeatStr != null
