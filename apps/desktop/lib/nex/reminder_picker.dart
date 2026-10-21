@@ -5,6 +5,7 @@
 /// Reminder picker dialog with Android parity quick choices and repeat options.
 library;
 
+import 'desktop_date_picker.dart';
 import 'features_state.dart';
 import 'package:flutter/material.dart';
 import 'package:nex_core/nex_core.dart';
@@ -19,14 +20,18 @@ Future<void> showReminderPicker(
   required Note note,
   required Future<void> Function(DateTime? dueAt, NoteRepeat repeat) onSave,
 }) {
+  final solar = NexPanelScope.maybeOf(context)?.S.solarCalendar ??
+      (Localizations.localeOf(context).languageCode == 'fa');
   return showDialog(
     context: context,
-    builder: (context) => _ReminderPickerDialog(note: note, onSave: onSave),
+    builder: (context) => _ReminderPickerDialog(note: note, onSave: onSave, solar: solar),
   );
 }
 
 class _ReminderPickerDialog extends StatefulWidget {
-  const _ReminderPickerDialog({required this.note, required this.onSave});
+  const _ReminderPickerDialog({required this.note, required this.onSave, required this.solar});
+
+  final bool solar;
 
   final Note note;
   final Future<void> Function(DateTime? dueAt, NoteRepeat repeat) onSave;
@@ -86,8 +91,9 @@ class _ReminderPickerDialogState extends State<_ReminderPickerDialog> {
   Future<void> _pickCustomDateTime() async {
     final now = DateTime.now();
     final initialDate = _selectedDue ?? now.add(const Duration(hours: 1));
-    final pickedDate = await showDatePicker(
-      context: context,
+    final pickedDate = await showDesktopDatePicker(
+      context,
+      solar: widget.solar,
       initialDate: initialDate.isBefore(now) ? now : initialDate,
       firstDate: now,
       lastDate: now.add(const Duration(days: 365 * 10)),
@@ -151,7 +157,7 @@ class _ReminderPickerDialogState extends State<_ReminderPickerDialog> {
     final theme = Theme.of(context);
 
     String formatDue(DateTime dt) {
-      final dateStr = nexDisplayDate(dt, solar: NexPanelScope.maybeOf(context)?.S.solarCalendar ?? fa, persian: fa);
+      final dateStr = nexDisplayDate(dt, solar: widget.solar, persian: fa);
       final timeStr =
           '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
       final formattedTime = fa ? nexDigits(timeStr, persian: true) : timeStr;

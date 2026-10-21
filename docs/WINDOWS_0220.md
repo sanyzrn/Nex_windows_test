@@ -100,3 +100,12 @@ reminder picker, the layout-toggle visibility change, their golden updates, the
 0.21.1 bump and the one-off golden workflow — was removed again on this branch
 (`git revert`, history kept; no force push). The 0.22.0 base is 0.21.0 plus the phases
 above; follow-up agent work is recorded in [the progress summary](agent-reports/SUMMARY.md). Closing the window quits Nex, as in 0.21.0.
+
+## Agent Track A follow-up
+
+The agent branch adds offline bilingual release history, Persian application
+counters and a reminder picker that carries the chosen calendar across dialogs.
+Solar selection uses valid year/month/day choices and returns a local civil date;
+reminders still store UTC. The compact review matrix covers every settings
+category and all four reader types. See [Part 5](agent-reports/PART5.md) for actual
+verification and outstanding installed-Windows checks.

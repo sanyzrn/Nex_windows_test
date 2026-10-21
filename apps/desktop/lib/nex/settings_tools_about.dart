@@ -53,12 +53,13 @@ mixin _SettingsToolsAbout on _SettingsStateBase {
           if (NexScope.maybeOf(context)?.updates case final updates?) ...[
             NexUpdateCard(updates: updates),
             const SizedBox(height: 18),
-          ],
+          ] else
+            const ReleaseNotesButton(),
           Row(
             children: [
               Expanded(
                 child: Text(
-                  'Nex Windows v$kAppShortVersion (Build $kAppBuild)',
+                  desktopDigits(context, 'Nex Windows v$kAppShortVersion (Build $kAppBuild)'),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: scheme.onSurfaceVariant,
                   ),

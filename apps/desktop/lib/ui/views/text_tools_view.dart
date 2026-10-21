@@ -1,3 +1,4 @@
+import '../../l10n/desktop_format.dart';
 import '../../l10n/utility_strings.dart';
 import 'dart:convert';
 
@@ -154,9 +155,9 @@ class _TextToolButtonState extends State<_TextToolButton> {
           final words = RegExp(r'\S+').allMatches(t.trim()).length;
           c.toast(
             c.message('{words} words · {chars} chars · {lines} lines', {
-              'words': '$words',
-              'chars': '${t.length}',
-              'lines': '${t.split('\n').length}',
+              'words': desktopDigits(context, words),
+              'chars': desktopDigits(context, t.length),
+              'lines': desktopDigits(context, t.split('\n').length),
             }),
           );
           return;

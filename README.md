@@ -23,7 +23,8 @@ These are Windows widget snapshots, not installed-app verification.
 - Keep the last **50 distinct clipboard text/image entries** across restarts, with separate favorites.
 - Use Windows tools such as Keep Awake, screenshots, window pinning, clipboard and app/folder launchers.
 - Switch between the custom desktop window and an edge panel with hover navigation, tray access and a global shortcut.
-- Choose a theme, language and dock layout. Tool selection is searchable and paginated.
+- Choose a theme, language, calendar and dock layout. Tool selection is searchable and paginated.
+- Read the full English/Persian release history offline from Settings → About Nex.
 
 The note schema, attachment and backup handling, and 14 palette identities are aligned with the [recorded DbsNex Android source](https://github.com/sanyzrn/DbsNex/tree/34514226260dc8b1d3da35f91082dbfa9ce46b93). [Cross-platform contract and validation](docs/CROSS_PLATFORM_0150.md). Windows keeps its own version and native integrations.
 

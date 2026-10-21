@@ -636,5 +636,8 @@
   "volumeMute": "قطع یا وصل صدا",
   "chooseColor": "انتخاب رنگ",
   "copyColor": "کپی کد رنگ",
-  "emojiCategory": "دستهٔ ایموجی"
+  "emojiCategory": "دستهٔ ایموجی",
+  "calendarYear": "سال",
+  "calendarMonth": "ماه",
+  "calendarDay": "روز"
 }

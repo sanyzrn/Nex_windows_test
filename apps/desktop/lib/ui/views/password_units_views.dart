@@ -1,3 +1,4 @@
+import '../../l10n/desktop_format.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/utility_strings.dart';
 import 'dart:math' as math;
@@ -68,7 +69,7 @@ class _PasswordViewState extends State<PasswordView> {
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 4),
           child: Text(
-            'Length ${_len.round()}',
+            desktopDigits(context, AppLocalizations.of(context)!.characters(_len.round())),
             style: TextStyle(
               fontFamily: Theme.of(context).textTheme.bodyMedium?.fontFamily,
               fontFamilyFallback: const ['Segoe UI'],
@@ -256,7 +257,7 @@ class _UnitsViewState extends State<UnitsView> {
                       child: ItemRow(
                         plain: true,
                         onTap: () => c.copy('${fmtUnit(v)} $n'),
-                        child: Text('${fmtUnit(v)} $n'),
+                        child: Text(desktopDigits(context, '${fmtUnit(v)} $n')),
                       ),
                     ),
                 ],

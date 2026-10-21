@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../l10n/desktop_format.dart';
+import 'release_notes.dart';
 import 'package:nex_ui/nex_ui.dart';
 import '../l10n/desktop_strings.dart';
 import 'controller.dart';
@@ -68,8 +70,8 @@ class NexUpdateCard extends StatelessWidget {
                           ),
                           Text(
                             u.release == null
-                                ? '${s.t('installed')} ${u.currentVersion}'
-                                : 'Nex ${u.release!.version}',
+                                ? '${s.t('installed')} ${desktopDigits(context, u.currentVersion)}'
+                                : 'Nex ${desktopDigits(context, u.release!.version)}',
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
                         ],
@@ -84,7 +86,7 @@ class NexUpdateCard extends StatelessWidget {
               const SizedBox(height: 14),
               LinearProgressIndicator(value: u.progress),
               const SizedBox(height: 6),
-              Text('${(u.progress * 100).floor()}%'),
+              Text(desktopDigits(context, '${(u.progress * 100).floor()}%')),
             ],
             if (u.error != null) ...[
               const SizedBox(height: 12),
@@ -108,6 +110,7 @@ class NexUpdateCard extends StatelessWidget {
               ),
             ],
             if (!compact) ...[
+              const ReleaseNotesButton(),
               const SizedBox(height: 18),
               SwitchListTile.adaptive(
                 contentPadding: EdgeInsets.zero,

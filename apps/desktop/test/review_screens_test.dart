@@ -14,6 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'support/review_fixture.dart';
 import 'support/text_scale_cases.dart';
+import 'support/compact_review_cases.dart';
 
 const _matrix = <ReviewShot>[
   ReviewShot(
@@ -300,7 +301,7 @@ const _matrix = <ReviewShot>[
 ];
 
 void main() {
-  for (final spec in [..._matrix, ...textScaleReviewShots]) {
+  for (final spec in [..._matrix, ...textScaleReviewShots, ...compactReviewShots]) {
     testWidgets('review: ${spec.name}', (t) async {
       final store = (await t.runAsync(
         () => openReviewStore(spec.name, count: spec.notes),

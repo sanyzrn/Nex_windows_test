@@ -10,6 +10,7 @@
 /// library_filter_widgets.dart.
 library;
 
+import '../l10n/desktop_format.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';

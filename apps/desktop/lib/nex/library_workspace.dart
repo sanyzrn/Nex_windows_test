@@ -63,7 +63,7 @@ mixin _LibraryWorkspace on _LibraryStateBase {
               ),
               const SizedBox(width: 6),
               Text(
-                overdue > 0 ? l.overdueCount(overdue) : l.dueCount(due.length),
+                overdue > 0 ? desktopDigits(context, l.overdueCount(overdue)) : desktopDigits(context, l.dueCount(due.length)),
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
                   fontWeight: FontWeight.w600,
                   color: overdue > 0 ? scheme.error : scheme.primary,

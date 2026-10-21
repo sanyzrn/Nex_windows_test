@@ -1,3 +1,4 @@
+import '../../l10n/desktop_format.dart';
 import '../../ui/desktop_accessibility.dart';
 import 'package:flutter/material.dart';
 import 'package:nex_ai/cloud.dart';
@@ -622,7 +623,7 @@ class _SettingsState extends State<DesktopIntelligenceSettings> {
                     FilledButton.tonalIcon(
                       onPressed: ai.busy ? null : () => _run(ai.indexNotes),
                       icon: const Icon(Icons.manage_search_outlined),
-                      label: Text('${s.t('index')} · ${ai.indexed}'),
+                      label: Text(desktopDigits(context, '${s.t('index')} · ${ai.indexed}')),
                     ),
                   ],
                 ),

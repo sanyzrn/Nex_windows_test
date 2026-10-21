@@ -1,3 +1,4 @@
+import '../../l10n/desktop_format.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/utility_strings.dart';
 import 'dart:async';
@@ -130,8 +131,8 @@ class _ClockViewState extends State<ClockView> {
         ? 'same time'
         : '${minutes > 0 ? '+' : '-'}${minutes.abs() ~/ 60}:${(minutes.abs() % 60).toString().padLeft(2, '0')}';
     return (
-      parts.time,
-      '${utilityLabelForText(context, dayStr)}, ${utilityLabelForText(context, diffStr)}',
+      desktopDigits(context, parts.time),
+      desktopDigits(context, '${utilityLabelForText(context, dayStr)}, ${utilityLabelForText(context, diffStr)}'),
     );
   }
 

@@ -411,7 +411,7 @@ class _NexNoteDetailState extends State<NexNoteDetail> {
                               label: Text(
                                 fa
                                     ? '${nexDisplayDate(shownDue!, solar: NexPanelScope.maybeOf(context)?.S.solarCalendar ?? true, persian: true)} ${nexDigits(_hhmm(shownDue), persian: true)}${note.dueRepeat != NoteRepeat.once ? ' (${note.dueRepeat == NoteRepeat.daily ? l.repeatDaily : l.repeatWeekly})' : ''}'
-                                    : '${nexDisplayDate(shownDue!)} ${_hhmm(shownDue)}${note.dueRepeat != NoteRepeat.once ? ' (${note.dueRepeat == NoteRepeat.daily ? l.repeatDaily : l.repeatWeekly})' : ''}',
+                                    : '${nexDisplayDate(shownDue!, solar: NexPanelScope.maybeOf(context)?.S.solarCalendar ?? false)} ${_hhmm(shownDue)}${note.dueRepeat != NoteRepeat.once ? ' (${note.dueRepeat == NoteRepeat.daily ? l.repeatDaily : l.repeatWeekly})' : ''}',
                               ),
                               onPressed: () => showReminderPicker(
                                 context,

@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Read the complete release history in Persian or English from About Nex and the
+  update card, without a network request.
+- Use Persian digits for application counters, timers and update progress, and
+  honor the selected calendar when choosing reminder dates and reviewing AI actions.
+
 - Keep minimum-size windows usable at large text sizes: scroll compact navigation,
   wrap labels at their requested size, and adapt capture/reader actions to fewer columns.
 - Prevent titles and reader type badges from overflowing narrow windows; keep

@@ -48,6 +48,8 @@ flutter:
   uses-material-design: true
   generate: true
   assets:
+    - CHANGELOG.md
+    - assets/CHANGELOG.fa.md
     - assets/notices/
   fonts:
     - family: Vazirmatn

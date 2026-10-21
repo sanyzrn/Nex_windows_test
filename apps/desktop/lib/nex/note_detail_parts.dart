@@ -11,6 +11,7 @@ import 'package:nex_core/nex_core.dart';
 import 'package:nex_ui/nex_ui.dart';
 
 import '../l10n/app_localizations.dart';
+import '../l10n/desktop_format.dart';
 import 'features_state.dart';
 import '../ui/desktop_accessibility.dart';
 
@@ -161,7 +162,7 @@ class NoteMetadataLine extends StatelessWidget {
       if (note.content?.trim().isNotEmpty == true) ...[
         dot,
         Text(
-          l.wordCount(note.content!.trim().split(RegExp(r'\s+')).length),
+          desktopDigits(context, l.wordCount(note.content!.trim().split(RegExp(r'\s+')).length)),
           style: style,
         ),
       ],

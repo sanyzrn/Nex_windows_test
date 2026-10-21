@@ -1419,4 +1419,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get emojiCategory => 'Emoji category';
+
+  @override
+  String get calendarYear => 'Year';
+
+  @override
+  String get calendarMonth => 'Month';
+
+  @override
+  String get calendarDay => 'Day';
 }

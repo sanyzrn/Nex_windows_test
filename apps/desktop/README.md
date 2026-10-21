@@ -55,7 +55,11 @@ or archive formats as part of UI cleanup.
 `lib/nex/intelligence` adds opt-in cloud providers, conversation history, note
 context/actions, OCR, transcription and semantic search through `nex_ai`.
 Provider keys use Windows secure storage. Local inference is a placeholder;
-cloud/LAN sync and Vault are not enabled. `lib/updates` checks stable GitHub
+cloud/LAN sync and Vault are not enabled. Release history is bundled in English/Persian and opens offline from About Nex
+or the update card. The reminder picker follows the chosen Solar/Gregorian
+calendar, returning the same civil date for UTC persistence.
+
+`lib/updates` checks stable GitHub
 releases, validates downloads and hands a saved session to Install & restart.
 
 ## Localization and development

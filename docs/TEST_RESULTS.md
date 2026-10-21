@@ -8,6 +8,7 @@ Use the report for the exact source change being reviewed:
 | Accessibility and keyboard focus | [Part 2](agent-reports/A2.md) |
 | Minimum size and text scaling | [Part 3](agent-reports/A3.md) |
 | Cleanup, documentation and focused logic coverage | [Part 4](agent-reports/PART4.md) |
+| Track A completion and compact matrix | [Part 5](agent-reports/PART5.md) |
 | Remaining native/manual work | [Windows checklist](TEST_0220.md) |
 
 [Current progress](agent-reports/SUMMARY.md) records which bundles have completed.

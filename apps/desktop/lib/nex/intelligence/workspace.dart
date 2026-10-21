@@ -1,3 +1,4 @@
+import '../../l10n/desktop_format.dart';
 import 'dart:async';
 import 'dart:io';
 import 'package:file_selector/file_selector.dart';
@@ -671,7 +672,7 @@ class _AssistantState extends State<DesktopAssistant> {
                                   )
                                     InputChip(
                                       avatar: const Icon(Icons.image_outlined),
-                                      label: Text('${i + 1}'),
+                                      label: Text(desktopDigits(context, i + 1)),
                                       onDeleted: locked
                                           ? null
                                           : () => ai.removeAttachment(i),
@@ -855,9 +856,10 @@ class _ActionReview extends StatelessWidget {
                       if (a.commitmentName != null) a.commitmentName!,
                       if (a.settingKey != null)
                         '${a.settingKey}: ${a.settingValue}',
-                      if (a.at != null) a.at!.toLocal().toString(),
+                      if (a.at != null)
+                        nexDisplayDate(a.at!, solar: NexPanelScope.maybeOf(context)?.S.solarCalendar ?? s.fa, persian: s.fa, time: true),
                       if (a.flag != null) '${a.flag}',
-                      if (a.index != null) '#${a.index! + 1}',
+                      if (a.index != null) desktopDigits(context, '#${a.index! + 1}'),
                       if (a.addTags.isNotEmpty) '+ ${a.addTags.join(', ')}',
                       if (a.removeTags.isNotEmpty)
                         '− ${a.removeTags.join(', ')}',

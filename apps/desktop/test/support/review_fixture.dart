@@ -1,5 +1,8 @@
+import 'package:flutter/services.dart';
+import 'package:nex_desktop/updates/release_notes.dart';
 import 'dart:io';
 import 'dart:convert';
+import 'package:nex_desktop/nex/desktop_date_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -105,6 +108,20 @@ Future<ReviewStore> openReviewStore(String name, {int count = 0}) async {
     );
     repo.attachTag(noteId: 'review-$i', tagId: tag.id);
   }
+  if (name.startsWith('compact_')) {
+    final image = File('${root.path}/review-image.png')..writeAsBytesSync(base64Decode('iVBORw0KGgoAAAANSUhEUgAAAPAAAACQCAIAAAC5w3GfAAAFO0lEQVR4nO3dPY4bRxCG4VlDgC/li/gGzuxQmeFsQznzDXQG5TqFAkGhEh3AmYM2KIq/M93VXV9VvW8qYFgz+6iWsyTBlw+fv21EWfrJewAiywBNqQI0pQrQlCpAU6oATakCNKUK0JQqQFOqAE2pAjSlCtCUKkBTqgBNqQI0pQrQlCpAU6reeA9Auv3y79/3/unjz7+vnGR/L3wEiy564Pg6NdmApu8donyeDmtA07YNUD5PgTU3hWSj2fA4IwG6erYK3U0DunQz/PmaBnTd5slzNA3oos0252Ua0BVbo83FNKApVYAu18rFuX5JA5pSBeharV+Zix8R0JQqQFOqAF0or78Nr3xcQFOqAE2pAjSlCtCUKkBTqgBNqQI0pQrQlCpAF8rrU9krHxfQlKpyoN+9f/UegSZWC3TTXNn0+mcdix+xEOhzx5VN564Q6IvKml65Mtf/QqgC+ibfsqYTVwL0A7g1Ta9ZnC5/JcwP+ilZTEc8/r2Sg96JFdNRjvy05KD3h2nlY+4vM+ijRjGtdrSO0oLu04lpheOMlPMrKQZd/vHrW6tJYsV3rChmsmXLmt74FiypDJ8zVDbd4nsK/bN9EozpcKW6KTS/pat5jxi6PKAn4cN0rJKAnsoO04HKAHoBOExHKQPoNWE6ROFBr3SGaf1ig14vDNPiBQbtZQvTykUF7asK07JFBe0epjULCVoEk8gYdF480FKMpIahLRxoQUCCI1UuEmhZOrKDFSwSaOUwLVIY0Ppi9Cd82tu/fvMeYbQYoKNYiTLnzZrm6KYDgI6lJNa0p84dhzatDjqij3AzXwuOa1oddNACmb5nN6hpadCBWFwXYvjHaiOa1v3UdwgQT5P93Ph+rK9//jN1EttEN3QOzZvqiRxavbH2tCJoTQTdqZ1OB9BApuVAq/34TdI5qUA0+5IDnTUF0yOao/xP0AKt8FOfl+/ZjYsMYVoIdG7NLa9ztLKob1oFdAXNrfVnaqtQ3LQE6DqaWyvPd4Y/ZdMSoAu2xvQ8ebKm/UFXW8+nZp/4bHOapp1Bl9Xcmnf6a7QJmvZ8L0dxzads3++xHpnUmz3cNjSaTxleCpeVKbWn/Z9D07Zt796/jrN2hKVj2gc06/lmI5fFnZT7AC0H0Gh+UN/FEcGkMMZq0Gh+2tFLpMDolPswS0GjeWf7L5Q7oOt8R+KmULQ9pgU1txwHWwea9Xy0x1dMVrNvi0Cjua97101fs9eEK0CjeaTrq6evueUy5/SXvtFsUnt5PArl8xa/MA7oMH399MV7hM5Wmp77lAPNVsXVvK39xTIRNJqtCq25tcz0LNBotiqB5tYa01NAo9mqNJpbC0zbg0azVck0t2ab5qVv0VJqbk01bQya9WxSYs2teaYtQaPZpPSaW5NMm4FGs0lFNLdmmLYBjWaTSmlumZvmplCir5++FNTcsjVtAJr1PFhZyqcMTY+CRvNgaG5ZmR4CjebB0GxeP2g0D4bmi0yWNDeFPqH5ZuOmO0GznkdC84MGTfeARvNIaH7aiOnDoNE8Epp31m36GGg0j4TmQ/WZ5qZwUWjuqMP0AdCs574qv6w93lHTe0GjuS8oj3fI9C7QaO4LzVbtN/0cNJr7QrNtO01zUzglNM9oj+knoFnPHaF5Xk9NPwKN5o7QPLvHpu+CRnNHaF7TA9O3QaO5IzSv7J7pG6DR3BGaReKvHAah2aWbS/oSNOv5aGh27Nr0D6DRfCjepKHQhenvoNF8KCjrdG76f9BoPhSa1TqZ5qbwcGjWrJl++fD5G+t5f2gW7z//DlEx6qLYmAAAAABJRU5ErkJggg=='));
+    repo.insert(Note(id: 'compact-photo', type: NoteType.photo,
+      mediaUri: image.path, mediaHash: sha256OfBytes(image.readAsBytesSync()),
+      caption: 'A quiet landscape / منظرهٔ آرام', createdAt: _day,
+      updatedAt: _day, deviceId: 'review-device', rev: 1, syncState: SyncState.pending));
+    repo.setDueAt('review-0', DateTime(2100, 1, 2, 9));
+    final file = File('${root.path}/review-guide.txt')..writeAsStringSync('Review attachment');
+    SqliteAttachmentRepository(repo, localDeviceId: 'review-device').add('review-0',
+      kind: AttachmentKind.file, mediaUri: file.path,
+      mediaHash: sha256OfBytes(file.readAsBytesSync()), name: 'review-guide.txt',
+      mimeType: 'text/plain', now: _day);
+    db.db.execute('UPDATE notes SET updated_at = ? WHERE id = ?', [_day.toUtc().toIso8601String(), 'review-0']);
+  }
   db.close();
   final features = NexFeatures(
     await DesktopStore.open(root.path, name),
@@ -198,6 +215,10 @@ Future<PanelController> bootReview(
     ),
   );
   await _frames(t);
+  if (spec.name.startsWith('compact_')) {
+    await t.runAsync(() => precacheImage(FileImage(File('${store.root.path}/review-image.png')), t.element(find.byType(Scaffold))));
+    await t.pump();
+  }
   return c;
 }
 
@@ -207,15 +228,23 @@ Future<void> goReview(
   PanelController c,
   ReviewShot spec,
 ) async {
+  final selectedReader = switch (spec.target) {
+    'readerText' => 'review-0', 'readerChecklist' => 'review-1',
+    'readerLink' => 'review-2', 'readerPhoto' => 'compact-photo', _ => null,
+  };
+  final settingsCategory = switch (spec.target) {
+    'displaySettings' => 0, 'shortcutSettings' => 2, 'aboutSettings' || 'releaseNotes' => 5,
+    _ => null,
+  };
   final window = spec.mode == 'window';
   switch (spec.target) {
     case 'assistant':
       c.selectWindowSection('assistant');
     case 'aiSettings' || 'providerSettings':
       c.selectWindowSection('settings');
-    case 'timeline' || 'reader':
+    case 'timeline' || 'reader' || 'readerText' || 'readerChecklist' || 'readerLink' || 'readerPhoto':
       window ? c.selectWindowSection('library') : c.openWidget('timeline');
-    case 'settings' || 'appearance' || 'backup' || 'toolsSettings':
+    case 'settings' || 'appearance' || 'backup' || 'toolsSettings' || 'displaySettings' || 'shortcutSettings' || 'aboutSettings' || 'releaseNotes' || 'solarCalendar':
       window ? c.selectWindowSection('settings') : c.openWidget('settings');
     case 'more':
       window ? c.selectWindowSection('tools') : c.openWidget('more');
@@ -223,6 +252,29 @@ Future<void> goReview(
       c.openWidget(spec.target == 'palette' ? 'note' : spec.target);
   }
   await _frames(t, 90);
+  if (settingsCategory != null) {
+    final open = find.byKey(ValueKey('settings-open-$settingsCategory'));
+    await t.ensureVisible(open); await t.tap(open); await _frames(t, 60);
+  }
+  if (spec.target == 'releaseNotes') {
+    await t.runAsync(() => rootBundle.loadString(releaseNotesAsset(spec.locale)));
+    await t.ensureVisible(find.byKey(const ValueKey('release-notes-open')));
+    await t.tap(find.byKey(const ValueKey('release-notes-open')));
+    await t.pump();
+    // Asset completion needs a real async turn, not simulated animation time.
+    for (var i = 0; i < 5 && find.byType(NexMarkdown).evaluate().isEmpty; i++) {
+      await t.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 40)));
+      await t.pump();
+    }
+    expect(find.byType(NexMarkdown), findsOneWidget);
+    await _frames(t, 60);
+  }
+  if (spec.target == 'solarCalendar') {
+    showDesktopDatePicker(t.element(find.byType(Scaffold)),
+      initialDate: DateTime(2026, 10, 21), firstDate: DateTime(2026, 10, 1),
+      lastDate: DateTime(2036, 10, 1), solar: true);
+    await t.pumpAndSettle();
+  }
   if (spec.target == 'aiSettings' || spec.target == 'providerSettings') {
     final open = find.byKey(const ValueKey('settings-open-6'));
     await t.ensureVisible(open);
@@ -271,6 +323,13 @@ Future<void> goReview(
       await t.pump();
     }
     await _frames(t);
+  }
+  if (selectedReader != null) {
+    final features = NexScope.of(t.element(find.byType(NexLibraryView)));
+    final note = await t.runAsync(() => features.store.call<Note>('get', {'id': selectedReader}));
+    features.requestNote(note!);
+    await _frames(t);
+    expect(find.byType(NexNoteDetail), findsOneWidget);
   }
   if (spec.target == 'reader') {
     await t.tap(find.byType(NoteCard).first);

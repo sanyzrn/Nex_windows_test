@@ -1,3 +1,5 @@
+import '../l10n/desktop_format.dart';
+import '../updates/release_notes.dart';
 import 'package:flutter/material.dart';
 import 'package:nex_data/schema/backup_kind.dart';
 import 'package:flutter/services.dart';

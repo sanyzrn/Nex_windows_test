@@ -5,3 +5,4 @@ request 6: complete A1 edge-panel and dock terminology after visual review
 request 7: A2 accessible controls, keyboard focus and semantic labels
 request 8: A3 minimum-size windows and full-size scaled labels
 request 9: A3 compact assistant label keeps page titles whole
+request 10: A4 compact settings/readers and A9/A11 localized history, counters and calendar picker

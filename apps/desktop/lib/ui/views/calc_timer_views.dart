@@ -1,3 +1,4 @@
+import '../../l10n/desktop_format.dart';
 import '../../l10n/utility_strings.dart';
 import 'dart:math' as math;
 
@@ -68,7 +69,7 @@ class _CalcViewState extends State<CalcView> {
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
               constraints: const BoxConstraints(minHeight: 40),
               child: Text(
-                _out,
+                desktopDigits(context, _out),
                 style: TextStyle(
                   fontFamily: Theme.of(
                     context,
@@ -249,7 +250,7 @@ class TimerView extends StatelessWidget {
       children: [
         Head(onBack: () => _backToMore(c)),
         Text(
-          fmtTimer(c.tLeft),
+          desktopDigits(context, fmtTimer(c.tLeft)),
           textAlign: TextAlign.center,
           style: TextStyle(
             fontFamily: Theme.of(context).textTheme.bodyMedium?.fontFamily,
@@ -268,7 +269,7 @@ class TimerView extends StatelessWidget {
                   padding: EdgeInsets.only(right: m == 25 ? 0 : 6),
                   child: Btn(
                     onPressed: () => c.timerPreset(m),
-                    child: Text('$m ${utilityLabelForText(context, 'minute')}'),
+                    child: Text(desktopDigits(context, '$m ${utilityLabelForText(context, 'minute')}')),
                   ),
                 ),
               ),
@@ -323,7 +324,7 @@ class StopwatchView extends StatelessWidget {
         ValueListenableBuilder<String>(
           valueListenable: c.swDisplay,
           builder: (context, txt, _) => Text(
-            txt,
+            desktopDigits(context, txt),
             textAlign: TextAlign.center,
             style: TextStyle(
               fontFamily: Theme.of(context).textTheme.bodyMedium?.fontFamily,
@@ -381,9 +382,9 @@ class StopwatchView extends StatelessWidget {
                           child: ItemRow(
                             plain: true,
                             onTap: () => c.copy(fmtSw(c.swLaps[i])),
-                            sub: Text(fmtSw(c.swLaps[i])),
+                            sub: Text(desktopDigits(context, fmtSw(c.swLaps[i]))),
                             child: Text(
-                              '${utilityLabelForText(context, 'Lap')} ${c.swLaps.length - i}',
+                              desktopDigits(context, '${utilityLabelForText(context, 'Lap')} ${c.swLaps.length - i}'),
                             ),
                           ),
                         ),

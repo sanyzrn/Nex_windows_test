@@ -45,7 +45,7 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
                 const SizedBox(width: 4),
                 Expanded(
                   child: Text(
-                    l.selectedCount(_selectedIds.length),
+                    desktopDigits(context, l.selectedCount(_selectedIds.length)),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
@@ -486,16 +486,16 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
                               ),
                               relativeTime: (time) => switch (time.unit) {
                                 NexRelativeUnit.now => l.justNow,
-                                NexRelativeUnit.minutes => l.minutesAgo(
+                                NexRelativeUnit.minutes => desktopDigits(context, l.minutesAgo(
                                   time.count,
-                                ),
-                                NexRelativeUnit.hours => l.hoursAgo(time.count),
-                                NexRelativeUnit.days => l.daysAgo(time.count),
-                                NexRelativeUnit.weeks => l.weeksAgo(time.count),
-                                NexRelativeUnit.months => l.monthsAgo(
+                                )),
+                                NexRelativeUnit.hours => desktopDigits(context, l.hoursAgo(time.count)),
+                                NexRelativeUnit.days => desktopDigits(context, l.daysAgo(time.count)),
+                                NexRelativeUnit.weeks => desktopDigits(context, l.weeksAgo(time.count)),
+                                NexRelativeUnit.months => desktopDigits(context, l.monthsAgo(
                                   time.count,
-                                ),
-                                NexRelativeUnit.years => l.yearsAgo(time.count),
+                                )),
+                                NexRelativeUnit.years => desktopDigits(context, l.yearsAgo(time.count)),
                               },
                               dueLabel: (due, repeat) {
                                 due = nextReminderOccurrence(

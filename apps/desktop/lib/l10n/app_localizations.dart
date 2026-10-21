@@ -2773,6 +2773,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Emoji category'**
   String get emojiCategory;
+
+  /// No description provided for @calendarYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Year'**
+  String get calendarYear;
+
+  /// No description provided for @calendarMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Month'**
+  String get calendarMonth;
+
+  /// No description provided for @calendarDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Day'**
+  String get calendarDay;
 }
 
 class _AppLocalizationsDelegate

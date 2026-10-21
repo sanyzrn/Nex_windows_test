@@ -1419,4 +1419,13 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get emojiCategory => 'دستهٔ ایموجی';
+
+  @override
+  String get calendarYear => 'سال';
+
+  @override
+  String get calendarMonth => 'ماه';
+
+  @override
+  String get calendarDay => 'روز';
 }

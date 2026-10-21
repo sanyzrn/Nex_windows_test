@@ -636,5 +636,8 @@
   "volumeMute": "Mute or unmute",
   "chooseColor": "Choose color",
   "copyColor": "Copy color code",
-  "emojiCategory": "Emoji category"
+  "emojiCategory": "Emoji category",
+  "calendarYear": "Year",
+  "calendarMonth": "Month",
+  "calendarDay": "Day"
 }
