@@ -27,7 +27,7 @@ void main() {
       );
       expect(
         desktopEditingDirection(
-          TextEditingValue(
+          const TextEditingValue(
             text: text,
             selection: TextSelection.collapsed(offset: text.length),
           ),

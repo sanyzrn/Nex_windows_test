@@ -13,8 +13,8 @@ already required. Phase 1 gives the desktop window its own form.
   computes the frame.
 - **Always the same.** With the default setting (`windowRemember` off) the saved
   frame is ignored on start and when switching back from the edge panel.
-  (Re-anchoring on a return from the tray was dropped together with the
-  tray-close behaviour, see "Reverted" below.)
+  The Part 6 agent follow-up also re-anchors a hidden compact window on tray
+  Open/left-click and single-instance activation; visible focus never moves it.
 - **Remembering.** `Settings > Display > Remember window size and position`
   restores the last frame (and maximised state) as in 0.21. The saved frame is
   recorded either way, so turning it on later has something to restore.
@@ -109,3 +109,19 @@ Solar selection uses valid year/month/day choices and returns a local civil date
 reminders still store UTC. The compact review matrix covers every settings
 category and all four reader types. See [Part 5](agent-reports/PART5.md) for actual
 verification and outstanding installed-Windows checks.
+
+## Agent Part 6 follow-up
+
+Settings → Display adds opt-in close-to-tray; the default remains quit. A missing
+real tray icon falls back to a clean quit. Tray Open, New note, Settings and Quit
+are localized. Hidden compact windows return to the cursor monitor's work-area
+corner; remembered windows and mere visible focus retain their frames.
+
+Toast actions Snooze 10 min and Done use a strict protocol plus note revision
+checks. Snooze retains the repeat rule from the new time; Done removes the
+reminder/series, never note content. Queue acceptance is no longer a delivery
+receipt. Mixed-language editing follows the active paragraph while retaining
+Flutter's text controller, IME, undo and selection. Simultaneous per-paragraph
+editing still requires a native editor; read mode already handles paragraphs.
+[Part 6](agent-reports/PART6.md) records automated evidence and
+[B0](agent-reports/B0.md) carries the installed-device checklist.

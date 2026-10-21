@@ -166,6 +166,7 @@ void NativeBridge::HandleMethodCall(
       {EncodableValue("workWidth"), EncodableValue(static_cast<int32_t>(monitor.rcWork.right - monitor.rcWork.left))},
       {EncodableValue("workHeight"), EncodableValue(static_cast<int32_t>(monitor.rcWork.bottom - monitor.rcWork.top))},
       {EncodableValue("tray"), EncodableValue(tray_added_)},
+      {EncodableValue("reminderActionsMarkup"), EncodableValue(VerifyReminderActionMarkup())},
       {EncodableValue("hotkey"), EncodableValue(hotkey_registered_)},
       {EncodableValue("workers"), EncodableValue(static_cast<int32_t>(workers_.size()))},
       {EncodableValue("monitors"), EncodableValue(static_cast<int32_t>(CollectMonitors().size()))}}));

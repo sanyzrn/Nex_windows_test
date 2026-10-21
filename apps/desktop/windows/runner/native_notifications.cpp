@@ -269,3 +269,20 @@ std::vector<std::pair<std::string, int64_t>> ListScheduledToastDetails() {
   } catch (...) {}
   return out;
 }
+
+bool VerifyReminderActionMarkup() {
+  try {
+    using namespace winrt::Windows::Data::Xml::Dom;
+    XmlDocument doc;
+    doc.LoadXml(ToastXml("diagnostic", "Title <&>\"", "Body <&>", 1792584000000LL, 7));
+    const auto actions = doc.GetElementsByTagName(L"action");
+    if (actions.Length() != 2) return false;
+    const auto first = actions.Item(0).as<XmlElement>();
+    const auto second = actions.Item(1).as<XmlElement>();
+    return first.GetAttribute(L"activationType") == L"protocol" &&
+        second.GetAttribute(L"activationType") == L"protocol" &&
+        first.GetAttribute(L"arguments") == L"nex-win://reminder/diagnostic?rev=7&at=1792584000000&action=snooze" &&
+        second.GetAttribute(L"arguments") == L"nex-win://reminder/diagnostic?rev=7&at=1792584000000&action=done" &&
+        doc.GetElementsByTagName(L"image").Length() == 1;
+  } catch (...) { return false; }
+}

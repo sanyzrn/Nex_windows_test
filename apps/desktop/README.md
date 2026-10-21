@@ -13,7 +13,7 @@ Declared version: **0.22.0+16**. [Product guide](../../README.md) ·
 - The panel shell provides edge reveal, dock, hover navigation and flyouts. Holds
   protect recordings, native pickers, active drags and modal operations. Both modes
   share a controller, note feature state and storage; mode transitions reveal the
-  native surface after the new Flutter frame. Closing currently quits the app.
+  native surface after the new Flutter frame. Closing quits by default; Settings → Display can retain Nex in the tray.
 - `lib/core/controller.dart` composes `PanelLifecycle`, `PanelTimers`, `PanelWiring`,
   `PanelDismissal`, `PanelWindowTransitions`, `PanelActions` and `PanelClipboardOps`.
   Its `part` files belong to the same library; do not import them independently.

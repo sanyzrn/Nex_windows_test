@@ -34,5 +34,7 @@ void SetReminderLabels(const std::string& snooze, const std::string& done);
 std::vector<std::string> ListScheduledToastIds();
 std::vector<std::pair<std::string, int64_t>> ListScheduledToastDetails();
 std::string ReminderDiagnosticError();
+// Parse synthetic action XML with the same WinRT DOM used by the queue.
+bool VerifyReminderActionMarkup();
 
 #endif  // RUNNER_NATIVE_NOTIFICATIONS_H_
