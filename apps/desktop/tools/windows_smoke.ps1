@@ -10,14 +10,20 @@ foreach ($file in @('nex_desktop.exe', 'nex_update.exe', 'flutter_windows.dll', 
 if (Get-Process -Name nex_desktop -ErrorAction SilentlyContinue) { throw 'Close the existing Nex desktop instance before running smoke tests.' }
 $probePath = [IO.Path]::ChangeExtension($Output, '.probe.json')
 $secondPath = [IO.Path]::ChangeExtension($Output, '.second.json')
-foreach ($file in @($probePath, $secondPath)) {
+$progressPath = $probePath + '.progress.json'
+$failurePath = $probePath + '.failure.json'
+foreach ($file in @($probePath, $secondPath, $progressPath, $failurePath)) {
     if (Test-Path -LiteralPath $file) { Remove-Item -LiteralPath $file }
 }
 $primary = Start-Process -FilePath $exe -ArgumentList @('--native-smoke', ('"' + $probePath + '"')) -WorkingDirectory $Release -WindowStyle Hidden -PassThru
 $deadline = [DateTime]::UtcNow.AddSeconds(15)
 while (-not (Test-Path -LiteralPath $probePath)) {
+    if (Test-Path -LiteralPath $failurePath) { throw ('Probe failed: ' + (Get-Content -LiteralPath $failurePath -Raw)) }
     if ($primary.HasExited) { throw 'Probe exited before writing a report.' }
-    if ([DateTime]::UtcNow -gt $deadline) { throw 'Probe did not finish in 15 seconds.' }
+    if ([DateTime]::UtcNow -gt $deadline) {
+        $stage = if (Test-Path -LiteralPath $progressPath) { Get-Content -LiteralPath $progressPath -Raw } else { 'before modules' }
+        throw ('Probe did not finish in 15 seconds. Last stage: ' + $stage)
+    }
     Start-Sleep -Milliseconds 20
 }
 $second = Start-Process -FilePath $exe -ArgumentList @('--native-smoke', ('"' + $secondPath + '"')) -WorkingDirectory $Release -WindowStyle Hidden -PassThru

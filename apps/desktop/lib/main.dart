@@ -119,7 +119,25 @@ void main(List<String> arguments) async {
     final native = controller.native as WinNativeHost;
     final startup = await native.startupEnabled();
     final result = await native.diagnostics();
-    result['modules'] = await probeDesktopModules(support.path);
+    var moduleStage = 'start';
+    try {
+      result['modules'] = await probeDesktopModules(
+        support.path,
+        onStage: (stage) {
+          moduleStage = stage;
+          File(
+            '${arguments[1]}.progress.json',
+          ).writeAsStringSync(jsonEncode({'stage': stage}));
+        },
+      );
+    } catch (error) {
+      // Explicit synthetic probe only: retain failures instead of an opaque
+      // external timeout. Never serialize vault values or user authentication.
+      File('${arguments[1]}.failure.json').writeAsStringSync(
+        jsonEncode({'stage': moduleStage, 'error': error.toString()}),
+      );
+      rethrow;
+    }
     var captures = 0;
     controller.onCapture = () {
       captures++;

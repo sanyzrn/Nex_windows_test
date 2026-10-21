@@ -39,16 +39,24 @@ List<int> desktopPdfProbeBytes() {
 /// Runs in the Release EXE, proving PDFium is bundled and usable offline,
 /// Windows secure writes round-trip and private copying avoids Nex history.
 /// Windows Hello itself always needs a real-person check, never a test bypass.
-Future<Map<String, Object>> probeDesktopModules(String temporaryRoot) async {
+Future<Map<String, Object>> probeDesktopModules(
+  String temporaryRoot, {
+  void Function(String stage)? onStage,
+}) async {
+  onStage?.call('pdfFixture');
   final file = File('$temporaryRoot/b8-probe.pdf');
   await file.writeAsBytes(desktopPdfProbeBytes());
+  onStage?.call('pdfInitialize');
   await pdfrxFlutterInitialize();
+  onStage?.call('pdfOpen');
   final document = await PdfDocument.openFile(file.path);
   var rendered = false, searched = false;
   try {
+    onStage?.call('pdfRender');
     final image = await document.pages.last.render(width: 300, height: 400);
     rendered = image != null && image.width == 300 && image.height == 400;
     image?.dispose();
+    onStage?.call('pdfSearch');
     searched =
         (await document.pages.last.loadText())?.fullText.contains(
           'probe page two',
@@ -58,23 +66,29 @@ Future<Map<String, Object>> probeDesktopModules(String temporaryRoot) async {
       throw StateError('PDF probe failed');
     }
   } finally {
+    onStage?.call('pdfClose');
     await document.dispose();
   }
   const storage = FlutterSecureStorage();
   final key = 'nex.windows.b8.probe.${newUuidV7()}';
   var secure = false;
   try {
+    onStage?.call('secureWrite');
     await storage.write(key: key, value: 'synthetic-b8-probe');
+    onStage?.call('secureRead');
     secure = await storage.read(key: key) == 'synthetic-b8-probe';
   } finally {
+    onStage?.call('secureDelete');
     await storage.delete(key: key);
   }
   const native = MethodChannel('rp/native');
+  onStage?.call('privateClipboard');
   final privateClipboard =
       await native.invokeMethod<bool>('privateClipboardSelfTest') == true;
   if (!secure || !privateClipboard) {
     throw StateError('Private storage/clipboard probe failed');
   }
+  onStage?.call('complete');
   return {
     'pdfPages': 2,
     'pdfRendered': rendered,
