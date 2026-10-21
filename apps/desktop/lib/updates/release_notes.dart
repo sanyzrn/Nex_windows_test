@@ -53,7 +53,7 @@ class _ReleaseNotesDialogState extends State<_ReleaseNotesDialog> {
           if (state.hasError) {
             return Text(DesktopStrings.of(context).t('releaseNotesError'));
           }
-          if (!state.hasData) return const Center(child: CircularProgressIndicator());
+          if (!state.hasData) { return const Center(child: CircularProgressIndicator()); }
           return SingleChildScrollView(child: NexMarkdown(state.data!));
         },
       ),

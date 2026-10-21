@@ -325,10 +325,7 @@ void main() {
       }
       await t.pumpWidget(const SizedBox());
       c.dispose();
-      await t.runAsync(() async {
-        await store.features.close();
-        await store.root.delete(recursive: true);
-      });
+      await closeReviewStore(t, store);
       expect(t.takeException(), isNull);
     });
   }

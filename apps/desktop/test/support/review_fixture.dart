@@ -337,3 +337,23 @@ Future<void> goReview(
     expect(find.byType(NexNoteDetail), findsOneWidget);
   }
 }
+
+/// Release decoders and the store before removing this test's temporary data.
+/// Windows can briefly retain an image/SQLite file handle after disposal; only
+/// sharing violations are retried, and persistent locks still fail the test.
+Future<void> closeReviewStore(WidgetTester tester, ReviewStore store) async {
+  PaintingBinding.instance.imageCache.clear();
+  PaintingBinding.instance.imageCache.clearLiveImages();
+  await tester.runAsync(() async {
+    await store.features.close();
+    for (var attempt = 0; ; attempt++) {
+      try {
+        await store.root.delete(recursive: true);
+        return;
+      } on FileSystemException catch (error) {
+        if (!Platform.isWindows || error.osError?.errorCode != 32 || attempt >= 9) rethrow;
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+      }
+    }
+  });
+}

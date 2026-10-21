@@ -45,3 +45,9 @@ Real Windows installation/uninstall/reinstall with notes, Run-dialog protocol
 activation, DPI/IME/Narrator and native delivery cannot be verified here.
 No version, schema/archive format, native runner or workflow changes; no merge,
 tag or release. Part 6 requires a new owner approval.
+
+Windows refresh 39549383449 initially failed in 20 new media-library/reader
+fixtures during temporary-directory cleanup (Windows sharing violation 32), not
+image comparison. Fixtures now evict decoded images and retry only that transient
+sharing error, bounded to 450ms; persistent/other errors still fail. No screenshot,
+assertion or comparison tolerance was removed. A fresh Windows run is required.
