@@ -72,6 +72,7 @@ class _DesktopCycleViewState extends State<DesktopCycleView> {
 
   Future<void> change(String command, Map<String, dynamic> args) async {
     if (!widget.features.modules.privateSession.isOpen || busy) return;
+    widget.features.modules.privateSession.touch();
     setState(() {
       busy = true;
       failed = false;

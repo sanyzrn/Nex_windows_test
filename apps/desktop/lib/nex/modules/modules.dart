@@ -123,14 +123,6 @@ Future<void> showDesktopModule(
                             ],
                           ),
                         ),
-                        if ((module == DesktopModule.vault ||
-                                module == DesktopModule.cycle) &&
-                            modules.privateSession.isOpen)
-                          IconButton(
-                            tooltip: l.privateLockNow,
-                            onPressed: modules.privateSession.lock,
-                            icon: const Icon(Icons.lock_outline_rounded),
-                          ),
                         IconButton(
                           tooltip: l.close,
                           onPressed: () => Navigator.of(context).pop(),

@@ -1,6 +1,6 @@
 # Nex Windows application
 
-Declared version: **0.25.0+19**. [Product guide](../../README.md) ·
+Declared version: **0.26.0+20**. [Product guide](../../README.md) ·
 [Current progress](../../docs/agent-reports/SUMMARY.md) ·
 [Shortcuts](../../docs/shortcuts.md) · [Release process](../../docs/RELEASING.md).
 
@@ -13,7 +13,7 @@ Declared version: **0.25.0+19**. [Product guide](../../README.md) ·
 - The panel shell provides edge reveal, dock, hover navigation and flyouts. Holds
   protect recordings, native pickers, active drags and modal operations. Both modes
   share a controller, note feature state and storage; mode transitions reveal the
-  native surface after the new Flutter frame. Closing quits by default; Settings → Display can retain Nex in the tray.
+  native surface after the new Flutter frame. Closing hides to the tray; explicit Quit drains and exits (close exits if no tray exists).
 - `lib/core/controller.dart` composes `PanelLifecycle`, `PanelTimers`, `PanelWiring`,
   `PanelDismissal`, `PanelWindowTransitions`, `PanelActions` and `PanelClipboardOps`.
   Its `part` files belong to the same library; do not import them independently.
@@ -123,3 +123,19 @@ use isolated data; historical results are indexed in [verification](../../docs/T
 [Integration history](../../docs/INTEGRATION.md) and historical transfer patches
 record the vendored package base; do not reapply patches. Existing shell/font/plugin
 notices remain in [THIRD_PARTY_NOTICES](THIRD_PARTY_NOTICES.md).
+
+## 0.26 usage / راهنمای کوتاه
+
+Close the desktop window to hide it in the tray; choose Quit to exit.
+Open PDF files with Ctrl+O, search with Ctrl+F, jump with Ctrl+G.
+Cycle's phase ring and keyboard slider inspect a day without recording it;
+choose a calendar day before setting a quick mood. Vault counts entries by
+category; lock private tools before leaving. Portrait refresh recalculates local
+statistics; AI still requires explicit permission and disclosure.
+
+دکمهٔ × پنجره را به ترای می‌فرستد؛ برای بستن کامل «خروج» را بزنید.
+در PDF میان‌برهای Ctrl+O، Ctrl+F و Ctrl+G به‌ترتیب برای بازکردن، جست‌وجو و
+انتخاب صفحه‌اند. حلقه و لغزندهٔ چرخه فقط برای بررسی تخمین‌اند؛ ثبت حال روزانه
+روی تاریخ انتخاب‌شدهٔ تقویم انجام می‌شود. فضای خصوصی تعداد هر دسته را نشان
+می‌دهد؛ هنگام ترک کار آن را قفل کنید. بازخوانی پرتره آمار محلی را دوباره محاسبه
+می‌کند و استفاده از هوش مصنوعی همچنان به اجازهٔ صریح نیاز دارد.

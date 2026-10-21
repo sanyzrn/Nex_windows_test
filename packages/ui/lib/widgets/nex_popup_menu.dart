@@ -26,6 +26,8 @@ class NexMenuEntryContent extends StatelessWidget {
       Flexible(
         child: Text(
           label,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: color),
         ),
       ),

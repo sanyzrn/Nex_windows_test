@@ -7,7 +7,7 @@ are the current work record; this does not assert that the branch has merged or 
 - Window mode opens at 460×760 dip, minimum 380×520. Below 960 logical px use
   the slim rail; at larger text sizes it grows to fit complete localized labels.
 - Capture, library, tools, intelligence and settings share the panel/window state.
-  Closing quits by default; Part 6 adds optional tray retention and hidden-window corner restoration.
+  In 0.26, closing hides to the tray; explicit Quit exits. Hidden-window corner restoration is retained.
 - Cloud intelligence and the GitHub updater exist. Local inference remains a
   placeholder. Do not reapply the historical integration patches.
 - Data/backup formats and version declarations stay unchanged unless requested.

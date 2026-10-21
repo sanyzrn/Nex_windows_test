@@ -336,7 +336,6 @@ class _ZonePicker extends StatelessWidget {
         borderRadius: nexDropdownRadius,
         dropdownColor: nexDropdownColor(context),
         isExpanded: true,
-        dropdownColor: p.liquid,
         hint: Text(
           utilityLabel(context, 'utility30'),
           style: TextStyle(

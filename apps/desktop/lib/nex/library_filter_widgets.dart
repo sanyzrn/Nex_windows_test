@@ -109,7 +109,13 @@ class _FilterBar extends StatelessWidget {
                                 shape: BoxShape.circle,
                               ),
                             ),
-                          Text(t.name),
+                          Flexible(
+                            child: Text(
+                              t.name,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
                         ],
                       ),
                     ),

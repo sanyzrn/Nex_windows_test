@@ -1,6 +1,6 @@
 # Android menu sync and module comparison — 0.26
 
-Source: actual `sanyzrn/DbsNex` branch `release/1.80.0`, inspected during this run.
+Source: actual `sanyzrn/DbsNex` branch `release/1.80.0`, commit `9590194f2425ed7eb3fa46ec61c1719cb98872a4`.
 Ported `packages/ui/lib/widgets/nex_popup_menu.dart`; copied only popupMenuTheme
 into `packages/ui/lib/tokens/nex_tokens.dart`. Windows tool accents, card density,
 leading sizes and Windows-owned files remain intact. Shared helpers now supply
@@ -21,7 +21,7 @@ Android's bitmap bridge; adds document identity and Ctrl+O/F/G. Cycle now has an
 inspectable phase ring with keyboard slider and quick mood on the selected date,
 preserving other observations through copyWith. Vault adds per-category counts;
 Portrait uses readable metric cards and refresh. Tool dialogs explain context
-and provide immediate shared private-session locking. These are desktop
+and retain immediate shared private-session locking. These are desktop
 adaptations, not a claim of full Android parity: Android native widgets,
 reminders, file-vault/biometric platform APIs and all portrait styling are not
 ported. Future work must preserve privacy/backup contracts.

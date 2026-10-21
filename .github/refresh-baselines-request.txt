@@ -1,1 +1,1 @@
-0.26.0: review tray settings, Android menu surfaces and all four tool improvements.
+0.26.0 revision 2: shared menus, module dashboards, corrected dropdown surface and current docs.

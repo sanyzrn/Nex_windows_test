@@ -16,7 +16,7 @@ class DesktopPortraitView extends StatefulWidget {
 
 class _DesktopPortraitViewState extends State<DesktopPortraitView> {
   NexWritingStats? stats;
-  bool failed = false, generating = false;
+  bool failed = false, generating = false, refreshing = false;
   @override
   void initState() {
     super.initState();
@@ -24,6 +24,8 @@ class _DesktopPortraitViewState extends State<DesktopPortraitView> {
   }
 
   Future<void> load() async {
+    if (refreshing) return;
+    setState(() => refreshing = true);
     try {
       final notes = await widget.features.store.call<List<Note>>(
         'portraitNotes',
@@ -38,6 +40,8 @@ class _DesktopPortraitViewState extends State<DesktopPortraitView> {
       }
     } catch (_) {
       if (mounted) setState(() => failed = true);
+    } finally {
+      if (mounted) setState(() => refreshing = false);
     }
   }
 
@@ -111,8 +115,10 @@ class _DesktopPortraitViewState extends State<DesktopPortraitView> {
                   ),
                 ),
                 IconButton(
-                  tooltip: l.retry,
-                  onPressed: generating ? null : load,
+                  tooltip: MaterialLocalizations.of(
+                    context,
+                  ).refreshIndicatorSemanticLabel,
+                  onPressed: generating || refreshing ? null : load,
                   icon: const Icon(Icons.refresh_rounded),
                 ),
               ],

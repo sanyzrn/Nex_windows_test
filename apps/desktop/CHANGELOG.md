@@ -5,7 +5,7 @@
 - Window × and Alt+F4 hide to the tray even for older profiles; explicit Quit drains and exits. If no tray is available, close exits safely.
 - Android shared menu surfaces, readable destructive items and rounded dropdowns now apply across desktop navigation and library actions.
 - Cycle adds an inspectable phase ring and quick mood; PDF adds document identity and Ctrl+O/F/G; Vault adds category counts; Portrait adds metric cards and refresh.
-- Tool headers explain context and offer immediate private locking. Updated installation probes and grouped physical-device acceptance checklist document remaining Windows/phone checks.
+- Tool headers explain context and retain the private locking controls. Updated installation probes and grouped physical-device acceptance checklist document remaining Windows/phone checks.
 
 ## 0.25.0 — 2026-10-22
 
