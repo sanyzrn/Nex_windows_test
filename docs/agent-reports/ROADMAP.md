@@ -38,6 +38,15 @@ generation and concise contact-sheet review avoid repeating the same captures.
 Part 7 includes the final B7 check after its feature changes. B0 records unresolved
 native checks early, and later parts update that same checklist.
 
+## B8 continuation — owner selection, 2026-10-21
+
+Parts 1–7 were merged and published as 0.23.0. The owner then selected all four
+core B8 modules: PDF reader, private area, writing portrait and cycle. This bundle
+starts at main `fcdea02` on `windows/b8-modules`; Windows-native extras remain
+outside it. Implementation and manual limits are recorded in [B8](B8.md), with
+final automated gates in the bundle's draft PR. No further version bump, merge
+or release is part of this implementation request.
+
 ## Lean execution and verification
 
 - Read only the files and original requirements needed for the current bundle.

@@ -55,12 +55,37 @@ or archive formats as part of UI cleanup.
 `lib/nex/intelligence` adds opt-in cloud providers, conversation history, note
 context/actions, OCR, transcription and semantic search through `nex_ai`.
 Provider keys use Windows secure storage. Local inference is a placeholder;
-cloud/LAN sync and Vault are not enabled. Release history is bundled in English/Persian and opens offline from About Nex
+cloud/LAN sync is not enabled. Release history is bundled in English/Persian and opens offline from About Nex
 or the update card. The reminder picker follows the chosen Solar/Gregorian
 calendar, returning the same civil date for UTC persistence.
 
 `lib/updates` checks stable GitHub
 releases, validates downloads and hands a saved session to Install & restart.
+
+## Optional modules (Unreleased)
+
+`lib/nex/modules` holds four device-opt-in modules. `NexFeatures.modules` owns
+switches and one `DesktopPrivateSession`; Settings and the window Tools shelf
+share their launchers. A private local Navigator is removed on blur/lock so
+nested dialogs cannot leave sensitive dates or text visible.
+
+- `pdf_reader.dart` uses the Flutter-3.44-compatible pdfrx 2.4 line; PDFium is a
+  bundled native build asset. Each keyed document owns its controller, and text
+  search attaches only after document readiness. HTTP(S) links and internal PDF
+  destinations are allowed; executable/custom link schemes are not launched.
+- `vault_store.dart` reuses the Android validated v1 shape in a Windows-only
+  secure-storage key; writes are serialized and read back. Neither note SQLite,
+  FTS, AI nor the library/full-backup writers read it. `native_private.cpp` owns
+  HWND-bound Windows Hello verification and excluded, sequence-checked copying.
+- `portrait_view.dart` counts live library notes with `nexWritingStats` and asks
+  for explicit disclosure consent before `DesktopIntelligence.writePortrait`.
+- `cycle_view.dart` uses existing `SqliteCycleRepository` commands in the storage
+  isolate and `CyclePredictor`, preserving advanced day fields and schema v1.
+  Daily logs queue immediately; chosen calendars affect display, not civil dates.
+
+The Release smoke probe renders/searches a synthetic PDF and tests secure
+storage/private clipboard behavior. A real person's Windows Hello verification
+and physical DPI/Narrator/backup checks remain manual. [B8 report](../../docs/agent-reports/B8.md).
 
 ## Localization and development
 
