@@ -47,6 +47,21 @@ Color nexWindowTint(ColorScheme scheme) => Color.alphaBlend(
   scheme.surfaceContainerLow,
 );
 
+/// The classic accent is an icon/focus color. Navigation labels need a
+/// stronger ink over the tinted rail and its selected wash.
+ThemeData nexDesktopRailTheme(ThemeData base) {
+  final colors = base.colorScheme;
+  final selected = Color.alphaBlend(
+    colors.primary.withValues(alpha: .09),
+    nexWindowTint(colors),
+  );
+  return base.copyWith(
+    colorScheme: colors.copyWith(
+      primary: nexReadableOn(colors.primary, selected, ratio: 5),
+    ),
+  );
+}
+
 /// The full desktop window shell — the app's main mode. A navigation rail on
 /// the leading edge switches between Capture, Library, Tools and Settings;
 /// the edge slide-out panel remains available as an optional mode and both
@@ -96,9 +111,15 @@ class _NexWindowShellState extends State<NexWindowShell> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 if (!_writing)
-                  wide
-                      ? _WindowNavRail(controller: c, features: widget.features)
-                      : _SlimRail(controller: c, features: widget.features),
+                  Theme(
+                    data: nexDesktopRailTheme(Theme.of(context)),
+                    child: wide
+                        ? _WindowNavRail(
+                            controller: c,
+                            features: widget.features,
+                          )
+                        : _SlimRail(controller: c, features: widget.features),
+                  ),
                 Expanded(
                   key: const ValueKey('window-content'),
                   child: Padding(

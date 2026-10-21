@@ -146,6 +146,7 @@ class _SettingsState extends State<DesktopIntelligenceSettings> {
               child: Column(
                 children: [
                   TextField(
+                    key: const ValueKey('ai-model-search'),
                     autofocus: true,
                     textDirection: TextDirection.ltr,
                     decoration: InputDecoration(labelText: s.t('searchModels')),

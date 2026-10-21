@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+import 'package:nex_desktop/ui/window_shell.dart';
 import 'package:nex_ui/nex_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nex_desktop/core/controller.dart';
@@ -31,11 +33,36 @@ void main() {
                 );
               }
             }
+            // Classic primary is an icon/focus tone; actual filled labels
+            // use the stronger fill from FilledButtonTheme.
+            final button = c.appTheme.filledButtonTheme.style!;
             expect(
-              nexContrast(colors.onPrimary, colors.primary),
+              nexContrast(
+                button.foregroundColor!.resolve({})!,
+                button.backgroundColor!.resolve({})!,
+              ),
               greaterThanOrEqualTo(4.5),
-              reason: '${preset.id} $mode primary',
+              reason: '${preset.id} $mode filled label',
             );
+            final rail = nexDesktopRailTheme(c.appTheme).colorScheme;
+            for (final background in [
+              nexWindowTint(colors),
+              Color.alphaBlend(
+                rail.primary.withValues(alpha: .09),
+                nexWindowTint(colors),
+              ),
+            ]) {
+              expect(
+                nexContrast(rail.primary, background),
+                greaterThanOrEqualTo(4.5),
+                reason: '${preset.id} $mode rail label',
+              );
+              expect(
+                nexContrast(rail.onSurfaceVariant, background),
+                greaterThanOrEqualTo(4.5),
+                reason: '${preset.id} $mode rail text',
+              );
+            }
           }
         }
       } finally {

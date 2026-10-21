@@ -26,7 +26,9 @@ Base: `436bc6a`; branch `windows/0.23-agent`. Owner approved this bundle.
 - B7: typing no longer rebuilds window chrome; small recording/status widgets
   retain independent updates. Regressions cover draft retention, welcome opt-out,
   credential-specific probe caching, model endpoints and native video routing.
-  Actual desktop schemes are checked at 4.5:1 across 14 palettes in light/dark.
+  Actual desktop text, filled-button labels and navigation labels are checked at
+  4.5:1 across 14 palettes in light/dark. Rail accents are strengthened over
+  their tinted background; raw icon-only primary is not mistaken for a text fill.
   Existing 10k-note benchmark now enforces 500 ms first-page and EN/FA search
   ceilings; these are headless query budgets, not a physical scroll/FPS claim.
 
@@ -35,6 +37,7 @@ whitespace checks pass. Local Flutter execution remains unavailable after the
 previous metadata-request automatic-review rejection; Windows CI supplies Flutter
 analysis/tests/build/native/installer evidence. The first Windows analysis caught two brace hints and one unused import; corrected.
 Windows refresh [39584740085](https://github.com/sanyzrn/Nex_windows_test/actions/runs/39584740085) rendered successfully; all 31 changed/new images were reviewed.
+Refresh [39585588218](https://github.com/sanyzrn/Nex_windows_test/actions/runs/39585588218) passed; both corrected empty-writing receipts were reviewed.
 Final source checks and final reviewed Windows renders will be recorded in the PR body and [checks](https://github.com/sanyzrn/Nex_windows_test/pull/9/checks), avoiding a documentation-only rerun.
 
 Physical sign-off still needs the owner: installed notifications/DND and real
