@@ -70,7 +70,7 @@ class DesktopPrivateSession extends ChangeNotifier {
   }
 
   /// The native writer excludes secrets from Nex/Windows clipboard history,
-  /// and clears only its own clipboard sequence after 30 seconds.
+  /// and clears only its own clipboard item after 30 seconds.
   Future<void> copy(String value) async {
     if (!isOpen) throw StateError('Private session is locked');
     touch();

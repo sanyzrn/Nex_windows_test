@@ -6,7 +6,7 @@
 
 bool VerifyPrivateTools(HWND owner, const std::wstring& reason,
                         const std::function<bool(int)>& wait_or_stop);
-bool SetPrivateClipboard(HWND owner, const std::wstring& text, DWORD* sequence);
+bool SetPrivateClipboard(HWND owner, const std::wstring& text, DWORD* token);
 bool ClipboardIsPrivate();
-bool ClearPrivateClipboard(HWND owner, DWORD sequence);
+bool ClearPrivateClipboard(HWND owner, DWORD token);
 #endif

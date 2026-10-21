@@ -61,8 +61,8 @@ NativeBridge::~NativeBridge() {
   channel_.SetMethodCallHandler(nullptr);
   stopping_.store(true);
   stop_cv_.notify_all();
-  const DWORD private_sequence = private_clipboard_sequence_.exchange(0);
-  if (private_sequence != 0) ClearPrivateClipboard(window_, private_sequence);
+  const DWORD private_token = private_clipboard_token_.exchange(0);
+  if (private_token != 0) ClearPrivateClipboard(window_, private_token);
   UnregisterHotKey(window_, 1);
   for (auto& worker : workers_) {
     EnumThreadWindows(GetThreadId(worker.thread.native_handle()),
@@ -145,19 +145,18 @@ void NativeBridge::HandleMethodCall(
       if (!stopping_) response->Success(EncodableValue(verified));
     });
   } else if (name == "privateClipboard") {
-    DWORD sequence = 0;
-    const bool copied = SetPrivateClipboard(window_, Utf16FromUtf8(ArgString(args, "text")), &sequence);
+    DWORD token = 0;
+    const bool copied = SetPrivateClipboard(window_, Utf16FromUtf8(ArgString(args, "text")), &token);
     result->Success(EncodableValue(copied));
     if (copied) {
-      private_clipboard_sequence_.store(sequence);
-      RunWorker([this, sequence]() {
+      private_clipboard_token_.store(token);
+      RunWorker([this, token]() {
         if (WaitOrStop(30000)) return;
         // A busy clipboard is retried briefly; a replacement is never cleared.
         for (int attempt = 0; attempt < 20; ++attempt) {
-          if (GetClipboardSequenceNumber() != sequence || !ClipboardIsPrivate()) return;
-          if (ClearPrivateClipboard(window_, sequence)) {
-            DWORD expected = sequence;
-            private_clipboard_sequence_.compare_exchange_strong(expected, 0);
+          if (ClearPrivateClipboard(window_, token)) {
+            DWORD expected = token;
+            private_clipboard_token_.compare_exchange_strong(expected, 0);
             return;
           }
           if (WaitOrStop(50)) return;
@@ -165,13 +164,26 @@ void NativeBridge::HandleMethodCall(
       });
     }
   } else if (name == "privateClipboardSelfTest") {
-    // Dedicated native probe, using a synthetic value only. It never verifies
-    // a real user or bypasses the Dart unlock; no content is returned.
-    DWORD sequence = 0;
-    const bool copied = SetPrivateClipboard(window_, L"Nex private clipboard probe", &sequence);
+    // Synthetic only. Test conversion and replacement as well as exclusion.
+    DWORD first = 0, replacement = 0;
+    const bool copied = SetPrivateClipboard(window_, L"Nex private clipboard probe", &first);
     const bool excluded = copied && ClipboardIsPrivate() && GetClipboardText().empty();
-    const bool cleared = copied && ClearPrivateClipboard(window_, sequence);
-    result->Success(EncodableValue(excluded && cleared));
+    if (copied && OpenClipboard(window_)) {
+      GetClipboardData(CF_TEXT); // Exercise Windows' synthesized text formats.
+      CloseClipboard();
+    }
+    const bool cleared = copied && ClearPrivateClipboard(window_, first);
+    const bool replaced = SetPrivateClipboard(window_, L"Synthetic first item", &first) &&
+        SetPrivateClipboard(window_, L"Synthetic replacement", &replacement);
+    const bool retained = replaced && !ClearPrivateClipboard(window_, first) && ClipboardIsPrivate();
+    const bool replacement_cleared = replaced && ClearPrivateClipboard(window_, replacement);
+    result->Success(EncodableValue(EncodableMap{
+      {EncodableValue("copied"), EncodableValue(copied)},
+      {EncodableValue("excluded"), EncodableValue(excluded)},
+      {EncodableValue("cleared"), EncodableValue(cleared)},
+      {EncodableValue("replacementRetained"), EncodableValue(retained)},
+      {EncodableValue("replacementCleared"), EncodableValue(replacement_cleared)},
+    }));
   } else if (name == "readClipboardImage") {
     ReadClipboardImage(ArgInt(args, "request"));
     result->Success();

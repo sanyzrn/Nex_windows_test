@@ -3,6 +3,7 @@
 #include <winrt/Windows.Foundation.h>
 #include <winrt/Windows.Security.Credentials.UI.h>
 #include <cstring>
+#include <atomic>
 
 bool VerifyPrivateTools(HWND owner, const std::wstring& reason,
                         const std::function<bool(int)>& wait_or_stop) {
@@ -37,6 +38,22 @@ namespace {
 UINT PrivateFormat() {
   return RegisterClipboardFormatW(L"ExcludeClipboardContentFromMonitorProcessing");
 }
+UINT TokenFormat() {
+  return RegisterClipboardFormatW(L"Nex.Windows.PrivateClipboard.Owner");
+}
+std::atomic<DWORD> next_token{0};
+bool HasToken(HWND owner, DWORD token) {
+  // Called with the clipboard open. Windows may synthesize additional text
+  // formats, changing its sequence without replacing our item. Match the
+  // window and our per-copy token instead, including across those conversions.
+  if (token == 0 || GetClipboardOwner() != owner || !ClipboardIsPrivate()) return false;
+  const HANDLE memory = GetClipboardData(TokenFormat());
+  if (!memory || GlobalSize(memory) < sizeof(DWORD)) return false;
+  const void* data = GlobalLock(memory);
+  DWORD stored = 0;
+  if (data) { memcpy(&stored, data, sizeof(stored)); GlobalUnlock(memory); }
+  return stored == token;
+}
 bool WriteDword(UINT format, DWORD value) {
   if (format == 0) return false;
   HGLOBAL memory = GlobalAlloc(GMEM_MOVEABLE, sizeof(DWORD));
@@ -50,14 +67,17 @@ bool WriteDword(UINT format, DWORD value) {
 }
 }
 
-bool SetPrivateClipboard(HWND owner, const std::wstring& text, DWORD* sequence) {
+bool SetPrivateClipboard(HWND owner, const std::wstring& text, DWORD* token) {
   if (text.empty() || text.size() > 10000 || !OpenClipboard(owner)) return false;
   EmptyClipboard();
+  DWORD identity = ++next_token;
+  if (identity == 0) identity = ++next_token;
   // Write the exclusion formats BEFORE the text, within the same clipboard lock.
   // A partial failure removes everything, rather than publishing a naked secret.
   bool ok = WriteDword(PrivateFormat(), 1) &&
       WriteDword(RegisterClipboardFormatW(L"CanIncludeInClipboardHistory"), 0) &&
-      WriteDword(RegisterClipboardFormatW(L"CanUploadToCloudClipboard"), 0);
+      WriteDword(RegisterClipboardFormatW(L"CanUploadToCloudClipboard"), 0) &&
+      WriteDword(TokenFormat(), identity);
   if (ok) {
     const size_t bytes = (text.size() + 1) * sizeof(wchar_t);
     HGLOBAL memory = GlobalAlloc(GMEM_MOVEABLE, bytes);
@@ -70,7 +90,7 @@ bool SetPrivateClipboard(HWND owner, const std::wstring& text, DWORD* sequence) 
     } else { if (memory) GlobalFree(memory); ok = false; }
   }
   if (!ok) EmptyClipboard();
-  *sequence = GetClipboardSequenceNumber();
+  *token = ok ? identity : 0;
   CloseClipboard();
   return ok;
 }
@@ -81,10 +101,10 @@ bool ClipboardIsPrivate() {
   return format != 0 && IsClipboardFormatAvailable(format);
 }
 
-bool ClearPrivateClipboard(HWND owner, DWORD sequence) {
+bool ClearPrivateClipboard(HWND owner, DWORD token) {
   if (!OpenClipboard(owner)) return false;
-  const bool matches = GetClipboardSequenceNumber() == sequence && ClipboardIsPrivate();
-  if (matches) EmptyClipboard();
+  const bool matches = HasToken(owner, token);
+  const bool cleared = matches && EmptyClipboard();
   CloseClipboard();
-  return matches;
+  return cleared;
 }

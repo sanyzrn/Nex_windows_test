@@ -81,12 +81,23 @@ Future<Map<String, Object>> probeDesktopModules(
     onStage?.call('secureDelete');
     await storage.delete(key: key);
   }
+  if (!secure) throw StateError('Secure storage round-trip failed');
   const native = MethodChannel('rp/native');
   onStage?.call('privateClipboard');
+  final clipboard = await native.invokeMapMethod<String, bool>(
+    'privateClipboardSelfTest',
+  );
   final privateClipboard =
-      await native.invokeMethod<bool>('privateClipboardSelfTest') == true;
-  if (!secure || !privateClipboard) {
-    throw StateError('Private storage/clipboard probe failed');
+      clipboard != null &&
+      const [
+        'copied',
+        'excluded',
+        'cleared',
+        'replacementRetained',
+        'replacementCleared',
+      ].every((key) => clipboard[key] == true);
+  if (!privateClipboard) {
+    throw StateError('Private clipboard probe failed: $clipboard');
   }
   onStage?.call('complete');
   return {
