@@ -57,12 +57,10 @@ bool CreateTrayIcon(HWND window, HICON& tray_icon, HMENU& tray_menu, bool startu
     Shell_NotifyIconW(NIM_DELETE, &nid);
     added = Shell_NotifyIconW(NIM_ADD, &nid) != FALSE;
   }
-  if (!added) {
-    added = (tray_icon != nullptr);
-  }
 
   tray_menu = CreatePopupMenu();
   AppendMenuW(tray_menu, MF_STRING, IDM_TRAY_OPEN, L"Nex");
+  AppendMenuW(tray_menu, MF_STRING, IDM_TRAY_CAPTURE, L"Nex");
   AppendMenuW(tray_menu, MF_STRING, IDM_TRAY_SETTINGS, L"Nex");
   AppendMenuW(tray_menu, MF_STRING, IDM_TRAY_ADDAPP, L"Nex");
   AppendMenuW(tray_menu, MF_SEPARATOR, 0, nullptr);

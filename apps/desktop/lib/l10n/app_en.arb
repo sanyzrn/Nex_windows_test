@@ -385,7 +385,7 @@
   "testNotification": "Test notifications",
   "testNotificationHint": "Shows one notification now and a second one 15 seconds later, so you can check both ways Nex delivers reminders.",
   "testNotificationRun": "Send test",
-  "testNotificationSent": "Test sent. You should see one notification now and another in 15 seconds.",
+  "testNotificationSent": "Windows accepted both test notifications. If they do not appear, check notification settings and Do not disturb.",
   "testNotificationFailed": "Windows did not accept the notification{detail}. Check Settings > System > Notifications and Focus assist.",
   "@testNotificationFailed": {
     "placeholders": {
@@ -639,5 +639,10 @@
   "emojiCategory": "Emoji category",
   "calendarYear": "Year",
   "calendarMonth": "Month",
-  "calendarDay": "Day"
+  "calendarDay": "Day",
+  "windowCloseAction": "Keep running in tray when I close the window",
+  "windowCloseTrayHint": "Close hides Nex. Open it from the tray; Quit saves and exits.",
+  "windowCloseQuitHint": "Off: closing saves and quits Nex.",
+  "reminderSnooze": "Snooze 10 min",
+  "reminderDone": "Done"
 }

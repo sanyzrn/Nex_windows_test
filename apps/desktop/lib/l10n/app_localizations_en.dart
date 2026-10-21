@@ -1082,8 +1082,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get testNotificationRun => 'Send test';
 
   @override
-  String get testNotificationSent =>
-      'Test sent. You should see one notification now and another in 15 seconds.';
+  String get testNotificationSent => 'Windows accepted both test notifications. If they do not appear, check notification settings and Do not disturb.';
 
   @override
   String testNotificationFailed(String detail) {
@@ -1428,4 +1427,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get calendarDay => 'Day';
+  @override
+  String get windowCloseAction => 'Keep running in tray when I close the window';
+
+  @override
+  String get windowCloseTrayHint => 'Close hides Nex. Open it from the tray; Quit saves and exits.';
+
+  @override
+  String get windowCloseQuitHint => 'Off: closing saves and quits Nex.';
+
+  @override
+  String get reminderSnooze => 'Snooze 10 min';
+
+  @override
+  String get reminderDone => 'Done';
+
 }

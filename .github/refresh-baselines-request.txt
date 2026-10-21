@@ -11,3 +11,5 @@ request 12: pump the deferred image-cache disposal frame before Windows temp cle
 request 13: immutable shared photo fixture avoids Windows mapped-file deletion; Persian attachment counts
 request 14: keep compact About version words whole above wrapping actions
 request 15: About build component matches existing release 0.22.0+16
+
+Part 6: optional close-to-tray row and notification settings link; active-paragraph field direction context. Refresh on Windows and review affected screenshots.

@@ -13,6 +13,7 @@ library;
 import '../l10n/desktop_format.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'desktop_editing_direction.dart';
 import 'package:flutter/services.dart';
 import 'package:nex_core/nex_core.dart';
 import 'package:nex_ui/nex_ui.dart';

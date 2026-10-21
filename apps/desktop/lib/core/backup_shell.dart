@@ -22,6 +22,8 @@ void validateBackupShell(Object? value) {
     'magnify',
     'panelPinned',
     'windowMaximized',
+    'windowRemember',
+    'closeToTray',
     'updates',
     'solarCalendar',
   };

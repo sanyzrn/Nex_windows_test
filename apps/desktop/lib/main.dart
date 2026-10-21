@@ -11,9 +11,11 @@ import 'nex/features.dart';
 import 'nex/store.dart';
 import 'nex/media_smoke.dart';
 import 'nex/panel_smoke.dart';
+import 'nex/lifecycle_smoke.dart';
 import 'nex/reminder_smoke.dart';
 import 'nex/reminder_coordinator.dart';
 import 'nex/note_activation.dart';
+import 'nex/reminder_activation.dart';
 import 'l10n/app_localizations.dart';
 import 'core/app_meta.dart';
 import 'updates/controller.dart';
@@ -41,6 +43,10 @@ void main(List<String> arguments) async {
   }
   if (arguments.length == 2 && arguments.first == '--reminder-smoke') {
     await reminderSmoke(arguments[1]);
+    return;
+  }
+  if (arguments.length == 2 && arguments.first == '--lifecycle-smoke') {
+    await lifecycleSmoke(arguments[1]);
     return;
   }
   final prefs = await SharedPreferences.getInstance();
@@ -89,9 +95,13 @@ void main(List<String> arguments) async {
       // Source runs have no installer marker and use normal saved preferences.
     }
   }
+  final actionLaunch =
+      arguments.length == 2 &&
+      arguments.first == '--open-note' &&
+      ReminderActivation.parse(arguments[1]) != null;
   await controller.bootstrap(
     installerLanguageMarker: installerLanguage,
-    showWindow: !arguments.contains('--background'),
+    showWindow: !arguments.contains('--background') && !actionLaunch,
     forcePanelMode: smokeMode,
   );
   controller.importFiles = (paths) {
@@ -224,6 +234,22 @@ void main(List<String> arguments) async {
     await reminders.close();
     await features.close();
   };
+  final labels = await AppLocalizations.delegate.load(
+    Locale(controller.resolvedLanguage),
+  );
+  await controller.native.setLabels({
+    'snooze': labels.reminderSnooze,
+    'done': labels.reminderDone,
+  });
+  if (actionLaunch) {
+    await reminders.start();
+    try {
+      await activateNote(arguments[1], controller, features);
+    } finally {
+      await controller.quit();
+    }
+    return;
+  }
   unawaited(reminders.start());
   if (Platform.isWindows) {
     final updates = features.updates = DesktopUpdates(
@@ -334,6 +360,9 @@ class _NativeLocaleLabelsState extends State<NativeLocaleLabels>
     final l = AppLocalizations.of(context)!;
     widget.controller.native.setLabels({
       'open': l.trayOpen,
+      'newNote': l.newNote,
+      'snooze': l.reminderSnooze,
+      'done': l.reminderDone,
       'settings': l.settings,
       'addApp': l.addApp,
       'startup': l.startup,

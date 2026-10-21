@@ -17,6 +17,7 @@ class _Native extends NativeHost {
     required String title,
     required String body,
     DateTime? occurrence,
+    int? revision,
   }) async {
     shown.add(body);
     return accept;
@@ -29,6 +30,7 @@ class _Native extends NativeHost {
     required String title,
     required String body,
     required DateTime fireAt,
+    int? revision,
   }) async {
     queued.add(body);
     return accept;

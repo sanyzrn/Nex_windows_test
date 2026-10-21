@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- Choose whether closing the window quits Nex or keeps it in the tray; Open
+  restores a hidden compact window to the cursor monitor's corner.
+- Snooze a reminder for 10 minutes or remove its reminder from the toast. Repeated
+  or stale actions are ignored; daily/weekly snooze continues from the new time.
+- Recover a missed reminder instead of treating queue acceptance as delivery.
+- Mixed-language editing follows the active paragraph without modifying text;
+  selection and IME composition keep a stable direction while active.
+
 - Read the complete release history in Persian or English from About Nex and the
   update card, without a network request.
 - Use Persian digits for application counters, timers and update progress, and

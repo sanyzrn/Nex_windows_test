@@ -152,6 +152,10 @@ FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
   }
   const bool display_change = message == WM_DPICHANGED || message == WM_DISPLAYCHANGE;
   if (bridge_ && display_change) bridge_->OnMessage(hwnd, message, wparam, lparam);
+  // Close belongs to Nex, before plugins or DefWindowProc can destroy the
+  // host. Explicit Quit sets quit_requested_ and is allowed through.
+  if (bridge_ && message == WM_CLOSE &&
+      bridge_->OnMessage(hwnd, message, wparam, lparam)) return 0;
   // Give Flutter, including plugins, an opportunity to handle window
   // messages.
   if (flutter_controller_) {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'desktop_editing_direction.dart';
 import 'package:nex_core/nex_core.dart';
 import '../l10n/app_localizations.dart';
 import 'features_state.dart';
@@ -144,29 +145,39 @@ class _TagManagerState extends State<_TagManager> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            TextField(
-              key: const ValueKey('tag-search'),
+            DesktopEditingDirection(
               controller: search,
-              decoration: InputDecoration(
-                hintText: l.search,
-                prefixIcon: const Icon(Icons.search),
+              multiline: false,
+              builder: (context, direction) => TextField(
+                textDirection: direction,
+                key: const ValueKey('tag-search'),
+                controller: search,
+                decoration: InputDecoration(
+                  hintText: l.search,
+                  prefixIcon: const Icon(Icons.search),
+                ),
+                onChanged: (_) => setState(() {}),
               ),
-              onChanged: (_) => setState(() {}),
             ),
             const SizedBox(height: 12),
-            TextField(
-              key: const ValueKey('tag-name'),
+            DesktopEditingDirection(
               controller: name,
-              enabled: !busy,
-              decoration: InputDecoration(
-                labelText: editingId == null ? l.addTag : l.edit,
-                suffixIcon: IconButton(
-                  tooltip: l.save,
-                  onPressed: busy ? null : save,
-                  icon: const Icon(Icons.check),
+              multiline: false,
+              builder: (context, direction) => TextField(
+                textDirection: direction,
+                key: const ValueKey('tag-name'),
+                controller: name,
+                enabled: !busy,
+                decoration: InputDecoration(
+                  labelText: editingId == null ? l.addTag : l.edit,
+                  suffixIcon: IconButton(
+                    tooltip: l.save,
+                    onPressed: busy ? null : save,
+                    icon: const Icon(Icons.check),
+                  ),
                 ),
+                onSubmitted: (_) => save(),
               ),
-              onSubmitted: (_) => save(),
             ),
             if (failure != null)
               Text(

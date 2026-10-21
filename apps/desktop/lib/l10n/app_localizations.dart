@@ -1536,6 +1536,21 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'Remember window size and position'**
+  /// Keep running in tray when I close the window
+  String get windowCloseAction;
+
+  /// Close hides Nex. Open it from the tray; Quit saves and exits.
+  String get windowCloseTrayHint;
+
+  /// Off: closing saves and quits Nex.
+  String get windowCloseQuitHint;
+
+  /// Snooze 10 min
+  String get reminderSnooze;
+
+  /// Done
+  String get reminderDone;
+
   String get windowRemember;
 
   /// No description provided for @windowRememberHint.

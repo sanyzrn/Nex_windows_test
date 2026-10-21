@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:nex_core/nex_core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'reminders.dart';
-import 'reminder_policy.dart';
 import 'store.dart';
 
 class ReminderDeliveryFailure implements Exception {}
@@ -27,7 +26,7 @@ class ReminderCoordinator {
   Future<void> start() async {
     _prefs = await SharedPreferences.getInstance();
     _scheduler.receipts.addAll(
-      _prefs!.getStringList('nex_reminder_receipts') ?? [],
+      _prefs!.getStringList('nex_reminder_delivered_v2') ?? [],
     );
     _changes = store.reminderChanges.listen((_) => unawaited(refresh()));
     _timer = Timer.periodic(
@@ -48,19 +47,22 @@ class ReminderCoordinator {
       }
       try {
         final notes = await store.call<List<Note>>('reminderCandidates');
-        _scheduler.currentReceipts = {
-          for (final note in notes)
-            reminderScheduleId(note.id): reminderReceipt(note),
-        };
         final result = await ReminderReconciliationEngine.reconcileNotes(
           notes: notes,
           scheduler: _scheduler,
           notifiedOverdueIds: _scheduler.receipts,
         );
-        await _prefs?.setStringList(
-          'nex_reminder_receipts',
-          _scheduler.receipts.toList().reversed.take(2048).toList(),
-        );
+        final recent = _scheduler.receipts
+            .toList()
+            .reversed
+            .take(2048)
+            .toList()
+            .reversed
+            .toList();
+        _scheduler.receipts
+          ..clear()
+          ..addAll(recent);
+        await _prefs?.setStringList('nex_reminder_delivered_v2', recent);
         onFailureChanged?.call(result.failedCount > 0);
         return result;
       } catch (_) {
@@ -89,7 +91,6 @@ class _TrackedScheduler implements ReminderScheduler {
   _TrackedScheduler(this.delegate);
   final ReminderScheduler delegate;
   final receipts = <String>{};
-  Map<String, String> currentReceipts = {};
   final _signatures = <String, String>{};
   Set<String> _scheduled = {};
 
@@ -104,8 +105,14 @@ class _TrackedScheduler implements ReminderScheduler {
     required String title,
     required String body,
     required DateTime fireAt,
+    int? revision,
   }) async {
-    final signature = jsonEncode([fireAt.millisecondsSinceEpoch, title, body]);
+    final signature = jsonEncode([
+      fireAt.millisecondsSinceEpoch,
+      title,
+      body,
+      revision,
+    ]);
     if (_scheduled.contains(id) && _signatures[id] == signature) return true;
     if (_scheduled.contains(id) && !await delegate.cancel(id)) return false;
     final success = await delegate.schedule(
@@ -114,12 +121,11 @@ class _TrackedScheduler implements ReminderScheduler {
       title: title,
       body: body,
       fireAt: fireAt,
+      revision: revision,
     );
     if (success) {
       _signatures[id] = signature;
       _scheduled.add(id);
-      final receipt = currentReceipts[id];
-      if (receipt != null) receipts.add(receipt);
     }
     return success;
   }
@@ -141,11 +147,13 @@ class _TrackedScheduler implements ReminderScheduler {
     required String title,
     required String body,
     DateTime? occurrence,
+    int? revision,
   }) => delegate.showOverdue(
     id: id,
     noteId: noteId,
     title: title,
     body: body,
     occurrence: occurrence,
+    revision: revision,
   );
 }

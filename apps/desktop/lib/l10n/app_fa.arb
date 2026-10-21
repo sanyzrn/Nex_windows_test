@@ -364,7 +364,7 @@
   "testNotification": "آزمایش اعلان‌ها",
   "testNotificationHint": "یک اعلان همین حالا و یکی دیگر ۱۵ ثانیه بعد نشان می‌دهد تا هر دو راه رساندن یادآورها را بسنجید.",
   "testNotificationRun": "ارسال آزمایشی",
-  "testNotificationSent": "آزمایش فرستاده شد. باید همین حالا یک اعلان و ۱۵ ثانیه بعد اعلان دیگری ببینید.",
+  "testNotificationSent": "ویندوز هر دو اعلان آزمایشی را پذیرفت. اگر نمایش داده نشدند، تنظیمات اعلان‌ها و حالت مزاحم نشوید را بررسی کن.",
   "testNotificationFailed": "ویندوز اعلان را نپذیرفت{detail}. تنظیمات > سیستم > اعلان‌ها و دستیار تمرکز (Focus assist) را بررسی کن.",
   "@testNotificationFailed": {
     "placeholders": {
@@ -639,5 +639,10 @@
   "emojiCategory": "دستهٔ ایموجی",
   "calendarYear": "سال",
   "calendarMonth": "ماه",
-  "calendarDay": "روز"
+  "calendarDay": "روز",
+  "windowCloseAction": "پس از بستن پنجره در سینی سیستم فعال بماند",
+  "windowCloseTrayHint": "بستن، پنجره را پنهان می‌کند. از سینی سیستم بازش کن؛ خروج، داده‌ها را ذخیره می‌کند و برنامه را می‌بندد.",
+  "windowCloseQuitHint": "خاموش: بستن پنجره، داده‌ها را ذخیره می‌کند و از نکس خارج می‌شود.",
+  "reminderSnooze": "۱۰ دقیقه بعد",
+  "reminderDone": "انجام شد"
 }

@@ -1083,8 +1083,7 @@ class AppLocalizationsFa extends AppLocalizations {
   String get testNotificationRun => 'ارسال آزمایشی';
 
   @override
-  String get testNotificationSent =>
-      'آزمایش فرستاده شد. باید همین حالا یک اعلان و ۱۵ ثانیه بعد اعلان دیگری ببینید.';
+  String get testNotificationSent => 'ویندوز هر دو اعلان آزمایشی را پذیرفت. اگر نمایش داده نشدند، تنظیمات اعلان‌ها و حالت مزاحم نشوید را بررسی کن.';
 
   @override
   String testNotificationFailed(String detail) {
@@ -1428,4 +1427,19 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get calendarDay => 'روز';
+  @override
+  String get windowCloseAction => 'پس از بستن پنجره در سینی سیستم فعال بماند';
+
+  @override
+  String get windowCloseTrayHint => 'بستن، پنجره را پنهان می‌کند. از سینی سیستم بازش کن؛ خروج، داده‌ها را ذخیره می‌کند و برنامه را می‌بندد.';
+
+  @override
+  String get windowCloseQuitHint => 'خاموش: بستن پنجره، داده‌ها را ذخیره می‌کند و از نکس خارج می‌شود.';
+
+  @override
+  String get reminderSnooze => '۱۰ دقیقه بعد';
+
+  @override
+  String get reminderDone => 'انجام شد';
+
 }

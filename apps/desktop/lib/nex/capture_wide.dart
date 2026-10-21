@@ -103,33 +103,38 @@ mixin CaptureWide on CaptureViewBase {
                             skipTraversal: true,
                             onFocusChange: (focused) =>
                                 focused ? c?.focusGained() : c?.focusLost(),
-                            child: TextField(
-                              key: const ValueKey('capture-field'),
+                            child: DesktopEditingDirection(
                               controller: f.composer,
-                              focusNode: f.focus,
-                              autofocus: true,
-                              minLines: 6,
-                              maxLines: small ? 12 : 16,
-                              textAlignVertical: TextAlignVertical.top,
-                              textDirection: nexDirectionOf(f.composer.text),
-                              keyboardType: TextInputType.multiline,
-                              style: theme.textTheme.bodyLarge?.copyWith(
-                                fontSize: 16,
-                                height: 1.6,
-                              ),
-                              decoration: InputDecoration(
-                                hintText: l.captureHint,
-                                hintStyle: theme.textTheme.bodyLarge?.copyWith(
-                                  color: scheme.onSurfaceVariant,
+                              multiline: true,
+                              builder: (context, direction) => TextField(
+                                key: const ValueKey('capture-field'),
+                                controller: f.composer,
+                                focusNode: f.focus,
+                                autofocus: true,
+                                minLines: 6,
+                                maxLines: small ? 12 : 16,
+                                textAlignVertical: TextAlignVertical.top,
+                                textDirection: direction,
+                                keyboardType: TextInputType.multiline,
+                                style: theme.textTheme.bodyLarge?.copyWith(
                                   fontSize: 16,
+                                  height: 1.6,
                                 ),
-                                filled: false,
-                                contentPadding: const EdgeInsets.all(18),
-                                border: InputBorder.none,
-                                enabledBorder: InputBorder.none,
-                                focusedBorder: InputBorder.none,
+                                decoration: InputDecoration(
+                                  hintText: l.captureHint,
+                                  hintStyle: theme.textTheme.bodyLarge
+                                      ?.copyWith(
+                                        color: scheme.onSurfaceVariant,
+                                        fontSize: 16,
+                                      ),
+                                  filled: false,
+                                  contentPadding: const EdgeInsets.all(18),
+                                  border: InputBorder.none,
+                                  enabledBorder: InputBorder.none,
+                                  focusedBorder: InputBorder.none,
+                                ),
+                                onChanged: f.write,
                               ),
-                              onChanged: f.write,
                             ),
                           ),
                         ),

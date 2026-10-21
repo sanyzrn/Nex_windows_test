@@ -21,6 +21,7 @@ class _Scheduler extends FakeReminderScheduler {
     required String title,
     required String body,
     required DateTime fireAt,
+    int? revision,
   }) async {
     calls++;
     if (fail) return false;
@@ -30,6 +31,7 @@ class _Scheduler extends FakeReminderScheduler {
       title: title,
       body: body,
       fireAt: fireAt,
+      revision: revision,
     );
   }
 }
@@ -276,6 +278,42 @@ void main() {
         });
         await runtime.refresh();
         expect(scheduler.overdueShown.length, 2);
+      } finally {
+        await runtime.close();
+        await store.close();
+        await root.delete(recursive: true);
+      }
+    },
+  );
+  test(
+    'queue acceptance is not a delivery receipt; missed delivery recovers once',
+    () async {
+      final root = await Directory.systemTemp.createTemp('nex-missed-');
+      final store = await DesktopStore.open(root.path, 'missed');
+      final scheduler = _Scheduler();
+      final runtime = ReminderCoordinator(store, scheduler);
+      try {
+        final note = await store.call<Note>('capture', {
+          'text': 'Missed while asleep',
+        });
+        await store.call('remind', {
+          'id': note.id,
+          'at': DateTime.now().add(const Duration(days: 1)),
+        });
+        await runtime.start();
+        expect(
+          SharedPreferences.getInstance().then(
+            (p) => p.getStringList('nex_reminder_delivered_v2'),
+          ),
+          completion(isEmpty),
+        );
+        await store.call('remind', {
+          'id': note.id,
+          'at': DateTime.now().subtract(const Duration(minutes: 1)),
+        });
+        await runtime.refresh();
+        await runtime.refresh();
+        expect(scheduler.overdueShown.length, 1);
       } finally {
         await runtime.close();
         await store.close();

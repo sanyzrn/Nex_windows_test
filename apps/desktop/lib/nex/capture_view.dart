@@ -9,6 +9,7 @@ library;
 import '../l10n/desktop_format.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'desktop_editing_direction.dart';
 import 'package:flutter/services.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:nex_ui/nex_ui.dart';
@@ -113,26 +114,30 @@ abstract class CaptureViewBase extends StatelessWidget {
               skipTraversal: true,
               onFocusChange: (focused) =>
                   focused ? c?.focusGained() : c?.focusLost(),
-              child: TextField(
-                key: const ValueKey('capture-field'),
+              child: DesktopEditingDirection(
                 controller: f.composer,
-                focusNode: f.focus,
-                autofocus: true,
-                minLines: 5,
-                maxLines: 9,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyLarge?.copyWith(fontSize: 15, height: 1.6),
-                textDirection: nexDirectionOf(f.composer.text),
-                decoration: InputDecoration(
-                  hintText: l.captureHint,
-                  filled: true,
-                  fillColor: Theme.of(
+                multiline: true,
+                builder: (context, direction) => TextField(
+                  key: const ValueKey('capture-field'),
+                  controller: f.composer,
+                  focusNode: f.focus,
+                  autofocus: true,
+                  minLines: 5,
+                  maxLines: 9,
+                  style: Theme.of(
                     context,
-                  ).colorScheme.surfaceContainerLowest,
-                  contentPadding: const EdgeInsets.all(14),
+                  ).textTheme.bodyLarge?.copyWith(fontSize: 15, height: 1.6),
+                  textDirection: direction,
+                  decoration: InputDecoration(
+                    hintText: l.captureHint,
+                    filled: true,
+                    fillColor: Theme.of(
+                      context,
+                    ).colorScheme.surfaceContainerLowest,
+                    contentPadding: const EdgeInsets.all(14),
+                  ),
+                  onChanged: f.write,
                 ),
-                onChanged: f.write,
               ),
             ),
           ),

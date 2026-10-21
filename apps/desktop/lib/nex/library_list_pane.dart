@@ -159,72 +159,78 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
                     c?.focusLost();
                   }
                 },
-                child: TextField(
-                  key: const ValueKey('library-search'),
+                child: DesktopEditingDirection(
                   controller: query,
-                  focusNode: _searchFocusNode,
-                  textDirection: nexDirectionOf(query.text),
-                  decoration: InputDecoration(
-                    hintText: l.search,
-                    hintMaxLines: stacked ? 3 : 1,
-                    // The Android app's search fields are capsules; a stadium
-                    // here matches it and separates search from the card edges
-                    // around it.
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(999),
-                      borderSide: BorderSide(color: scheme.outlineVariant),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(999),
-                      borderSide: BorderSide(
-                        color: scheme.primary,
-                        width: nexFocusRingWidth,
+                  multiline: false,
+                  builder: (context, direction) => TextField(
+                    key: const ValueKey('library-search'),
+                    controller: query,
+                    focusNode: _searchFocusNode,
+                    textDirection: direction,
+                    decoration: InputDecoration(
+                      hintText: l.search,
+                      hintMaxLines: stacked ? 3 : 1,
+                      // The Android app's search fields are capsules; a stadium
+                      // here matches it and separates search from the card edges
+                      // around it.
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(999),
+                        borderSide: BorderSide(color: scheme.outlineVariant),
                       ),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(vertical: 10),
-                    prefixIcon: const Icon(Icons.search_rounded, size: 18),
-                    suffixIcon: query.text.isNotEmpty
-                        ? IconButton(
-                            tooltip: l.clearSearch,
-                            icon: const Icon(Icons.close_rounded, size: 16),
-                            onPressed: () {
-                              query.clear();
-                              load();
-                            },
-                          )
-                        : stacked
-                        ? null
-                        : Padding(
-                            padding: const EdgeInsetsDirectional.only(end: 10),
-                            child: Center(
-                              widthFactor: 1,
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 6,
-                                  vertical: 2,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: scheme.surfaceContainerHighest,
-                                  borderRadius: BorderRadius.circular(4),
-                                  border: Border.all(
-                                    color: scheme.outlineVariant.withValues(
-                                      alpha: 0.5,
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(999),
+                        borderSide: BorderSide(
+                          color: scheme.primary,
+                          width: nexFocusRingWidth,
+                        ),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                      prefixIcon: const Icon(Icons.search_rounded, size: 18),
+                      suffixIcon: query.text.isNotEmpty
+                          ? IconButton(
+                              tooltip: l.clearSearch,
+                              icon: const Icon(Icons.close_rounded, size: 16),
+                              onPressed: () {
+                                query.clear();
+                                load();
+                              },
+                            )
+                          : stacked
+                          ? null
+                          : Padding(
+                              padding: const EdgeInsetsDirectional.only(
+                                end: 10,
+                              ),
+                              child: Center(
+                                widthFactor: 1,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: scheme.surfaceContainerHighest,
+                                    borderRadius: BorderRadius.circular(4),
+                                    border: Border.all(
+                                      color: scheme.outlineVariant.withValues(
+                                        alpha: 0.5,
+                                      ),
                                     ),
                                   ),
-                                ),
-                                child: Text(
-                                  ShortcutLabels.search,
-                                  style: TextStyle(
-                                    fontSize: 10.5,
-                                    fontWeight: FontWeight.w600,
-                                    color: scheme.onSurfaceVariant,
+                                  child: Text(
+                                    ShortcutLabels.search,
+                                    style: TextStyle(
+                                      fontSize: 10.5,
+                                      fontWeight: FontWeight.w600,
+                                      color: scheme.onSurfaceVariant,
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
-                          ),
+                    ),
+                    onChanged: _queryChanged,
                   ),
-                  onChanged: _queryChanged,
                 ),
               );
               final actions = Row(

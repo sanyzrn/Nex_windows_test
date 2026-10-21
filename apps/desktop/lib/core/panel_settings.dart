@@ -45,6 +45,9 @@ class Settings {
   /// False (default): the window opens as the compact card in the corner,
   /// always the same size. True: it reopens at the frame it was left in.
   bool windowRemember = false;
+
+  /// Opt-in: the default close action remains a clean quit.
+  bool closeToTray = false;
   List<String> recentEmoji = [];
   List<Color> recentColors = [];
   String edge = 'right';
@@ -98,6 +101,7 @@ class Settings {
     'windowBounds': windowBounds,
     'windowMaximized': windowMaximized,
     'windowRemember': windowRemember,
+    'closeToTray': closeToTray,
     'recentEmoji': recentEmoji,
     'recentColors': recentColors.map(_hex).toList(),
     'edge': edge,
@@ -151,6 +155,7 @@ class Settings {
     }
     s.windowMaximized = j['windowMaximized'] as bool? ?? false;
     s.windowRemember = j['windowRemember'] as bool? ?? false;
+    s.closeToTray = j['closeToTray'] as bool? ?? false;
     s.recentEmoji = ((j['recentEmoji'] as List?) ?? [])
         .map((e) => e.toString())
         .toList();

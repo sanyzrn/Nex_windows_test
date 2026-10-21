@@ -81,6 +81,22 @@ mixin _SettingsDisplayAppearance on _SettingsStateBase {
           ),
           const Divider(height: 1),
           _SettingRow(
+            title: l.windowCloseAction,
+            subtitle: c.S.closeToTray
+                ? l.windowCloseTrayHint
+                : l.windowCloseQuitHint,
+            control: Switch(
+              key: const ValueKey('close-to-tray'),
+              value: c.S.closeToTray,
+              onChanged: (v) {
+                c.S.closeToTray = v;
+                c.save();
+                c.refresh();
+              },
+            ),
+          ),
+          const Divider(height: 1),
+          _SettingRow(
             title: l.windowRemember,
             subtitle: l.windowRememberHint,
             control: Switch(
@@ -141,10 +157,21 @@ mixin _SettingsDisplayAppearance on _SettingsStateBase {
             title: l.testNotification,
             subtitle: l.testNotificationHint,
             control: DesktopFocusRing(
-              child: OutlinedButton(
-                key: const ValueKey('test-notification'),
-                onPressed: () => _sendTestNotification(c, l),
-                child: Text(l.testNotificationRun),
+              child: Wrap(
+                spacing: NexSpacing.sm,
+                runSpacing: NexSpacing.sm,
+                children: [
+                  OutlinedButton(
+                    key: const ValueKey('test-notification'),
+                    onPressed: () => _sendTestNotification(c, l),
+                    child: Text(l.testNotificationRun),
+                  ),
+                  TextButton(
+                    onPressed: () =>
+                        c.native.launch('ms-settings:notifications'),
+                    child: Text(l.notificationSettings),
+                  ),
+                ],
               ),
             ),
           ),

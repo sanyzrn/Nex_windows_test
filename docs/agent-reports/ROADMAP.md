@@ -29,7 +29,7 @@ an owner decision. Internal commits may separate unrelated changes.
 | 3 | A3 | Minimum window and text-scale overflow sweep | Implemented; verification in A3.md |
 | 4 | A5, A7, A8, A10 | Repository cleanup, architecture/README/shortcuts, contributor templates and focused pure-logic coverage | Completed; [report](PART4.md), focused checks recorded |
 | 5 | A9, A11, A12, A4, A6 | Persian updater notes, digits/calendar consistency, installer polish; complete the screenshot matrix after these changes, then format | Completed; [report](PART5.md); closes Track A |
-| 6 | B0, B1, B2, B3 | Triage remaining Windows checks; mixed-language editing, close/tray lifecycle, corner restoration, reminders and toast actions | Not started; native checks need Windows |
+| 6 | B0, B1, B2, B3 | Triage remaining Windows checks; mixed-language editing, close/tray lifecycle, corner restoration, reminders and toast actions | In progress; owner approved, native checks via Windows CI |
 | 7 | B4, B5, B6, B7 | Windows appearance/integration, Android AI parity including models/YouTube, backup/onboarding/settings/update handoff, final accessibility/performance/localization checks | Not started; closes Track B |
 | Optional | B8 | Owner-selected modules and Windows extras | Deferred; selection and approval required before implementation |
 
@@ -61,7 +61,7 @@ native checks early, and later parts update that same checklist.
 - Report unavailable Windows/manual checks honestly and carry them forward.
   Required native verification is not removed to save tokens.
 
-The owner approved Part 5 and it is complete. Wait for approval before Part 6.
+The owner approved Part 6. B0–B3 are in progress; wait for approval before Part 7.
 
 No data schema or backup format changes. No version bump until requested.
 Draft PRs are due at the end of each track, as specified in the work order.

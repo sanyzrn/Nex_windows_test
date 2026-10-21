@@ -34,6 +34,7 @@
 #define IDM_TRAY_ADDAPP 40003
 #define IDM_TRAY_STARTUP 40004
 #define IDM_TRAY_QUIT 40005
+#define IDM_TRAY_CAPTURE 40006
 
 /// The whole native half of the app, ported from the original's
 /// src/sys/windows.rs: edge window plumbing, tray, clipboard watch
