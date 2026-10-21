@@ -93,6 +93,7 @@ void main() {
                 RepaintBoundary(
                   key: const ValueKey('b8-review'),
                   child: MaterialApp(
+                    debugShowCheckedModeBanner: false,
                     theme: c.appTheme,
                     locale: Locale(locale),
                     localizationsDelegates:
@@ -102,7 +103,7 @@ void main() {
                       controller: c,
                       child: NexScope(
                         features: store.features,
-                        child: Scaffold(body: body),
+                        child: Scaffold(backgroundColor: c.appTheme.colorScheme.surface, body: body),
                       ),
                     ),
                   ),
@@ -131,6 +132,7 @@ void main() {
                 RepaintBoundary(
                   key: const ValueKey('b8-review'),
                   child: MaterialApp(
+                    debugShowCheckedModeBanner: false,
                     theme: c.appTheme,
                     locale: Locale(locale),
                     localizationsDelegates:
@@ -146,7 +148,7 @@ void main() {
                       controller: c,
                       child: NexScope(
                         features: store.features,
-                        child: Scaffold(body: body),
+                        child: Scaffold(backgroundColor: c.appTheme.colorScheme.surface, body: body),
                       ),
                     ),
                   ),

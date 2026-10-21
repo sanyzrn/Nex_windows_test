@@ -19,7 +19,7 @@ bool VerifyPrivateTools(HWND owner, const std::wstring& reason,
       IAsyncOperation<UserConsentVerificationResult> operation{nullptr};
       const winrt::hstring message(reason);
       winrt::check_hresult(interop->RequestVerificationForWindowAsync(
-          owner, winrt::get_abi(message), winrt::guid_of<decltype(operation)>(),
+          owner, reinterpret_cast<HSTRING>(winrt::get_abi(message)), winrt::guid_of<decltype(operation)>(),
           winrt::put_abi(operation)));
       while (operation.Status() == AsyncStatus::Started) {
         if (wait_or_stop(100)) { operation.Cancel(); break; }

@@ -24,7 +24,7 @@ class DesktopPdfReader extends StatefulWidget {
 }
 
 class _DesktopPdfReaderState extends State<DesktopPdfReader> {
-  final controller = PdfViewerController();
+  var controller = PdfViewerController();
   PdfTextSearcher? searcher;
   final query = TextEditingController();
   late String? path = widget.initialPath;
@@ -52,6 +52,9 @@ class _DesktopPdfReaderState extends State<DesktopPdfReader> {
       searcher = null;
       setState(() {
         path = files.first.path;
+        // A retiring keyed viewer detaches its controller on disposal. Give
+        // the replacement its own controller so it cannot be detached by it.
+        controller = PdfViewerController();
         page = 1;
         count = 0;
         failed = false;
@@ -295,8 +298,9 @@ class _DesktopPdfReaderState extends State<DesktopPdfReader> {
                         documentSize: Size(x, height),
                       );
                     },
-                    onViewerReady: (document, _) {
-                      if (!mounted) return;
+                    onViewerReady: (document, activeController) {
+                      if (!mounted || !identical(activeController, controller))
+                        return;
                       searcher?.removeListener(_changed);
                       searcher?.dispose();
                       // pdfrx 2.4 requires an attached, ready controller here.
@@ -325,6 +329,10 @@ class _DesktopPdfReaderState extends State<DesktopPdfReader> {
                           ),
                           TextButton(
                             onPressed: () => setState(() {
+                              searcher?.removeListener(_changed);
+                              searcher?.dispose();
+                              searcher = null;
+                              controller = PdfViewerController();
                               count = 0;
                               revision++;
                             }),
