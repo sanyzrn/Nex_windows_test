@@ -10,10 +10,12 @@ Future<DateTime?> showDesktopDatePicker(
   required DateTime firstDate,
   required DateTime lastDate,
   required bool solar,
+  bool useRootNavigator = true,
 }) {
   if (!solar) {
     return showDatePicker(
       context: context,
+      useRootNavigator: useRootNavigator,
       initialDate: initialDate,
       firstDate: firstDate,
       lastDate: lastDate,
@@ -21,6 +23,7 @@ Future<DateTime?> showDesktopDatePicker(
   }
   return showDialog<DateTime>(
     context: context,
+    useRootNavigator: useRootNavigator,
     builder: (_) => _SolarDatePicker(
       initialDate: initialDate,
       firstDate: firstDate,

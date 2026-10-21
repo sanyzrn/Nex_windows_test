@@ -6,7 +6,7 @@
 
 A local-first notebook and desktop toolkit for Windows, with English and Persian interfaces. Work in a full desktop window or a compact panel at either screen edge.
 
-**Current app version: `0.23.0+17` · Windows 10/11 · x64**
+**Current app version: `0.24.0+18` · Windows 10/11 · x64**
 
 [Download the latest installer](https://github.com/sanyzrn/Nex_windows_test/releases/latest) · [What's new](apps/desktop/CHANGELOG.md) · [Report a bug](https://github.com/sanyzrn/Nex_windows_test/issues/new/choose) · [فارسی](#راهنمای-فارسی)
 
@@ -25,6 +25,15 @@ These are Windows widget snapshots, not installed-app verification.
 - Switch between the custom desktop window and an edge panel with hover navigation, tray access and a global shortcut.
 - Choose a theme, language, calendar and dock layout. Tool selection is searchable and paginated.
 - Read the full English/Persian release history offline from Settings → About Nex.
+
+### Optional modules (0.24.0)
+
+Enable PDF reader, Private area, Writing portrait or Cycle independently in
+Settings → Docked tools & apps. They start off; disabling keeps their data.
+Private area and Cycle share a two-minute Windows Hello unlock. Vault entries
+stay in Windows secure storage and out of library backups; cycle records remain
+in the Android-compatible library. Writing statistics stay local; the optional
+AI portrait asks before sending a short note sample. [B8 details and checks](docs/agent-reports/B8.md).
 
 The note schema, attachment and backup handling, and 14 palette identities are aligned with the [recorded DbsNex Android source](https://github.com/sanyzrn/DbsNex/tree/34514226260dc8b1d3da35f91082dbfa9ce46b93). [Cross-platform contract and validation](docs/CROSS_PLATFORM_0150.md). Windows keeps its own version and native integrations.
 

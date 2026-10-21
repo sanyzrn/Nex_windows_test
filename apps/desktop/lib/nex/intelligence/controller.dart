@@ -1063,6 +1063,58 @@ class DesktopIntelligence extends ChangeNotifier {
     }
   }
 
+  NexPortrait? get writtenPortrait =>
+      NexPortrait.decode(string('ai.windows.portrait'));
+
+  Future<void> removeWrittenPortrait() async {
+    await initialize();
+    if (!await _prefs!.remove('ai.windows.portrait')) {
+      throw StateError('Could not remove portrait');
+    }
+    _notify();
+  }
+
+  /// Only called after the module's explicit per-request disclosure dialog.
+  Future<NexPortrait?> writePortrait() async {
+    await initialize();
+    if (!enabled || !canRead || busy) return null;
+    final generation = ++_generation;
+    busy = true;
+    _notify();
+    try {
+      final notes = await store.call<List<Note>>('portraitNotes');
+      if (generation != _generation || _closed || !enabled || !canRead) {
+        return null;
+      }
+      final stats = nexWritingStats(notes);
+      if (!stats.unlocked) return null;
+      final source = nexPortraitSource(notes);
+      final portrait = await _adapter().writePortrait(
+        source.text,
+        facts: nexWritingFacts(stats),
+        basedOn: source.ids.length,
+        notes: source.ids,
+      );
+      if (generation != _generation ||
+          _closed ||
+          !enabled ||
+          !canRead ||
+          portrait == null) {
+        return null;
+      }
+      if (!await _prefs!.setString('ai.windows.portrait', portrait.encode())) {
+        throw StateError('Could not save portrait');
+      }
+      return portrait;
+    } finally {
+      if (generation == _generation) {
+        _finishAdapter();
+        busy = false;
+        _notify();
+      }
+    }
+  }
+
   Future<void> close() async {
     _closed = true;
     cancel();

@@ -1,7 +1,7 @@
 name: nex_desktop
 description: "Nex for Windows desktop application."
 publish_to: "none"
-version: 0.23.0+17
+version: 0.24.0+18
 
 environment:
   sdk: ^3.12.0
@@ -38,6 +38,10 @@ dependencies:
   timezone: ^0.10.1
   # Official FFI helpers (malloc/free) for the tiny user32 calls.
   ffi: ^2.1.0
+  # PDFium is bundled at build time; reading never downloads a runtime.
+  pdfrx: ">=2.4.0 <2.5.0"
+  # image 4.11 (PDF backend) uses decodeLazy, absent in archive 4.3.
+  archive: ^4.5.2
 
 dev_dependencies:
   flutter_test:

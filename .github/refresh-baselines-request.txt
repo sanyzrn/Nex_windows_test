@@ -1,1 +1,1 @@
-Release 0.23.0+17: refresh visible About/version and finalized bilingual release-history screenshots, 2026-10-21.
+B8 module review: capture the real filled theme surface, without the debug banner; retain compact/wide and 2x-text checks, 2026-10-21.

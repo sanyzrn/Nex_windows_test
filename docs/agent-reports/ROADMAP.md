@@ -13,7 +13,7 @@ Working branch: `windows/0.23-agent`. Android reference: separate read-only
 
 The owner requested fewer parts, lower token use, related work together, short
 reports and only necessary tests. This replaces the old 21-part schedule without
-dropping required work-order items. Parts 1–6 are implemented and their Windows checks passed. The owner approved Part 7; its implementation and final verification are tracked below. Optional B8 remains a separate decision. The old part numbers
+dropping required work-order items. Parts 1–6 are implemented and their Windows checks passed. The owner approved Part 7; its implementation and final verification are tracked below. B8's four core modules were explicitly selected on 2026-10-21. The old part numbers
 4–21 are superseded; A/B identifiers still refer to the original work order.
 
 Each remaining row is one approval boundary. Finish related work in that row,
@@ -38,6 +38,19 @@ generation and concise contact-sheet review avoid repeating the same captures.
 Part 7 includes the final B7 check after its feature changes. B0 records unresolved
 native checks early, and later parts update that same checklist.
 
+## B8 continuation — owner selection, 2026-10-21
+
+The owner subsequently authorized merging B8 and publishing **0.24.0+18** for
+manual testing. Full B8 Windows CI passed; the final versioned source must pass
+main-branch Windows CI before release automation publishes its tested installer.
+
+Parts 1–7 were merged and published as 0.23.0. The owner then selected all four
+core B8 modules: PDF reader, private area, writing portrait and cycle. This bundle
+starts at main `fcdea02` on `windows/b8-modules`; Windows-native extras remain
+outside it. Implementation and manual limits are recorded in [B8](B8.md), with
+final automated gates in the bundle's draft PR. No further version bump, merge
+or release is part of this implementation request.
+
 ## Lean execution and verification
 
 - Read only the files and original requirements needed for the current bundle.
@@ -60,7 +73,7 @@ native checks early, and later parts update that same checklist.
 - Report unavailable Windows/manual checks honestly and carry them forward.
   Required native verification is not removed to save tokens.
 
-The owner approved Part 7. B4–B7 implementation is recorded in PART7.md; final Windows CI and physical-device limits are tracked there. Stop before optional B8.
+The owner approved Part 7. B4–B7 implementation is recorded in PART7.md; final Windows CI and physical-device limits are tracked there. The owner subsequently selected the four core B8 modules; follow [B8](B8.md).
 
 No data schema or backup format changes. The owner has now requested publication; the release version is 0.23.0+17.
 Draft PRs are due at the end of each track, as specified in the work order.

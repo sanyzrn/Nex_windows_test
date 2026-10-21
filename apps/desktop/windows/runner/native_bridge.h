@@ -112,6 +112,7 @@ class NativeBridge {
   bool WaitOrStop(int milliseconds);
   std::atomic<bool> stopping_{false};
   std::atomic<bool> clipboard_started_{false};
+  std::atomic<DWORD> private_clipboard_token_{0};
   std::condition_variable stop_cv_;
   std::mutex stop_mutex_;
   struct Worker { std::thread thread; std::shared_ptr<std::atomic<bool>> done; };

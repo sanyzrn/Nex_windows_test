@@ -167,6 +167,49 @@ class DesktopStore {
             }
             final dynamic result;
             switch (cmd) {
+              case 'portraitNotes':
+                final count =
+                    db.db
+                            .select(
+                              'SELECT COUNT(*) AS n FROM notes WHERE deleted_at IS NULL',
+                            )
+                            .single['n']
+                        as int;
+                result = notes.listTimeline(limit: count);
+              case 'cycleSnapshot':
+                final cycle = SqliteCycleRepository(db);
+                final day = a['day'] as DateTime;
+                result = {
+                  'periods': cycle.periods(),
+                  'log': cycle.day(day),
+                  'days': cycle.days(
+                    a['from'] as DateTime,
+                    a['to'] as DateTime,
+                  ),
+                };
+              case 'cycleStart':
+                result = SqliteCycleRepository(db).startPeriod(
+                  a['day'] as DateTime,
+                  closeAfter: a['typicalPeriod'] as int? ?? 5,
+                );
+              case 'cycleEnd':
+                SqliteCycleRepository(
+                  db,
+                ).endPeriod(a['id'] as String, a['day'] as DateTime);
+                result = null;
+              case 'cycleUpdate':
+                SqliteCycleRepository(db).updatePeriod(
+                  a['id'] as String,
+                  a['start'] as DateTime,
+                  a['end'] as DateTime?,
+                );
+                result = null;
+              case 'cycleDelete':
+                SqliteCycleRepository(db).deletePeriod(a['id'] as String);
+                result = null;
+              case 'cycleDay':
+                SqliteCycleRepository(db).saveDay(a['log'] as CycleDayLog);
+                result = null;
               case 'aiActions':
                 result = executeDesktopAiActions(
                   db,

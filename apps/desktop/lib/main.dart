@@ -11,6 +11,7 @@ import 'nex/features.dart';
 import 'nex/welcome.dart';
 import 'nex/store.dart';
 import 'nex/media_smoke.dart';
+import 'nex/modules/module_probe.dart';
 import 'nex/panel_smoke.dart';
 import 'nex/lifecycle_smoke.dart';
 import 'nex/reminder_smoke.dart';
@@ -118,6 +119,25 @@ void main(List<String> arguments) async {
     final native = controller.native as WinNativeHost;
     final startup = await native.startupEnabled();
     final result = await native.diagnostics();
+    var moduleStage = 'start';
+    try {
+      result['modules'] = await probeDesktopModules(
+        support.path,
+        onStage: (stage) {
+          moduleStage = stage;
+          File(
+            '${arguments[1]}.progress.json',
+          ).writeAsStringSync(jsonEncode({'stage': stage}));
+        },
+      );
+    } catch (error) {
+      // Explicit synthetic probe only: retain failures instead of an opaque
+      // external timeout. Never serialize vault values or user authentication.
+      File('${arguments[1]}.failure.json').writeAsStringSync(
+        jsonEncode({'stage': moduleStage, 'error': error.toString()}),
+      );
+      rethrow;
+    }
     var captures = 0;
     controller.onCapture = () {
       captures++;
@@ -204,6 +224,9 @@ void main(List<String> arguments) async {
     return;
   }
   LicenseRegistry.addLicense(() async* {
+    yield LicenseEntryWithLineBreaks([
+      'PDFium',
+    ], await rootBundle.loadString('assets/notices/pdfium.txt'));
     yield LicenseEntryWithLineBreaks([
       'Right Panel',
     ], await rootBundle.loadString('assets/notices/right-panel.txt'));

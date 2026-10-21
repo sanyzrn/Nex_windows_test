@@ -5,6 +5,7 @@ import 'package:nex_ui/nex_ui.dart';
 
 import '../l10n/app_localizations.dart';
 import 'features_state.dart';
+import 'modules/modules.dart';
 
 /// The same attachment rows that mobile stores, opened by the Windows host.
 class NexNoteAttachments extends StatefulWidget {
@@ -167,9 +168,10 @@ class _NexNoteAttachmentsState extends State<NexNoteAttachments> {
                   : NexTextSurface(attachment.caption!, maxLines: 3),
               onTap: native == null
                   ? null
-                  : () => NexScope.of(
-                      context,
-                    ).guard(() => native.launch(attachment.mediaUri)),
+                  : () => NexScope.of(context).guard(
+                      () =>
+                          openDesktopModuleMedia(context, attachment.mediaUri),
+                    ),
               trailing: IconButton(
                 tooltip: l.remove,
                 icon: const Icon(Icons.close, size: 18),

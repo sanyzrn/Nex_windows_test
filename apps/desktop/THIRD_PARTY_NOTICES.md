@@ -35,3 +35,12 @@ The normal Flutter licences page also displays dependency notices. Windows Segoe
 ## Windows intelligence storage
 
 Cloud adapters and pure-Dart AI contracts follow DbsNex Android 2.1.6 at `67930daa7230273055107ac210faa8b86167e540`. The desktop uses `flutter_secure_storage` (10.3.4 in the lockfile) and its Windows implementation (4.2.2) for account-bound credential protection. Their original dependency licenses are included through the Flutter license registry. No provider key or local inference model is distributed.
+
+
+## PDF reading
+
+pdfrx 2.4.8, pdfrx_engine 0.4.7 and pdfium_dart/pdfium_flutter provide offline
+PDF reading under their bundled package licenses. PDFium's pinned
+`chromium/7811` Windows distribution and all 16 included upstream notices are
+preserved in [assets/notices/pdfium.txt](assets/notices/pdfium.txt) and registered
+in About → Licenses. PDFium is downloaded at build time and included in setup.

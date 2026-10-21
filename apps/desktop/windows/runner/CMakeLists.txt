@@ -19,6 +19,7 @@ add_executable(${BINARY_NAME} WIN32
   "native_clipboard.cpp"
   "native_pickers.cpp"
   "native_notifications.cpp"
+  "native_private.cpp"
   "utils.cpp"
   "win32_window.cpp"
   "${FLUTTER_MANAGED_DIR}/generated_plugin_registrant.cc"

@@ -18,6 +18,7 @@
 #include "native_clipboard.h"
 #include "native_pickers.h"
 #include "native_notifications.h"
+#include "native_private.h"
 #include "resource.h"
 
 #include <windows.h>
@@ -60,6 +61,8 @@ NativeBridge::~NativeBridge() {
   channel_.SetMethodCallHandler(nullptr);
   stopping_.store(true);
   stop_cv_.notify_all();
+  const DWORD private_token = private_clipboard_token_.exchange(0);
+  if (private_token != 0) ClearPrivateClipboard(window_, private_token);
   UnregisterHotKey(window_, 1);
   for (auto& worker : workers_) {
     EnumThreadWindows(GetThreadId(worker.thread.native_handle()),
@@ -129,7 +132,59 @@ void NativeBridge::HandleMethodCall(
   const auto* args = raw_args ? std::get_if<EncodableMap>(raw_args) : nullptr;
   const std::string& name = call.method_name();
 
-  if (name == "readClipboardImage") {
+  if (name == "privateVerify") {
+    if (picking_.exchange(true)) { result->Success(EncodableValue(false)); return; }
+    auto response = std::shared_ptr<flutter::MethodResult<EncodableValue>>(std::move(result));
+    const auto reason = Utf16FromUtf8(ArgString(args, "reason"));
+    RunWorker([this, response, reason]() {
+      bool verified = false;
+      try { verified = VerifyPrivateTools(window_, reason,
+          [this](int ms) { return WaitOrStop(ms); }); } catch (...) {}
+      picking_.store(false);
+      // FlutterDesktopMessengerSendResponse is explicitly thread-safe.
+      if (!stopping_) response->Success(EncodableValue(verified));
+    });
+  } else if (name == "privateClipboard") {
+    DWORD token = 0;
+    const bool copied = SetPrivateClipboard(window_, Utf16FromUtf8(ArgString(args, "text")), &token);
+    result->Success(EncodableValue(copied));
+    if (copied) {
+      private_clipboard_token_.store(token);
+      RunWorker([this, token]() {
+        if (WaitOrStop(30000)) return;
+        // A busy clipboard is retried briefly; a replacement is never cleared.
+        for (int attempt = 0; attempt < 20; ++attempt) {
+          if (ClearPrivateClipboard(window_, token)) {
+            DWORD expected = token;
+            private_clipboard_token_.compare_exchange_strong(expected, 0);
+            return;
+          }
+          if (WaitOrStop(50)) return;
+        }
+      });
+    }
+  } else if (name == "privateClipboardSelfTest") {
+    // Synthetic only. Test conversion and replacement as well as exclusion.
+    DWORD first = 0, replacement = 0;
+    const bool copied = SetPrivateClipboard(window_, L"Nex private clipboard probe", &first);
+    const bool excluded = copied && ClipboardIsPrivate() && GetClipboardText().empty();
+    if (copied && OpenClipboard(window_)) {
+      GetClipboardData(CF_TEXT); // Exercise Windows' synthesized text formats.
+      CloseClipboard();
+    }
+    const bool cleared = copied && ClearPrivateClipboard(window_, first);
+    const bool replaced = SetPrivateClipboard(window_, L"Synthetic first item", &first) &&
+        SetPrivateClipboard(window_, L"Synthetic replacement", &replacement);
+    const bool retained = replaced && !ClearPrivateClipboard(window_, first) && ClipboardIsPrivate();
+    const bool replacement_cleared = replaced && ClearPrivateClipboard(window_, replacement);
+    result->Success(EncodableValue(EncodableMap{
+      {EncodableValue("copied"), EncodableValue(copied)},
+      {EncodableValue("excluded"), EncodableValue(excluded)},
+      {EncodableValue("cleared"), EncodableValue(cleared)},
+      {EncodableValue("replacementRetained"), EncodableValue(retained)},
+      {EncodableValue("replacementCleared"), EncodableValue(replacement_cleared)},
+    }));
+  } else if (name == "readClipboardImage") {
     ReadClipboardImage(ArgInt(args, "request"));
     result->Success();
   } else if (name == "labels") {
@@ -786,6 +841,7 @@ void NativeBridge::StartClipboardWatch() {
       const uint64_t s = GetClipboardSequenceNumber();
       if (s != seq) {
         seq = s;
+        if (ClipboardIsPrivate()) continue;
         const std::string text = GetClipboardText();
         if (!text.empty() && text.find_first_not_of(" \t\r\n") != std::string::npos &&
             text.size() < 100000) {

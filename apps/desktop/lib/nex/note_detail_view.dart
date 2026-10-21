@@ -25,6 +25,7 @@ import 'reminder_picker.dart';
 import 'reminder_coordinator.dart' show ReminderDeliveryFailure;
 import 'reminder_policy.dart';
 import 'note_attachments.dart';
+import 'modules/modules.dart';
 import 'intelligence/note_panel.dart';
 
 class NexNoteDetail extends StatefulWidget {
@@ -392,8 +393,10 @@ class _NexNoteDetailState extends State<NexNoteDetail> {
                           onOpenMedia: note.mediaUri == null
                               ? null
                               : () => features.guard(() async {
-                                  final c = NexPanelScope.maybeOf(context);
-                                  await c?.native.launch(note.mediaUri!);
+                                  await openDesktopModuleMedia(
+                                    context,
+                                    note.mediaUri!,
+                                  );
                                 }, rethrowError: true),
                           onDelete: () async {
                             final id = note.id;
