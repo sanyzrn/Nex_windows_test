@@ -9,3 +9,4 @@ request 10: A4 compact settings/readers and A9/A11 localized history, counters a
 request 11: await Windows fixture image/store handle release before temporary cleanup
 request 12: pump the deferred image-cache disposal frame before Windows temp cleanup
 request 13: immutable shared photo fixture avoids Windows mapped-file deletion; Persian attachment counts
+request 14: keep compact About version words whole above wrapping actions

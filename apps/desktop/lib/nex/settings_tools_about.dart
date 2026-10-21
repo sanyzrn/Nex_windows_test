@@ -55,16 +55,17 @@ mixin _SettingsToolsAbout on _SettingsStateBase {
             const SizedBox(height: 18),
           ] else
             const ReleaseNotesButton(),
-          Row(
+          Text(
+            desktopDigits(context, 'Nex Windows v$kAppShortVersion (Build $kAppBuild)'),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: scheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
             children: [
-              Expanded(
-                child: Text(
-                  desktopDigits(context, 'Nex Windows v$kAppShortVersion (Build $kAppBuild)'),
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: scheme.onSurfaceVariant,
-                  ),
-                ),
-              ),
               TextButton(
                 onPressed: () => showLicensePage(
                   context: context,
@@ -73,7 +74,6 @@ mixin _SettingsToolsAbout on _SettingsStateBase {
                 ),
                 child: Text(l.about),
               ),
-              const SizedBox(width: 8),
               FilledButton.tonal(
                 style: FilledButton.styleFrom(
                   backgroundColor: scheme.errorContainer,

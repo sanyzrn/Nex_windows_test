@@ -13,6 +13,16 @@ void main() {
       final controller = await bootReview(t, shot, store);
       try {
         await goReview(t, controller, shot);
+        if (shot.target == 'aboutSettings') {
+          final version = t.renderObject<RenderParagraph>(
+            find.textContaining('Nex Windows v'),
+          );
+          expect(
+            version.getMinIntrinsicWidth(double.infinity),
+            lessThanOrEqualTo(version.size.width + .01),
+            reason: 'The version must retain whole words in compact About.',
+          );
+        }
         expect(t.takeException(), isNull);
         const evidence = String.fromEnvironment('NEX_COMPACT_EVIDENCE');
         if (evidence.isNotEmpty) {
