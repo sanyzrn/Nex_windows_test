@@ -51,3 +51,7 @@ fixtures during temporary-directory cleanup (Windows sharing violation 32), not
 image comparison. Fixtures now evict decoded images and retry only that transient
 sharing error, bounded to 450ms; persistent/other errors still fail. No screenshot,
 assertion or comparison tolerance was removed. A fresh Windows run is required.
+
+The SDK's CachedImage disposal defers handle release to a post-frame callback;
+the fixture now explicitly pumps that frame after cache eviction, before real
+asynchronous directory deletion. This addresses the handle lifetime itself.

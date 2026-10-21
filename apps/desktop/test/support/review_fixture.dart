@@ -344,6 +344,8 @@ Future<void> goReview(
 Future<void> closeReviewStore(WidgetTester tester, ReviewStore store) async {
   PaintingBinding.instance.imageCache.clear();
   PaintingBinding.instance.imageCache.clearLiveImages();
+  // CachedImage.disposeHandle runs after a frame, not after a real-time delay.
+  await tester.pump();
   await tester.runAsync(() async {
     await store.features.close();
     for (var attempt = 0; ; attempt++) {
@@ -351,7 +353,7 @@ Future<void> closeReviewStore(WidgetTester tester, ReviewStore store) async {
         await store.root.delete(recursive: true);
         return;
       } on FileSystemException catch (error) {
-        if (!Platform.isWindows || error.osError?.errorCode != 32 || attempt >= 9) rethrow;
+        if (!Platform.isWindows || error.osError?.errorCode != 32 || attempt >= 9) { rethrow; }
         await Future<void>.delayed(const Duration(milliseconds: 50));
       }
     }
