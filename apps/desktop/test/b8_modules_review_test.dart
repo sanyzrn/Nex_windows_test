@@ -8,7 +8,6 @@ import 'package:nex_core/nex_core.dart';
 import 'package:nex_data/nex_data.dart';
 import 'package:nex_desktop/core/controller.dart';
 import 'package:nex_desktop/core/native.dart';
-import 'package:nex_desktop/core/panel_settings.dart';
 import 'package:nex_desktop/l10n/app_localizations.dart';
 import 'package:nex_desktop/nex/features_state.dart';
 import 'package:nex_desktop/nex/modules/module_controller.dart';
@@ -103,7 +102,10 @@ void main() {
                       controller: c,
                       child: NexScope(
                         features: store.features,
-                        child: Scaffold(backgroundColor: c.appTheme.colorScheme.surface, body: body),
+                        child: Scaffold(
+                          backgroundColor: c.appTheme.colorScheme.surface,
+                          body: body,
+                        ),
                       ),
                     ),
                   ),
@@ -141,14 +143,17 @@ void main() {
                     builder: (context, child) => MediaQuery(
                       data: MediaQuery.of(
                         context,
-                      ).copyWith(textScaler: TextScaler.linear(2)),
+                      ).copyWith(textScaler: const TextScaler.linear(2)),
                       child: child!,
                     ),
                     home: NexPanelScope(
                       controller: c,
                       child: NexScope(
                         features: store.features,
-                        child: Scaffold(backgroundColor: c.appTheme.colorScheme.surface, body: body),
+                        child: Scaffold(
+                          backgroundColor: c.appTheme.colorScheme.surface,
+                          body: body,
+                        ),
                       ),
                     ),
                   ),

@@ -30,11 +30,12 @@ class _DesktopPortraitViewState extends State<DesktopPortraitView> {
       );
       final value = nexWritingStats(notes, now: widget.statsAt);
       await widget.features.intelligence.initialize();
-      if (mounted)
+      if (mounted) {
         setState(() {
           stats = value;
           failed = false;
         });
+      }
     } catch (_) {
       if (mounted) setState(() => failed = true);
     }
@@ -86,12 +87,13 @@ class _DesktopPortraitViewState extends State<DesktopPortraitView> {
     final l = AppLocalizations.of(context)!;
     final scheme = Theme.of(context).colorScheme;
     final s = stats;
-    if (s == null)
+    if (s == null) {
       return Center(
         child: failed
             ? TextButton(onPressed: load, child: Text(l.retry))
             : const CircularProgressIndicator(),
       );
+    }
     return ListenableBuilder(
       listenable: widget.features.intelligence,
       builder: (context, _) {

@@ -30,11 +30,12 @@ class _DesktopVaultViewState extends State<DesktopVaultView> {
   Future<void> load() async {
     try {
       final value = await widget.modules.vault.read();
-      if (mounted)
+      if (mounted) {
         setState(() {
           snapshot = value;
           failed = false;
         });
+      }
     } catch (_) {
       if (mounted) setState(() => failed = true);
     }
@@ -44,7 +45,7 @@ class _DesktopVaultViewState extends State<DesktopVaultView> {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context)!;
     final entry = editing;
-    if (entry != null)
+    if (entry != null) {
       return _VaultEditor(
         key: ValueKey(entry.id),
         modules: widget.modules,
@@ -54,6 +55,7 @@ class _DesktopVaultViewState extends State<DesktopVaultView> {
           await load();
         },
       );
+    }
     final labels = [l.vaultPasswords, l.vaultCards, l.vaultMessages];
     final icons = [
       Icons.key_rounded,
@@ -220,8 +222,9 @@ class _VaultEditorState extends State<_VaultEditor> {
     // value and does not report success until secure read-back succeeds.
     unawaited(
       pending.catchError((Object _) {
-        if (mounted)
+        if (mounted) {
           setState(() => error = AppLocalizations.of(context)!.failed);
+        }
       }),
     );
   }
@@ -282,30 +285,33 @@ class _VaultEditorState extends State<_VaultEditor> {
         ],
       ),
     );
-    if (yes != true || !mounted || !widget.modules.privateSession.isOpen)
+    if (yes != true || !mounted || !widget.modules.privateSession.isOpen) {
       return;
+    }
     setState(() => busy = true);
     try {
       await widget.modules.vault.delete(widget.entry.id);
       if (mounted) widget.onBack();
     } catch (_) {
-      if (mounted)
+      if (mounted) {
         setState(() {
           busy = false;
           error = l.failed;
         });
+      }
     }
   }
 
   Future<void> copy(String key) async {
     try {
       await widget.modules.privateSession.copy(fields[key]!.text);
-      if (mounted)
+      if (mounted) {
         ScaffoldMessenger.maybeOf(context)?.showSnackBar(
           SnackBar(
             content: Text(AppLocalizations.of(context)!.privateCopyHint),
           ),
         );
+      }
     } catch (_) {
       if (mounted) setState(() => error = AppLocalizations.of(context)!.failed);
     }

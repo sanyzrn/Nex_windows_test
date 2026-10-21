@@ -53,7 +53,7 @@ class _DesktopCycleViewState extends State<DesktopCycleView> {
             'from': month.subtract(const Duration(days: 40)),
             'to': month.add(const Duration(days: 40)),
           });
-      if (mounted && token == generation)
+      if (mounted && token == generation) {
         setState(() {
           periods = (value['periods'] as List).cast<CyclePeriod>();
           logs = (value['days'] as List).cast<CycleDayLog>();
@@ -61,6 +61,7 @@ class _DesktopCycleViewState extends State<DesktopCycleView> {
           loaded = true;
           failed = false;
         });
+      }
     } catch (_) {
       if (mounted && token == generation) setState(() => failed = true);
     } finally {
@@ -262,7 +263,7 @@ class _DesktopCycleViewState extends State<DesktopCycleView> {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context)!;
     final modules = widget.features.modules;
-    if (editingDay)
+    if (editingDay) {
       return DesktopCycleDayEditor(
         features: widget.features,
         initial: log ?? CycleDayLog(day: CycleDate.of(selected)),
@@ -271,8 +272,10 @@ class _DesktopCycleViewState extends State<DesktopCycleView> {
           unawaited(load());
         },
       );
-    if (!loaded && !failed)
+    }
+    if (!loaded && !failed) {
       return const Center(child: CircularProgressIndicator());
+    }
     final prediction = CyclePredictor.predict(
       periods: periods,
       today: CycleDate.of(widget.clock()),

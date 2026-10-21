@@ -86,8 +86,9 @@ Future<void> showDesktopModule(
                   builder: (_) => DesktopCycleView(features: features),
                 ),
               };
-              if (!modules.enabled(module))
+              if (!modules.enabled(module)) {
                 content = Center(child: Text(l.moduleDisabled));
+              }
               return Column(
                 children: [
                   Padding(

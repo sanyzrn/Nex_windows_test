@@ -54,8 +54,9 @@ Future<Map<String, Object>> probeDesktopModules(String temporaryRoot) async {
           'probe page two',
         ) ==
         true;
-    if (document.pages.length != 2 || !rendered || !searched)
+    if (document.pages.length != 2 || !rendered || !searched) {
       throw StateError('PDF probe failed');
+    }
   } finally {
     await document.dispose();
   }
@@ -71,8 +72,9 @@ Future<Map<String, Object>> probeDesktopModules(String temporaryRoot) async {
   const native = MethodChannel('rp/native');
   final privateClipboard =
       await native.invokeMethod<bool>('privateClipboardSelfTest') == true;
-  if (!secure || !privateClipboard)
+  if (!secure || !privateClipboard) {
     throw StateError('Private storage/clipboard probe failed');
+  }
   return {
     'pdfPages': 2,
     'pdfRendered': rendered,

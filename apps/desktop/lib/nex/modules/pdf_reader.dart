@@ -253,12 +253,13 @@ class _DesktopPdfReaderState extends State<DesktopPdfReader> {
                         } else if (link.url != null &&
                             desktopPdfWebLink(link.url!)) {
                           final native = NexPanelScope.maybeOf(context)?.native;
-                          if (native != null)
+                          if (native != null) {
                             unawaited(
                               widget.features.guard(
                                 () => native.launch(link.url.toString()),
                               ),
                             );
+                          }
                         }
                       },
                     ),
@@ -299,8 +300,10 @@ class _DesktopPdfReaderState extends State<DesktopPdfReader> {
                       );
                     },
                     onViewerReady: (document, activeController) {
-                      if (!mounted || !identical(activeController, controller))
+                      if (!mounted ||
+                          !identical(activeController, controller)) {
                         return;
+                      }
                       searcher?.removeListener(_changed);
                       searcher?.dispose();
                       // pdfrx 2.4 requires an attached, ready controller here.
@@ -310,12 +313,14 @@ class _DesktopPdfReaderState extends State<DesktopPdfReader> {
                         count = document.pages.length;
                         failed = false;
                       });
-                      if (query.text.isNotEmpty)
+                      if (query.text.isNotEmpty) {
                         searcher?.startTextSearch(query.text);
+                      }
                     },
                     onPageChanged: (value) {
-                      if (mounted && value != null)
+                      if (mounted && value != null) {
                         setState(() => page = value);
+                      }
                     },
                     loadingBannerBuilder: (_, _, _) =>
                         const Center(child: CircularProgressIndicator()),

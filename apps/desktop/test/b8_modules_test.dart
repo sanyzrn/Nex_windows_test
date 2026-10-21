@@ -166,7 +166,7 @@ void main() {
         );
         expect(
           (snapshot['periods'] as List<CyclePeriod>).single.end,
-          CycleDate(2026, 10, 16),
+          const CycleDate(2026, 10, 16),
         );
         expect(
           await store.call<List<Note>>('search', {
@@ -238,12 +238,10 @@ void main() {
     t,
   ) async {
     await t.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        home: const Scaffold(
-          body: DesktopPdfPagePicker(count: 100, current: 80),
-        ),
+        home: Scaffold(body: DesktopPdfPagePicker(count: 100, current: 80)),
       ),
     );
     await t.pumpAndSettle();
@@ -262,8 +260,9 @@ void main() {
       t.binding.defaultBinaryMessenger.setMockMethodCallHandler(
         const MethodChannel('rp/native'),
         (call) async {
-          if (call.method == 'privateClipboard')
+          if (call.method == 'privateClipboard') {
             copied.add((call.arguments as Map)['text'] as String);
+          }
           return true;
         },
       );

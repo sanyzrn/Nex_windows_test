@@ -1068,8 +1068,9 @@ class DesktopIntelligence extends ChangeNotifier {
 
   Future<void> removeWrittenPortrait() async {
     await initialize();
-    if (!await _prefs!.remove('ai.windows.portrait'))
+    if (!await _prefs!.remove('ai.windows.portrait')) {
       throw StateError('Could not remove portrait');
+    }
     _notify();
   }
 
@@ -1082,8 +1083,9 @@ class DesktopIntelligence extends ChangeNotifier {
     _notify();
     try {
       final notes = await store.call<List<Note>>('portraitNotes');
-      if (generation != _generation || _closed || !enabled || !canRead)
+      if (generation != _generation || _closed || !enabled || !canRead) {
         return null;
+      }
       final stats = nexWritingStats(notes);
       if (!stats.unlocked) return null;
       final source = nexPortraitSource(notes);
@@ -1097,8 +1099,9 @@ class DesktopIntelligence extends ChangeNotifier {
           _closed ||
           !enabled ||
           !canRead ||
-          portrait == null)
+          portrait == null) {
         return null;
+      }
       if (!await _prefs!.setString('ai.windows.portrait', portrait.encode())) {
         throw StateError('Could not save portrait');
       }
