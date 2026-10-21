@@ -1,1 +1,1 @@
-0.25.0 panel controls and library chrome; version/build and bilingual release history; compare updated Windows views without changing thresholds. 2026-10-22.
+0.25.0 panel controls and library chrome; version/build and bilingual release history; compare updated Windows views without changing thresholds. 2026-10-22. Receipt regression compile correction.

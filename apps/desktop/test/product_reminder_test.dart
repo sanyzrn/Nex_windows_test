@@ -283,7 +283,7 @@ void main() {
         expect(
           features.reminderNeedsAttention(
             current.copyWith(
-              dueAt: () => current.dueAt!.add(const Duration(days: 1)),
+              dueAt: current.dueAt!.add(const Duration(days: 1)),
             ),
           ),
           isTrue,
