@@ -29,8 +29,9 @@ Base: `436bc6a`; branch `windows/0.23-agent`. Owner approved this bundle.
   Actual desktop text, filled-button labels and navigation labels are checked at
   4.5:1 across 14 palettes in light/dark. Rail accents are strengthened over
   their tinted background; raw icon-only primary is not mistaken for a text fill.
-  Existing 10k-note benchmark now enforces 500 ms first-page and EN/FA search
-  ceilings; these are headless query budgets, not a physical scroll/FPS claim.
+  Existing 10k-note benchmark now enforces 500 ms first-page/EN/FA search
+  ceilings and 128 MiB process RSS growth after its first 1000 captures; these
+  headless store budgets do not claim physical scroll/FPS or GPU-memory results.
 
 Verification: local translation parity, 18 checker tests, syntax formatting and
 whitespace checks pass. Local Flutter execution remains unavailable after the
@@ -38,7 +39,9 @@ previous metadata-request automatic-review rejection; Windows CI supplies Flutte
 analysis/tests/build/native/installer evidence. The first Windows analysis caught two brace hints and one unused import; corrected.
 Windows refresh [39584740085](https://github.com/sanyzrn/Nex_windows_test/actions/runs/39584740085) rendered successfully; all 31 changed/new images were reviewed.
 Refresh [39585588218](https://github.com/sanyzrn/Nex_windows_test/actions/runs/39585588218) passed; both corrected empty-writing receipts were reviewed.
-Final source checks and final reviewed Windows renders will be recorded in the PR body and [checks](https://github.com/sanyzrn/Nex_windows_test/pull/9/checks), avoiding a documentation-only rerun.
+Refresh [39586615755](https://github.com/sanyzrn/Nex_windows_test/actions/runs/39586615755) passed; all 81 navigation-contrast image changes were reviewed, with unchanged dimensions and no layout regressions.
+The cancellation fixtures now return valid synthetic transcription/embedding responses; automatic detection correctly stopped accepting the previous text-only mock as audio. Existing timeout/expectation strictness stays intact.
+Final source checks will be recorded in the PR body and [checks](https://github.com/sanyzrn/Nex_windows_test/pull/9/checks), avoiding a documentation-only rerun.
 
 Physical sign-off still needs the owner: installed notifications/DND and real
 IME/DPI/multiple monitors/Narrator (see [B0](B0.md)); real Android ↔ Windows `.nexbak`
@@ -48,3 +51,18 @@ hardware. Automated fixture/codec tests do not substitute for those checks.
 No immediate merge or new PR is required to implement this part. Keep PR #9 Draft
 until physical sign-off; no schema/archive format/version change, merge or release.
 Optional B8 remains deferred pending explicit selection.
+
+## Visual comparison
+
+Writing is Nex's central action, so the chosen treatment gives its editor the
+rail's space while keeping the current draft and a quiet local-save receipt.
+A single live editor and short reduced-motion-aware fades keep this treatment
+usable with keyboard, large text and the existing Windows 10/11 surfaces.
+
+Before (normal workspace, Part 6):
+
+![Before](https://raw.githubusercontent.com/sanyzrn/Nex_windows_test/436bc6aac7ad8cbaf480241d5dc1f938c6059a6d/apps/desktop/test/review_goldens/redesign_window_capture_1200_light_en.png)
+
+After (writing mode, same 1200 px light-English viewport):
+
+![After](https://raw.githubusercontent.com/sanyzrn/Nex_windows_test/d1d8584dfec091d2b6a487221185595f4cffc85c/apps/desktop/test/review_goldens/writing_1200_light_en.png)

@@ -15,9 +15,15 @@ void main() {
         'nex-benchmark-10k-',
       );
       final stopwatch = Stopwatch();
+      DesktopStore? benchmarkStore;
 
       try {
-        final store = await DesktopStore.open(tempDir.path, 'bench-device');
+        final store = benchmarkStore = await DesktopStore.open(
+          tempDir.path,
+          'bench-device',
+        );
+
+        final initialRss = ProcessInfo.currentRss;
 
         // 1. Generate 10,000 notes into temporary database
         stopwatch.start();
@@ -35,6 +41,21 @@ void main() {
         for (var i = 0; i < totalNotes; i++) {
           final sample = batchWords[i % batchWords.length];
           await store.call('capture', {'text': '$sample #$i'});
+          if (i == 999) {
+            // Includes the store worker isolate in this process, without a
+            // second fixture. A broad ceiling catches per-capture retention;
+            // it is not a claim about installed app GPU/long-session memory.
+            final growth = ProcessInfo.currentRss - initialRss;
+            // ignore: avoid_print
+            print(
+              'WP7 Benchmark: RSS growth after 1000 captures: ${growth ~/ 1024} KiB',
+            );
+            expect(
+              growth,
+              lessThan(128 * 1024 * 1024),
+              reason: '1000-capture RSS growth budget (128 MiB)',
+            );
+          }
         }
         stopwatch.stop();
         final insertMs = stopwatch.elapsedMilliseconds;
@@ -95,9 +116,8 @@ void main() {
           'filters': const SearchFilters(query: 'كتاب'),
         });
         expect(foldedSearch.length, faSearch.length);
-
-        await store.close();
       } finally {
+        await benchmarkStore?.close();
         // 5. Clean up temporary database
         if (tempDir.existsSync()) {
           tempDir.deleteSync(recursive: true);

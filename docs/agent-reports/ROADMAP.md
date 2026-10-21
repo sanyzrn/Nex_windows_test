@@ -29,7 +29,7 @@ an owner decision. Internal commits may separate unrelated changes.
 | 4 | A5, A7, A8, A10 | Repository cleanup, architecture/README/shortcuts, contributor templates and focused pure-logic coverage | Completed; [report](PART4.md), focused checks recorded |
 | 5 | A9, A11, A12, A4, A6 | Persian updater notes, digits/calendar consistency, installer polish; complete the screenshot matrix after these changes, then format | Completed; [report](PART5.md); closes Track A |
 | 6 | B0, B1, B2, B3 | Triage remaining Windows checks; mixed-language editing, close/tray lifecycle, corner restoration, reminders and toast actions | Implemented; [report](PART6.md), CI result in PR checks; physical checks in [B0](B0.md) |
-| 7 | B4, B5, B6, B7 | Windows appearance/integration, Android AI parity including models/YouTube, backup/onboarding/settings/update handoff, final accessibility/performance/localization checks | Implemented; [report](PART7.md), final Windows checks pending |
+| 7 | B4, B5, B6, B7 | Windows appearance/integration, Android AI parity including models/YouTube, backup/onboarding/settings/update handoff, final accessibility/performance/localization checks | Implemented; [report](PART7.md), final Windows checks tracked in PR |
 | Optional | B8 | Owner-selected modules and Windows extras | Deferred; selection and approval required before implementation |
 
 A6 stays last in Track A and remains a standalone formatting commit inside Part 5.

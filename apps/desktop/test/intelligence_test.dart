@@ -94,6 +94,21 @@ void main() {
       secrets: secrets,
       clientFactory: () => MockClient((r) async {
         seen.add(r);
+        if (r.url.path.endsWith('/audio/transcriptions')) {
+          return http.Response(jsonEncode({'text': 'A synthetic tone'}), 200);
+        }
+        if (r.url.path.endsWith('/embeddings')) {
+          return http.Response(
+            jsonEncode({
+              'data': [
+                {
+                  'embedding': [1.0, 0.0],
+                },
+              ],
+            }),
+            200,
+          );
+        }
         return _answer(reply);
       }),
     );
@@ -484,6 +499,7 @@ void main() {
     'cancelled voice input never starts an upload after reading the file',
     () async {
       await enable();
+      expect(ai.config.supportsTranscription, isTrue);
       final file = File('${root.path}/question.wav');
       await file.writeAsBytes([1, 2, 3]);
       final task = ai.transcribeQuestion(file.path);

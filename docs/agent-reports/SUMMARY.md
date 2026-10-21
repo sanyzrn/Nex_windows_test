@@ -20,9 +20,10 @@ Source, tests, glossary, changelog and reports are committed together and pushed
 after each completed part. No merge, tag, release or version bump is authorized at this point.
 No private data, credentials, backup/schema changes or Android source changes.
 
-Windows-generated screenshots were reviewed. Full Windows comparison/build/native
-smoke and real DPI/installer/notification/Narrator checks remain open; refresh-mode
-success does not imply those checks passed.
+Windows screenshots were reviewed. Parts 1–6 passed comparison/build/native
+smoke/installer/update checks; the final Part 7 PR checks supply current automated
+evidence. Real DPI/notification/Narrator, Android round trips and representative
+hardware profiling remain open. Refresh success alone is not full sign-off.
 
 Parts 1–6 have passed Windows CI. Part 7 was approved and implemented; its final checks and manual limitations are recorded in PART7.md. Optional B8 is deferred. Track A [draft PR #9](https://github.com/sanyzrn/Nex_windows_test/pull/9) is open;
 Windows CI and manual limits are recorded in Part 5 and the PR checks.
