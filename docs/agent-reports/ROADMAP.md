@@ -13,8 +13,8 @@ Working branch: `windows/0.23-agent`. Android reference: separate read-only
 
 The owner requested fewer parts, lower token use, related work together, short
 reports and only necessary tests. This replaces the old 21-part schedule without
-dropping required work-order items. Parts 1–4 are completed. There are now
-**three required parts left**, plus the optional B8 decision. The old part numbers
+dropping required work-order items. Parts 1–5 are completed. There are now
+**two required parts left**, plus the optional B8 decision. The old part numbers
 4–21 are superseded; A/B identifiers still refer to the original work order.
 
 Each remaining row is one approval boundary. Finish related work in that row,
@@ -28,7 +28,7 @@ an owner decision. Internal commits may separate unrelated changes.
 | 2 | A2 | Accessible labels, focus rings, LTR/RTL focus-order tests | Implemented; verification in A2.md |
 | 3 | A3 | Minimum window and text-scale overflow sweep | Implemented; verification in A3.md |
 | 4 | A5, A7, A8, A10 | Repository cleanup, architecture/README/shortcuts, contributor templates and focused pure-logic coverage | Completed; [report](PART4.md), focused checks recorded |
-| 5 | A9, A11, A12, A4, A6 | Persian updater notes, digits/calendar consistency, installer polish; complete the screenshot matrix after these changes, then format | Not started; closes Track A |
+| 5 | A9, A11, A12, A4, A6 | Persian updater notes, digits/calendar consistency, installer polish; complete the screenshot matrix after these changes, then format | Completed; [report](PART5.md); closes Track A |
 | 6 | B0, B1, B2, B3 | Triage remaining Windows checks; mixed-language editing, close/tray lifecycle, corner restoration, reminders and toast actions | Not started; native checks need Windows |
 | 7 | B4, B5, B6, B7 | Windows appearance/integration, Android AI parity including models/YouTube, backup/onboarding/settings/update handoff, final accessibility/performance/localization checks | Not started; closes Track B |
 | Optional | B8 | Owner-selected modules and Windows extras | Deferred; selection and approval required before implementation |
@@ -61,7 +61,7 @@ native checks early, and later parts update that same checklist.
 - Report unavailable Windows/manual checks honestly and carry them forward.
   Required native verification is not removed to save tokens.
 
-The owner approved Part 4 and it is complete. Wait for approval before Part 5.
+The owner approved Part 5 and it is complete. Wait for approval before Part 6.
 
 No data schema or backup format changes. No version bump until requested.
 Draft PRs are due at the end of each track, as specified in the work order.
