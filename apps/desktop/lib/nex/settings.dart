@@ -7,7 +7,6 @@ import 'package:file_selector/file_selector.dart';
 import 'package:nex_ui/nex_ui.dart';
 import 'command_palette.dart' show nexFoldText;
 import '../core/app_meta.dart';
-import '../core/controller.dart' show PanelController;
 import '../core/display_identity.dart';
 import '../core/panel_settings.dart';
 import 'tool_organizer.dart';
@@ -112,7 +111,7 @@ abstract class _SettingsStateBase extends State<NexSettingsView> {
     ];
     final keywords = [
       '${l.interfaceMode} ${l.windowRemember} ${l.windowCloseAction} ${l.testNotification} ${l.edge}',
-      '${l.language} ${l.light} ${l.dark} ${l.followSystem}',
+      '${l.appLanguage} ${l.light} ${l.dark} ${l.followSystem} ${l.themePalette} ${l.customAccent} ${l.textScale} ${l.solarCalendar} ${l.settingsDensity}',
       '${l.hotkey} ${l.pasteOnClick} ${l.magnify}',
       '${l.restore} ${l.recoveryKey} ${l.importNotes}',
       '',

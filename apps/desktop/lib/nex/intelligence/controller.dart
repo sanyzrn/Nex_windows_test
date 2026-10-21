@@ -58,6 +58,54 @@ class DesktopIntelligence extends ChangeNotifier {
   String _checkIdentity(AiProviderConfig value) =>
       jsonEncode([value.capabilityFingerprint, value.apiKey]);
 
+  AiCapabilityCheck? checkFor(AiProviderConfig candidate) {
+    final cached = _checks[_checkIdentity(candidate)];
+    if (cached != null) return cached;
+    if (candidate.apiKey != _keys[candidate.provider.wireName] ||
+        candidate.checkedTime == null) {
+      return null;
+    }
+    try {
+      final raw =
+          jsonDecode(
+                string('ai.capabilityReport.${candidate.provider.wireName}'),
+              )
+              as Map;
+      if (raw['fingerprint'] != candidate.capabilityFingerprint) return null;
+      final results = raw['results'] as Map;
+      return AiCapabilityCheck(
+        at: DateTime.parse(raw['at'] as String),
+        results: {
+          for (final capability in AiCapability.values)
+            if (results[capability.name] case final Map value)
+              capability: AiProbeResult(
+                AiProbeVerdict.values.byName(value['verdict'] as String),
+                status: value['status'] as int?,
+                detail: value['detail'] as String?,
+              ),
+        },
+      );
+    } catch (_) {
+      return null;
+    }
+  }
+
+  String _capabilityReport(AiProviderConfig candidate) => jsonEncode({
+    'fingerprint': candidate.capabilityFingerprint,
+    'at': capabilityCheck!.at.toUtc().toIso8601String(),
+    'results': {
+      for (final entry in capabilityCheck!.results.entries)
+        entry.key.name: {
+          'verdict': entry.value.verdict.name,
+          'status': entry.value.status,
+          'detail': entry.value.detail?.replaceAll(
+            candidate.apiKey.isEmpty ? '\u0000' : candidate.apiKey,
+            '…',
+          ),
+        },
+    },
+  });
+
   Future<List<String>> models(AiProviderConfig candidate) async {
     await initialize();
     if (!flag('ai.cloud_opt_in')) throw StateError('Cloud consent is required');
@@ -250,6 +298,9 @@ class DesktopIntelligence extends ChangeNotifier {
     final wire = value.provider.wireName;
     final oldKey = await secrets.read('ai.key.$wire');
     final previous = {
+      'ai.capabilityReport.$wire': _prefs!.getString(
+        'ai.capabilityReport.$wire',
+      ),
       for (final key in value.toMap().keys.where(
         (k) => k != 'apiKey' && k != 'provider',
       ))
@@ -272,6 +323,13 @@ class DesktopIntelligence extends ChangeNotifier {
             throw StateError('Could not save provider');
           }
         }
+      }
+      if (capabilityCheck != null &&
+          !await _prefs!.setString(
+            'ai.capabilityReport.$wire',
+            _capabilityReport(value),
+          )) {
+        throw StateError('Could not save capability report');
       }
       if (!await _prefs!.setString('ai.provider', wire)) {
         throw StateError('Could not activate provider');

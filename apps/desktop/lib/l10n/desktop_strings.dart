@@ -11,6 +11,11 @@ class DesktopStrings {
     'leaveWriting': ['Leave writing mode (Esc)', 'خروج از حالت نوشتن (Esc)'],
     'wordCount': ['Words', 'واژه‌ها'],
     'writingSaving': ['Saving…', 'در حال ذخیره…'],
+    'writingFailed': [
+      'Could not save — check the error message',
+      'ذخیره نشد؛ پیام خطا را بررسی کن',
+    ],
+    'writingReady': ['Ready to write', 'آمادهٔ نوشتن'],
     'writingSaved': ['Saved locally', 'روی دستگاه ذخیره شد'],
     'welcomeTitle': ['Make Nex yours', 'نکس را برای خودت تنظیم کن'],
     'welcomeHint': [

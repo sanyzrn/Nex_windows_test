@@ -126,8 +126,9 @@ class _SettingsState extends State<DesktopIntelligenceSettings> {
     if (!mounted ||
         !identical(_ai, NexScope.of(context).intelligence) ||
         candidate.apiKey != _current.apiKey ||
-        candidate.capabilityFingerprint != _current.capabilityFingerprint)
+        candidate.capabilityFingerprint != _current.capabilityFingerprint) {
       return;
+    }
     final s = AiStrings.of(context);
     var query = '';
     final picked = await showDialog<String>(
@@ -177,11 +178,12 @@ class _SettingsState extends State<DesktopIntelligenceSettings> {
         },
       ),
     );
-    if (mounted && picked != null)
+    if (mounted && picked != null) {
       setState(() {
         _model.text = picked;
         _invalidate();
       });
+    }
   });
 
   @override
@@ -276,6 +278,7 @@ class _SettingsState extends State<DesktopIntelligenceSettings> {
             },
           ),
         );
+        final check = ai.checkFor(_current);
         final d = DesktopStrings.of(context);
         final c = theme.colorScheme;
         Widget section(String title, IconData icon, List<Widget> children) =>
@@ -501,7 +504,7 @@ class _SettingsState extends State<DesktopIntelligenceSettings> {
                             ),
                         ],
                       ),
-                      if (_tested != null && ai.capabilityCheck != null) ...[
+                      if (check != null) ...[
                         const SizedBox(height: 12),
                         Text(
                           s.t('probeHint'),
@@ -511,8 +514,7 @@ class _SettingsState extends State<DesktopIntelligenceSettings> {
                           spacing: 8,
                           runSpacing: 8,
                           children: [
-                            for (final entry
-                                in ai.capabilityCheck!.results.entries)
+                            for (final entry in check.results.entries)
                               Tooltip(
                                 message: [
                                   if (entry.value.status != null)
@@ -538,6 +540,33 @@ class _SettingsState extends State<DesktopIntelligenceSettings> {
                           ],
                         ),
                       ],
+                      if (check != null)
+                        ExpansionTile(
+                          tilePadding: EdgeInsets.zero,
+                          title: Text(s.t('probeDetails')),
+                          children: [
+                            for (final entry in check.results.entries)
+                              ListTile(
+                                contentPadding: EdgeInsets.zero,
+                                title: Text(
+                                  '${s.t(entry.key.name)}: ${s.t(entry.value.verdict.name)}',
+                                ),
+                                subtitle: SelectableText(
+                                  [
+                                    if (entry.value.status != null)
+                                      'HTTP ${entry.value.status}',
+                                    if (entry.value.detail != null)
+                                      entry.value.detail!.replaceAll(
+                                        _key.text.isEmpty
+                                            ? '\u0000'
+                                            : _key.text,
+                                        '…',
+                                      ),
+                                  ].join(' · '),
+                                ),
+                              ),
+                          ],
+                        ),
                       if (_status != null)
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 10),

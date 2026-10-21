@@ -143,6 +143,18 @@ void main() {
         prefs.getKeys().map(prefs.get).join(),
         isNot(contains('new-secret')),
       );
+      await ai.close();
+      ai = DesktopIntelligence(
+        store,
+        secrets: secrets,
+        clientFactory: () =>
+            MockClient((_) async => throw StateError('No network on reload')),
+      );
+      await ai.initialize();
+      expect(
+        ai.checkFor(ai.config)!.results[AiCapability.images]!.verdict,
+        AiProbeVerdict.refused,
+      );
       await ai.setValue('ai.cloud_opt_in', false);
       await expectLater(
         ai.saveProvider(config.copyWith(apiKey: 'new-secret')),

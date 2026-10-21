@@ -226,10 +226,17 @@ class _WritingStatus extends StatelessWidget {
       valueListenable: f.composer,
       builder: (context, value, _) {
         final count = RegExp(r'\S+').allMatches(value.text).length;
+        final status = f.error != null
+            ? 'writingFailed'
+            : f.saving
+            ? 'writingSaving'
+            : value.text.trim().isEmpty
+            ? 'writingReady'
+            : 'writingSaved';
         return Padding(
           padding: const EdgeInsets.all(12),
           child: Text(
-            '${s.t('wordCount')}: ${desktopDigits(context, count)} · ${s.t(f.saving ? 'writingSaving' : 'writingSaved')}',
+            '${s.t('wordCount')}: ${desktopDigits(context, count)} · ${s.t(status)}',
             style: Theme.of(context).textTheme.labelMedium,
           ),
         );

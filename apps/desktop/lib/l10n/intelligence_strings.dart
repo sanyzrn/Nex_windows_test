@@ -22,6 +22,7 @@ class AiStrings {
     'absent': ['Unavailable', 'ارائه نمی‌شود'],
     'unknown': ['Unconfirmed', 'نامشخص'],
     'video': ['Video', 'ویدئو'],
+    'probeDetails': ['Capability check details', 'جزئیات آزمایش قابلیت‌ها'],
     'probeHint': [
       'Connection testing also checks capabilities with synthetic samples. Hover a result for the provider response.',
       'آزمایش اتصال، قابلیت‌ها را هم با نمونه‌های آزمایشی بررسی می‌کند. برای دیدن پاسخ ارائه‌دهنده روی نتیجه مکث کن.',

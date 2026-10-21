@@ -11,7 +11,7 @@ Base: `436bc6a`; branch `windows/0.23-agent`. Owner approved this bundle.
 - B5: explicit connection tests automatically probe four capabilities with the
   shared Android engine and synthetic samples, displaying verdicts, HTTP status
   and refusal detail. No manual capability dropdowns or background probing.
-  Modes/time/fingerprint persist with provider settings; the in-memory result
+  Modes/time/fingerprint and redacted verdict details persist with provider settings; the in-memory result
   cache includes the credential and fields, is bounded, and clears on consent
   withdrawal. Keys remain only in Windows secure storage. Provider models have a
   searchable picker with manual ID fallback; Gemini accepts custom `/v1beta`
@@ -33,8 +33,9 @@ Base: `436bc6a`; branch `windows/0.23-agent`. Owner approved this bundle.
 Verification: local translation parity, 18 checker tests, syntax formatting and
 whitespace checks pass. Local Flutter execution remains unavailable after the
 previous metadata-request automatic-review rejection; Windows CI supplies Flutter
-analysis/tests/build/native/installer evidence. Final source checks and reviewed
-Windows renders will be recorded in the PR body and [checks](https://github.com/sanyzrn/Nex_windows_test/pull/9/checks), avoiding a documentation-only rerun.
+analysis/tests/build/native/installer evidence. The first Windows analysis caught two brace hints and one unused import; corrected.
+Windows refresh [39584740085](https://github.com/sanyzrn/Nex_windows_test/actions/runs/39584740085) rendered successfully; all 31 changed/new images were reviewed.
+Final source checks and final reviewed Windows renders will be recorded in the PR body and [checks](https://github.com/sanyzrn/Nex_windows_test/pull/9/checks), avoiding a documentation-only rerun.
 
 Physical sign-off still needs the owner: installed notifications/DND and real
 IME/DPI/multiple monitors/Narrator (see [B0](B0.md)); real Android ↔ Windows `.nexbak`
