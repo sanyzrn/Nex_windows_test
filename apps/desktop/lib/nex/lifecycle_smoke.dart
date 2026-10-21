@@ -7,6 +7,7 @@ import '../main.dart' show RightPanelApp;
 import 'features_state.dart';
 import 'store.dart';
 
+/// Deliberately uses the legacy false flag to verify migration-independent close.
 /// The PowerShell harness sends real WM_CLOSE/tray commands and checks HWNDs.
 Future<void> lifecycleSmoke(String output) async {
   final root = await Directory.systemTemp.createTemp('nex-lifecycle-');
@@ -18,7 +19,7 @@ Future<void> lifecycleSmoke(String output) async {
   await c.bootstrap(
     preset: Settings()
       ..language = 'en'
-      ..closeToTray = true,
+      ..closeToTray = false,
     useNative: false,
   );
   await native.setWindowMode('window', compact: true);

@@ -174,7 +174,7 @@ class _SlimMoreMenu extends StatelessWidget {
     final l = AppLocalizations.of(context)!;
     final light = controller.palette.isLight;
     return DesktopFocusRing(
-      child: PopupMenuButton<String>(
+      child: NexPopupMenuButton<String>(
         key: const ValueKey('rail-more'),
         tooltip: l.toolMore,
         position: PopupMenuPosition.under,
@@ -194,20 +194,20 @@ class _SlimMoreMenu extends StatelessWidget {
           }
         },
         itemBuilder: (context) => [
-          PopupMenuItem(
+          nexMenuItem(
             value: 'panel',
-            child: _MenuRow(Icons.view_sidebar_outlined, l.switchToPanel),
+            icon: Icons.view_sidebar_outlined,
+            label: l.switchToPanel,
           ),
-          PopupMenuItem(
+          nexMenuItem(
             value: 'theme',
-            child: _MenuRow(
-              light ? Icons.dark_mode_outlined : Icons.light_mode_outlined,
-              light ? l.dark : l.light,
-            ),
+            icon: light ? Icons.dark_mode_outlined : Icons.light_mode_outlined,
+            label: light ? l.dark : l.light,
           ),
-          PopupMenuItem(
+          nexMenuItem(
             value: 'keys',
-            child: _MenuRow(Icons.keyboard_outlined, l.keyboardShortcuts),
+            icon: Icons.keyboard_outlined,
+            label: l.keyboardShortcuts,
           ),
         ],
         child: ExcludeSemantics(
@@ -226,22 +226,6 @@ class _SlimMoreMenu extends StatelessWidget {
       ),
     );
   }
-}
-
-class _MenuRow extends StatelessWidget {
-  const _MenuRow(this.icon, this.label);
-  final IconData icon;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) => Row(
-    mainAxisSize: MainAxisSize.min,
-    children: [
-      Icon(icon, size: 19),
-      const SizedBox(width: NexSpacing.md - 4),
-      Flexible(child: Text(label, overflow: TextOverflow.ellipsis)),
-    ],
-  );
 }
 
 /// One slim-rail destination. Its label wraps at the requested text size;

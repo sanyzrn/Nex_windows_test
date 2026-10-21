@@ -102,9 +102,20 @@ class _DesktopPortraitViewState extends State<DesktopPortraitView> {
         return ListView(
           padding: const EdgeInsets.all(NexSpacing.lg),
           children: [
-            Text(
-              l.portraitLocal,
-              style: Theme.of(context).textTheme.titleMedium,
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    l.portraitLocal,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                ),
+                IconButton(
+                  tooltip: l.retry,
+                  onPressed: generating ? null : load,
+                  icon: const Icon(Icons.refresh_rounded),
+                ),
+              ],
             ),
             const SizedBox(height: NexSpacing.md),
             Wrap(
@@ -116,9 +127,27 @@ class _DesktopPortraitViewState extends State<DesktopPortraitView> {
                   (l.portraitDays, s.days),
                   (l.portraitRecent, s.activeLast30),
                 ])
-                  Chip(
-                    label: Text(
-                      '${pair.$1} · ${desktopDigits(context, pair.$2)}',
+                  Container(
+                    constraints: const BoxConstraints(minWidth: 130),
+                    padding: const EdgeInsets.all(NexSpacing.md),
+                    decoration: BoxDecoration(
+                      color: scheme.primaryContainer,
+                      borderRadius: BorderRadius.circular(NexRadius.lg),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          desktopDigits(context, pair.$2),
+                          style: Theme.of(context).textTheme.headlineSmall
+                              ?.copyWith(color: scheme.onPrimaryContainer),
+                        ),
+                        Text(
+                          pair.$1,
+                          style: TextStyle(color: scheme.onPrimaryContainer),
+                        ),
+                      ],
                     ),
                   ),
               ],

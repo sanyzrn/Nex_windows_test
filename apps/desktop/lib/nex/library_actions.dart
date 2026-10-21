@@ -45,8 +45,7 @@ mixin _LibraryActions on _LibraryStateBase {
     if (trash) return;
     final l = AppLocalizations.of(context)!;
     final messenger = ScaffoldMessenger.of(context);
-    final dangerColor = Theme.of(context).colorScheme.error;
-    final result = await showMenu<String>(
+    final result = await nexShowContextMenu<String>(
       context: context,
       position: RelativeRect.fromLTRB(
         globalPosition.dx,
@@ -55,55 +54,23 @@ mixin _LibraryActions on _LibraryStateBase {
         globalPosition.dy + 1,
       ),
       items: [
-        PopupMenuItem(
-          value: 'open',
-          child: Row(
-            children: [
-              const Icon(Icons.open_in_new, size: 18),
-              const SizedBox(width: 8),
-              Text(l.readNote),
-            ],
-          ),
-        ),
-        PopupMenuItem(
+        nexMenuItem(value: 'open', icon: Icons.open_in_new, label: l.readNote),
+        nexMenuItem(
           value: 'pin',
-          child: Row(
-            children: [
-              const Icon(Icons.push_pin_outlined, size: 18),
-              const SizedBox(width: 8),
-              Text(note.pinnedAt == null ? l.pin : l.unpin),
-            ],
-          ),
+          icon: Icons.push_pin_outlined,
+          label: note.pinnedAt == null ? l.pin : l.unpin,
         ),
-        PopupMenuItem(
-          value: 'copy',
-          child: Row(
-            children: [
-              const Icon(Icons.copy_rounded, size: 18),
-              const SizedBox(width: 8),
-              Text(l.copy),
-            ],
-          ),
-        ),
-        PopupMenuItem(
+        nexMenuItem(value: 'copy', icon: Icons.copy_rounded, label: l.copy),
+        nexMenuItem(
           value: 'remind',
-          child: Row(
-            children: [
-              const Icon(Icons.alarm_add_outlined, size: 18),
-              const SizedBox(width: 8),
-              Text(l.remind),
-            ],
-          ),
+          icon: Icons.alarm_add_outlined,
+          label: l.remind,
         ),
-        PopupMenuItem(
+        nexMenuItem(
           value: 'delete',
-          child: Row(
-            children: [
-              Icon(Icons.delete_outline, size: 18, color: dangerColor),
-              const SizedBox(width: 8),
-              Text(l.delete, style: TextStyle(color: dangerColor)),
-            ],
-          ),
+          icon: Icons.delete_outline,
+          label: l.delete,
+          destructive: true,
         ),
       ],
     );

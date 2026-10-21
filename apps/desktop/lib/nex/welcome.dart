@@ -1,3 +1,4 @@
+import 'package:nex_ui/nex_ui.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -94,6 +95,8 @@ class _WelcomeDialogState extends State<_WelcomeDialog> {
               Text(s.t('welcomeHint')),
               const SizedBox(height: 20),
               DropdownButtonFormField<String>(
+                borderRadius: nexDropdownRadius,
+                dropdownColor: nexDropdownColor(context),
                 key: ValueKey('welcome-language-${c.S.language}'),
                 initialValue: c.S.language,
                 decoration: InputDecoration(labelText: l.language),
@@ -114,6 +117,8 @@ class _WelcomeDialogState extends State<_WelcomeDialog> {
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
+                borderRadius: nexDropdownRadius,
+                dropdownColor: nexDropdownColor(context),
                 initialValue: ['light', 'dark', 'system'].contains(c.S.theme)
                     ? c.S.theme
                     : 'dark',

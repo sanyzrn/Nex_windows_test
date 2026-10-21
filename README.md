@@ -6,7 +6,7 @@
 
 A local-first notebook and desktop toolkit for Windows, with English and Persian interfaces. Work in a full desktop window or a compact panel at either screen edge.
 
-**Current app version: `0.25.0+19` · Windows 10/11 · x64**
+**Current app version: `0.26.0+20` · Windows 10/11 · x64**
 
 [Download the latest installer](https://github.com/sanyzrn/Nex_windows_test/releases/latest) · [What's new](apps/desktop/CHANGELOG.md) · [Report a bug](https://github.com/sanyzrn/Nex_windows_test/issues/new/choose) · [فارسی](#راهنمای-فارسی)
 
@@ -127,3 +127,14 @@ saves before closing. Toggle automatic downloads or check manually in Settings �
 About Nex. When upgrading from a pre-0.21.0 build, install the latest stable
 installer once; those older versions do not contain the updater.
 [Design and update contract](docs/WINDOWS_0210.md).
+
+### 0.26 acceptance
+
+Window close hides to tray; use tray Quit to exit. Tools are independently enabled
+in Settings → Tools. PDF: Ctrl+O opens, Ctrl+F focuses search, Ctrl+G picks a page.
+Cycle's ring/slider inspects estimates without recording them; quick mood applies
+to the selected calendar day. The lock button locks all private tools together.
+
+[Current physical acceptance checklist](docs/agent-reports/MANUAL_TEST_0.26.md) ·
+[Android UI sync and limitations](docs/agent-reports/UI_SYNC_0.26.md) ·
+[Signing/editor recommendations](docs/agent-reports/SIGNING_AND_EDITOR_0.26.md).

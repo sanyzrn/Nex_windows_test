@@ -55,8 +55,20 @@ try {
     $expectedVersion = (Get-Item -LiteralPath $setup[0].FullName).VersionInfo.ProductVersion
     $actualVersion = (Get-Item -LiteralPath $target).VersionInfo.ProductVersion
     Write-Host "Installed target version: $actualVersion; installer: $expectedVersion"
+    # Registration belongs to the installer, not an unpackaged smoke EXE.
+    $protocol = Get-Item -LiteralPath 'HKCU:\Software\Classes\nex-win'
+    if ($protocol.GetValue('URL Protocol', $null) -ne '') { throw 'Missing URL Protocol marker.' }
+    $command = (Get-Item -LiteralPath 'HKCU:\Software\Classes\nex-win\shell\open\command').GetValue('')
+    if ($command -ne ('"' + $target + '" --open-note "%1"')) { throw 'Wrong installed protocol command.' }
+    $shortcutPath = Join-Path ([Environment]::GetFolderPath('Programs')) 'Nex\Nex.lnk'
+    if (-not (Test-Path -LiteralPath $shortcutPath)) { throw 'Missing Start menu shortcut.' }
+    $shell = New-Object -ComObject Shell.Application
+    $folder = $shell.Namespace((Split-Path -Parent $shortcutPath))
+    $shortcut = $folder.ParseName((Split-Path -Leaf $shortcutPath))
+    if ($shortcut.ExtendedProperty('System.AppUserModel.ID') -ne 'Nex.Desktop.App') { throw 'Wrong installed shortcut AUMID.' }
+    Write-Host 'PASS: installed nex-win protocol command and Start-menu AUMID read from Windows.'
     # The helper is no longer running. Stop the relaunched GUI through its
-    # normal WM_CLOSE route and exercise the newly installed complete bundle.
+    # explicit tray Quit route and exercise the newly installed complete bundle.
     Add-Type @'
 using System;
 using System.Runtime.InteropServices;
@@ -66,7 +78,7 @@ public static class NexUpdateClose {
   [DllImport("user32.dll")] private static extern uint GetWindowThreadProcessId(IntPtr hwnd, out uint owner);
   [DllImport("user32.dll")] private static extern bool PostMessage(IntPtr hwnd, uint msg, IntPtr w, IntPtr l);
   public static void Close(uint pid) {
-    EnumWindows((hwnd, unused) => { uint owner; GetWindowThreadProcessId(hwnd, out owner); if (owner == pid) PostMessage(hwnd, 0x0010, IntPtr.Zero, IntPtr.Zero); return true; }, IntPtr.Zero);
+    EnumWindows((hwnd, unused) => { uint owner; GetWindowThreadProcessId(hwnd, out owner); if (owner == pid) PostMessage(hwnd, 0x0111, new IntPtr(40005), IntPtr.Zero); return true; }, IntPtr.Zero);
   }
 }
 '@

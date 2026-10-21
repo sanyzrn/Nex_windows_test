@@ -196,6 +196,8 @@ class _NoteIntelligenceState extends State<NoteIntelligencePanel> {
                         width: 340,
                         child: task == 'translate'
                             ? DropdownButtonFormField<AiOutputLanguage>(
+                                borderRadius: nexDropdownRadius,
+                                dropdownColor: nexDropdownColor(context),
                                 initialValue: _language,
                                 isExpanded: true,
                                 decoration: InputDecoration(
@@ -215,6 +217,8 @@ class _NoteIntelligenceState extends State<NoteIntelligencePanel> {
                                 },
                               )
                             : DropdownButtonFormField<NexRewriteStyle>(
+                                borderRadius: nexDropdownRadius,
+                                dropdownColor: nexDropdownColor(context),
                                 initialValue: _style,
                                 isExpanded: true,
                                 decoration: InputDecoration(

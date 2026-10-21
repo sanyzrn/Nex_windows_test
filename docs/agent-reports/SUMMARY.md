@@ -32,3 +32,21 @@ Release automation publishes only after successful main-branch Windows CI for th
 Final Part 7 source verification: [Windows run 39589605793](https://github.com/sanyzrn/Nex_windows_test/actions/runs/39589605793), commit `4095fd9`: 856 desktop tests, shared UI 280, core 250, data 294 with 14 existing skips, AI 184, desktop without local inference 662; Release/native/installer/update checks passed.
 
 Release preparation: version 0.23.0+17 declarations passed local consistency checks; Windows refresh [39608500545](https://github.com/sanyzrn/Nex_windows_test/actions/runs/39608500545) passed and all eight changed About/history images were reviewed. Final main-branch CI and release URLs are recorded in PR #9.
+
+## 0.26 candidate — 2026-10-22
+
+Based on published main 91d3daa (0.25.0), preserving existing branches/history.
+Caption close now hides with a real tray regardless of legacy false settings;
+explicit Quit remains the drain/exit route. Shared Android menu helpers/theme
+ported without desktop-density replacement; stock menus ratcheted. Four module
+views improved; see UI_SYNC_0.26.md for exact scope and remaining Android gaps.
+CI native lifecycle fixture deliberately uses the old false flag. Installed
+protocol/AUMID assertions added to existing installer smoke rather than a second
+redundant job. Windows-only manual/performance/phone work remains NOT TESTED and
+assigned in MANUAL_TEST_0.26.md; no measurements invented. Signing/editor memo
+makes recommendations only. No artifacts proven unnecessary were deleted.
+
+Local localization parity and diff hygiene passed. Flutter validation locally
+was blocked by automatic review over metadata-endpoint access; no bypass used.
+Windows CI and visual review are pending at this commit. Release is not yet
+claimed; append final actual evidence after the gates complete.

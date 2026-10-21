@@ -1,3 +1,4 @@
+import 'package:nex_ui/nex_ui.dart';
 import '../../l10n/desktop_format.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/utility_strings.dart';
@@ -332,6 +333,8 @@ class _ZonePicker extends StatelessWidget {
     final remaining = kZones.where((z) => !current.contains(z)).toList();
     return DropdownButtonHideUnderline(
       child: DropdownButton<String>(
+        borderRadius: nexDropdownRadius,
+        dropdownColor: nexDropdownColor(context),
         isExpanded: true,
         dropdownColor: p.liquid,
         hint: Text(

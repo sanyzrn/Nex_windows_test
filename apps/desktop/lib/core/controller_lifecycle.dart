@@ -432,11 +432,11 @@ mixin PanelLifecycle on PanelStateBase {
     if (_closingWindow || _quitQueued) return;
     _closingWindow = true;
     try {
-      if (S.closeToTray) {
-        await _rememberWindowFrame();
-        save();
-        if (await native.hideToTray()) return;
-      }
+      // Caption close is never explicit Quit, including profiles that saved
+      // the old opt-in flag as false. Fall back to Quit only without a tray.
+      await _rememberWindowFrame();
+      save();
+      if (await native.hideToTray()) return;
       await quit();
     } finally {
       _closingWindow = false;

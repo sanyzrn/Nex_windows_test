@@ -59,7 +59,7 @@ class _FilterBar extends StatelessWidget {
             ),
             const SizedBox(width: 6),
             // Type filter dropdown menu
-            PopupMenuButton<String>(
+            NexPopupMenuButton<String>(
               key: const ValueKey('library-type-filter'),
               tooltip: l.type,
               initialValue: type?.name ?? '__all__',
@@ -67,20 +67,12 @@ class _FilterBar extends StatelessWidget {
                 value == '__all__' ? null : NoteType.values.byName(value),
               ),
               itemBuilder: (context) => [
-                PopupMenuItem<String>(
-                  value: '__all__',
-                  child: Text(l.filterAllTypes),
-                ),
+                nexMenuItem<String>(value: '__all__', label: l.filterAllTypes),
                 ...NoteType.values.map(
-                  (v) => PopupMenuItem<String>(
+                  (v) => nexMenuItem<String>(
                     value: v.name,
-                    child: Row(
-                      children: [
-                        Icon(nexNoteTypeIcon(v.name), size: 18),
-                        const SizedBox(width: 8),
-                        Text(noteTypeLabel(l, v)),
-                      ],
-                    ),
+                    icon: nexNoteTypeIcon(v.name),
+                    label: noteTypeLabel(l, v),
                   ),
                 ),
               ],
@@ -95,16 +87,13 @@ class _FilterBar extends StatelessWidget {
             ),
             if (tags.isNotEmpty) ...[
               const SizedBox(width: 6),
-              PopupMenuButton<String>(
+              NexPopupMenuButton<String>(
                 tooltip: l.tags,
                 initialValue: tag ?? '__all__',
                 onSelected: (value) =>
                     onTagChanged(value == '__all__' ? null : value),
                 itemBuilder: (context) => [
-                  PopupMenuItem<String>(
-                    value: '__all__',
-                    child: Text(l.filterAllTags),
-                  ),
+                  nexMenuItem<String>(value: '__all__', label: l.filterAllTags),
                   ...tags.map(
                     (t) => PopupMenuItem<String>(
                       value: t.id,
@@ -139,21 +128,18 @@ class _FilterBar extends StatelessWidget {
             ],
             if (threads.isNotEmpty) ...[
               const SizedBox(width: 6),
-              PopupMenuButton<String>(
+              NexPopupMenuButton<String>(
                 tooltip: l.threads,
                 initialValue: thread ?? '__all__',
                 onSelected: (value) =>
                     onThreadChanged(value == '__all__' ? null : value),
                 itemBuilder: (context) => [
-                  PopupMenuItem<String>(
+                  nexMenuItem<String>(
                     value: '__all__',
-                    child: Text(l.filterAllThreads),
+                    label: l.filterAllThreads,
                   ),
                   ...threads.map(
-                    (th) => PopupMenuItem<String>(
-                      value: th.id,
-                      child: Text(th.name),
-                    ),
+                    (th) => nexMenuItem<String>(value: th.id, label: th.name),
                   ),
                 ],
                 child: _FilterPill(

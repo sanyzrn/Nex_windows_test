@@ -368,7 +368,7 @@ class _AssistantState extends State<DesktopAssistant> {
                                   icon: const Icon(Icons.history),
                                 ),
                               if (box.maxWidth < 850)
-                                PopupMenuButton<String>(
+                                NexPopupMenuButton<String>(
                                   tooltip: s.t('history'),
                                   icon: const Icon(Icons.history),
                                   onSelected: ai.openConversation,
@@ -381,13 +381,10 @@ class _AssistantState extends State<DesktopAssistant> {
                                         final text = list.isEmpty
                                             ? s.t('newChat')
                                             : '${list.first['text']}';
-                                        return PopupMenuItem(
+                                        return nexMenuItem(
                                           value: e.key,
-                                          child: Text(
-                                            text,
-                                            maxLines: 2,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
+                                          icon: Icons.chat_bubble_outline,
+                                          label: text,
                                         );
                                       })
                                       .toList(),

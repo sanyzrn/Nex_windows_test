@@ -63,7 +63,7 @@ Future<void> showDesktopModule(
         insetPadding: const EdgeInsets.all(NexSpacing.md),
         clipBehavior: Clip.antiAlias,
         child: SizedBox(
-          width: 860,
+          width: 1040,
           height: MediaQuery.sizeOf(dialogContext).height * .9,
           child: ListenableBuilder(
             listenable: modules,
@@ -106,11 +106,31 @@ Future<void> showDesktopModule(
                         ),
                         const SizedBox(width: NexSpacing.sm),
                         Expanded(
-                          child: Text(
-                            desktopModuleTitle(l, module),
-                            style: Theme.of(context).textTheme.titleMedium,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                desktopModuleTitle(l, module),
+                                style: Theme.of(context).textTheme.titleMedium,
+                              ),
+                              Text(
+                                desktopModuleHint(l, module),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                            ],
                           ),
                         ),
+                        if ((module == DesktopModule.vault ||
+                                module == DesktopModule.cycle) &&
+                            modules.privateSession.isOpen)
+                          IconButton(
+                            tooltip: l.privateLockNow,
+                            onPressed: modules.privateSession.lock,
+                            icon: const Icon(Icons.lock_outline_rounded),
+                          ),
                         IconButton(
                           tooltip: l.close,
                           onPressed: () => Navigator.of(context).pop(),

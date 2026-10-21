@@ -28,8 +28,9 @@ class _Native extends NativeHost {
 }
 
 void main() {
-  test('close remains opt-in and round-trips shell settings', () {
-    expect(Settings.fromMap({}).closeToTray, isFalse);
+  test('caption close migrates legacy profiles to tray retention', () {
+    expect(Settings.fromMap({}).closeToTray, isTrue);
+    expect(Settings.fromMap({'closeToTray': false}).closeToTray, isTrue);
     expect(
       Settings.fromMap((Settings()..closeToTray = true).toMap()).closeToTray,
       isTrue,
@@ -38,7 +39,7 @@ void main() {
   for (final keep in [false, true]) {
     for (final tray in [false, true]) {
       test(
-        'close keep=$keep tray=$tray hides only with a real tray, explicit quit drains',
+        'close keep=$keep tray=$tray ignores legacy flag and hides only with a real tray, explicit quit drains',
         () async {
           final native = _Native()..available = tray;
           final c = PanelController(nativeHost: native);
@@ -52,9 +53,9 @@ void main() {
           };
           c.onTray('shutdown');
           await Future<void>.delayed(Duration.zero);
-          expect(native.hides, keep ? 1 : 0);
-          expect(native.exits, keep && tray ? 0 : 1);
-          if (keep && tray) {
+          expect(native.hides, 1);
+          expect(native.exits, tray ? 0 : 1);
+          if (tray) {
             expect(drained, 0);
             await c.quit();
           }

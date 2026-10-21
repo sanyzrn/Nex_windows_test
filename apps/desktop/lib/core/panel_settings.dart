@@ -51,7 +51,7 @@ class Settings {
   bool windowRemember = false;
 
   /// Opt-in: the default close action remains a clean quit.
-  bool closeToTray = false;
+  bool closeToTray = true;
   List<String> recentEmoji = [];
   List<Color> recentColors = [];
   String edge = 'right';
@@ -174,7 +174,7 @@ class Settings {
     }
     s.windowMaximized = j['windowMaximized'] as bool? ?? false;
     s.windowRemember = j['windowRemember'] as bool? ?? false;
-    s.closeToTray = j['closeToTray'] as bool? ?? false;
+    s.closeToTray = true; // Migrate the former opt-in close behavior.
     s.recentEmoji = ((j['recentEmoji'] as List?) ?? [])
         .map((e) => e.toString())
         .toList();

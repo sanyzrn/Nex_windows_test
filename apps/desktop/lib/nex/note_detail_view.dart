@@ -512,6 +512,8 @@ class _NexNoteDetailState extends State<NexNoteDetail> {
                                   .toList(),
                             ),
                             DropdownButton<String>(
+                              borderRadius: nexDropdownRadius,
+                              dropdownColor: nexDropdownColor(context),
                               hint: Text(l.joinThread),
                               isExpanded: true,
                               items: availableThreads

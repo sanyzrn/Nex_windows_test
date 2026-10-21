@@ -104,10 +104,10 @@ $result | Add-Member normalGuiFirstFrame $true
 [void][NexWindowProbe]::PostMessage($window, 0x0312, [IntPtr]1, [IntPtr]::Zero)
 Start-Sleep -Milliseconds 500
 $result | Add-Member normalGuiAliveAfterCapture (-not $normal.HasExited)
-[void][NexWindowProbe]::PostMessage($window, 0x0010, [IntPtr]::Zero, [IntPtr]::Zero)
+[void][NexWindowProbe]::PostMessage($window, 0x0111, [IntPtr]40005, [IntPtr]::Zero)
 if (-not $normal.WaitForExit(10000)) { throw 'Normal GUI failed to drain and close.' }
 $result | Add-Member normalGuiExitCode $normal.ExitCode
-# Isolated opt-in close/tray run: user preferences and notes are never changed.
+# Isolated legacy-profile close/tray run: user preferences and notes are never changed.
 $lifePath = [IO.Path]::ChangeExtension($Output, '.lifecycle.json')
 if (Test-Path -LiteralPath $lifePath) { Remove-Item -LiteralPath $lifePath }
 $life = Start-Process -FilePath $exe -ArgumentList @('--lifecycle-smoke', ('"' + $lifePath + '"')) -WorkingDirectory $Release -PassThru
