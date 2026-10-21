@@ -106,11 +106,9 @@ class _DesktopVaultViewState extends State<DesktopVaultView> {
             spacing: NexSpacing.sm,
             children: [
               FilledButton.tonalIcon(
-                onPressed: () => setState(
-                  () => editing = draft?.kind == kind
-                      ? draft
-                      : VaultStore.empty(kind),
-                ),
+                onPressed: draft == null
+                    ? () => setState(() => editing = VaultStore.empty(kind))
+                    : null,
                 icon: const Icon(Icons.add),
                 label: Text(l.moduleAdd),
               ),
@@ -153,7 +151,9 @@ class _DesktopVaultViewState extends State<DesktopVaultView> {
                   ),
                 ),
                 trailing: const Icon(Icons.chevron_right),
-                onTap: () => setState(() => editing = e),
+                onTap: draft != null && draft.id != e.id
+                    ? null
+                    : () => setState(() => editing = draft ?? e),
               ),
             ),
         ],
@@ -378,19 +378,17 @@ class _VaultEditorState extends State<_VaultEditor> {
                 autocorrect: false,
                 // Secret text never uses the framework copy menu, which would
                 // feed the ordinary clipboard watcher. Copy goes through native.
-                enableInteractiveSelection: !secret,
+                enableInteractiveSelection: false,
                 maxLines: !secret || !reveal
                     ? 1
                     : (key == 'text' || key == 'notes' ? 5 : 1),
                 decoration: InputDecoration(
                   labelText: label,
-                  suffixIcon: secret
-                      ? IconButton(
-                          tooltip: l.copy,
-                          onPressed: busy ? null : () => copy(key),
-                          icon: const Icon(Icons.copy_outlined),
-                        )
-                      : null,
+                  suffixIcon: IconButton(
+                    tooltip: l.copy,
+                    onPressed: busy ? null : () => copy(key),
+                    icon: const Icon(Icons.copy_outlined),
+                  ),
                 ),
                 onChanged: (_) => changed(),
               ),

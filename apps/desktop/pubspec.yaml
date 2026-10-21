@@ -40,6 +40,8 @@ dependencies:
   ffi: ^2.1.0
   # PDFium is bundled at build time; reading never downloads a runtime.
   pdfrx: ">=2.4.0 <2.5.0"
+  # image 4.11 (PDF backend) uses decodeLazy, absent in archive 4.3.
+  archive: ^4.5.2
 
 dev_dependencies:
   flutter_test:

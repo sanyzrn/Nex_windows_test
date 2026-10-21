@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:nex_core/nex_core.dart';
@@ -11,6 +12,7 @@ import 'package:nex_desktop/nex/modules/module_controller.dart';
 import 'package:nex_desktop/nex/modules/private_session.dart';
 import 'package:nex_desktop/nex/modules/private_gate.dart';
 import 'package:nex_desktop/nex/modules/vault_store.dart';
+import 'package:nex_desktop/nex/modules/vault_view.dart';
 import 'package:nex_desktop/nex/modules/pdf_reader.dart';
 import 'package:nex_desktop/nex/store.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -247,6 +249,60 @@ void main() {
     expect(find.text('80'), findsOneWidget);
     expect(t.takeException(), isNull);
   });
+  testWidgets(
+    'private editor copies title through the excluded clipboard and saves its draft',
+    (t) async {
+      final session = DesktopPrivateSession(authenticate: (_) async => true);
+      await session.unlock('synthetic');
+      final modules = DesktopModules(privateSession: session);
+      await modules.initialize();
+      final copied = <String>[];
+      t.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        const MethodChannel('rp/native'),
+        (call) async {
+          if (call.method == 'privateClipboard')
+            copied.add((call.arguments as Map)['text'] as String);
+          return true;
+        },
+      );
+      await t.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(body: DesktopVaultView(modules: modules)),
+        ),
+      );
+      await t.pumpAndSettle();
+      await t.tap(find.text('Add'));
+      await t.pumpAndSettle();
+      await t.enterText(
+        find.byKey(const ValueKey('vault-field-title')),
+        'Synthetic private title',
+      );
+      await t.enterText(
+        find.byKey(const ValueKey('vault-field-password')),
+        'Synthetic secret',
+      );
+      await t.tap(find.byTooltip('Copy').first);
+      await t.pumpAndSettle();
+      expect(copied, ['Synthetic private title']);
+      expect(
+        t
+            .widgetList<TextField>(find.byType(TextField))
+            .every((field) => !field.enableInteractiveSelection),
+        isTrue,
+      );
+      final snapshot = await modules.vault.read();
+      expect(snapshot.draft?.title, 'Synthetic private title');
+      expect(snapshot.draft?.value('password'), 'Synthetic secret');
+      await t.pumpWidget(const SizedBox());
+      modules.dispose();
+      t.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        const MethodChannel('rp/native'),
+        null,
+      );
+    },
+  );
   test(
     'vault format rejects duplicates and keeps the Android v1 entry shape',
     () {

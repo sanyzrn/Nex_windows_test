@@ -1,1 +1,1 @@
-B8 core modules: review 32 new module surfaces and Tools/settings/release-note additions in EN/FA, light/dark, compact/wide; 2026-10-21.
+B8 core modules, compatible image/archive codec pair: review 32 module surfaces plus Tools/settings/release-note additions, 2026-10-21.

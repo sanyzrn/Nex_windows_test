@@ -28,7 +28,11 @@ class _DesktopCycleViewState extends State<DesktopCycleView> {
   List<CyclePeriod> periods = [];
   List<CycleDayLog> logs = [];
   CycleDayLog? log;
-  bool loaded = false, busy = false, failed = false, editingDay = false;
+  bool loaded = false,
+      busy = false,
+      loading = false,
+      failed = false,
+      editingDay = false;
   int generation = 0;
   bool get solar =>
       NexPanelScope.maybeOf(context)?.S.solarCalendar ??
@@ -41,6 +45,7 @@ class _DesktopCycleViewState extends State<DesktopCycleView> {
 
   Future<void> load() async {
     final token = ++generation;
+    setState(() => loading = true);
     try {
       final value = await widget.features.store
           .call<Map<String, dynamic>>('cycleSnapshot', {
@@ -58,6 +63,8 @@ class _DesktopCycleViewState extends State<DesktopCycleView> {
         });
     } catch (_) {
       if (mounted && token == generation) setState(() => failed = true);
+    } finally {
+      if (mounted && token == generation) setState(() => loading = false);
     }
   }
 
@@ -343,7 +350,7 @@ class _DesktopCycleViewState extends State<DesktopCycleView> {
           solar: solar,
           periods: periods,
           logs: logs,
-          onSelect: busy
+          onSelect: busy || loading
               ? (_) {}
               : (day) {
                   setState(() {
@@ -383,7 +390,9 @@ class _DesktopCycleViewState extends State<DesktopCycleView> {
                 child: Text(l.cycleEnd),
               ),
             OutlinedButton.icon(
-              onPressed: busy ? null : () => setState(() => editingDay = true),
+              onPressed: busy || loading
+                  ? null
+                  : () => setState(() => editingDay = true),
               icon: const Icon(Icons.edit_note),
               label: Text(l.cycleLog),
             ),

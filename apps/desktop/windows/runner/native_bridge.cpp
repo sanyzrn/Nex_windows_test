@@ -61,6 +61,8 @@ NativeBridge::~NativeBridge() {
   channel_.SetMethodCallHandler(nullptr);
   stopping_.store(true);
   stop_cv_.notify_all();
+  const DWORD private_sequence = private_clipboard_sequence_.exchange(0);
+  if (private_sequence != 0) ClearPrivateClipboard(window_, private_sequence);
   UnregisterHotKey(window_, 1);
   for (auto& worker : workers_) {
     EnumThreadWindows(GetThreadId(worker.thread.native_handle()),
@@ -146,9 +148,22 @@ void NativeBridge::HandleMethodCall(
     DWORD sequence = 0;
     const bool copied = SetPrivateClipboard(window_, Utf16FromUtf8(ArgString(args, "text")), &sequence);
     result->Success(EncodableValue(copied));
-    if (copied) RunWorker([this, sequence]() {
-      if (!WaitOrStop(30000)) ClearPrivateClipboard(window_, sequence);
-    });
+    if (copied) {
+      private_clipboard_sequence_.store(sequence);
+      RunWorker([this, sequence]() {
+        if (WaitOrStop(30000)) return;
+        // A busy clipboard is retried briefly; a replacement is never cleared.
+        for (int attempt = 0; attempt < 20; ++attempt) {
+          if (GetClipboardSequenceNumber() != sequence || !ClipboardIsPrivate()) return;
+          if (ClearPrivateClipboard(window_, sequence)) {
+            DWORD expected = sequence;
+            private_clipboard_sequence_.compare_exchange_strong(expected, 0);
+            return;
+          }
+          if (WaitOrStop(50)) return;
+        }
+      });
+    }
   } else if (name == "privateClipboardSelfTest") {
     // Dedicated native probe, using a synthetic value only. It never verifies
     // a real user or bypasses the Dart unlock; no content is returned.
