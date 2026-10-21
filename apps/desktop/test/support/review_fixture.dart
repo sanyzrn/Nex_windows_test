@@ -110,17 +110,36 @@ Future<ReviewStore> openReviewStore(String name, {int count = 0}) async {
   }
   if (name.startsWith('compact_')) {
     final image = File('test/fixtures/review-landscape.png').absolute;
-    repo.insert(Note(id: 'compact-photo', type: NoteType.photo,
-      mediaUri: image.path, mediaHash: sha256OfBytes(image.readAsBytesSync()),
-      caption: 'A quiet landscape / منظرهٔ آرام', createdAt: _day,
-      updatedAt: _day, deviceId: 'review-device', rev: 1, syncState: SyncState.pending));
+    repo.insert(
+      Note(
+        id: 'compact-photo',
+        type: NoteType.photo,
+        mediaUri: image.path,
+        mediaHash: sha256OfBytes(image.readAsBytesSync()),
+        caption: 'A quiet landscape / منظرهٔ آرام',
+        createdAt: _day,
+        updatedAt: _day,
+        deviceId: 'review-device',
+        rev: 1,
+        syncState: SyncState.pending,
+      ),
+    );
     repo.setDueAt('review-0', DateTime(2100, 1, 2, 9));
-    final file = File('${root.path}/review-guide.txt')..writeAsStringSync('Review attachment');
-    SqliteAttachmentRepository(repo, localDeviceId: 'review-device').add('review-0',
-      kind: AttachmentKind.file, mediaUri: file.path,
-      mediaHash: sha256OfBytes(file.readAsBytesSync()), name: 'review-guide.txt',
-      mimeType: 'text/plain', now: _day);
-    db.db.execute('UPDATE notes SET updated_at = ? WHERE id = ?', [_day.toUtc().toIso8601String(), 'review-0']);
+    final file = File('${root.path}/review-guide.txt')
+      ..writeAsStringSync('Review attachment');
+    SqliteAttachmentRepository(repo, localDeviceId: 'review-device').add(
+      'review-0',
+      kind: AttachmentKind.file,
+      mediaUri: file.path,
+      mediaHash: sha256OfBytes(file.readAsBytesSync()),
+      name: 'review-guide.txt',
+      mimeType: 'text/plain',
+      now: _day,
+    );
+    db.db.execute('UPDATE notes SET updated_at = ? WHERE id = ?', [
+      _day.toUtc().toIso8601String(),
+      'review-0',
+    ]);
   }
   db.close();
   final features = NexFeatures(
@@ -216,7 +235,12 @@ Future<PanelController> bootReview(
   );
   await _frames(t);
   if (spec.name.startsWith('compact_')) {
-    await t.runAsync(() => precacheImage(FileImage(File('test/fixtures/review-landscape.png').absolute), t.element(find.byType(Scaffold))));
+    await t.runAsync(
+      () => precacheImage(
+        FileImage(File('test/fixtures/review-landscape.png').absolute),
+        t.element(find.byType(Scaffold)),
+      ),
+    );
     await t.pump();
   }
   return c;
@@ -229,11 +253,16 @@ Future<void> goReview(
   ReviewShot spec,
 ) async {
   final selectedReader = switch (spec.target) {
-    'readerText' => 'review-0', 'readerChecklist' => 'review-1',
-    'readerLink' => 'review-2', 'readerPhoto' => 'compact-photo', _ => null,
+    'readerText' => 'review-0',
+    'readerChecklist' => 'review-1',
+    'readerLink' => 'review-2',
+    'readerPhoto' => 'compact-photo',
+    _ => null,
   };
   final settingsCategory = switch (spec.target) {
-    'displaySettings' => 0, 'shortcutSettings' => 2, 'aboutSettings' || 'releaseNotes' => 5,
+    'displaySettings' => 0,
+    'shortcutSettings' => 2,
+    'aboutSettings' || 'releaseNotes' => 5,
     _ => null,
   };
   final window = spec.mode == 'window';
@@ -242,9 +271,22 @@ Future<void> goReview(
       c.selectWindowSection('assistant');
     case 'aiSettings' || 'providerSettings':
       c.selectWindowSection('settings');
-    case 'timeline' || 'reader' || 'readerText' || 'readerChecklist' || 'readerLink' || 'readerPhoto':
+    case 'timeline' ||
+        'reader' ||
+        'readerText' ||
+        'readerChecklist' ||
+        'readerLink' ||
+        'readerPhoto':
       window ? c.selectWindowSection('library') : c.openWidget('timeline');
-    case 'settings' || 'appearance' || 'backup' || 'toolsSettings' || 'displaySettings' || 'shortcutSettings' || 'aboutSettings' || 'releaseNotes' || 'solarCalendar':
+    case 'settings' ||
+        'appearance' ||
+        'backup' ||
+        'toolsSettings' ||
+        'displaySettings' ||
+        'shortcutSettings' ||
+        'aboutSettings' ||
+        'releaseNotes' ||
+        'solarCalendar':
       window ? c.selectWindowSection('settings') : c.openWidget('settings');
     case 'more':
       window ? c.selectWindowSection('tools') : c.openWidget('more');
@@ -254,25 +296,35 @@ Future<void> goReview(
   await _frames(t, 90);
   if (settingsCategory != null) {
     final open = find.byKey(ValueKey('settings-open-$settingsCategory'));
-    await t.ensureVisible(open); await t.tap(open); await _frames(t, 60);
+    await t.ensureVisible(open);
+    await t.tap(open);
+    await _frames(t, 60);
   }
   if (spec.target == 'releaseNotes') {
-    await t.runAsync(() => rootBundle.loadString(releaseNotesAsset(spec.locale)));
+    await t.runAsync(
+      () => rootBundle.loadString(releaseNotesAsset(spec.locale)),
+    );
     await t.ensureVisible(find.byKey(const ValueKey('release-notes-open')));
     await t.tap(find.byKey(const ValueKey('release-notes-open')));
     await t.pump();
     // Asset completion needs a real async turn, not simulated animation time.
     for (var i = 0; i < 5 && find.byType(NexMarkdown).evaluate().isEmpty; i++) {
-      await t.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 40)));
+      await t.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 40)),
+      );
       await t.pump();
     }
     expect(find.byType(NexMarkdown), findsOneWidget);
     await _frames(t, 60);
   }
   if (spec.target == 'solarCalendar') {
-    showDesktopDatePicker(t.element(find.byType(Scaffold)),
-      initialDate: DateTime(2026, 10, 21), firstDate: DateTime(2026, 10, 1),
-      lastDate: DateTime(2036, 10, 1), solar: true);
+    showDesktopDatePicker(
+      t.element(find.byType(Scaffold)),
+      initialDate: DateTime(2026, 10, 21),
+      firstDate: DateTime(2026, 10, 1),
+      lastDate: DateTime(2036, 10, 1),
+      solar: true,
+    );
     await t.pumpAndSettle();
   }
   if (spec.target == 'aiSettings' || spec.target == 'providerSettings') {
@@ -326,7 +378,9 @@ Future<void> goReview(
   }
   if (selectedReader != null) {
     final features = NexScope.of(t.element(find.byType(NexLibraryView)));
-    final note = await t.runAsync(() => features.store.call<Note>('get', {'id': selectedReader}));
+    final note = await t.runAsync(
+      () => features.store.call<Note>('get', {'id': selectedReader}),
+    );
     features.requestNote(note!);
     await _frames(t);
     expect(find.byType(NexNoteDetail), findsOneWidget);
@@ -353,7 +407,11 @@ Future<void> closeReviewStore(WidgetTester tester, ReviewStore store) async {
         await store.root.delete(recursive: true);
         return;
       } on FileSystemException catch (error) {
-        if (!Platform.isWindows || error.osError?.errorCode != 32 || attempt >= 9) { rethrow; }
+        if (!Platform.isWindows ||
+            error.osError?.errorCode != 32 ||
+            attempt >= 9) {
+          rethrow;
+        }
         await Future<void>.delayed(const Duration(milliseconds: 50));
       }
     }

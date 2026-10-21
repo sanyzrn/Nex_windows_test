@@ -19,7 +19,9 @@ void main() {
 
   Widget host(Note note) => MaterialApp(
     theme: nexLightTheme(),
-    home: Scaffold(body: SizedBox(width: 400, child: NoteCard(note: note))),
+    home: Scaffold(
+      body: SizedBox(width: 400, child: NoteCard(note: note)),
+    ),
   );
 
   testWidgets('a formatted note shows its words, not its markers', (
@@ -64,9 +66,7 @@ void main() {
     Note checklist(int items) => Note(
       id: 'n2',
       type: NoteType.checklist,
-      content: [
-        for (var i = 1; i <= items; i++) '- [ ] item $i',
-      ].join('\n'),
+      content: [for (var i = 1; i <= items; i++) '- [ ] item $i'].join('\n'),
       createdAt: DateTime.utc(2026, 7, 28),
       updatedAt: DateTime.utc(2026, 7, 28),
       deviceId: 'test',
@@ -130,9 +130,7 @@ void main() {
       expect(tester.getSize(find.byType(NoteCard)).height, collapsed);
     });
 
-    testWidgets('a very long checklist stops at the ceiling', (
-      tester,
-    ) async {
+    testWidgets('a very long checklist stops at the ceiling', (tester) async {
       // The setting is for reading a note without opening it, not for
       // handing one note the whole screen. Past the ceiling the card says
       // how much it is holding back, exactly as a collapsed one does.

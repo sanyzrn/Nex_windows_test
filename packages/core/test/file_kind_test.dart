@@ -7,7 +7,11 @@ void main() {
   group('the extension decides', () {
     test('Markdown, in every spelling it has in the wild', () {
       for (final name in ['a.md', 'a.markdown', 'a.mdown', 'a.mkd']) {
-        expect(NexFileKinds.of(path: '/x/$name'), NexFileKind.markdown, reason: name);
+        expect(
+          NexFileKinds.of(path: '/x/$name'),
+          NexFileKind.markdown,
+          reason: name,
+        );
       }
       expect(NexFileKinds.of(path: '/x/NOTES.MD'), NexFileKind.markdown);
     });
@@ -21,7 +25,11 @@ void main() {
 
     test('source and configuration are code', () {
       for (final name in ['main.dart', 'a.py', 'a.json', 'a.yml', 'a.sh']) {
-        expect(NexFileKinds.of(path: '/x/$name'), NexFileKind.code, reason: name);
+        expect(
+          NexFileKinds.of(path: '/x/$name'),
+          NexFileKind.code,
+          reason: name,
+        );
       }
     });
 

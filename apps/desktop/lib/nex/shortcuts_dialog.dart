@@ -28,7 +28,10 @@ class _ShortcutsDialog extends StatelessWidget {
 
     final shortcuts = [
       (ShortcutLabels.spaced(ShortcutLabels.newNote), l.actionNewNote),
-      (ShortcutLabels.spaced(ShortcutLabels.newChecklist), l.actionNewChecklist),
+      (
+        ShortcutLabels.spaced(ShortcutLabels.newChecklist),
+        l.actionNewChecklist,
+      ),
       (ShortcutLabels.spaced(ShortcutLabels.search), l.actionSearch),
       (ShortcutLabels.spaced(ShortcutLabels.library), l.actionLibrary),
       (ShortcutLabels.spaced(ShortcutLabels.settings), l.actionSettings),
@@ -41,9 +44,7 @@ class _ShortcutsDialog extends StatelessWidget {
     ];
 
     return AlertDialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       title: Row(
         children: [
           Container(

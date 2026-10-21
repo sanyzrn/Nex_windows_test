@@ -623,7 +623,12 @@ class _SettingsState extends State<DesktopIntelligenceSettings> {
                     FilledButton.tonalIcon(
                       onPressed: ai.busy ? null : () => _run(ai.indexNotes),
                       icon: const Icon(Icons.manage_search_outlined),
-                      label: Text(desktopDigits(context, '${s.t('index')} · ${ai.indexed}')),
+                      label: Text(
+                        desktopDigits(
+                          context,
+                          '${s.t('index')} · ${ai.indexed}',
+                        ),
+                      ),
                     ),
                   ],
                 ),

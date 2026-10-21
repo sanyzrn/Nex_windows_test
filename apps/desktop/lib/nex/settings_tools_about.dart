@@ -56,10 +56,13 @@ mixin _SettingsToolsAbout on _SettingsStateBase {
           ] else
             const ReleaseNotesButton(),
           Text(
-            desktopDigits(context, 'Nex Windows v$kAppShortVersion (Build $kAppBuild)'),
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: scheme.onSurfaceVariant,
+            desktopDigits(
+              context,
+              'Nex Windows v$kAppShortVersion (Build $kAppBuild)',
             ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
           ),
           const SizedBox(height: 8),
           Wrap(

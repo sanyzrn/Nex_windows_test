@@ -15,7 +15,11 @@ import 'package:nex_ui/nex_ui.dart';
 void main() {
   const boundaryKey = ValueKey('icon');
 
-  Widget host({double? size, Color? color, IconThemeData? theme}) => MaterialApp(
+  Widget host({
+    double? size,
+    Color? color,
+    IconThemeData? theme,
+  }) => MaterialApp(
     home: Scaffold(
       body: Center(
         child: RepaintBoundary(

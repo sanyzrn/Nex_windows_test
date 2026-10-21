@@ -34,7 +34,9 @@ class _ReleaseNotesDialogState extends State<_ReleaseNotesDialog> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final asset = releaseNotesAsset(Localizations.localeOf(context).languageCode);
+    final asset = releaseNotesAsset(
+      Localizations.localeOf(context).languageCode,
+    );
     if (_asset != asset) {
       _asset = asset;
       _text = DefaultAssetBundle.of(context).loadString(asset);
@@ -53,7 +55,9 @@ class _ReleaseNotesDialogState extends State<_ReleaseNotesDialog> {
           if (state.hasError) {
             return Text(DesktopStrings.of(context).t('releaseNotesError'));
           }
-          if (!state.hasData) { return const Center(child: CircularProgressIndicator()); }
+          if (!state.hasData) {
+            return const Center(child: CircularProgressIndicator());
+          }
           return SingleChildScrollView(child: NexMarkdown(state.data!));
         },
       ),

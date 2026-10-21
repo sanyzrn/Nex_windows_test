@@ -899,7 +899,9 @@ class DesktopIntelligence extends ChangeNotifier {
       final answer = await _adapter().digest(
         notes.take(30).map(contextLine).join('\n'),
       );
-      if (generation != _generation || answer == null || answer.trim().isEmpty) {
+      if (generation != _generation ||
+          answer == null ||
+          answer.trim().isEmpty) {
         return;
       }
       brief = answer;

@@ -69,7 +69,10 @@ class _PasswordViewState extends State<PasswordView> {
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 4),
           child: Text(
-            desktopDigits(context, AppLocalizations.of(context)!.characters(_len.round())),
+            desktopDigits(
+              context,
+              AppLocalizations.of(context)!.characters(_len.round()),
+            ),
             style: TextStyle(
               fontFamily: Theme.of(context).textTheme.bodyMedium?.fontFamily,
               fontFamilyFallback: const ['Segoe UI'],

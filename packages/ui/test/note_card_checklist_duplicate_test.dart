@@ -30,10 +30,7 @@ void main() {
         home: Scaffold(
           body: SizedBox(
             width: 400,
-            child: NoteCard(
-              note: note,
-              onChecklistToggle: toggled.add,
-            ),
+            child: NoteCard(note: note, onChecklistToggle: toggled.add),
           ),
         ),
       ),

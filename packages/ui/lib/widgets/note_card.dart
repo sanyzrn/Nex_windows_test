@@ -349,7 +349,12 @@ class _BoardBody extends StatelessWidget {
                       color: c.onSurfaceVariant,
                     ),
                     Text(
-                      nexDigits('${note.attachmentCount}', persian: Localizations.localeOf(context).languageCode == 'fa'),
+                      nexDigits(
+                        '${note.attachmentCount}',
+                        persian:
+                            Localizations.localeOf(context).languageCode ==
+                            'fa',
+                      ),
                       style: theme.textTheme.labelSmall,
                     ),
                   ],
@@ -674,7 +679,10 @@ extension on _CardBody {
           const SizedBox(width: NexSpacing.xs),
           ExcludeSemantics(
             child: Text(
-              nexDigits('+${note.attachmentCount}', persian: Localizations.localeOf(context).languageCode == 'fa'),
+              nexDigits(
+                '+${note.attachmentCount}',
+                persian: Localizations.localeOf(context).languageCode == 'fa',
+              ),
               textDirection: TextDirection.ltr,
               maxLines: 1,
               style: theme.textTheme.labelSmall?.copyWith(

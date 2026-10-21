@@ -113,7 +113,10 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
-          body: SizedBox(width: 400, child: NexTextSurface('$english\n$persian')),
+          body: SizedBox(
+            width: 400,
+            child: NexTextSurface('$english\n$persian'),
+          ),
         ),
       ),
     );
@@ -242,23 +245,23 @@ void _autoDirection() {
     TextEditingController controller, {
     required void Function() onBuild,
   }) => MaterialApp(
-        home: Directionality(
-          textDirection: TextDirection.ltr,
-          child: Material(
-            child: NexAutoDirection(
+    home: Directionality(
+      textDirection: TextDirection.ltr,
+      child: Material(
+        child: NexAutoDirection(
+          controller: controller,
+          builder: (context, direction) {
+            onBuild();
+            return TextField(
               controller: controller,
-              builder: (context, direction) {
-                onBuild();
-                return TextField(
-                  controller: controller,
-                  textDirection: direction,
-                  textAlign: TextAlign.start,
-                );
-              },
-            ),
-          ),
+              textDirection: direction,
+              textAlign: TextAlign.start,
+            );
+          },
         ),
-      );
+      ),
+    ),
+  );
 
   testWidgets('a moving selection does not rebuild the field', (tester) async {
     // The bug this is here for: a `TextEditingController` notifies its

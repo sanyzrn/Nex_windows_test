@@ -279,7 +279,8 @@ void main() {
       expect(find.text('پیوست قابل جستجو'), findsOneWidget);
       expect(find.text('Attach files'), findsOneWidget);
       final captionField = find.byWidgetPredicate(
-        (widget) => widget is TextField &&
+        (widget) =>
+            widget is TextField &&
             widget.controller?.text == 'توضیح یادداشت قدیمی',
       );
       expect(captionField, findsOneWidget);

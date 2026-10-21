@@ -235,15 +235,26 @@ void main() {
       await t.pump(const Duration(milliseconds: 151));
       await t.enterText(search, '');
       await _settleDatabase(t);
-      expect(find.descendant(of: find.byType(AlertDialog), matching: find.text('unique needle')), findsNothing);
+      expect(
+        find.descendant(
+          of: find.byType(AlertDialog),
+          matching: find.text('unique needle'),
+        ),
+        findsNothing,
+      );
       expect(find.byType(CircularProgressIndicator), findsNothing);
       await t.enterText(search, 'unique');
       await t.pump(const Duration(milliseconds: 151));
       await _settleDatabase(t);
-      t.widget<TextField>(search).controller!.selection =
-          const TextSelection(baseOffset: 0, extentOffset: 6);
+      t.widget<TextField>(search).controller!.selection = const TextSelection(
+        baseOffset: 0,
+        extentOffset: 6,
+      );
       await t.pump();
-      final hit = find.descendant(of: find.byType(AlertDialog), matching: find.text('unique needle'));
+      final hit = find.descendant(
+        of: find.byType(AlertDialog),
+        matching: find.text('unique needle'),
+      );
       expect(hit, findsOneWidget);
       await t.tap(hit);
       await t.pump();

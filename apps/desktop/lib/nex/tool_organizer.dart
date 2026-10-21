@@ -96,7 +96,10 @@ class _NexToolOrganizerState extends State<NexToolOrganizer> {
             for (final entry in labels.entries)
               ChoiceChip(
                 label: Text(
-                  desktopDigits(context, '${entry.value} · ${tools.where((t) => placement(t.id) == entry.key).length}'),
+                  desktopDigits(
+                    context,
+                    '${entry.value} · ${tools.where((t) => placement(t.id) == entry.key).length}',
+                  ),
                 ),
                 selected: filter == entry.key,
                 onSelected: (_) => setState(() {

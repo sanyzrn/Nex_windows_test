@@ -301,7 +301,11 @@ const _matrix = <ReviewShot>[
 ];
 
 void main() {
-  for (final spec in [..._matrix, ...textScaleReviewShots, ...compactReviewShots]) {
+  for (final spec in [
+    ..._matrix,
+    ...textScaleReviewShots,
+    ...compactReviewShots,
+  ]) {
     testWidgets('review: ${spec.name}', (t) async {
       final store = (await t.runAsync(
         () => openReviewStore(spec.name, count: spec.notes),

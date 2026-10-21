@@ -8,7 +8,10 @@ class DesktopStrings {
   String t(String key) => (_copy[key] ?? [key, key])[fa ? 1 : 0];
   static const _copy = <String, List<String>>{
     'whatsNew': ["What's new", 'تازه‌های نکس'],
-    'releaseNotesError': ['Release notes could not be loaded.', 'یادداشت‌های انتشار بارگذاری نشد.'],
+    'releaseNotesError': [
+      'Release notes could not be loaded.',
+      'یادداشت‌های انتشار بارگذاری نشد.',
+    ],
     'searchSettings': ['Search settings', 'جست‌وجوی تنظیمات'],
     'settingsIntro': ['Make Nex feel like you.', 'نکس را به سلیقهٔ خودت بساز.'],
     'settingsHint': [

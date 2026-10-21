@@ -11,10 +11,13 @@ void main() {
     () async {
       final root = await Directory.systemTemp.createTemp('nex-test-');
       final db = NexDatabase.open('${root.path}/nex.sqlite');
-      final android = CaptureService(
-        SqliteNoteRepository(db, localDeviceId: 'android'),
-        deviceId: 'android',
-      ).submitTextCapture('\u06cc\u0627\u062f\u062f\u0627\u0634\u062a \u0642\u062f\u06cc\u0645\u06cc');
+      final android =
+          CaptureService(
+            SqliteNoteRepository(db, localDeviceId: 'android'),
+            deviceId: 'android',
+          ).submitTextCapture(
+            '\u06cc\u0627\u062f\u062f\u0627\u0634\u062a \u0642\u062f\u06cc\u0645\u06cc',
+          );
       db.close();
       final store = await DesktopStore.open(root.path, 'windows');
       try {
@@ -46,7 +49,10 @@ void main() {
         });
         expect(desktopQuery.map((n) => n.id), androidQuery.map((n) => n.id));
         reference.close();
-        await store.call<dynamic>('tag', {'id': note.id, 'name': '\u06a9\u0627\u0631'});
+        await store.call<dynamic>('tag', {
+          'id': note.id,
+          'name': '\u06a9\u0627\u0631',
+        });
         expect(
           (await store.call<Note>('get', {'id': note.id})).tags.single.name,
           '\u06a9\u0627\u0631',
@@ -156,7 +162,9 @@ void main() {
       final n2 = cap.submitTextCapture(
         '\u06a9\u062a\u0627\u0628\u200c\u062e\u0627\u0646\u0647 \u0632\u06cc\u0628\u0627',
       )!;
-      seedDb.db.execute("DELETE FROM nex_meta WHERE key = 'search_index_folded'");
+      seedDb.db.execute(
+        "DELETE FROM nex_meta WHERE key = 'search_index_folded'",
+      );
       seedDb.db.execute(
         "UPDATE notes_fts SET content = '\u0643\u062a\u0627\u0628\u062e\u0627\u0646\u0647 \u0648 \u064a\u0627\u062f\u062f\u0627\u0634\u062a' WHERE note_id = '${n1.id}'",
       );
@@ -178,17 +186,23 @@ void main() {
         expect(resPersianKaf.map((n) => n.id).toSet(), {n1.id, n2.id});
 
         final resNoZwnj = await store.call<List<Note>>('search', {
-          'filters': const SearchFilters(query: '\u06a9\u062a\u0627\u0628\u062e\u0627\u0646\u0647'),
+          'filters': const SearchFilters(
+            query: '\u06a9\u062a\u0627\u0628\u062e\u0627\u0646\u0647',
+          ),
         });
         expect(resNoZwnj.map((n) => n.id).toSet(), {n1.id, n2.id});
 
         final resWithZwnj = await store.call<List<Note>>('search', {
-          'filters': const SearchFilters(query: '\u06a9\u062a\u0627\u0628\u200c\u062e\u0627\u0646\u0647'),
+          'filters': const SearchFilters(
+            query: '\u06a9\u062a\u0627\u0628\u200c\u062e\u0627\u0646\u0647',
+          ),
         });
         expect(resWithZwnj.map((n) => n.id).toSet(), {n1.id, n2.id});
 
         final resYeh = await store.call<List<Note>>('search', {
-          'filters': const SearchFilters(query: '\u06cc\u0627\u062f\u062f\u0627\u0634\u062a'),
+          'filters': const SearchFilters(
+            query: '\u06cc\u0627\u062f\u062f\u0627\u0634\u062a',
+          ),
         });
         expect(resYeh.single.id, n1.id);
       } finally {

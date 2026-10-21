@@ -132,7 +132,10 @@ class _ClockViewState extends State<ClockView> {
         : '${minutes > 0 ? '+' : '-'}${minutes.abs() ~/ 60}:${(minutes.abs() % 60).toString().padLeft(2, '0')}';
     return (
       desktopDigits(context, parts.time),
-      desktopDigits(context, '${utilityLabelForText(context, dayStr)}, ${utilityLabelForText(context, diffStr)}'),
+      desktopDigits(
+        context,
+        '${utilityLabelForText(context, dayStr)}, ${utilityLabelForText(context, diffStr)}',
+      ),
     );
   }
 

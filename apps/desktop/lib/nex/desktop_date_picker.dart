@@ -12,18 +12,29 @@ Future<DateTime?> showDesktopDatePicker(
   required bool solar,
 }) {
   if (!solar) {
-    return showDatePicker(context: context, initialDate: initialDate,
-      firstDate: firstDate, lastDate: lastDate);
+    return showDatePicker(
+      context: context,
+      initialDate: initialDate,
+      firstDate: firstDate,
+      lastDate: lastDate,
+    );
   }
   return showDialog<DateTime>(
     context: context,
     builder: (_) => _SolarDatePicker(
-      initialDate: initialDate, firstDate: firstDate, lastDate: lastDate),
+      initialDate: initialDate,
+      firstDate: firstDate,
+      lastDate: lastDate,
+    ),
   );
 }
 
 class _SolarDatePicker extends StatefulWidget {
-  const _SolarDatePicker({required this.initialDate, required this.firstDate, required this.lastDate});
+  const _SolarDatePicker({
+    required this.initialDate,
+    required this.firstDate,
+    required this.lastDate,
+  });
   final DateTime initialDate, firstDate, lastDate;
   @override
   State<_SolarDatePicker> createState() => _SolarDatePickerState();
@@ -35,7 +46,11 @@ class _SolarDatePickerState extends State<_SolarDatePicker> {
   late final last = DateUtils.dateOnly(widget.lastDate);
 
   void select(int year, int month, int day) {
-    var value = nexGregorianDate(year, month, day.clamp(1, nexPersianMonthDays(year, month)));
+    var value = nexGregorianDate(
+      year,
+      month,
+      day.clamp(1, nexPersianMonthDays(year, month)),
+    );
     if (value.isBefore(first)) value = first;
     if (value.isAfter(last)) value = last;
     setState(() => selected = value);
@@ -55,15 +70,38 @@ class _SolarDatePickerState extends State<_SolarDatePicker> {
     final firstYear = nexPersianDate(first).year;
     final lastYear = nexPersianDate(last).year;
     final months = fa ? nexPersianMonthNames : nexPersianMonthNamesLatin;
-    Widget field(String id, String label, int value, List<int> values, String Function(int) text) => SizedBox(
-      width: (id == 'month' ? 160 : id == 'year' ? 120 : 90) * MediaQuery.textScalerOf(context).scale(1).clamp(1.0, 2.0),
+    Widget field(
+      String id,
+      String label,
+      int value,
+      List<int> values,
+      String Function(int) text,
+    ) => SizedBox(
+      width:
+          (id == 'month'
+              ? 160
+              : id == 'year'
+              ? 120
+              : 90) *
+          MediaQuery.textScalerOf(context).scale(1).clamp(1.0, 2.0),
       child: DropdownButtonFormField<int>(
-        key: ValueKey('solar-$id-$value'), initialValue: value,
-        isExpanded: true, itemHeight: null, isDense: false, decoration: InputDecoration(labelText: label),
-        items: [for (final v in values) DropdownMenuItem(value: v, child: Text(text(v)))],
+        key: ValueKey('solar-$id-$value'),
+        initialValue: value,
+        isExpanded: true,
+        itemHeight: null,
+        isDense: false,
+        decoration: InputDecoration(labelText: label),
+        items: [
+          for (final v in values)
+            DropdownMenuItem(value: v, child: Text(text(v))),
+        ],
         onChanged: (v) {
           if (v == null) return;
-          select(id == 'year' ? v : date.year, id == 'month' ? v : date.month, id == 'day' ? v : date.day);
+          select(
+            id == 'year' ? v : date.year,
+            id == 'month' ? v : date.month,
+            id == 'day' ? v : date.day,
+          );
         },
       ),
     );
@@ -73,20 +111,56 @@ class _SolarDatePickerState extends State<_SolarDatePicker> {
       content: SizedBox(
         width: 360,
         child: SingleChildScrollView(
-          child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(nexDisplayDate(selected, solar: true, persian: fa), key: const ValueKey('solar-selected-date')),
-            const SizedBox(height: 16),
-            Wrap(spacing: 12, runSpacing: 16, children: [
-              field('year', l.calendarYear, date.year, [for (var y = firstYear; y <= lastYear; y++) y], (v) => desktopDigits(context, v)),
-              field('month', l.calendarMonth, date.month, [for (var m = 1; m <= 12; m++) if (inRange(date.year, m, 1) || inRange(date.year, m, nexPersianMonthDays(date.year, m)) || (m == date.month)) m], (v) => months[v - 1]),
-              field('day', l.calendarDay, date.day, [for (var d = 1; d <= nexPersianMonthDays(date.year, date.month); d++) if (inRange(date.year, date.month, d)) d], (v) => desktopDigits(context, v)),
-            ]),
-          ]),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                nexDisplayDate(selected, solar: true, persian: fa),
+                key: const ValueKey('solar-selected-date'),
+              ),
+              const SizedBox(height: 16),
+              Wrap(
+                spacing: 12,
+                runSpacing: 16,
+                children: [
+                  field('year', l.calendarYear, date.year, [
+                    for (var y = firstYear; y <= lastYear; y++) y,
+                  ], (v) => desktopDigits(context, v)),
+                  field('month', l.calendarMonth, date.month, [
+                    for (var m = 1; m <= 12; m++)
+                      if (inRange(date.year, m, 1) ||
+                          inRange(
+                            date.year,
+                            m,
+                            nexPersianMonthDays(date.year, m),
+                          ) ||
+                          (m == date.month))
+                        m,
+                  ], (v) => months[v - 1]),
+                  field('day', l.calendarDay, date.day, [
+                    for (
+                      var d = 1;
+                      d <= nexPersianMonthDays(date.year, date.month);
+                      d++
+                    )
+                      if (inRange(date.year, date.month, d)) d,
+                  ], (v) => desktopDigits(context, v)),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.pop(context), child: Text(material.cancelButtonLabel)),
-        FilledButton(onPressed: () => Navigator.pop(context, selected), child: Text(material.okButtonLabel)),
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(material.cancelButtonLabel),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.pop(context, selected),
+          child: Text(material.okButtonLabel),
+        ),
       ],
     );
   }

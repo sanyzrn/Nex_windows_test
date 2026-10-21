@@ -171,7 +171,9 @@ abstract class CaptureViewBase extends StatelessWidget {
             TextButton.icon(
               onPressed: c == null ? null : () => c.openWidget('timeline'),
               icon: const Icon(Icons.check_circle_outline_rounded, size: 18),
-              label: Text(desktopDigits(context, l.mediaAdded(f.importedCount))),
+              label: Text(
+                desktopDigits(context, l.mediaAdded(f.importedCount)),
+              ),
             ),
           if (f.error != null)
             Text(

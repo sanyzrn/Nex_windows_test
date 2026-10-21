@@ -122,7 +122,10 @@ mixin _SettingsDisplayAppearance on _SettingsStateBase {
                       DropdownMenuItem(
                         value: i,
                         child: Text(
-                          desktopDigits(context, '${l.monitor} ${displayNumber(c.screens[i], i)}'),
+                          desktopDigits(
+                            context,
+                            '${l.monitor} ${displayNumber(c.screens[i], i)}',
+                          ),
                         ),
                       ),
                   ],
@@ -321,7 +324,10 @@ mixin _SettingsDisplayAppearance on _SettingsStateBase {
                 max: 3,
                 divisions: 25,
                 value: c.S.uiScale,
-                label: desktopDigits(context, '${(c.S.uiScale * 100).round()}%'),
+                label: desktopDigits(
+                  context,
+                  '${(c.S.uiScale * 100).round()}%',
+                ),
                 onChanged: (v) {
                   c.S.uiScale = v;
                   c.refresh();

@@ -15,9 +15,7 @@ void main() {
     String text = 'the boiler is making a noise',
   }) => tester.pumpWidget(
     MaterialApp(
-      home: Scaffold(
-        body: NexTextSurface(text, selectable: selectable),
-      ),
+      home: Scaffold(body: NexTextSurface(text, selectable: selectable)),
     ),
   );
 

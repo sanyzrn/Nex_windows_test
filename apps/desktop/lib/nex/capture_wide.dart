@@ -259,7 +259,9 @@ mixin CaptureWide on CaptureViewBase {
                     TextButton.icon(
                       onPressed: () => c?.selectWindowSection('library'),
                       icon: const Icon(Icons.check_circle_outline, size: 15),
-                      label: Text(desktopDigits(context, l.mediaAdded(f.importedCount))),
+                      label: Text(
+                        desktopDigits(context, l.mediaAdded(f.importedCount)),
+                      ),
                       style: TextButton.styleFrom(
                         visualDensity: VisualDensity.compact,
                       ),

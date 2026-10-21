@@ -28,11 +28,8 @@ class NexFeatures extends ChangeNotifier {
   final DesktopIntelligence Function(DesktopStore)? _intelligenceFactory;
   DesktopIntelligence get intelligence => _intelligence ??=
       _intelligenceFactory?.call(store) ?? DesktopIntelligence(store);
-  NexFeatures(
-    this.store, {
-    this.pickFiles,
-    this._intelligenceFactory,
-  }) : session = CaptureSession(store) {
+  NexFeatures(this.store, {this.pickFiles, this._intelligenceFactory})
+    : session = CaptureSession(store) {
     _libraryChanges = store.libraryChanges.listen((_) {
       libraryRevision++;
       notify();

@@ -149,7 +149,11 @@ class NoteMetadataLine extends StatelessWidget {
           Icon(Icons.schedule_rounded, size: 13, color: muted),
           const SizedBox(width: 4),
           Text(
-            nexDisplayDate(note.createdAt, solar: NexPanelScope.maybeOf(context)?.S.solarCalendar ?? fa, persian: fa),
+            nexDisplayDate(
+              note.createdAt,
+              solar: NexPanelScope.maybeOf(context)?.S.solarCalendar ?? fa,
+              persian: fa,
+            ),
             style: style,
           ),
         ],
@@ -162,7 +166,10 @@ class NoteMetadataLine extends StatelessWidget {
       if (note.content?.trim().isNotEmpty == true) ...[
         dot,
         Text(
-          desktopDigits(context, l.wordCount(note.content!.trim().split(RegExp(r'\s+')).length)),
+          desktopDigits(
+            context,
+            l.wordCount(note.content!.trim().split(RegExp(r'\s+')).length),
+          ),
           style: style,
         ),
       ],

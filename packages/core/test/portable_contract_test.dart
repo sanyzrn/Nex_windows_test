@@ -18,10 +18,10 @@ void main() {
         unorderedEquals(contract['sharedPreferences'] as List),
       );
       expect(
-      PortablePreferences.settingsVersion,
-      contract['sharedSettingsVersion'],
-    );
-    PortablePreferences.validate(PortablePreferences.defaults);
+        PortablePreferences.settingsVersion,
+        contract['sharedSettingsVersion'],
+      );
+      PortablePreferences.validate(PortablePreferences.defaults);
     },
   );
 }

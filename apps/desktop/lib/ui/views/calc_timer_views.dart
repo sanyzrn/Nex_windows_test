@@ -269,7 +269,12 @@ class TimerView extends StatelessWidget {
                   padding: EdgeInsets.only(right: m == 25 ? 0 : 6),
                   child: Btn(
                     onPressed: () => c.timerPreset(m),
-                    child: Text(desktopDigits(context, '$m ${utilityLabelForText(context, 'minute')}')),
+                    child: Text(
+                      desktopDigits(
+                        context,
+                        '$m ${utilityLabelForText(context, 'minute')}',
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -382,9 +387,14 @@ class StopwatchView extends StatelessWidget {
                           child: ItemRow(
                             plain: true,
                             onTap: () => c.copy(fmtSw(c.swLaps[i])),
-                            sub: Text(desktopDigits(context, fmtSw(c.swLaps[i]))),
+                            sub: Text(
+                              desktopDigits(context, fmtSw(c.swLaps[i])),
+                            ),
                             child: Text(
-                              desktopDigits(context, '${utilityLabelForText(context, 'Lap')} ${c.swLaps.length - i}'),
+                              desktopDigits(
+                                context,
+                                '${utilityLabelForText(context, 'Lap')} ${c.swLaps.length - i}',
+                              ),
                             ),
                           ),
                         ),

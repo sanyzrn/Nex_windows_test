@@ -20,16 +20,22 @@ Future<void> showReminderPicker(
   required Note note,
   required Future<void> Function(DateTime? dueAt, NoteRepeat repeat) onSave,
 }) {
-  final solar = NexPanelScope.maybeOf(context)?.S.solarCalendar ??
+  final solar =
+      NexPanelScope.maybeOf(context)?.S.solarCalendar ??
       (Localizations.localeOf(context).languageCode == 'fa');
   return showDialog(
     context: context,
-    builder: (context) => _ReminderPickerDialog(note: note, onSave: onSave, solar: solar),
+    builder: (context) =>
+        _ReminderPickerDialog(note: note, onSave: onSave, solar: solar),
   );
 }
 
 class _ReminderPickerDialog extends StatefulWidget {
-  const _ReminderPickerDialog({required this.note, required this.onSave, required this.solar});
+  const _ReminderPickerDialog({
+    required this.note,
+    required this.onSave,
+    required this.solar,
+  });
 
   final bool solar;
 
