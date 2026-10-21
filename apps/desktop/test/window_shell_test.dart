@@ -106,10 +106,15 @@ void main() {
       final (_, f, _) = await _bootWindow(tester);
       await _settle(tester);
       final caption = tester.widget(find.byType(NexWindowCaption));
-      await tester.enterText(
-        find.byKey(const ValueKey('capture-field')),
-        'A quiet draft متن فارسی',
-      );
+      // Writes use a real store worker. Keep the asynchronous edit and flush
+      // in runAsync, as the durability regression below already does.
+      await tester.runAsync(() async {
+        await tester.enterText(
+          find.byKey(const ValueKey('capture-field')),
+          'A quiet draft متن فارسی',
+        );
+        await f.session.flushed;
+      });
       await _settle(tester);
       expect(
         identical(caption, tester.widget(find.byType(NexWindowCaption))),
