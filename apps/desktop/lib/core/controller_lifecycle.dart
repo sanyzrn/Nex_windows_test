@@ -17,7 +17,9 @@ mixin PanelLifecycle on PanelStateBase {
     bool showWindow = true,
     bool forcePanelMode = false,
   }) async {
-    _persistSettings = preset == null;
+    // The native smoke forces panel mode; it must never write that into the
+    // profile a later normal launch loads.
+    _persistSettings = preset == null && !forcePanelMode;
     try {
       S = preset ?? Settings.fromMap(storage.loadSettings());
     } catch (_) {

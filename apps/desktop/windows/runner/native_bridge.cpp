@@ -969,7 +969,7 @@ bool NativeBridge::OnMessage(HWND hwnd, UINT message, WPARAM wparam, LPARAM lpar
     return true;
   }
   if (message == WM_CLOSE && !quit_requested_) {
-    SmokeTrace("close message");
+    SmokeTrace(std::string("close message windowMode=") + (window_mode_ ? "1" : "0"));
     PostEvent("tray", EncodableValue(EncodableMap{{EncodableValue("id"), EncodableValue("shutdown")}}));
     return true;
   }
