@@ -116,3 +116,30 @@ single-instance, normal-window and second-launch stages, then failed the tray
 compact-corner assertion (`left 40`, expected `1448`). The published 0.26.0
 binary fails the same assertion, including with the unmodified HEAD smoke
 script, so the failure predates this cleanup; no test or tolerance was changed.
+
+
+### 0.27.0 Phase 5 - Android 2.1.15 parity audit (report only)
+
+Compared Windows main `8dbaf4c5dbd1161f13636f6a82ce8d105bd61754` with
+DbsNex `release/1.80.0` at `9590194f2425ed7eb3fa46ec61c1719cb98872a4`
+(Android version 2.1.15). Added `PARITY_0.27.md` with area-by-area source
+findings, desktop-fit/scope/risk assessments, all twelve absent optional
+modules, and five candidates for owner selection: consistent batch pinning,
+an existing-tag chooser for one note, Library date presets, three Cycle
+Nex dialog shells, and consistent ordinary Library copy notices.
+
+Scanned 138 desktop Dart files: 0 stock popup buttons, 1 intentional stock
+popup item, 18 Nex-styled Material dropdowns, 13 SnackBar construction sites,
+7 raw Cards, and 23 AlertDialogs. Reviewed two existing Windows module
+baseline images, without regenerating images or claiming live visual parity.
+Localization parity and its 18 checker tests passed here. All 50 report source
+links and 182 inventory locations validated; final whitespace, append-only
+summary integrity, and documentation-only scope checks passed here.
+
+Flutter/Dart/PowerShell tests, analysis, live app comparison, native smoke,
+build/installer, Hello, OS notifications and phone backup round-trips were
+not run: this environment is Linux without Flutter, Dart or PowerShell.
+The existing phase-2 tray-smoke finding remains as recorded above; this audit
+does not resolve or reclassify it. No app, vendored package, format, version,
+identity, test or golden baseline changed. No commit/push/PR/tag/release was
+made. Owner selection is needed before implementing phase-6 candidates.
