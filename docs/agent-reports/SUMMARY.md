@@ -251,3 +251,28 @@ passed. [P3 report](PHASE6_P3_0.28.md) records commands and test-helper correcti
 Both features remain on the development branch; main/0.27 release were not
 changed. Windows CI, visual baseline refresh/review and 0.28 installer checks
 are pending before release. No golden or tolerance was modified here.
+
+
+### 0.28 development — phase 6 P4/P5 complete
+
+Owner approved combining the two remaining small parity candidates on the
+existing unmerged `windows/0.28-tag-picker` branch. Cycle period edit/delete
+and typical-length settings now use `NexAlertDialog`, retaining existing
+navigation, validation and results. Ordinary Library copy feedback from the
+context menu, Ctrl+C and selection toolbar now uses `showNexNotice`: replacement,
+four-second expiry and Close. Clipboard payloads, private clipboard and Undo
+code are unchanged. Updated both unreleased changelogs; version stays 0.28.0+22.
+
+Four Cycle dialog regressions passed at 380×520/200% text, covering both
+languages/themes and glass on/off across cases, with real cancel/save outcomes.
+Four copy regressions passed for both languages/themes and all three paths,
+including real clipboard payloads, rapid repeats, expiry and dismissal. Existing
+module, reported-bug/Undo and note-copy regressions also passed: 27 distinct
+selected tests in total. Analyzer, localization parity, paired release-history
+sections/bullets, formatting, diff/scope and append-only checks passed.
+[P4/P5 report](PHASE6_P4_P5_0.28.md) records exact commands and fixture corrections.
+
+P1–P5 are implemented: P1 in released 0.27, P2–P5 on this development branch.
+Windows native/visual/installer validation and full Windows CI remain pending;
+no baseline was regenerated. Backup round-trip kit, performance measurements
+and final 0.28 release preparation remain. No merge or publication in this step.

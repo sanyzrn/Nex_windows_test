@@ -103,9 +103,7 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
                     final sel = notes.where((n) => _selectedIds.contains(n.id));
                     final text = sel.map(noteCopyText).join('\n\n---\n\n');
                     Clipboard.setData(ClipboardData(text: text));
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(SnackBar(content: Text(l.copy)));
+                    showNexNotice(ScaffoldMessenger.of(context), l.copy);
                   },
                 ),
                 _BannerIcon(
