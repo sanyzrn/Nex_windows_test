@@ -106,12 +106,8 @@ public static class NexWindowProbe {
 '@
 }
 # This run opens the normal GUI/application-support library, without entering data.
-$hideDiag = [IO.Path]::ChangeExtension($Output, '.hide.txt')
-if (Test-Path -LiteralPath $hideDiag) { Remove-Item -LiteralPath $hideDiag }
-$env:NEX_HIDE_DIAG = $hideDiag
 # A hidden start (SW_HIDE in STARTUPINFO) would swallow the window's first ShowWindow call.
 $normal = Start-Process -FilePath $exe -WorkingDirectory $Release -PassThru
-Remove-Item Env:NEX_HIDE_DIAG
 $until = [DateTime]::UtcNow.AddSeconds(15)
 $window = [IntPtr]::Zero
 while ($window -eq [IntPtr]::Zero) {
@@ -135,14 +131,13 @@ while ([NexWindowProbe]::VisibleWindow([uint32]$normal.Id) -ne [IntPtr]::Zero) {
     Start-Sleep -Milliseconds 20
 }
 $normalSecond = Start-Process -FilePath $exe -WorkingDirectory $Release -PassThru
-function Get-NormalTrace { 'Trace: ' + $(if (Test-Path -LiteralPath $hideDiag) { Get-Content -LiteralPath $hideDiag -Raw } else { 'none' }) }
-if (-not $normalSecond.WaitForExit(1500) -or $normalSecond.ExitCode -ne 0) { throw ('Second normal launch did not yield to the first. First exited: ' + $normal.HasExited + '. ' + (Get-NormalTrace)) }
+if (-not $normalSecond.WaitForExit(1500) -or $normalSecond.ExitCode -ne 0) { throw ('Second normal launch did not yield to the first. First exited: ' + $normal.HasExited + '.') }
 $until = [DateTime]::UtcNow.AddSeconds(10)
 do {
     $restored = [NexWindowProbe]::VisibleWindow([uint32]$normal.Id)
     if ($restored -ne [IntPtr]::Zero) { break }
-    if ($normal.HasExited) { $why = 'Trace: ' + $(if (Test-Path -LiteralPath $hideDiag) { Get-Content -LiteralPath $hideDiag -Raw } else { 'none' }); throw "Second normal launch: the first process exited (code $($normal.ExitCode)) instead of restoring its window. $why" }
-    if ([DateTime]::UtcNow -gt $until) { throw ('Second normal launch did not restore the first window. Windows: ' + [NexWindowProbe]::Describe([uint32]$normal.Id) + ' Trace: ' + $(if (Test-Path -LiteralPath $hideDiag) { Get-Content -LiteralPath $hideDiag -Raw } else { 'none' })) }
+    if ($normal.HasExited) { throw "Second normal launch: the first process exited (code $($normal.ExitCode)) instead of restoring its window." }
+    if ([DateTime]::UtcNow -gt $until) { throw ('Second normal launch did not restore the first window. Windows: ' + [NexWindowProbe]::Describe([uint32]$normal.Id)) }
     Start-Sleep -Milliseconds 20
 } while ($true)
 if ($restored -ne $window) { throw 'Second launch replaced the original window.' }

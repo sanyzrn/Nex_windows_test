@@ -36,22 +36,6 @@
 #include <flutter_windows.h>
 
 namespace {
-// Opt-in smoke trace: appends one line to the file named by NEX_HIDE_DIAG.
-// Never set in normal use.
-void SmokeTrace(const std::string& line) {
-  wchar_t path[MAX_PATH] = {};
-  if (GetEnvironmentVariableW(L"NEX_HIDE_DIAG", path, MAX_PATH) == 0) return;
-  HANDLE file = CreateFileW(path, FILE_APPEND_DATA, FILE_SHARE_READ | FILE_SHARE_WRITE,
-                            nullptr, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
-  if (file == INVALID_HANDLE_VALUE) return;
-  const std::string text = line + "; ";
-  DWORD written = 0;
-  WriteFile(file, text.data(), static_cast<DWORD>(text.size()), &written, nullptr);
-  CloseHandle(file);
-}
-}  // namespace
-
-namespace {
 using flutter::EncodableList;
 using flutter::EncodableMap;
 using flutter::EncodableValue;
@@ -343,8 +327,6 @@ void NativeBridge::HandleMethodCall(
     // try once more at the moment it matters before giving up and quitting.
     if (window_mode_ && !tray_added_) CreateTray();
     const bool can_hide = window_mode_ && tray_added_;
-    SmokeTrace(std::string("hideToTray windowMode=") + (window_mode_ ? "1" : "0") +
-               " tray=" + (tray_added_ ? "1" : "0") + " hide=" + (can_hide ? "1" : "0"));
     if (can_hide) {
       pending_show_ = false;
       hidden_to_tray_ = true;
@@ -352,7 +334,6 @@ void NativeBridge::HandleMethodCall(
     }
     result->Success(EncodableValue(can_hide));
   } else if (name == "quit") {
-    SmokeTrace("quit requested by Dart");
     quit_requested_ = true;
     PostMessage(window_, WM_CLOSE, 0, 0);
     result->Success();
@@ -945,7 +926,6 @@ bool NativeBridge::OnMessage(HWND hwnd, UINT message, WPARAM wparam, LPARAM lpar
     return true;
   }
   if (message == WM_APP_SHOW) {
-    SmokeTrace(std::string("show message hidden_to_tray=") + (hidden_to_tray_ ? "1" : "0"));
     SetPassthrough(false);
     // A second launch must reveal a window hidden to the tray even when the
     // Dart side is busy or slow to answer the event below.
@@ -969,7 +949,6 @@ bool NativeBridge::OnMessage(HWND hwnd, UINT message, WPARAM wparam, LPARAM lpar
     return true;
   }
   if (message == WM_CLOSE && !quit_requested_) {
-    SmokeTrace(std::string("close message windowMode=") + (window_mode_ ? "1" : "0"));
     PostEvent("tray", EncodableValue(EncodableMap{{EncodableValue("id"), EncodableValue("shutdown")}}));
     return true;
   }
