@@ -32,6 +32,7 @@ import 'reminder_policy.dart';
 import 'shortcuts_dialog.dart';
 import 'store.dart';
 import 'tag_manager.dart';
+import 'library_date_filter.dart';
 
 part 'library_actions.dart';
 part 'library_filter_widgets.dart';
@@ -64,6 +65,7 @@ abstract class _LibraryStateBase extends State<NexLibraryView> {
   List<NoteThread> threads = [];
   final Set<String> _selectedIds = {};
   NoteType? type;
+  LibraryDatePreset datePreset = LibraryDatePreset.any;
   String? tag;
   String? thread;
   String? failure;
@@ -142,18 +144,22 @@ abstract class _LibraryStateBase extends State<NexLibraryView> {
       failure = null;
     });
     try {
+      final dates = datePreset.bounds(DateTime.now());
       final rows = trash
           ? await database.call<List<Note>>('trash')
           : query.text.isNotEmpty ||
                 type != null ||
                 tag != null ||
-                thread != null
+                thread != null ||
+                datePreset != LibraryDatePreset.any
           ? await database.call<List<Note>>('search', {
               'thread': thread,
               'filters': SearchFilters(
                 query: query.text,
                 types: type == null ? [] : [type!],
                 tagIds: tag == null ? [] : [tag!],
+                createdFrom: dates.from,
+                createdTo: dates.to,
               ),
             })
           : await database.call<List<Note>>('timeline', {
@@ -186,6 +192,7 @@ abstract class _LibraryStateBase extends State<NexLibraryView> {
             query.text.isEmpty &&
             type == null &&
             tag == null &&
+            datePreset == LibraryDatePreset.any &&
             rows.length == 50;
         loading = false;
         if (selectedNote != null) {
@@ -197,6 +204,7 @@ abstract class _LibraryStateBase extends State<NexLibraryView> {
                   type != null ||
                   tag != null ||
                   thread != null ||
+                  datePreset != LibraryDatePreset.any ||
                   trash)) {
             _detailRelease?.call();
             _detailRelease = null;

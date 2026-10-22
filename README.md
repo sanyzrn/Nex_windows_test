@@ -64,6 +64,7 @@ Generated installers belong in GitHub Release assets. Git tracks source, assets,
 | New note / checklist | `Ctrl+N` / `Ctrl+Shift+N` |
 | Search or jump to a note/tool | `Ctrl+K` |
 | Open library / settings | `Ctrl+L` / `Ctrl+,` |
+| Filter by creation date | Library → calendar pill → Today / Last 7 days / Last 30 days; includes today in local time |
 | Add an existing tag | Note → Tags & threads → **Choose an existing tag**; search by name |
 | Manage tags | Library → **Manage tags** |
 | Switch interface mode | Sidebar or Settings → Display & interface |
@@ -111,6 +112,7 @@ The Intelligence workspace supports five cloud providers, conversation history, 
 
 - [آخرین نصاب و فایل بررسی SHA-256](https://github.com/sanyzrn/Nex_windows_test/releases/latest) را از بخش Releases دریافت کنید؛ لینک دانلود داخل گزارش‌های قدیمی، نسخهٔ جاری محسوب نمی‌شود.
 - قبل از ارتقا، برنامهٔ باز را از منوی کنار ساعت ببندید. یادداشت‌ها، رسانه‌ها و تنظیمات در مسیر جدا از فایل‌های نصب نگه‌داری می‌شوند.
+- در کتابخانه، فیلتر تاریخ ایجاد را از دکمهٔ تقویم انتخاب کنید: امروز، ۷ روز اخیر یا ۳۰ روز اخیر؛ روز جاری بر اساس ساعت محلی محاسبه می‌شود.
 - در جزئیات یادداشت ← «برچسب‌ها و رشته‌ها» ← «انتخاب برچسب موجود»، تگ را جست‌وجو و اضافه کنید؛ نوشتن نام تگ جدید هم در دسترس است.
 - مدیریت ساخت، ویرایش و حذف تگ در کتابخانه است. در تنظیمات، انتخاب ابزارها با جست‌وجو و گزینه‌های «داک، بیشتر، پنهان» انجام می‌شود.
 - کلیپ‌بورد ۵۰ مورد اخیر متن/تصویر را نگه می‌دارد و علاقه‌مندی‌ها جدا هستند.

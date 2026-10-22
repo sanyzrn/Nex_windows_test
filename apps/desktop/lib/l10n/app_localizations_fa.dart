@@ -51,6 +51,18 @@ class AppLocalizationsFa extends AppLocalizations {
   String get threads => 'رشته‌ها';
 
   @override
+  String get filterCreatedDate => 'تاریخ ایجاد';
+
+  @override
+  String get filterAnyTime => 'همهٔ زمان‌ها';
+
+  @override
+  String get filterLast7Days => '۷ روز اخیر';
+
+  @override
+  String get filterLast30Days => '۳۰ روز اخیر';
+
+  @override
   String get clear => 'پاک کردن فیلترها';
 
   @override

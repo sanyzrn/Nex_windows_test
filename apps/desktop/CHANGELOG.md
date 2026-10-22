@@ -2,6 +2,7 @@
 
 ## 0.28.0 — Unreleased
 
+- Filter Library notes by creation date: Any time, Today, Last 7 days or Last 30 days. Date filters combine with text, type, tag and thread filters and can be cleared separately or together.
 - Add existing tags from note details with a searchable picker, tag colors and English/Persian text matching. Tags already on the note are excluded; typing a new tag remains available.
 - Attach existing tags by identity so renames remain safe, repeated attachment does not duplicate tags, and deleted tags are not recreated.
 

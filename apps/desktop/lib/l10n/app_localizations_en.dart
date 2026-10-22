@@ -51,6 +51,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get threads => 'Threads';
 
   @override
+  String get filterCreatedDate => 'Created date';
+
+  @override
+  String get filterAnyTime => 'Any time';
+
+  @override
+  String get filterLast7Days => 'Last 7 days';
+
+  @override
+  String get filterLast30Days => 'Last 30 days';
+
+  @override
   String get clear => 'Clear filters';
 
   @override

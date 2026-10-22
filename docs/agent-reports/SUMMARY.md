@@ -227,3 +227,27 @@ fixture corrections and limitations.
 Windows CI/native checks, visual baseline refresh and installer publication
 remain pending for the 0.28 release. No baseline was regenerated. Main and
 published 0.27.0 remain unchanged; P3 date filters are the next planned item.
+
+
+### 0.28 development — phase 6 P3 Library date presets
+
+At the owner's request, added P3 to the same unmerged `windows/0.28-tag-picker`
+branch after P2. Version remains 0.28.0+22. Library now offers Any time / Today /
+Last 7 days / Last 30 days for creation dates, with local calendar-day bounds
+converted to UTC. Date restrictions combine with query/type/tag/thread and
+participate in empty-state handling, clear actions and pagination gating.
+Entering Recently deleted clears dates and hides that control. No persistence,
+worker, shared-package, settings-key or schema changes.
+
+Four new tests passed in Asia/Tehran, including real SQLite boundary checks
+and English/light + Persian/dark UI combinations, clearing and 380×520 at
+200% text. Two boundary tests also passed under America/New_York, with explicit
+UTC assertions for 23-hour and 25-hour days. The selected tag-picker, bulk-pin,
+localization, version, menu and redesign regressions passed all 28 tests.
+Thus 32 distinct selected tests passed, plus 18 localization checker tests.
+Analyzer, localization parity, formatting, diff and append-only summary checks
+passed. [P3 report](PHASE6_P3_0.28.md) records commands and test-helper corrections.
+
+Both features remain on the development branch; main/0.27 release were not
+changed. Windows CI, visual baseline refresh/review and 0.28 installer checks
+are pending before release. No golden or tolerance was modified here.

@@ -179,6 +179,30 @@ abstract class AppLocalizations {
   /// **'Threads'**
   String get threads;
 
+  /// No description provided for @filterCreatedDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Created date'**
+  String get filterCreatedDate;
+
+  /// No description provided for @filterAnyTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Any time'**
+  String get filterAnyTime;
+
+  /// No description provided for @filterLast7Days.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 7 days'**
+  String get filterLast7Days;
+
+  /// No description provided for @filterLast30Days.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 30 days'**
+  String get filterLast30Days;
+
   /// No description provided for @clear.
   ///
   /// In en, this message translates to:
