@@ -323,7 +323,23 @@ void NativeBridge::HandleMethodCall(
     compact_window_ = window_mode_ && ArgBool(args, "compact");
     result->Success();
   } else if (name == "hideToTray") {
+    // The shell may not have been ready when the icon was first added, so
+    // try once more at the moment it matters before giving up and quitting.
+    if (window_mode_ && !tray_added_) CreateTray();
     const bool can_hide = window_mode_ && tray_added_;
+    wchar_t diag_path[MAX_PATH] = {};
+    if (!can_hide && GetEnvironmentVariableW(L"NEX_HIDE_DIAG", diag_path, MAX_PATH) > 0) {
+      // Opt-in smoke diagnostics only; never set in normal use.
+      HANDLE file = CreateFileW(diag_path, GENERIC_WRITE, FILE_SHARE_READ, nullptr,
+                                CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+      if (file != INVALID_HANDLE_VALUE) {
+        const std::string text = std::string("hideToTray refused: windowMode=") +
+            (window_mode_ ? "1" : "0") + " tray=" + (tray_added_ ? "1" : "0");
+        DWORD written = 0;
+        WriteFile(file, text.data(), static_cast<DWORD>(text.size()), &written, nullptr);
+        CloseHandle(file);
+      }
+    }
     if (can_hide) {
       pending_show_ = false;
       hidden_to_tray_ = true;

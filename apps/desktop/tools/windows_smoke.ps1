@@ -106,7 +106,11 @@ public static class NexWindowProbe {
 '@
 }
 # This run opens the normal GUI/application-support library, without entering data.
+$hideDiag = [IO.Path]::ChangeExtension($Output, '.hide.txt')
+if (Test-Path -LiteralPath $hideDiag) { Remove-Item -LiteralPath $hideDiag }
+$env:NEX_HIDE_DIAG = $hideDiag
 $normal = Start-Process -FilePath $exe -WorkingDirectory $Release -WindowStyle Hidden -PassThru
+Remove-Item Env:NEX_HIDE_DIAG
 $until = [DateTime]::UtcNow.AddSeconds(15)
 $window = [IntPtr]::Zero
 while ($window -eq [IntPtr]::Zero) {
@@ -135,7 +139,7 @@ $until = [DateTime]::UtcNow.AddSeconds(10)
 do {
     $restored = [NexWindowProbe]::VisibleWindow([uint32]$normal.Id)
     if ($restored -ne [IntPtr]::Zero) { break }
-    if ($normal.HasExited) { throw "Second normal launch: the first process exited (code $($normal.ExitCode)) instead of restoring its window." }
+    if ($normal.HasExited) { $why = if (Test-Path -LiteralPath $hideDiag) { Get-Content -LiteralPath $hideDiag -Raw } else { 'no hide diagnostic written' }; throw "Second normal launch: the first process exited (code $($normal.ExitCode)) instead of restoring its window. $why" }
     if ([DateTime]::UtcNow -gt $until) { throw ('Second normal launch did not restore the first window. Windows: ' + [NexWindowProbe]::Describe([uint32]$normal.Id)) }
     Start-Sleep -Milliseconds 20
 } while ($true)
