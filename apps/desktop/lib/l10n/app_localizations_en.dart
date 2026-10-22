@@ -111,6 +111,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addTag => 'Add tag · Enter';
 
   @override
+  String get chooseExistingTag => 'Choose an existing tag';
+
+  @override
+  String get searchTags => 'Search tags';
+
+  @override
+  String get noAvailableTags => 'No other existing tags to add.';
+
+  @override
+  String get noMatchingTags => 'No matching tags.';
+
+  @override
   String get addThread => 'New thread · Enter';
 
   @override

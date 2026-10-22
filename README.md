@@ -6,7 +6,7 @@
 
 A local-first notebook and desktop toolkit for Windows, with English and Persian interfaces. Work in a full desktop window or a compact panel at either screen edge.
 
-**Current app version: `0.27.0+21` · Windows 10/11 · x64**
+**Development version: `0.28.0+22` · Windows 10/11 · x64**
 
 [Download the latest installer](https://github.com/sanyzrn/Nex_windows_test/releases/latest) · [What's new](apps/desktop/CHANGELOG.md) · [Report a bug](https://github.com/sanyzrn/Nex_windows_test/issues/new/choose) · [فارسی](#راهنمای-فارسی)
 
@@ -64,6 +64,7 @@ Generated installers belong in GitHub Release assets. Git tracks source, assets,
 | New note / checklist | `Ctrl+N` / `Ctrl+Shift+N` |
 | Search or jump to a note/tool | `Ctrl+K` |
 | Open library / settings | `Ctrl+L` / `Ctrl+,` |
+| Add an existing tag | Note → Tags & threads → **Choose an existing tag**; search by name |
 | Manage tags | Library → **Manage tags** |
 | Switch interface mode | Sidebar or Settings → Display & interface |
 | Choose tools | Settings → Docked tools & apps → Dock / More / Hidden |
@@ -106,10 +107,11 @@ The Intelligence workspace supports five cloud providers, conversation history, 
 
 ## راهنمای فارسی
 
-نکس ویندوز یک دفتر یادداشت محلی با ابزارهای کاربردی ویندوز است. نسخهٔ فعلی کد **۰٫۲۲٫۰، بیلد ۱۶** است و دو حالت پنجره و پنل کناری دارد.
+نکس ویندوز یک دفتر یادداشت محلی با ابزارهای کاربردی ویندوز است. نسخهٔ فعلی کد **۰٫۲۸٫۰، بیلد ۲۲** است و دو حالت پنجره و پنل کناری دارد.
 
 - [آخرین نصاب و فایل بررسی SHA-256](https://github.com/sanyzrn/Nex_windows_test/releases/latest) را از بخش Releases دریافت کنید؛ لینک دانلود داخل گزارش‌های قدیمی، نسخهٔ جاری محسوب نمی‌شود.
 - قبل از ارتقا، برنامهٔ باز را از منوی کنار ساعت ببندید. یادداشت‌ها، رسانه‌ها و تنظیمات در مسیر جدا از فایل‌های نصب نگه‌داری می‌شوند.
+- در جزئیات یادداشت ← «برچسب‌ها و رشته‌ها» ← «انتخاب برچسب موجود»، تگ را جست‌وجو و اضافه کنید؛ نوشتن نام تگ جدید هم در دسترس است.
 - مدیریت ساخت، ویرایش و حذف تگ در کتابخانه است. در تنظیمات، انتخاب ابزارها با جست‌وجو و گزینه‌های «داک، بیشتر، پنهان» انجام می‌شود.
 - کلیپ‌بورد ۵۰ مورد اخیر متن/تصویر را نگه می‌دارد و علاقه‌مندی‌ها جدا هستند.
 - [گزارش باگ](https://github.com/sanyzrn/Nex_windows_test/issues/new/choose) را با نسخهٔ برنامه، مشخصات مانیتورها و مراحل بازتولید ثبت کنید؛ فارسی و انگلیسی پذیرفته می‌شوند.

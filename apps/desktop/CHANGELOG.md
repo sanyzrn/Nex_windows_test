@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.28.0 — Unreleased
+
+- Add existing tags from note details with a searchable picker, tag colors and English/Persian text matching. Tags already on the note are excluded; typing a new tag remains available.
+- Attach existing tags by identity so renames remain safe, repeated attachment does not duplicate tags, and deleted tags are not recreated.
+
 ## 0.27.0 — 2026-10-22
 
 - Bulk Pin preserves existing pins in mixed selections and pins only the unpinned notes. Selecting only pinned notes changes the action to Unpin and removes their pins together.

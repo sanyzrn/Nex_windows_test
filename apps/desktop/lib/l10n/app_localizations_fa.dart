@@ -111,6 +111,18 @@ class AppLocalizationsFa extends AppLocalizations {
   String get addTag => 'افزودن برچسب · Enter';
 
   @override
+  String get chooseExistingTag => 'انتخاب برچسب موجود';
+
+  @override
+  String get searchTags => 'جست‌وجوی برچسب‌ها';
+
+  @override
+  String get noAvailableTags => 'برچسب موجود دیگری برای افزودن نیست.';
+
+  @override
+  String get noMatchingTags => 'برچسبی با این جست‌وجو پیدا نشد.';
+
+  @override
   String get addThread => 'رشته جدید · Enter';
 
   @override

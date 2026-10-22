@@ -299,6 +299,30 @@ abstract class AppLocalizations {
   /// **'Add tag · Enter'**
   String get addTag;
 
+  /// No description provided for @chooseExistingTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose an existing tag'**
+  String get chooseExistingTag;
+
+  /// No description provided for @searchTags.
+  ///
+  /// In en, this message translates to:
+  /// **'Search tags'**
+  String get searchTags;
+
+  /// No description provided for @noAvailableTags.
+  ///
+  /// In en, this message translates to:
+  /// **'No other existing tags to add.'**
+  String get noAvailableTags;
+
+  /// No description provided for @noMatchingTags.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching tags.'**
+  String get noMatchingTags;
+
   /// No description provided for @addThread.
   ///
   /// In en, this message translates to:

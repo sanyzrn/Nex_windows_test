@@ -204,3 +204,26 @@ The owner authorized release of this completed scope as 0.27.0+21. Remaining
 P2-P5 items and performance/phone work are deferred. Full main-branch Windows
 CI, native/installer/update checks and automatic verified publication are
 still pending at this documentation commit; no release success is claimed.
+
+
+### 0.28 development — phase 6 P2 existing-tag picker
+
+The owner authorized P2 while testing the published 0.27.0 release and assigned
+new work to 0.28.0. On `windows/0.28-tag-picker`, note detail now offers a
+searchable existing-tag dialog with colors, Persian/Arabic text folding,
+already-attached exclusion, localized empty/error/retry states and panel hold.
+The original typed-tag field remains available. Existing-tag attachment uses
+IDs through the existing command, survives rename, is idempotent and rejects
+deleted notes/tags. No schema, shared-package or settings-key changes.
+
+Bumped development metadata to 0.28.0+22, with matching Windows resource and
+installer declarations, paired unreleased changelogs and README guidance.
+The combined selected suite passed 23 tests; after the final error/empty-state
+case, all six new tests passed, covering English/Persian, light/dark and
+380×520 at 200% text. Analyzer, localization parity, 18 checker tests, formatting
+and diff checks passed. See [P2 validation](PHASE6_P2_0.28.md) for commands,
+fixture corrections and limitations.
+
+Windows CI/native checks, visual baseline refresh and installer publication
+remain pending for the 0.28 release. No baseline was regenerated. Main and
+published 0.27.0 remain unchanged; P3 date filters are the next planned item.

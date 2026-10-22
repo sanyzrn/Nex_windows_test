@@ -20,6 +20,7 @@ import '../ui/desktop_accessibility.dart';
 import 'features_state.dart';
 import 'note_copy.dart';
 import 'notices.dart';
+import 'tag_picker.dart';
 import 'note_detail_parts.dart';
 import 'reminder_picker.dart';
 import 'reminder_coordinator.dart' show ReminderDeliveryFailure;
@@ -127,13 +128,30 @@ class _NexNoteDetailState extends State<NexNoteDetail> {
     } catch (e) {
       if (mounted) {
         setState(
-          () => failure = e is ReminderDeliveryFailure
+          () => failure = command == 'tag'
+              ? AppLocalizations.of(context)!.failed
+              : e is ReminderDeliveryFailure
               ? AppLocalizations.of(context)!.reminderDeliveryFailed
               : e.toString(),
         );
       }
       if (rethrowError) rethrow;
     }
+  }
+
+  Future<void> pickTag() async {
+    final store = NexScope.of(context).store;
+    final noteId = note.id;
+    await withPanelHold(context, () async {
+      final selected = await showDesktopTagPicker(
+        context,
+        store: store,
+        noteId: noteId,
+      );
+      if (selected != null && mounted && note.id == noteId) {
+        await run('tag', {'tag': selected.id});
+      }
+    });
   }
 
   @override
@@ -472,6 +490,15 @@ class _NexNoteDetailState extends State<NexNoteDetail> {
                           title: Text(l.tagsAndThreads),
                           tilePadding: EdgeInsets.zero,
                           children: [
+                            Align(
+                              alignment: AlignmentDirectional.centerStart,
+                              child: TextButton.icon(
+                                key: const ValueKey('note-existing-tag'),
+                                onPressed: pickTag,
+                                icon: const Icon(Icons.sell_outlined),
+                                label: Text(l.chooseExistingTag),
+                              ),
+                            ),
                             DesktopEditingDirection(
                               controller: tag,
                               multiline: false,
@@ -536,7 +563,12 @@ class _NexNoteDetailState extends State<NexNoteDetail> {
                             ),
                           ],
                         ),
-                        if (failure != null) Text('${l.failed}: $failure'),
+                        if (failure != null)
+                          Text(
+                            failure == l.failed
+                                ? l.failed
+                                : '${l.failed}: $failure',
+                          ),
                       ],
                     ),
                   ),
