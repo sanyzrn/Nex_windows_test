@@ -1,3 +1,5 @@
+> The former root checksum is archived as [SHA256SUMS_0.13.0](SHA256SUMS_0.13.0); use assets from the matching current Release.
+
 > Historical snapshot. For current status, see [the agent summary](../agent-reports/SUMMARY.md).
 
 # Current persistent clipboard validation — 2026-10-14, Windows 0.12.0+8

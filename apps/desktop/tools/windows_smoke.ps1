@@ -104,6 +104,24 @@ $result | Add-Member normalGuiFirstFrame $true
 [void][NexWindowProbe]::PostMessage($window, 0x0312, [IntPtr]1, [IntPtr]::Zero)
 Start-Sleep -Milliseconds 500
 $result | Add-Member normalGuiAliveAfterCapture (-not $normal.HasExited)
+# Exercise an actual second normal launch, not only the synthetic activation message.
+[void][NexWindowProbe]::PostMessage($window, 0x0010, [IntPtr]::Zero, [IntPtr]::Zero)
+$until = [DateTime]::UtcNow.AddSeconds(10)
+while ([NexWindowProbe]::VisibleWindow([uint32]$normal.Id) -ne [IntPtr]::Zero) {
+    if ($normal.HasExited -or [DateTime]::UtcNow -gt $until) { throw 'Normal caption close did not retain a hidden process.' }
+    Start-Sleep -Milliseconds 20
+}
+$normalSecond = Start-Process -FilePath $exe -WorkingDirectory $Release -PassThru
+if (-not $normalSecond.WaitForExit(1500) -or $normalSecond.ExitCode -ne 0) { throw 'Second normal launch did not yield to the first.' }
+$until = [DateTime]::UtcNow.AddSeconds(10)
+do {
+    $restored = [NexWindowProbe]::VisibleWindow([uint32]$normal.Id)
+    if ($restored -ne [IntPtr]::Zero) { break }
+    if ($normal.HasExited -or [DateTime]::UtcNow -gt $until) { throw 'Second normal launch did not restore the first window.' }
+    Start-Sleep -Milliseconds 20
+} while ($true)
+if ($restored -ne $window) { throw 'Second launch replaced the original window.' }
+$result | Add-Member normalGuiSecondLaunchRestores $true
 [void][NexWindowProbe]::PostMessage($window, 0x0111, [IntPtr]40005, [IntPtr]::Zero)
 if (-not $normal.WaitForExit(10000)) { throw 'Normal GUI failed to drain and close.' }
 $result | Add-Member normalGuiExitCode $normal.ExitCode
@@ -168,5 +186,5 @@ try {
 
 $result | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $Output -Encoding utf8
 $result | ConvertTo-Json -Depth 8
-if (-not ($result.tray -and $result.reminderActionsMarkup -and $result.hotkey -and $result.hotkeyDelivered -and $result.captureOpened -and $result.displayChangeRefresh -and $result.startupToggle -and $result.startupRestored -and $singleInstance -and $primary.ExitCode -eq 0 -and $result.normalGuiAliveAfterCapture -and $result.normalGuiExitCode -eq 0)) { throw 'One or more native checks failed.' }
+if (-not ($result.tray -and $result.processAumid -and $result.normalGuiSecondLaunchRestores -and $result.reminderActionsMarkup -and $result.hotkey -and $result.hotkeyDelivered -and $result.captureOpened -and $result.displayChangeRefresh -and $result.startupToggle -and $result.startupRestored -and $singleInstance -and $primary.ExitCode -eq 0 -and $result.normalGuiAliveAfterCapture -and $result.normalGuiExitCode -eq 0)) { throw 'One or more native checks failed.' }
 foreach ($position in $result.placements) { if (-not $position.edgeReveal) { throw "Edge reveal failed on monitor $($position.monitor) / $($position.edge)" } }

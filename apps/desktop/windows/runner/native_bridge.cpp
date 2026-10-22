@@ -209,6 +209,11 @@ void NativeBridge::HandleMethodCall(
     GetMonitorInfo(MonitorFromWindow(window_, MONITOR_DEFAULTTONEAREST), &monitor);
     GetClientRect(window_, &client);
     GetClientRect(controller_->view()->GetNativeWindow(), &view);
+    PWSTR process_app_id = nullptr;
+    const HRESULT app_id_result = GetCurrentProcessExplicitAppUserModelID(&process_app_id);
+    const bool process_aumid = SUCCEEDED(app_id_result) && process_app_id != nullptr &&
+        std::wstring(process_app_id) == L"Nex.Desktop.App";
+    CoTaskMemFree(process_app_id);
     result->Success(EncodableValue(EncodableMap{
       {EncodableValue("visible"), EncodableValue(IsWindowVisible(window_) != FALSE)},
       {EncodableValue("windowMode"), EncodableValue(window_mode_)},
@@ -221,6 +226,7 @@ void NativeBridge::HandleMethodCall(
       {EncodableValue("workWidth"), EncodableValue(static_cast<int32_t>(monitor.rcWork.right - monitor.rcWork.left))},
       {EncodableValue("workHeight"), EncodableValue(static_cast<int32_t>(monitor.rcWork.bottom - monitor.rcWork.top))},
       {EncodableValue("tray"), EncodableValue(tray_added_)},
+      {EncodableValue("processAumid"), EncodableValue(process_aumid)},
       {EncodableValue("reminderActionsMarkup"), EncodableValue(VerifyReminderActionMarkup())},
       {EncodableValue("hotkey"), EncodableValue(hotkey_registered_)},
       {EncodableValue("workers"), EncodableValue(static_cast<int32_t>(workers_.size()))},

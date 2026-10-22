@@ -27,5 +27,6 @@ adaptations, not a claim of full Android parity: Android native widgets,
 reminders, file-vault/biometric platform APIs and all portrait styling are not
 ported. Future work must preserve privacy/backup contracts.
 
-No historical screenshots, patches, vendored licenses or archives were deleted:
-no inspected tracked artifact was proven unnecessary. Build caches are ignored.
+The unused root checksum for 0.13.0 moved to docs/archive/SHA256SUMS_0.13.0;
+current checksums belong to matching Releases. Historical screenshots, patches,
+licenses and archives were preserved. Build caches are ignored.

@@ -50,3 +50,27 @@ Local localization parity and diff hygiene passed. Flutter validation locally
 was blocked by automatic review over metadata-endpoint access; no bypass used.
 Windows CI and visual review are pending at this commit. Release is not yet
 claimed; append final actual evidence after the gates complete.
+
+### 0.26 visual review and final validation handoff
+
+[Windows visual refresh 39695846116](https://github.com/sanyzrn/Nex_windows_test/actions/runs/39695846116)
+passed 226 cases and generated `40ba6cb`. All 47 changed images reviewed;
+[review and examples](REVIEW_0.26.md). No golden tolerance changes. Final module
+layouts now include wide/compact Cycle dashboard, actionable PDF open state,
+Vault category cards and Portrait metrics. Native smoke now reads actual process
+AUMID and launches a real second normal instance to restore the original HWND;
+installed protocol/shortcut identity are read after installation. Those new
+native assertions still require the final Windows build/smoke result.
+
+Earlier CI exposed a duplicate dropdownColor argument; fixed. Analysis on the
+corrected and final layout sources passed. Local parity/tool checks passed (18
+checks); local Flutter was not retried after the automatic-review block. The
+obsolete root 0.13 checksum moved to docs/archive/SHA256SUMS_0.13.0, preserving
+history while avoiding confusion with current release assets. No user data,
+licenses, historical screenshots or existing work was removed.
+
+Remaining owner/Windows-agent checks: physical IME, Hello, DPI/multiple monitors,
+real notifications/sleep/clock cases, performance measurements and phone archive
+round-trips, grouped in MANUAL_TEST_0.26.md. They remain unverified. Signing and
+native-editor decisions remain with the owner. Final CI/publication evidence is
+tracked in PR #12; a screenshot-refresh success alone never authorizes publication.
