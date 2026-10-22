@@ -413,6 +413,8 @@ class _NexCommitmentEditorDialogState extends State<NexCommitmentEditorDialog> {
               children: [
                 Expanded(
                   child: DropdownButtonFormField<NexCadence>(
+                    borderRadius: nexDropdownRadius,
+                    dropdownColor: nexDropdownColor(context),
                     initialValue: _cadence,
                     decoration: InputDecoration(
                       labelText: l.commitmentCadence,

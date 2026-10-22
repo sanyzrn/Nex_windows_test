@@ -48,6 +48,7 @@ public static class NexWindowProbe {
     [DllImport("user32.dll")] private static extern bool EnumWindows(EnumProc callback, IntPtr unused);
     [DllImport("user32.dll")] private static extern uint GetWindowThreadProcessId(IntPtr hwnd, out uint processId);
     [DllImport("user32.dll")] public static extern bool IsWindowVisible(IntPtr hwnd);
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)] public static extern bool SetWindowText(IntPtr hwnd, string text);
     [DllImport("user32.dll")] private static extern int GetClassName(IntPtr hwnd, StringBuilder lpClassName, int nMaxCount);
     [DllImport("user32.dll")] public static extern bool PostMessage(IntPtr hwnd, uint message, IntPtr wparam, IntPtr lparam);
     [StructLayout(LayoutKind.Sequential)] public struct Rect { public int left, top, right, bottom; }
@@ -70,6 +71,21 @@ public static class NexWindowProbe {
         return new Rect { left = info.work.right - margin - width, top = info.work.bottom - margin - height,
             right = info.work.right - margin, bottom = info.work.bottom - margin };
     }
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)] private static extern IntPtr GetProp(IntPtr hwnd, string name);
+    public static string Describe(uint processId) {
+        var lines = new StringBuilder();
+        EnumWindows((hwnd, unused) => {
+            uint owner; GetWindowThreadProcessId(hwnd, out owner);
+            if (owner != processId) return true;
+            var sb = new StringBuilder(256);
+            GetClassName(hwnd, sb, 256);
+            Rect r; GetWindowRect(hwnd, out r);
+            lines.AppendFormat("[{0}] visible={1} marker={2} rect={3},{4},{5},{6}; ", sb, IsWindowVisible(hwnd),
+                GetProp(hwnd, "Nex.Desktop.PrimaryWindow") != IntPtr.Zero, r.left, r.top, r.right, r.bottom);
+            return true;
+        }, IntPtr.Zero);
+        return lines.Length == 0 ? "no top-level windows" : lines.ToString();
+    }
     public static IntPtr VisibleWindow(uint processId) {
         IntPtr found = IntPtr.Zero;
         EnumWindows((hwnd, unused) => {
@@ -90,7 +106,12 @@ public static class NexWindowProbe {
 '@
 }
 # This run opens the normal GUI/application-support library, without entering data.
-$normal = Start-Process -FilePath $exe -WorkingDirectory $Release -WindowStyle Hidden -PassThru
+$hideDiag = [IO.Path]::ChangeExtension($Output, '.hide.txt')
+if (Test-Path -LiteralPath $hideDiag) { Remove-Item -LiteralPath $hideDiag }
+$env:NEX_HIDE_DIAG = $hideDiag
+# A hidden start (SW_HIDE in STARTUPINFO) would swallow the window's first ShowWindow call.
+$normal = Start-Process -FilePath $exe -WorkingDirectory $Release -PassThru
+Remove-Item Env:NEX_HIDE_DIAG
 $until = [DateTime]::UtcNow.AddSeconds(15)
 $window = [IntPtr]::Zero
 while ($window -eq [IntPtr]::Zero) {
@@ -104,10 +125,32 @@ $result | Add-Member normalGuiFirstFrame $true
 [void][NexWindowProbe]::PostMessage($window, 0x0312, [IntPtr]1, [IntPtr]::Zero)
 Start-Sleep -Milliseconds 500
 $result | Add-Member normalGuiAliveAfterCapture (-not $normal.HasExited)
+# A Flutter/plugin-updated caption must not break primary-instance discovery.
+if (-not [NexWindowProbe]::SetWindowText($window, 'Nex renamed activation fixture')) { throw 'Could not set activation fixture caption.' }
+# Exercise an actual second normal launch, not only the synthetic activation message.
 [void][NexWindowProbe]::PostMessage($window, 0x0010, [IntPtr]::Zero, [IntPtr]::Zero)
+$until = [DateTime]::UtcNow.AddSeconds(10)
+while ([NexWindowProbe]::VisibleWindow([uint32]$normal.Id) -ne [IntPtr]::Zero) {
+    if ($normal.HasExited -or [DateTime]::UtcNow -gt $until) { throw 'Normal caption close did not retain a hidden process.' }
+    Start-Sleep -Milliseconds 20
+}
+$normalSecond = Start-Process -FilePath $exe -WorkingDirectory $Release -PassThru
+function Get-NormalTrace { 'Trace: ' + $(if (Test-Path -LiteralPath $hideDiag) { Get-Content -LiteralPath $hideDiag -Raw } else { 'none' }) }
+if (-not $normalSecond.WaitForExit(1500) -or $normalSecond.ExitCode -ne 0) { throw ('Second normal launch did not yield to the first. First exited: ' + $normal.HasExited + '. ' + (Get-NormalTrace)) }
+$until = [DateTime]::UtcNow.AddSeconds(10)
+do {
+    $restored = [NexWindowProbe]::VisibleWindow([uint32]$normal.Id)
+    if ($restored -ne [IntPtr]::Zero) { break }
+    if ($normal.HasExited) { $why = 'Trace: ' + $(if (Test-Path -LiteralPath $hideDiag) { Get-Content -LiteralPath $hideDiag -Raw } else { 'none' }); throw "Second normal launch: the first process exited (code $($normal.ExitCode)) instead of restoring its window. $why" }
+    if ([DateTime]::UtcNow -gt $until) { throw ('Second normal launch did not restore the first window. Windows: ' + [NexWindowProbe]::Describe([uint32]$normal.Id) + ' Trace: ' + $(if (Test-Path -LiteralPath $hideDiag) { Get-Content -LiteralPath $hideDiag -Raw } else { 'none' })) }
+    Start-Sleep -Milliseconds 20
+} while ($true)
+if ($restored -ne $window) { throw 'Second launch replaced the original window.' }
+$result | Add-Member normalGuiSecondLaunchRestores $true
+[void][NexWindowProbe]::PostMessage($window, 0x0111, [IntPtr]40005, [IntPtr]::Zero)
 if (-not $normal.WaitForExit(10000)) { throw 'Normal GUI failed to drain and close.' }
 $result | Add-Member normalGuiExitCode $normal.ExitCode
-# Isolated opt-in close/tray run: user preferences and notes are never changed.
+# Isolated legacy-profile close/tray run: user preferences and notes are never changed.
 $lifePath = [IO.Path]::ChangeExtension($Output, '.lifecycle.json')
 if (Test-Path -LiteralPath $lifePath) { Remove-Item -LiteralPath $lifePath }
 $life = Start-Process -FilePath $exe -ArgumentList @('--lifecycle-smoke', ('"' + $lifePath + '"')) -WorkingDirectory $Release -PassThru
@@ -168,5 +211,5 @@ try {
 
 $result | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $Output -Encoding utf8
 $result | ConvertTo-Json -Depth 8
-if (-not ($result.tray -and $result.reminderActionsMarkup -and $result.hotkey -and $result.hotkeyDelivered -and $result.captureOpened -and $result.displayChangeRefresh -and $result.startupToggle -and $result.startupRestored -and $singleInstance -and $primary.ExitCode -eq 0 -and $result.normalGuiAliveAfterCapture -and $result.normalGuiExitCode -eq 0)) { throw 'One or more native checks failed.' }
+if (-not ($result.tray -and $result.processAumid -and $result.normalGuiSecondLaunchRestores -and $result.reminderActionsMarkup -and $result.hotkey -and $result.hotkeyDelivered -and $result.captureOpened -and $result.displayChangeRefresh -and $result.startupToggle -and $result.startupRestored -and $singleInstance -and $primary.ExitCode -eq 0 -and $result.normalGuiAliveAfterCapture -and $result.normalGuiExitCode -eq 0)) { throw 'One or more native checks failed.' }
 foreach ($position in $result.placements) { if (-not $position.edgeReveal) { throw "Edge reveal failed on monitor $($position.monitor) / $($position.edge)" } }

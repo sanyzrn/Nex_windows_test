@@ -176,18 +176,8 @@ mixin _SettingsDisplayAppearance on _SettingsStateBase {
           const Divider(height: 1),
           _SettingRow(
             title: l.windowCloseAction,
-            subtitle: c.S.closeToTray
-                ? l.windowCloseTrayHint
-                : l.windowCloseQuitHint,
-            control: Switch(
-              key: const ValueKey('close-to-tray'),
-              value: c.S.closeToTray,
-              onChanged: (v) {
-                c.S.closeToTray = v;
-                c.save();
-                c.refresh();
-              },
-            ),
+            subtitle: l.windowCloseTrayHint,
+            control: const Icon(Icons.notifications_active_outlined),
           ),
           const Divider(height: 1),
           _SettingRow(
@@ -228,6 +218,8 @@ mixin _SettingsDisplayAppearance on _SettingsStateBase {
               _SettingRow(
                 title: l.monitor,
                 control: DropdownButton<int>(
+                  borderRadius: nexDropdownRadius,
+                  dropdownColor: nexDropdownColor(context),
                   value: c.S.monitor.clamp(0, c.screens.length - 1),
                   items: [
                     for (var i = 0; i < c.screens.length; i++)
@@ -367,6 +359,8 @@ mixin _SettingsDisplayAppearance on _SettingsStateBase {
           _SettingRow(
             title: l.themePalette,
             control: DropdownButton<String>(
+              borderRadius: nexDropdownRadius,
+              dropdownColor: nexDropdownColor(context),
               value: nexThemePresets.any((p) => p.id == c.S.preset)
                   ? c.S.preset
                   : 'classic',
@@ -476,6 +470,8 @@ mixin _SettingsDisplayAppearance on _SettingsStateBase {
           _SettingRow(
             title: l.appLanguage,
             control: DropdownButton<String>(
+              borderRadius: nexDropdownRadius,
+              dropdownColor: nexDropdownColor(context),
               value: c.S.language,
               underline: const SizedBox.shrink(),
               items: [

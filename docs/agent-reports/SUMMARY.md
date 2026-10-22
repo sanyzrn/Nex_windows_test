@@ -32,3 +32,61 @@ Release automation publishes only after successful main-branch Windows CI for th
 Final Part 7 source verification: [Windows run 39589605793](https://github.com/sanyzrn/Nex_windows_test/actions/runs/39589605793), commit `4095fd9`: 856 desktop tests, shared UI 280, core 250, data 294 with 14 existing skips, AI 184, desktop without local inference 662; Release/native/installer/update checks passed.
 
 Release preparation: version 0.23.0+17 declarations passed local consistency checks; Windows refresh [39608500545](https://github.com/sanyzrn/Nex_windows_test/actions/runs/39608500545) passed and all eight changed About/history images were reviewed. Final main-branch CI and release URLs are recorded in PR #9.
+
+## 0.26 candidate — 2026-10-22
+
+Based on published main 91d3daa (0.25.0), preserving existing branches/history.
+Caption close now hides with a real tray regardless of legacy false settings;
+explicit Quit remains the drain/exit route. Shared Android menu helpers/theme
+ported without desktop-density replacement; stock menus ratcheted. Four module
+views improved; see UI_SYNC_0.26.md for exact scope and remaining Android gaps.
+CI native lifecycle fixture deliberately uses the old false flag. Installed
+protocol/AUMID assertions added to existing installer smoke rather than a second
+redundant job. Windows-only manual/performance/phone work remains NOT TESTED and
+assigned in MANUAL_TEST_0.26.md; no measurements invented. Signing/editor memo
+makes recommendations only. No artifacts proven unnecessary were deleted.
+
+Local localization parity and diff hygiene passed. Flutter validation locally
+was blocked by automatic review over metadata-endpoint access; no bypass used.
+Windows CI and visual review are pending at this commit. Release is not yet
+claimed; append final actual evidence after the gates complete.
+
+### 0.26 visual review and final validation handoff
+
+[Windows visual refresh 39695846116](https://github.com/sanyzrn/Nex_windows_test/actions/runs/39695846116)
+passed 226 cases and generated `40ba6cb`. All 47 changed images reviewed;
+[review and examples](REVIEW_0.26.md). No golden tolerance changes. Final module
+layouts now include wide/compact Cycle dashboard, actionable PDF open state,
+Vault category cards and Portrait metrics. Native smoke now reads actual process
+AUMID and launches a real second normal instance to restore the original HWND;
+installed protocol/shortcut identity are read after installation. Those new
+native assertions still require the final Windows build/smoke result.
+
+Earlier CI exposed a duplicate dropdownColor argument; fixed. Analysis on the
+corrected and final layout sources passed. Local parity/tool checks passed (18
+checks); local Flutter was not retried after the automatic-review block. The
+obsolete root 0.13 checksum moved to docs/archive/SHA256SUMS_0.13.0, preserving
+history while avoiding confusion with current release assets. No user data,
+licenses, historical screenshots or existing work was removed.
+
+Remaining owner/Windows-agent checks: physical IME, Hello, DPI/multiple monitors,
+real notifications/sleep/clock cases, performance measurements and phone archive
+round-trips, grouped in MANUAL_TEST_0.26.md. They remain unverified. Signing and
+native-editor decisions remain with the owner. Final CI/publication evidence is
+tracked in PR #12; a screenshot-refresh success alone never authorizes publication.
+
+### 0.26 native activation correction
+
+[Windows run 39697158980](https://github.com/sanyzrn/Nex_windows_test/actions/runs/39697158980)
+passed analysis, 900 desktop tests/golden comparisons, 285 shared UI tests,
+250 core tests, 294 data tests (14 existing skips), and the Release build.
+The actual second-normal-launch smoke failed to restore the hidden first HWND;
+installer/remaining checks did not run, and no release was published.
+
+Primary lookup now uses a stable window property instead of depending on the
+Flutter/plugin-controlled caption; app-owned activation is routed before plugin
+delegates. The real launcher regression deliberately renames the first caption
+before hiding and launching again. PDF shortcut scope now receives focus on first
+open, with Ctrl+F dispatched through real key events in the existing PDF test.
+These corrections require the next Windows run; no native pass is inferred from
+source inspection or from the earlier synthetic activation-message probe.

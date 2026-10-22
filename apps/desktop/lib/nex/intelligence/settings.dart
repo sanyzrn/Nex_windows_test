@@ -261,6 +261,8 @@ class _SettingsState extends State<DesktopIntelligenceSettings> {
         ) => Padding(
           padding: const EdgeInsets.symmetric(vertical: 8),
           child: DropdownButtonFormField<String>(
+            borderRadius: nexDropdownRadius,
+            dropdownColor: nexDropdownColor(context),
             initialValue: values.contains(ai.string(pref))
                 ? ai.string(pref)
                 : fallback,
@@ -782,6 +784,8 @@ class _SettingsState extends State<DesktopIntelligenceSettings> {
               toggle('allowActions', 'ai.allowActions', true),
               toggle('cycle', 'cycle.assistant_access'),
               DropdownButtonFormField<int>(
+                borderRadius: nexDropdownRadius,
+                dropdownColor: nexDropdownColor(context),
                 initialValue:
                     [
                       10,

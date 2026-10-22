@@ -4,6 +4,7 @@ import 'package:nex_ui/nex_ui.dart';
 import 'package:nex_core/nex_core.dart';
 import '../features_state.dart';
 import '../../l10n/app_localizations.dart';
+import '../../l10n/desktop_format.dart';
 import '../desktop_editing_direction.dart';
 import 'module_controller.dart';
 import 'vault_store.dart';
@@ -74,8 +75,26 @@ class _DesktopVaultViewState extends State<DesktopVaultView> {
           children: [
             for (final value in VaultKind.values)
               ChoiceChip(
-                avatar: Icon(icons[value.index], size: 18),
-                label: Text(labels[value.index]),
+                avatar: Icon(icons[value.index], size: 24),
+                showCheckmark: false,
+                padding: const EdgeInsets.all(NexSpacing.md),
+                label: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(labels[value.index]),
+                    if (snapshot != null)
+                      Text(
+                        desktopDigits(
+                          context,
+                          snapshot!.entries
+                              .where((e) => e.kind == value)
+                              .length,
+                        ),
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                  ],
+                ),
                 selected: kind == value,
                 onSelected: (_) => setState(() {
                   kind = value;

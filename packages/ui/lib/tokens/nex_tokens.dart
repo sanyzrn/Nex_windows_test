@@ -811,6 +811,17 @@ ThemeData _theme({
         borderRadius: BorderRadius.circular(NexRadius.lg),
       ),
     ),
+    popupMenuTheme: PopupMenuThemeData(
+      color: liquidGlass ? Colors.transparent : scheme.surfaceContainerHigh,
+      surfaceTintColor: Colors.transparent,
+      elevation: liquidGlass ? 0 : 3,
+      menuPadding: liquidGlass
+          ? EdgeInsets.zero
+          : const EdgeInsets.symmetric(vertical: NexSpacing.sm),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(NexRadius.lg),
+      ),
+    ),
     dialogTheme: DialogThemeData(
       elevation: liquidGlass ? 12 : 6,
       backgroundColor: cardSurface,

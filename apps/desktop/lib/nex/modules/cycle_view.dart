@@ -7,6 +7,7 @@ import '../../l10n/desktop_format.dart';
 import '../desktop_date_picker.dart';
 import '../features_state.dart';
 import 'cycle_calendar.dart';
+import 'cycle_ring.dart';
 import 'cycle_labels.dart';
 import 'cycle_day_editor.dart';
 
@@ -71,6 +72,7 @@ class _DesktopCycleViewState extends State<DesktopCycleView> {
 
   Future<void> change(String command, Map<String, dynamic> args) async {
     if (!widget.features.modules.privateSession.isOpen || busy) return;
+    widget.features.modules.privateSession.touch();
     setState(() {
       busy = true;
       failed = false;
@@ -204,6 +206,8 @@ class _DesktopCycleViewState extends State<DesktopCycleView> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 DropdownButtonFormField<int>(
+                  borderRadius: nexDropdownRadius,
+                  dropdownColor: nexDropdownColor(context),
                   initialValue: cycle,
                   decoration: InputDecoration(labelText: l.cycleLength),
                   items: [
@@ -217,6 +221,8 @@ class _DesktopCycleViewState extends State<DesktopCycleView> {
                 ),
                 const SizedBox(height: NexSpacing.md),
                 DropdownButtonFormField<int>(
+                  borderRadius: nexDropdownRadius,
+                  dropdownColor: nexDropdownColor(context),
                   initialValue: period,
                   decoration: InputDecoration(labelText: l.cyclePeriodLength),
                   items: [
@@ -283,74 +289,40 @@ class _DesktopCycleViewState extends State<DesktopCycleView> {
       typicalPeriod: modules.typicalPeriod,
     );
     final open = periods.where((p) => p.isOpen).lastOrNull;
-    final ringSize = (190 * MediaQuery.textScalerOf(context).scale(1)).clamp(
-      190.0,
-      320.0,
-    );
-    return ListView(
-      padding: const EdgeInsets.all(NexSpacing.md),
-      children: [
-        Text(l.cyclePrivacy, style: Theme.of(context).textTheme.bodySmall),
-        const SizedBox(height: NexSpacing.md),
-        if (prediction == null)
-          Text(l.cycleNoHistory)
-        else
-          Center(
-            child: SizedBox(
-              width: ringSize,
-              height: ringSize,
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  SizedBox.expand(
-                    child: CircularProgressIndicator(
-                      value: (prediction.cycleDay / prediction.averageCycle)
-                          .clamp(0, 1),
-                      strokeWidth: 6,
-                      backgroundColor: Theme.of(
-                        context,
-                      ).colorScheme.surfaceContainerHighest,
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(NexSpacing.md),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          l.cycleDay(
-                            desktopDigits(context, prediction.cycleDay),
-                          ),
-                          textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.titleLarge,
-                        ),
-                        Text(
-                          cycleStageLabel(l, prediction.stage),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+    final overview = Card(
+      color: Theme.of(context).colorScheme.surfaceContainerLow,
+      child: Padding(
+        padding: const EdgeInsets.all(NexSpacing.md),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (prediction == null)
+              Text(l.cycleNoHistory)
+            else
+              DesktopCycleRing(prediction: prediction),
+            if (prediction != null) ...[
+              const SizedBox(height: NexSpacing.md),
+              Text(l.cycleNext, style: Theme.of(context).textTheme.titleSmall),
+              Text(
+                '${date(prediction.nextEarliest.local)} – ${date(prediction.nextLatest.local)}',
               ),
-            ),
-          ),
-        if (prediction != null) ...[
-          const SizedBox(height: NexSpacing.md),
-          Text(l.cycleNext, style: Theme.of(context).textTheme.titleSmall),
-          Text(
-            '${date(prediction.nextEarliest.local)} – ${date(prediction.nextLatest.local)}',
-          ),
-          if (prediction.confidence != CycleConfidence.high)
-            Text(
-              l.cycleUncertain,
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-        ],
-        const SizedBox(height: NexSpacing.md),
-        Text(l.cycleEstimate, style: Theme.of(context).textTheme.bodySmall),
-        const SizedBox(height: NexSpacing.md),
-        DesktopCycleCalendar(
+              if (prediction.confidence != CycleConfidence.high)
+                Text(
+                  l.cycleUncertain,
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+            ],
+            const SizedBox(height: NexSpacing.md),
+            Text(l.cycleEstimate, style: Theme.of(context).textTheme.bodySmall),
+            const SizedBox(height: NexSpacing.md),
+          ],
+        ),
+      ),
+    );
+    final calendar = Card(
+      child: Padding(
+        padding: const EdgeInsets.all(NexSpacing.sm),
+        child: DesktopCycleCalendar(
           today: widget.clock(),
           selected: selected,
           month: month,
@@ -371,8 +343,56 @@ class _DesktopCycleViewState extends State<DesktopCycleView> {
             unawaited(load());
           },
         ),
+      ),
+    );
+    return ListView(
+      padding: const EdgeInsets.all(NexSpacing.md),
+      children: [
+        Text(l.cyclePrivacy, style: Theme.of(context).textTheme.bodySmall),
+        const SizedBox(height: NexSpacing.md),
+        LayoutBuilder(
+          builder: (context, box) {
+            if (box.maxWidth >= 760) {
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(width: 340, child: overview),
+                  const SizedBox(width: NexSpacing.md),
+                  Expanded(child: calendar),
+                ],
+              );
+            }
+            return Column(
+              children: [
+                overview,
+                const SizedBox(height: NexSpacing.md),
+                calendar,
+              ],
+            );
+          },
+        ),
         const SizedBox(height: NexSpacing.md),
         Text(date(selected), style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: NexSpacing.sm),
+        Text(l.cycleMood, style: Theme.of(context).textTheme.titleSmall),
+        Wrap(
+          spacing: NexSpacing.xs,
+          runSpacing: NexSpacing.xs,
+          children: [
+            for (final mood in CycleMood.values)
+              ChoiceChip(
+                label: Text(cycleMoodLabel(l, mood)),
+                selected: log?.mood == mood,
+                onSelected: busy || loading
+                    ? null
+                    : (yes) => change('cycleDay', {
+                        'log': (log ?? CycleDayLog(day: CycleDate.of(selected)))
+                            .copyWith(mood: () => yes ? mood : null),
+                      }),
+              ),
+          ],
+        ),
+        const SizedBox(height: NexSpacing.sm),
         Wrap(
           spacing: NexSpacing.sm,
           runSpacing: NexSpacing.sm,

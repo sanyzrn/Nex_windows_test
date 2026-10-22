@@ -36,6 +36,22 @@
 #include <flutter_windows.h>
 
 namespace {
+// Opt-in smoke trace: appends one line to the file named by NEX_HIDE_DIAG.
+// Never set in normal use.
+void SmokeTrace(const std::string& line) {
+  wchar_t path[MAX_PATH] = {};
+  if (GetEnvironmentVariableW(L"NEX_HIDE_DIAG", path, MAX_PATH) == 0) return;
+  HANDLE file = CreateFileW(path, FILE_APPEND_DATA, FILE_SHARE_READ | FILE_SHARE_WRITE,
+                            nullptr, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+  if (file == INVALID_HANDLE_VALUE) return;
+  const std::string text = line + "; ";
+  DWORD written = 0;
+  WriteFile(file, text.data(), static_cast<DWORD>(text.size()), &written, nullptr);
+  CloseHandle(file);
+}
+}  // namespace
+
+namespace {
 using flutter::EncodableList;
 using flutter::EncodableMap;
 using flutter::EncodableValue;
@@ -209,6 +225,11 @@ void NativeBridge::HandleMethodCall(
     GetMonitorInfo(MonitorFromWindow(window_, MONITOR_DEFAULTTONEAREST), &monitor);
     GetClientRect(window_, &client);
     GetClientRect(controller_->view()->GetNativeWindow(), &view);
+    PWSTR process_app_id = nullptr;
+    const HRESULT app_id_result = GetCurrentProcessExplicitAppUserModelID(&process_app_id);
+    const bool process_aumid = SUCCEEDED(app_id_result) && process_app_id != nullptr &&
+        std::wstring(process_app_id) == L"Nex.Desktop.App";
+    CoTaskMemFree(process_app_id);
     result->Success(EncodableValue(EncodableMap{
       {EncodableValue("visible"), EncodableValue(IsWindowVisible(window_) != FALSE)},
       {EncodableValue("windowMode"), EncodableValue(window_mode_)},
@@ -221,6 +242,7 @@ void NativeBridge::HandleMethodCall(
       {EncodableValue("workWidth"), EncodableValue(static_cast<int32_t>(monitor.rcWork.right - monitor.rcWork.left))},
       {EncodableValue("workHeight"), EncodableValue(static_cast<int32_t>(monitor.rcWork.bottom - monitor.rcWork.top))},
       {EncodableValue("tray"), EncodableValue(tray_added_)},
+      {EncodableValue("processAumid"), EncodableValue(process_aumid)},
       {EncodableValue("reminderActionsMarkup"), EncodableValue(VerifyReminderActionMarkup())},
       {EncodableValue("hotkey"), EncodableValue(hotkey_registered_)},
       {EncodableValue("workers"), EncodableValue(static_cast<int32_t>(workers_.size()))},
@@ -317,13 +339,20 @@ void NativeBridge::HandleMethodCall(
     compact_window_ = window_mode_ && ArgBool(args, "compact");
     result->Success();
   } else if (name == "hideToTray") {
+    // The shell may not have been ready when the icon was first added, so
+    // try once more at the moment it matters before giving up and quitting.
+    if (window_mode_ && !tray_added_) CreateTray();
     const bool can_hide = window_mode_ && tray_added_;
+    SmokeTrace(std::string("hideToTray windowMode=") + (window_mode_ ? "1" : "0") +
+               " tray=" + (tray_added_ ? "1" : "0") + " hide=" + (can_hide ? "1" : "0"));
     if (can_hide) {
       pending_show_ = false;
+      hidden_to_tray_ = true;
       ShowWindow(window_, SW_HIDE);
     }
     result->Success(EncodableValue(can_hide));
   } else if (name == "quit") {
+    SmokeTrace("quit requested by Dart");
     quit_requested_ = true;
     PostMessage(window_, WM_CLOSE, 0, 0);
     result->Success();
@@ -434,6 +463,7 @@ void NativeBridge::SetWindowMode(const std::string& mode, int x, int y, int w,
   ++surface_generation_;
   surface_requested_generation_ = UINT64_MAX;
   pending_show_ = false;
+  hidden_to_tray_ = false;
   window_mode_ = to_window;
   compact_window_ = to_window && compact;
   if (!to_window) {
@@ -587,6 +617,16 @@ flutter::EncodableMap NativeBridge::WindowFrame() const {
       {EncodableValue("h"), EncodableValue(static_cast<int32_t>(r.bottom - r.top))},
       {EncodableValue("maximized"), EncodableValue(zoomed)},
   };
+}
+
+// Brings back a window that close-to-tray hid. This is native-only so it does
+// not depend on the Dart isolate answering a tray event, and it also covers a
+// surface that has not reported ready again.
+void NativeBridge::RevealFromTray() {
+  if (!window_mode_ || !hidden_to_tray_) return;
+  hidden_to_tray_ = false;
+  if (!IsWindowVisible(window_)) FocusWindow();
+  if (!IsWindowVisible(window_)) ShowWindow(window_, SW_SHOW);
 }
 
 void NativeBridge::FocusWindow() {
@@ -905,7 +945,11 @@ bool NativeBridge::OnMessage(HWND hwnd, UINT message, WPARAM wparam, LPARAM lpar
     return true;
   }
   if (message == WM_APP_SHOW) {
+    SmokeTrace(std::string("show message hidden_to_tray=") + (hidden_to_tray_ ? "1" : "0"));
     SetPassthrough(false);
+    // A second launch must reveal a window hidden to the tray even when the
+    // Dart side is busy or slow to answer the event below.
+    RevealFromTray();
     SetForegroundWindow(window_);
     PostEvent("tray", EncodableValue(EncodableMap{{EncodableValue("id"), EncodableValue("open")}}));
     return true;
@@ -925,6 +969,7 @@ bool NativeBridge::OnMessage(HWND hwnd, UINT message, WPARAM wparam, LPARAM lpar
     return true;
   }
   if (message == WM_CLOSE && !quit_requested_) {
+    SmokeTrace(std::string("close message windowMode=") + (window_mode_ ? "1" : "0"));
     PostEvent("tray", EncodableValue(EncodableMap{{EncodableValue("id"), EncodableValue("shutdown")}}));
     return true;
   }
@@ -969,6 +1014,7 @@ bool NativeBridge::OnMessage(HWND hwnd, UINT message, WPARAM wparam, LPARAM lpar
     const UINT mouse = static_cast<UINT>(lparam);
     if (mouse == WM_LBUTTONUP || mouse == WM_LBUTTONDBLCLK) {
       SetPassthrough(false);
+      RevealFromTray();
       SetForegroundWindow(window_);
       PostEvent("tray", EncodableValue(EncodableMap{
                              {EncodableValue("id"), EncodableValue("open")}}));
@@ -992,6 +1038,7 @@ bool NativeBridge::OnMessage(HWND hwnd, UINT message, WPARAM wparam, LPARAM lpar
     if (ev != nullptr) {
       if (id == IDM_TRAY_OPEN || id == IDM_TRAY_SETTINGS) {
         SetPassthrough(false);
+        RevealFromTray();
         SetForegroundWindow(window_);
       }
       PostEvent("tray", EncodableValue(EncodableMap{

@@ -25,6 +25,8 @@ mixin _SettingsShortcutsBackup on _SettingsStateBase {
             title: l.hotkey,
             subtitle: l.hotkeyInUse,
             control: DropdownButton<String>(
+              borderRadius: nexDropdownRadius,
+              dropdownColor: nexDropdownColor(context),
               value: c.S.hotkey,
               underline: const SizedBox.shrink(),
               items: ['N', 'Q', 'Space']
