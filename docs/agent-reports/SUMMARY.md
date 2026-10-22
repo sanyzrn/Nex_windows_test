@@ -189,3 +189,18 @@ pixels. No local golden regeneration or tolerance changes. Publication remains
 pending refreshed-image review and successful full Windows CI for the exact
 release source, including native smoke, installer build and verified update
 handoff. No physical-phone round-trip or manual Windows acceptance is claimed.
+
+
+### 0.27.0 Windows visual review - release source
+
+[Refresh run 39829751363](https://github.com/sanyzrn/Nex_windows_test/actions/runs/39829751363)
+passed all 226 golden/review cases on Windows with Flutter 3.44.8 and committed
+`09bb1ab`. Reviewed all eight changed images: About in English/Persian and
+light/dark changed only its version/build line; the four release-history
+images show the new 0.27.0 notes with readable text and accessible Close.
+No dimensions or tolerances changed; no other baseline files changed.
+
+The owner authorized release of this completed scope as 0.27.0+21. Remaining
+P2-P5 items and performance/phone work are deferred. Full main-branch Windows
+CI, native/installer/update checks and automatic verified publication are
+still pending at this documentation commit; no release success is claimed.
