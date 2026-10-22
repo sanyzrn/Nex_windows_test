@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.27.0 — 2026-10-22
+
+- Bulk Pin preserves existing pins in mixed selections and pins only the unpinned notes. Selecting only pinned notes changes the action to Unpin and removes their pins together.
+- The selection tooltip reflects the action, and English/Persian feedback explains the five-note pin limit when capacity is reached.
+- Removed temporary native smoke tracing while retaining clear failure messages for Windows activation checks.
+
 ## 0.26.0 — 2026-10-22
 
 - Window × and Alt+F4 hide to the tray even for older profiles; explicit Quit drains and exits. If no tray is available, close exits safely.

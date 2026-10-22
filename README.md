@@ -6,7 +6,7 @@
 
 A local-first notebook and desktop toolkit for Windows, with English and Persian interfaces. Work in a full desktop window or a compact panel at either screen edge.
 
-**Current app version: `0.26.0+20` · Windows 10/11 · x64**
+**Current app version: `0.27.0+21` · Windows 10/11 · x64**
 
 [Download the latest installer](https://github.com/sanyzrn/Nex_windows_test/releases/latest) · [What's new](apps/desktop/CHANGELOG.md) · [Report a bug](https://github.com/sanyzrn/Nex_windows_test/issues/new/choose) · [فارسی](#راهنمای-فارسی)
 
@@ -19,7 +19,7 @@ These are Windows widget snapshots, not installed-app verification.
 ## What you can do
 
 - Capture and search text, checklists, links, images, files and voice notes; edits save locally.
-- Organize notes with tags, threads, pins and reminders. Recently deleted notes can be restored.
+- Organize notes with tags, threads, pins and reminders. Recently deleted notes can be restored. Ctrl/Shift-click notes to select them; Pin adds pins to unpinned selections, while Unpin removes them only when every selected note is pinned (up to five pins).
 - Keep the last **50 distinct clipboard text/image entries** across restarts, with separate favorites.
 - Use Windows tools such as Keep Awake, screenshots, window pinning, clipboard and app/folder launchers.
 - In panel mode, resize the icon dock independently and adjust the edge reveal area in Settings → Display.

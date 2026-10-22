@@ -1,1 +1,1 @@
-0.26.0 revision 3: review responsive Cycle dashboard, PDF open state, Vault categories and Portrait metrics.
+0.27.0 release: refresh Windows About/version and release-history snapshots for 0.27.0+21; retain all existing visual tolerances and review changed images before publication.

@@ -168,3 +168,24 @@ visual review were not run. No shared package, data format, settings key,
 identity or version change. Phase 5 is locally committed as `4b931e6`;
 P1 remains uncommitted for review. Nothing was pushed/merged/published, in
 accordance with the work order assigning push to the owner.
+
+
+### 0.27.0 release preparation - owner authorized publication
+
+The owner explicitly authorized pushing and publishing the completed work as
+0.27.0, with the installer in repository Releases; all other planned changes
+are deferred. This supersedes the original owner-only push/release workflow.
+P1 is committed as `95288bb`; phase-5 audit documentation is `4b931e6`.
+
+Bumped all declared versions to 0.27.0+21 / resource 0.27.0.21, updated both
+changelogs and the README selection guide, and increased the release-history
+assertion to 14 sections. The 19 selected version/localization/bulk-pin/menu
+tests, localization parity, 18 checker tests and diff whitespace check passed
+locally. The latest existing main CI (`39781563512`, commit `8dbaf4c`) passed
+all Windows gates; the earlier physical-machine tray finding remains historical.
+
+Requested Windows-runner baseline refresh for About/version/release-history
+pixels. No local golden regeneration or tolerance changes. Publication remains
+pending refreshed-image review and successful full Windows CI for the exact
+release source, including native smoke, installer build and verified update
+handoff. No physical-phone round-trip or manual Windows acceptance is claimed.
