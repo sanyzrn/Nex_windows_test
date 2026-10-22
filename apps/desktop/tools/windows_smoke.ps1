@@ -71,6 +71,21 @@ public static class NexWindowProbe {
         return new Rect { left = info.work.right - margin - width, top = info.work.bottom - margin - height,
             right = info.work.right - margin, bottom = info.work.bottom - margin };
     }
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)] private static extern IntPtr GetProp(IntPtr hwnd, string name);
+    public static string Describe(uint processId) {
+        var lines = new StringBuilder();
+        EnumWindows((hwnd, unused) => {
+            uint owner; GetWindowThreadProcessId(hwnd, out owner);
+            if (owner != processId) return true;
+            var sb = new StringBuilder(256);
+            GetClassName(hwnd, sb, 256);
+            Rect r; GetWindowRect(hwnd, out r);
+            lines.AppendFormat("[{0}] visible={1} marker={2} rect={3},{4},{5},{6}; ", sb, IsWindowVisible(hwnd),
+                GetProp(hwnd, "Nex.Desktop.PrimaryWindow") != IntPtr.Zero, r.left, r.top, r.right, r.bottom);
+            return true;
+        }, IntPtr.Zero);
+        return lines.Length == 0 ? "no top-level windows" : lines.ToString();
+    }
     public static IntPtr VisibleWindow(uint processId) {
         IntPtr found = IntPtr.Zero;
         EnumWindows((hwnd, unused) => {
@@ -120,7 +135,8 @@ $until = [DateTime]::UtcNow.AddSeconds(10)
 do {
     $restored = [NexWindowProbe]::VisibleWindow([uint32]$normal.Id)
     if ($restored -ne [IntPtr]::Zero) { break }
-    if ($normal.HasExited -or [DateTime]::UtcNow -gt $until) { throw 'Second normal launch did not restore the first window.' }
+    if ($normal.HasExited) { throw "Second normal launch: the first process exited (code $($normal.ExitCode)) instead of restoring its window." }
+    if ([DateTime]::UtcNow -gt $until) { throw ('Second normal launch did not restore the first window. Windows: ' + [NexWindowProbe]::Describe([uint32]$normal.Id)) }
     Start-Sleep -Milliseconds 20
 } while ($true)
 if ($restored -ne $window) { throw 'Second launch replaced the original window.' }

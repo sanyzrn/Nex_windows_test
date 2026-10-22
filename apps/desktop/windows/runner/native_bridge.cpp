@@ -326,6 +326,7 @@ void NativeBridge::HandleMethodCall(
     const bool can_hide = window_mode_ && tray_added_;
     if (can_hide) {
       pending_show_ = false;
+      hidden_to_tray_ = true;
       ShowWindow(window_, SW_HIDE);
     }
     result->Success(EncodableValue(can_hide));
@@ -440,6 +441,7 @@ void NativeBridge::SetWindowMode(const std::string& mode, int x, int y, int w,
   ++surface_generation_;
   surface_requested_generation_ = UINT64_MAX;
   pending_show_ = false;
+  hidden_to_tray_ = false;
   window_mode_ = to_window;
   compact_window_ = to_window && compact;
   if (!to_window) {
@@ -593,6 +595,16 @@ flutter::EncodableMap NativeBridge::WindowFrame() const {
       {EncodableValue("h"), EncodableValue(static_cast<int32_t>(r.bottom - r.top))},
       {EncodableValue("maximized"), EncodableValue(zoomed)},
   };
+}
+
+// Brings back a window that close-to-tray hid. This is native-only so it does
+// not depend on the Dart isolate answering a tray event, and it also covers a
+// surface that has not reported ready again.
+void NativeBridge::RevealFromTray() {
+  if (!window_mode_ || !hidden_to_tray_) return;
+  hidden_to_tray_ = false;
+  if (!IsWindowVisible(window_)) FocusWindow();
+  if (!IsWindowVisible(window_)) ShowWindow(window_, SW_SHOW);
 }
 
 void NativeBridge::FocusWindow() {
@@ -912,6 +924,9 @@ bool NativeBridge::OnMessage(HWND hwnd, UINT message, WPARAM wparam, LPARAM lpar
   }
   if (message == WM_APP_SHOW) {
     SetPassthrough(false);
+    // A second launch must reveal a window hidden to the tray even when the
+    // Dart side is busy or slow to answer the event below.
+    RevealFromTray();
     SetForegroundWindow(window_);
     PostEvent("tray", EncodableValue(EncodableMap{{EncodableValue("id"), EncodableValue("open")}}));
     return true;
@@ -975,6 +990,7 @@ bool NativeBridge::OnMessage(HWND hwnd, UINT message, WPARAM wparam, LPARAM lpar
     const UINT mouse = static_cast<UINT>(lparam);
     if (mouse == WM_LBUTTONUP || mouse == WM_LBUTTONDBLCLK) {
       SetPassthrough(false);
+      RevealFromTray();
       SetForegroundWindow(window_);
       PostEvent("tray", EncodableValue(EncodableMap{
                              {EncodableValue("id"), EncodableValue("open")}}));
@@ -998,6 +1014,7 @@ bool NativeBridge::OnMessage(HWND hwnd, UINT message, WPARAM wparam, LPARAM lpar
     if (ev != nullptr) {
       if (id == IDM_TRAY_OPEN || id == IDM_TRAY_SETTINGS) {
         SetPassthrough(false);
+        RevealFromTray();
         SetForegroundWindow(window_);
       }
       PostEvent("tray", EncodableValue(EncodableMap{

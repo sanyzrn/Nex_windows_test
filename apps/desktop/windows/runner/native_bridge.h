@@ -103,6 +103,7 @@ class NativeBridge {
                      bool maximized, bool show, bool compact);
   flutter::EncodableMap WindowFrame() const;
   void FocusWindow();
+  void RevealFromTray();
 
   void CreateTray();
   void RemoveTray();
@@ -134,6 +135,7 @@ class NativeBridge {
   uint64_t surface_requested_generation_ = 0;
   bool frame_callback_pending_ = false;
   bool pending_show_ = false;
+  bool hidden_to_tray_ = false;
   bool pending_show_maximized_ = false;
   bool tray_added_ = false;
   bool quit_requested_ = false;
