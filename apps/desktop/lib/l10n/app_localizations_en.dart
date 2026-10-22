@@ -96,6 +96,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get unpin => 'Unpin';
 
   @override
+  String get pinLimitReached => 'You can pin up to 5 notes.';
+
+  @override
   String get delete => 'Delete';
 
   @override

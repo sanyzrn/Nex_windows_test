@@ -143,3 +143,28 @@ The existing phase-2 tray-smoke finding remains as recorded above; this audit
 does not resolve or reclassify it. No app, vendored package, format, version,
 identity, test or golden baseline changed. No commit/push/PR/tag/release was
 made. Owner selection is needed before implementing phase-6 candidates.
+
+
+### 0.27.0 Phase 6 - P1 consistent bulk Pin / Unpin (review pending)
+
+After the owner delegated the next-item choice, implemented P1 only. Mixed
+selections now pin their unpinned notes without removing existing pins;
+all-pinned selections unpin together, and the tooltip reflects the intent.
+The existing five-note limit is preserved, with Persian/English feedback
+when capacity is reached. Added four real UI/database regressions covering
+mixed/all/none-pinned selections and the limit, across both languages,
+themes and reading directions. Details: `PHASE6_P1_0.27.md`.
+
+Using Flutter 3.44.8 / Dart 3.12.2 on Linux, dependency installation, analysis
+(no issues), 15 targeted tests, localization parity and 18 checker tests
+passed. New/generated localization changes were kept minimal. The Linux
+SQLite loader needed a scratch-only link to the installed system library;
+no repository workaround was introduced. Diff whitespace, documentation-only
+summary append and bounded P1 scope checks passed. No existing test or golden
+tolerance was changed, and no baseline was regenerated.
+
+Windows UI hygiene (PowerShell), native/build/installer checks and Windows
+visual review were not run. No shared package, data format, settings key,
+identity or version change. Phase 5 is locally committed as `4b931e6`;
+P1 remains uncommitted for review. Nothing was pushed/merged/published, in
+accordance with the work order assigning push to the owner.

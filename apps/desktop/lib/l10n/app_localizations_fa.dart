@@ -96,6 +96,9 @@ class AppLocalizationsFa extends AppLocalizations {
   String get unpin => 'برداشتن سنجاق';
 
   @override
+  String get pinLimitReached => 'حداکثر ۵ یادداشت را می‌توان سنجاق کرد.';
+
+  @override
   String get delete => 'حذف';
 
   @override

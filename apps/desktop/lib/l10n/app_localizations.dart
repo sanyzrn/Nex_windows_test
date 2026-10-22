@@ -269,6 +269,12 @@ abstract class AppLocalizations {
   /// **'Unpin'**
   String get unpin;
 
+  /// No description provided for @pinLimitReached.
+  ///
+  /// In en, this message translates to:
+  /// **'You can pin up to 5 notes.'**
+  String get pinLimitReached;
+
   /// No description provided for @delete.
   ///
   /// In en, this message translates to:

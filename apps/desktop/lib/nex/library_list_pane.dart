@@ -13,6 +13,9 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
   Widget _buildListPane(BuildContext context, AppLocalizations l, bool fa) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final chosen = notes.where((n) => _selectedIds.contains(n.id)).toList();
+    final unpinChosen =
+        chosen.isNotEmpty && chosen.every((n) => n.pinnedAt != null);
 
     return Column(
       children: [
@@ -60,24 +63,36 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
                 ),
                 _BannerIcon(
                   icon: Icons.push_pin_outlined,
-                  tooltip: l.pin,
+                  tooltip: unpinChosen ? l.unpin : l.pin,
                   color: scheme.onPrimaryContainer,
                   onPressed: () async {
                     final features = NexScope.of(context);
-                    final chosen = notes
-                        .where((n) => _selectedIds.contains(n.id))
-                        .toList();
+                    final messenger = ScaffoldMessenger.of(context);
+                    var limitReached = false;
                     await features.guard(() async {
                       for (final n in chosen) {
-                        await features.store.call(
-                          n.pinnedAt == null ? 'pin' : 'unpin',
-                          {'id': n.id},
-                        );
+                        if (unpinChosen) {
+                          await features.store.call<void>('unpin', {
+                            'id': n.id,
+                          });
+                        } else if (n.pinnedAt == null) {
+                          final pinned = await features.store.call<bool>(
+                            'pin',
+                            {'id': n.id},
+                          );
+                          if (!pinned) {
+                            limitReached = true;
+                            break;
+                          }
+                        }
                       }
                     });
                     if (!mounted) return;
                     setState(() => _selectedIds.clear());
                     await load();
+                    if (mounted && limitReached) {
+                      showNexNotice(messenger, l.pinLimitReached);
+                    }
                   },
                 ),
                 _BannerIcon(
