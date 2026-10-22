@@ -90,3 +90,29 @@ before hiding and launching again. PDF shortcut scope now receives focus on firs
 open, with Ctrl+F dispatched through real key events in the existing PDF test.
 These corrections require the next Windows run; no native pass is inferred from
 source inspection or from the earlier synthetic activation-message probe.
+
+### 0.27.0 Phase 1 - baseline
+
+Baseline on `main` at `c3139f2` (`0.27.0+21`; latest published tag `v0.26.0`,
+no `v0.27.0`). On Windows 11 Home Single Language 10.0.26300 x64 with one
+1920x1080 monitor at 125% scaling, all local CI checks passed: version
+consistency (7 tests), localization parity plus 18 checker tests, UI hygiene,
+analysis, 900 desktop tests, 285 shared UI tests, 250 core tests, 294 data
+tests (14 existing skips), 184 AI tests, the Release build (106.7 s), the
+installer build (19.1 s), and the native smoke (6.3 s) with an isolated
+`APPDATA`. No files changed and no commit was made.
+
+### 0.27.0 Phase 2 - remove temporary smoke tracing
+
+Removed the 0.26.0 `SmokeTrace` helper and all four calls from
+`native_bridge.cpp`, and `NEX_HIDE_DIAG` / `Get-NormalTrace` from
+`tools/windows_smoke.ps1`. The normal-launch failure messages still distinguish
+"first process exited" from "did not restore".
+
+PowerShell syntax, Release build (16.7 s), analysis (24.6 s), version checks,
+localization parity, UI hygiene, native private checks (5 s), and all 900
+desktop tests (200.3 s) passed. The native smoke passed its probe,
+single-instance, normal-window and second-launch stages, then failed the tray
+compact-corner assertion (`left 40`, expected `1448`). The published 0.26.0
+binary fails the same assertion, including with the unmodified HEAD smoke
+script, so the failure predates this cleanup; no test or tolerance was changed.
