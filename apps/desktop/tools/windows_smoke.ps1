@@ -134,7 +134,8 @@ while ([NexWindowProbe]::VisibleWindow([uint32]$normal.Id) -ne [IntPtr]::Zero) {
     Start-Sleep -Milliseconds 20
 }
 $normalSecond = Start-Process -FilePath $exe -WorkingDirectory $Release -PassThru
-if (-not $normalSecond.WaitForExit(1500) -or $normalSecond.ExitCode -ne 0) { throw 'Second normal launch did not yield to the first.' }
+function Get-NormalTrace { 'Trace: ' + $(if (Test-Path -LiteralPath $hideDiag) { Get-Content -LiteralPath $hideDiag -Raw } else { 'none' }) }
+if (-not $normalSecond.WaitForExit(1500) -or $normalSecond.ExitCode -ne 0) { throw ('Second normal launch did not yield to the first. First exited: ' + $normal.HasExited + '. ' + (Get-NormalTrace)) }
 $until = [DateTime]::UtcNow.AddSeconds(10)
 do {
     $restored = [NexWindowProbe]::VisibleWindow([uint32]$normal.Id)
