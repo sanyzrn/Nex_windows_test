@@ -109,7 +109,8 @@ public static class NexWindowProbe {
 $hideDiag = [IO.Path]::ChangeExtension($Output, '.hide.txt')
 if (Test-Path -LiteralPath $hideDiag) { Remove-Item -LiteralPath $hideDiag }
 $env:NEX_HIDE_DIAG = $hideDiag
-$normal = Start-Process -FilePath $exe -WorkingDirectory $Release -WindowStyle Hidden -PassThru
+# A hidden start (SW_HIDE in STARTUPINFO) would swallow the window's first ShowWindow call.
+$normal = Start-Process -FilePath $exe -WorkingDirectory $Release -PassThru
 Remove-Item Env:NEX_HIDE_DIAG
 $until = [DateTime]::UtcNow.AddSeconds(15)
 $window = [IntPtr]::Zero
