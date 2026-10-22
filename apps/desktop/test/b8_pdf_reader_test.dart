@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nex_desktop/l10n/app_localizations.dart';
@@ -55,6 +56,18 @@ void main() {
         }
 
         await until(() => find.text('Page 1 of 2').evaluate().isNotEmpty);
+        // Shortcuts work on first open, before clicking any focusable control.
+        await t.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+        await t.sendKeyEvent(LogicalKeyboardKey.keyF);
+        await t.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+        await t.pump();
+        expect(
+          t
+              .widget<TextField>(find.byKey(const ValueKey('pdf-search')))
+              .focusNode!
+              .hasFocus,
+          isTrue,
+        );
         await t.tap(find.byKey(const ValueKey('pdf-next')));
         await t.pump(const Duration(milliseconds: 400));
         await until(() => find.text('Page 2 of 2').evaluate().isNotEmpty);

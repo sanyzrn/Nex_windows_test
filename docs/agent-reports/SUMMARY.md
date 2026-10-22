@@ -74,3 +74,19 @@ real notifications/sleep/clock cases, performance measurements and phone archive
 round-trips, grouped in MANUAL_TEST_0.26.md. They remain unverified. Signing and
 native-editor decisions remain with the owner. Final CI/publication evidence is
 tracked in PR #12; a screenshot-refresh success alone never authorizes publication.
+
+### 0.26 native activation correction
+
+[Windows run 39697158980](https://github.com/sanyzrn/Nex_windows_test/actions/runs/39697158980)
+passed analysis, 900 desktop tests/golden comparisons, 285 shared UI tests,
+250 core tests, 294 data tests (14 existing skips), and the Release build.
+The actual second-normal-launch smoke failed to restore the hidden first HWND;
+installer/remaining checks did not run, and no release was published.
+
+Primary lookup now uses a stable window property instead of depending on the
+Flutter/plugin-controlled caption; app-owned activation is routed before plugin
+delegates. The real launcher regression deliberately renames the first caption
+before hiding and launching again. PDF shortcut scope now receives focus on first
+open, with Ctrl+F dispatched through real key events in the existing PDF test.
+These corrections require the next Windows run; no native pass is inferred from
+source inspection or from the earlier synthetic activation-message probe.

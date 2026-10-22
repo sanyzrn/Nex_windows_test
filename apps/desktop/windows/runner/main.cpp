@@ -9,6 +9,21 @@
 #include "native_bridge.h"
 #include "utils.h"
 
+namespace {
+constexpr wchar_t kPrimaryWindowProperty[] = L"Nex.Desktop.PrimaryWindow";
+
+HWND FindPrimaryWindow() {
+  HWND primary = nullptr;
+  EnumWindows([](HWND candidate, LPARAM output) -> BOOL {
+    if (GetPropW(candidate, kPrimaryWindowProperty) == nullptr) return TRUE;
+    *reinterpret_cast<HWND*>(output) = candidate;
+    return FALSE;
+  }, reinterpret_cast<LPARAM>(&primary));
+  // Compatibility with an already running older binary without the marker.
+  return primary != nullptr ? primary : FindWindowW(L"RIGHT_PANEL_WIN32_WINDOW", L"Nex");
+}
+}  // namespace
+
 // Nex: a liquid side panel that lives on the edge of the screen.
 // The window is created borderless, always-on-top, transparent and
 // click-through (the bridge toggles that), positioned on the right edge of
@@ -38,7 +53,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
       ::CreateMutexW(nullptr, TRUE, mutex_name.c_str());
   if (mutex != nullptr && ::GetLastError() == ERROR_ALREADY_EXISTS) {
     if (command_line_arguments.size() == 2 && command_line_arguments[0] == "--open-note") {
-      const HWND existing = FindWindowW(L"RIGHT_PANEL_WIN32_WINDOW", L"Nex");
+      const HWND existing = FindPrimaryWindow();
       if (existing != nullptr) {
         const auto& uri = command_line_arguments[1];
         COPYDATASTRUCT data{0x4E45584E, static_cast<DWORD>(uri.size() + 1),
@@ -50,7 +65,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
       return EXIT_SUCCESS;
     }
     if (wcsstr(GetCommandLineW(), L"--native-smoke") == nullptr) {
-      const HWND existing = FindWindowW(L"RIGHT_PANEL_WIN32_WINDOW", L"Nex");
+      const HWND existing = FindPrimaryWindow();
       if (existing != nullptr) {
         DWORD owner = 0;
         GetWindowThreadProcessId(existing, &owner);
@@ -94,6 +109,12 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
   Win32Window::Size size(panel_w, panel_h);
   if (!window.Create(L"Nex", origin, size)) {
     return EXIT_FAILURE;
+  }
+  if (!panel_probe) {
+    // Window captions belong to Flutter and may change or be empty. Instance
+    // activation must find the hidden primary without depending on its title.
+    SetPropW(window.GetHandle(), kPrimaryWindowProperty,
+             reinterpret_cast<HANDLE>(static_cast<ULONG_PTR>(1)));
   }
   window.SetQuitOnClose(true);
 

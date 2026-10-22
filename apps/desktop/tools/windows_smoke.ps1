@@ -48,6 +48,7 @@ public static class NexWindowProbe {
     [DllImport("user32.dll")] private static extern bool EnumWindows(EnumProc callback, IntPtr unused);
     [DllImport("user32.dll")] private static extern uint GetWindowThreadProcessId(IntPtr hwnd, out uint processId);
     [DllImport("user32.dll")] public static extern bool IsWindowVisible(IntPtr hwnd);
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)] public static extern bool SetWindowText(IntPtr hwnd, string text);
     [DllImport("user32.dll")] private static extern int GetClassName(IntPtr hwnd, StringBuilder lpClassName, int nMaxCount);
     [DllImport("user32.dll")] public static extern bool PostMessage(IntPtr hwnd, uint message, IntPtr wparam, IntPtr lparam);
     [StructLayout(LayoutKind.Sequential)] public struct Rect { public int left, top, right, bottom; }
@@ -104,6 +105,8 @@ $result | Add-Member normalGuiFirstFrame $true
 [void][NexWindowProbe]::PostMessage($window, 0x0312, [IntPtr]1, [IntPtr]::Zero)
 Start-Sleep -Milliseconds 500
 $result | Add-Member normalGuiAliveAfterCapture (-not $normal.HasExited)
+# A Flutter/plugin-updated caption must not break primary-instance discovery.
+if (-not [NexWindowProbe]::SetWindowText($window, 'Nex renamed activation fixture')) { throw 'Could not set activation fixture caption.' }
 # Exercise an actual second normal launch, not only the synthetic activation message.
 [void][NexWindowProbe]::PostMessage($window, 0x0010, [IntPtr]::Zero, [IntPtr]::Zero)
 $until = [DateTime]::UtcNow.AddSeconds(10)
