@@ -311,3 +311,24 @@ round-trip. The prepared kit completes the environment-independent portion of
 phase 4; physical confirmation and Android return files remain with the owner.
 Performance measurement and 0.28 Windows release validation remain pending.
 No merge or release in this step.
+
+
+### 0.28 release — reviewed Windows baseline correction
+
+After the owner merged 0.28, main CI 39930646393 passed 881 tests and failed
+41 review-image comparisons only. Analysis/version/UI hygiene passed; build and
+release were skipped. The 0.27 baselines had not yet incorporated the 0.28 pixels.
+
+Finalized dated EN/FA release notes and current-version README text; requested
+Windows-only refresh on `windows/0.28-visual-baselines`. Refresh 39933957571
+passed all 226 visual cases and committed b59c02f. Reviewed all 41 changed paths:
+33 Library filter-bar views, four About and four release-history images. All
+paths exactly match the failures; dimensions and tolerances are unchanged.
+Six before/after contact sheets and two full screenshots confirmed expected
+changes only, with readable Persian release notes and accessible Close.
+
+Localization/release-history parity, diff and bounded-scope checks passed.
+No app/shared-package/data code or behavior test was changed, skipped or loosened.
+[CI report](CI_0.28.md) records the failed/refresh runs and review evidence.
+The main comparison/build/native/installer/update gates and automatic publication
+are pending at this report commit. No Windows/phone physical acceptance is claimed.
