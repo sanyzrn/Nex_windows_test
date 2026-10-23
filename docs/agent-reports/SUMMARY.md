@@ -276,3 +276,38 @@ P1–P5 are implemented: P1 in released 0.27, P2–P5 on this development branch
 Windows native/visual/installer validation and full Windows CI remain pending;
 no baseline was regenerated. Backup round-trip kit, performance measurements
 and final 0.28 release preparation remain. No merge or publication in this step.
+
+
+### 0.28 development — phase 4 backup round-trip kit prepared
+
+Owner authorized the next step. Added `apps/desktop/tools/backup_roundtrip.dart`,
+Persian [round-trip instructions](BACKUP_ROUNDTRIP.md) and the small synthetic
+[fixture kit](fixtures/backup-roundtrip-0.28.zip) on the same development branch.
+No production backup/app/shared-package code, formats, dependencies, lockfiles,
+settings keys, CI or version metadata changed. Version remains 0.28.0+22.
+
+On Linux/Dart 3.12.2, generation through the production shared backup APIs and
+restoration after deleting the source passed for both portable library and full
+backup. Separate CLI verification also passed for both files. All eight tables
+matched exactly after media-path normalization; all five media hashes matched.
+Preserved: 6 notes, 7 tags/3 links, 3 reminders/2 recurring, 2 extra attachments,
+1 thread/2 members and 1 synthetic Cycle period/day. Full-backup shared dark/fa/
+solar appearance matched. Key and all data in the fixture are explicitly synthetic.
+The ZIP includes expected rows/counts, results, recovery key, guide and checksums.
+Kit SHA-256: bd0c9a059ea86ac3aae9ef6e1f58291c35561eb5452aad48f2880aa5235445e5.
+
+Targeted Dart analyzer and format checks passed; archive format/PNG CRC/WAV,
+ZIP integrity and every packaged checksum passed. Diff/scope and append-only
+summary checks passed. The old SDK/cache had been removed. Standard dependency
+fetch was rejected by automatic review because it tried a cloud metadata endpoint;
+only explicitly named public pub.dev archives were fetched directly and matched
+the lockfile SHA-256. No rejected metadata request was retried. The initial worker
+CLI hit a Flutter-only dependency, so the final probe deliberately tests the actual
+shared data APIs without the Flutter worker. An invalid initial synthetic PNG was
+replaced and the final kit regenerated and validated; no product code was altered.
+
+Not run: Windows worker/UI/native restore, actual Android import/export or phone
+round-trip. The prepared kit completes the environment-independent portion of
+phase 4; physical confirmation and Android return files remain with the owner.
+Performance measurement and 0.28 Windows release validation remain pending.
+No merge or release in this step.
