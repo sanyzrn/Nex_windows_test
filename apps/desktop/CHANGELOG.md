@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.28.0 — Unreleased
+## 0.28.0 — 2026-10-23
 
 - Cycle period editing, deletion and typical-length settings use the shared Nex dialog shell, including its optional glass appearance.
 - Library copy feedback now replaces older notices, expires automatically and offers a Close button for context-menu, keyboard and selection copies.

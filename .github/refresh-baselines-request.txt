@@ -1,1 +1,1 @@
-0.27.0 release: refresh Windows About/version and release-history snapshots for 0.27.0+21; retain all existing visual tolerances and review changed images before publication.
+0.28.0+22 release: regenerate Windows baselines for the Library date filter, existing-tag entry point, About version/build and English/Persian release notes. CI 39930646393 passed 881 tests and failed 41 review-image comparisons only. Preserve all test tolerances; review every changed image before main publication.
