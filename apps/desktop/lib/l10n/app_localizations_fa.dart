@@ -51,6 +51,18 @@ class AppLocalizationsFa extends AppLocalizations {
   String get threads => 'رشته‌ها';
 
   @override
+  String get filterCreatedDate => 'تاریخ ایجاد';
+
+  @override
+  String get filterAnyTime => 'همهٔ زمان‌ها';
+
+  @override
+  String get filterLast7Days => '۷ روز اخیر';
+
+  @override
+  String get filterLast30Days => '۳۰ روز اخیر';
+
+  @override
   String get clear => 'پاک کردن فیلترها';
 
   @override
@@ -109,6 +121,18 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get addTag => 'افزودن برچسب · Enter';
+
+  @override
+  String get chooseExistingTag => 'انتخاب برچسب موجود';
+
+  @override
+  String get searchTags => 'جست‌وجوی برچسب‌ها';
+
+  @override
+  String get noAvailableTags => 'برچسب موجود دیگری برای افزودن نیست.';
+
+  @override
+  String get noMatchingTags => 'برچسبی با این جست‌وجو پیدا نشد.';
 
   @override
   String get addThread => 'رشته جدید · Enter';

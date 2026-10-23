@@ -103,9 +103,7 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
                     final sel = notes.where((n) => _selectedIds.contains(n.id));
                     final text = sel.map(noteCopyText).join('\n\n---\n\n');
                     Clipboard.setData(ClipboardData(text: text));
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(SnackBar(content: Text(l.copy)));
+                    showNexNotice(ScaffoldMessenger.of(context), l.copy);
                   },
                 ),
                 _BannerIcon(
@@ -309,6 +307,7 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
           type: type,
           tag: tag,
           thread: thread,
+          datePreset: datePreset,
           trash: trash,
           tags: tags,
           threads: threads,
@@ -324,11 +323,16 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
             thread = v;
             load();
           },
+          onDateChanged: (v) {
+            datePreset = v;
+            load();
+          },
           onTrashToggled: () {
             _detailRelease?.call();
             _detailRelease = null;
             setState(() {
               trash = !trash;
+              datePreset = LibraryDatePreset.any;
               selectedNote = null;
               _selectedIds.clear();
             });
@@ -338,6 +342,7 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
             query.clear();
             type = null;
             tag = thread = null;
+            datePreset = LibraryDatePreset.any;
             trash = false;
             load();
           },
@@ -383,6 +388,7 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
                                   query.clear();
                                   type = null;
                                   tag = thread = null;
+                                  datePreset = LibraryDatePreset.any;
                                   trash = false;
                                   load();
                                 },

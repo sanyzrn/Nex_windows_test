@@ -107,7 +107,7 @@ class _DesktopCycleViewState extends State<DesktopCycleView> {
       context: context,
       useRootNavigator: false,
       builder: (dialog) => StatefulBuilder(
-        builder: (dialog, update) => AlertDialog(
+        builder: (dialog, update) => NexAlertDialog(
           title: Text(l.cycleEdit),
           content: SingleChildScrollView(
             child: Column(
@@ -174,7 +174,7 @@ class _DesktopCycleViewState extends State<DesktopCycleView> {
     final yes = await showDialog<bool>(
       context: context,
       useRootNavigator: false,
-      builder: (context) => AlertDialog(
+      builder: (context) => NexAlertDialog(
         title: Text(l.cycleDelete),
         actions: [
           TextButton(
@@ -199,7 +199,7 @@ class _DesktopCycleViewState extends State<DesktopCycleView> {
       context: context,
       useRootNavigator: false,
       builder: (context) => StatefulBuilder(
-        builder: (context, update) => AlertDialog(
+        builder: (context, update) => NexAlertDialog(
           title: Text(l.cycleTypical),
           content: SingleChildScrollView(
             child: Column(

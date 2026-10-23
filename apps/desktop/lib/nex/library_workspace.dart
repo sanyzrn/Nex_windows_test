@@ -1,13 +1,14 @@
 part of 'library_view.dart';
 
 mixin _LibraryWorkspace on _LibraryStateBase {
-  /// True while any filter (search, type, tag, thread, trash) is active —
+  /// True while any filter (search, type, tag, thread, date, trash) is active —
   /// decides between the filtered-empty state and the first-run design.
   bool get _isFilteredEmpty =>
       query.text.isNotEmpty ||
       type != null ||
       tag != null ||
       thread != null ||
+      datePreset != LibraryDatePreset.any ||
       trash;
 
   /// Whether [n]'s reminder still needs attention today (due later today,

@@ -104,8 +104,9 @@ mixin _LibraryKeys on _LibraryStateBase {
         event.logicalKey == LogicalKeyboardKey.keyC &&
         selectedNote != null) {
       Clipboard.setData(ClipboardData(text: noteCopyText(selectedNote!)));
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.copy)),
+      showNexNotice(
+        ScaffoldMessenger.of(context),
+        AppLocalizations.of(context)!.copy,
       );
       return KeyEventResult.handled;
     }

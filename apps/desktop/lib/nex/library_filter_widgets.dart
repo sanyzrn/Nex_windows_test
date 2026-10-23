@@ -6,19 +6,21 @@
 // are private to the library; do not import this file directly.
 part of 'library_view.dart';
 
-/// Horizontal row of filter pills (all / type / tag / thread / trash) shown
+/// Horizontal row of filter pills (all / type / date / tag / thread / trash) shown
 /// above the note list.
 class _FilterBar extends StatelessWidget {
   const _FilterBar({
     required this.type,
     required this.tag,
     required this.thread,
+    required this.datePreset,
     required this.trash,
     required this.tags,
     required this.threads,
     required this.onTypeChanged,
     required this.onTagChanged,
     required this.onThreadChanged,
+    required this.onDateChanged,
     required this.onTrashToggled,
     required this.onClearAll,
   });
@@ -26,12 +28,14 @@ class _FilterBar extends StatelessWidget {
   final NoteType? type;
   final String? tag;
   final String? thread;
+  final LibraryDatePreset datePreset;
   final bool trash;
   final List<Tag> tags;
   final List<NoteThread> threads;
   final ValueChanged<NoteType?> onTypeChanged;
   final ValueChanged<String?> onTagChanged;
   final ValueChanged<String?> onThreadChanged;
+  final ValueChanged<LibraryDatePreset> onDateChanged;
   final VoidCallback onTrashToggled;
   final VoidCallback onClearAll;
 
@@ -39,7 +43,11 @@ class _FilterBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context)!;
     final hasActiveFilter =
-        type != null || tag != null || thread != null || trash;
+        type != null ||
+        tag != null ||
+        thread != null ||
+        datePreset != LibraryDatePreset.any ||
+        trash;
 
     // Full width: in a Column a bare scroll view shrinks to its chips and is
     // centred, which put the pills mid-pane in a wide window.
@@ -85,6 +93,30 @@ class _FilterBar extends StatelessWidget {
                 onClear: type != null ? () => onTypeChanged(null) : null,
               ),
             ),
+            if (!trash) ...[
+              const SizedBox(width: 6),
+              NexPopupMenuButton<LibraryDatePreset>(
+                key: const ValueKey('library-date-filter'),
+                tooltip: l.filterCreatedDate,
+                initialValue: datePreset,
+                onSelected: onDateChanged,
+                itemBuilder: (context) => [
+                  for (final preset in LibraryDatePreset.values)
+                    nexMenuItem<LibraryDatePreset>(
+                      value: preset,
+                      label: _datePresetLabel(l, preset),
+                    ),
+                ],
+                child: _FilterPill(
+                  label: _datePresetLabel(l, datePreset),
+                  icon: Icons.date_range_outlined,
+                  selected: datePreset != LibraryDatePreset.any,
+                  onClear: datePreset == LibraryDatePreset.any
+                      ? null
+                      : () => onDateChanged(LibraryDatePreset.any),
+                ),
+              ),
+            ],
             if (tags.isNotEmpty) ...[
               const SizedBox(width: 6),
               NexPopupMenuButton<String>(
@@ -188,6 +220,14 @@ class _FilterBar extends StatelessWidget {
     );
   }
 }
+
+String _datePresetLabel(AppLocalizations l, LibraryDatePreset preset) =>
+    switch (preset) {
+      LibraryDatePreset.any => l.filterAnyTime,
+      LibraryDatePreset.today => l.todayTitle,
+      LibraryDatePreset.last7Days => l.filterLast7Days,
+      LibraryDatePreset.last30Days => l.filterLast30Days,
+    };
 
 /// A single rounded filter pill with optional clear button.
 class _FilterPill extends StatefulWidget {

@@ -204,3 +204,110 @@ The owner authorized release of this completed scope as 0.27.0+21. Remaining
 P2-P5 items and performance/phone work are deferred. Full main-branch Windows
 CI, native/installer/update checks and automatic verified publication are
 still pending at this documentation commit; no release success is claimed.
+
+
+### 0.28 development — phase 6 P2 existing-tag picker
+
+The owner authorized P2 while testing the published 0.27.0 release and assigned
+new work to 0.28.0. On `windows/0.28-tag-picker`, note detail now offers a
+searchable existing-tag dialog with colors, Persian/Arabic text folding,
+already-attached exclusion, localized empty/error/retry states and panel hold.
+The original typed-tag field remains available. Existing-tag attachment uses
+IDs through the existing command, survives rename, is idempotent and rejects
+deleted notes/tags. No schema, shared-package or settings-key changes.
+
+Bumped development metadata to 0.28.0+22, with matching Windows resource and
+installer declarations, paired unreleased changelogs and README guidance.
+The combined selected suite passed 23 tests; after the final error/empty-state
+case, all six new tests passed, covering English/Persian, light/dark and
+380×520 at 200% text. Analyzer, localization parity, 18 checker tests, formatting
+and diff checks passed. See [P2 validation](PHASE6_P2_0.28.md) for commands,
+fixture corrections and limitations.
+
+Windows CI/native checks, visual baseline refresh and installer publication
+remain pending for the 0.28 release. No baseline was regenerated. Main and
+published 0.27.0 remain unchanged; P3 date filters are the next planned item.
+
+
+### 0.28 development — phase 6 P3 Library date presets
+
+At the owner's request, added P3 to the same unmerged `windows/0.28-tag-picker`
+branch after P2. Version remains 0.28.0+22. Library now offers Any time / Today /
+Last 7 days / Last 30 days for creation dates, with local calendar-day bounds
+converted to UTC. Date restrictions combine with query/type/tag/thread and
+participate in empty-state handling, clear actions and pagination gating.
+Entering Recently deleted clears dates and hides that control. No persistence,
+worker, shared-package, settings-key or schema changes.
+
+Four new tests passed in Asia/Tehran, including real SQLite boundary checks
+and English/light + Persian/dark UI combinations, clearing and 380×520 at
+200% text. Two boundary tests also passed under America/New_York, with explicit
+UTC assertions for 23-hour and 25-hour days. The selected tag-picker, bulk-pin,
+localization, version, menu and redesign regressions passed all 28 tests.
+Thus 32 distinct selected tests passed, plus 18 localization checker tests.
+Analyzer, localization parity, formatting, diff and append-only summary checks
+passed. [P3 report](PHASE6_P3_0.28.md) records commands and test-helper corrections.
+
+Both features remain on the development branch; main/0.27 release were not
+changed. Windows CI, visual baseline refresh/review and 0.28 installer checks
+are pending before release. No golden or tolerance was modified here.
+
+
+### 0.28 development — phase 6 P4/P5 complete
+
+Owner approved combining the two remaining small parity candidates on the
+existing unmerged `windows/0.28-tag-picker` branch. Cycle period edit/delete
+and typical-length settings now use `NexAlertDialog`, retaining existing
+navigation, validation and results. Ordinary Library copy feedback from the
+context menu, Ctrl+C and selection toolbar now uses `showNexNotice`: replacement,
+four-second expiry and Close. Clipboard payloads, private clipboard and Undo
+code are unchanged. Updated both unreleased changelogs; version stays 0.28.0+22.
+
+Four Cycle dialog regressions passed at 380×520/200% text, covering both
+languages/themes and glass on/off across cases, with real cancel/save outcomes.
+Four copy regressions passed for both languages/themes and all three paths,
+including real clipboard payloads, rapid repeats, expiry and dismissal. Existing
+module, reported-bug/Undo and note-copy regressions also passed: 27 distinct
+selected tests in total. Analyzer, localization parity, paired release-history
+sections/bullets, formatting, diff/scope and append-only checks passed.
+[P4/P5 report](PHASE6_P4_P5_0.28.md) records exact commands and fixture corrections.
+
+P1–P5 are implemented: P1 in released 0.27, P2–P5 on this development branch.
+Windows native/visual/installer validation and full Windows CI remain pending;
+no baseline was regenerated. Backup round-trip kit, performance measurements
+and final 0.28 release preparation remain. No merge or publication in this step.
+
+
+### 0.28 development — phase 4 backup round-trip kit prepared
+
+Owner authorized the next step. Added `apps/desktop/tools/backup_roundtrip.dart`,
+Persian [round-trip instructions](BACKUP_ROUNDTRIP.md) and the small synthetic
+[fixture kit](fixtures/backup-roundtrip-0.28.zip) on the same development branch.
+No production backup/app/shared-package code, formats, dependencies, lockfiles,
+settings keys, CI or version metadata changed. Version remains 0.28.0+22.
+
+On Linux/Dart 3.12.2, generation through the production shared backup APIs and
+restoration after deleting the source passed for both portable library and full
+backup. Separate CLI verification also passed for both files. All eight tables
+matched exactly after media-path normalization; all five media hashes matched.
+Preserved: 6 notes, 7 tags/3 links, 3 reminders/2 recurring, 2 extra attachments,
+1 thread/2 members and 1 synthetic Cycle period/day. Full-backup shared dark/fa/
+solar appearance matched. Key and all data in the fixture are explicitly synthetic.
+The ZIP includes expected rows/counts, results, recovery key, guide and checksums.
+Kit SHA-256: bd0c9a059ea86ac3aae9ef6e1f58291c35561eb5452aad48f2880aa5235445e5.
+
+Targeted Dart analyzer and format checks passed; archive format/PNG CRC/WAV,
+ZIP integrity and every packaged checksum passed. Diff/scope and append-only
+summary checks passed. The old SDK/cache had been removed. Standard dependency
+fetch was rejected by automatic review because it tried a cloud metadata endpoint;
+only explicitly named public pub.dev archives were fetched directly and matched
+the lockfile SHA-256. No rejected metadata request was retried. The initial worker
+CLI hit a Flutter-only dependency, so the final probe deliberately tests the actual
+shared data APIs without the Flutter worker. An invalid initial synthetic PNG was
+replaced and the final kit regenerated and validated; no product code was altered.
+
+Not run: Windows worker/UI/native restore, actual Android import/export or phone
+round-trip. The prepared kit completes the environment-independent portion of
+phase 4; physical confirmation and Android return files remain with the owner.
+Performance measurement and 0.28 Windows release validation remain pending.
+No merge or release in this step.

@@ -179,6 +179,30 @@ abstract class AppLocalizations {
   /// **'Threads'**
   String get threads;
 
+  /// No description provided for @filterCreatedDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Created date'**
+  String get filterCreatedDate;
+
+  /// No description provided for @filterAnyTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Any time'**
+  String get filterAnyTime;
+
+  /// No description provided for @filterLast7Days.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 7 days'**
+  String get filterLast7Days;
+
+  /// No description provided for @filterLast30Days.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 30 days'**
+  String get filterLast30Days;
+
   /// No description provided for @clear.
   ///
   /// In en, this message translates to:
@@ -298,6 +322,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add tag · Enter'**
   String get addTag;
+
+  /// No description provided for @chooseExistingTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose an existing tag'**
+  String get chooseExistingTag;
+
+  /// No description provided for @searchTags.
+  ///
+  /// In en, this message translates to:
+  /// **'Search tags'**
+  String get searchTags;
+
+  /// No description provided for @noAvailableTags.
+  ///
+  /// In en, this message translates to:
+  /// **'No other existing tags to add.'**
+  String get noAvailableTags;
+
+  /// No description provided for @noMatchingTags.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching tags.'**
+  String get noMatchingTags;
 
   /// No description provided for @addThread.
   ///

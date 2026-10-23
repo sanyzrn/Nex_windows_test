@@ -89,7 +89,7 @@ mixin _LibraryActions on _LibraryStateBase {
       case 'copy':
         Clipboard.setData(ClipboardData(text: noteCopyText(note)));
         if (!mounted) return;
-        messenger.showSnackBar(SnackBar(content: Text(l.copy)));
+        showNexNotice(messenger, l.copy);
       case 'remind':
         if (!mounted) return;
         // The scope is captured before the picker opens: the dialog outlives

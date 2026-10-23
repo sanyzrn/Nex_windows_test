@@ -399,9 +399,26 @@ class DesktopStore {
                 maintenance.deleteTag(a['tag'] as String);
                 result = null;
               case 'tag':
-                result = TagService(
-                  notes,
-                ).addTag(noteId: a['id'] as String, name: a['name'] as String);
+                final tagId = a['tag'] as String?;
+                if (tagId == null) {
+                  result = TagService(notes).addTag(
+                    noteId: a['id'] as String,
+                    name: a['name'] as String,
+                  );
+                } else {
+                  final note = notes.getById(a['id'] as String);
+                  final tag = notes
+                      .listTags()
+                      .where((t) => t.id == tagId)
+                      .firstOrNull;
+                  if (note == null || note.deletedAt != null || tag == null) {
+                    throw StateError('Note or tag unavailable');
+                  }
+                  if (!note.tags.any((t) => t.id == tagId)) {
+                    notes.attachTag(noteId: note.id, tagId: tagId);
+                  }
+                  result = tag;
+                }
               case 'untag':
                 notes.detachTag(
                   noteId: a['id'] as String,
