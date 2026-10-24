@@ -193,7 +193,7 @@ void main() {
       'Emoji',
     );
     await _settle(tester);
-    final emojiTile = find.text('Emoji');
+    final emojiTile = find.widgetWithText(TextButton, 'Emoji');
     expect(emojiTile, findsOneWidget);
     await tester.ensureVisible(emojiTile);
     await tester.pumpAndSettle();

@@ -109,3 +109,12 @@ The exact final main commit must pass full behavior/golden comparison, shared
 packages, Windows Release/native smoke, installer and verified-update checks.
 Automatic publication is pending those gates at this documentation commit.
 Physical monitor placement, Hello and owner-device acceptance remain unverified.
+
+### Full-suite navigation fixture correction
+
+Main run 40115733045 passed 925 desktop tests and failed three navigation
+expectations, with no golden differences. The EN/FA keyboard walks now include
+the added Library locations button between search and layout controls. The Emoji
+navigation assertion targets its TextButton, excluding the identical text in
+the active search editor. All original navigation and bidirectional focus
+assertions remain. Standalone analysis passed; full CI is rerun before release.
