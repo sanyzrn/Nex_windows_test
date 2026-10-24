@@ -8,6 +8,7 @@ import 'package:nex_ui/nex_ui.dart';
 
 import '../l10n/app_localizations.dart';
 import 'features_state.dart';
+import 'desktop_date_picker.dart';
 
 /// Localized cadence label.
 String commitmentCadenceLabel(
@@ -65,10 +66,15 @@ class _NexCommitmentsViewState extends State<NexCommitmentsView> {
   String? _error;
 
   @override
-  void initState() {
-    super.initState();
-    _load();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_started) {
+      _started = true;
+      _load();
+    }
   }
+
+  bool _started = false;
 
   Future<void> _load() async {
     setState(() {
@@ -107,9 +113,15 @@ class _NexCommitmentsViewState extends State<NexCommitmentsView> {
   }
 
   Future<void> _openEditor([NexCommitment? item]) async {
+    final panel = NexPanelScope.maybeOf(context);
     final result = await showDialog<NexCommitment>(
       context: context,
-      builder: (ctx) => NexCommitmentEditorDialog(existing: item),
+      builder: (ctx) {
+        final editor = NexCommitmentEditorDialog(existing: item);
+        return panel == null
+            ? editor
+            : NexPanelScope(controller: panel, child: editor);
+      },
     );
     if (result != null && mounted) {
       final store = NexScope.of(context).store;
@@ -342,7 +354,7 @@ class _NexCommitmentEditorDialogState extends State<NexCommitmentEditorDialog> {
   );
   late NexCadence _cadence = widget.existing?.cadence ?? NexCadence.days;
   late int _every = widget.existing?.every ?? 1;
-  late final DateTime _dueAt =
+  late DateTime _dueAt =
       widget.existing?.dueAt ?? DateTime.now().add(const Duration(hours: 1));
   late final Set<int> _selectedWeekdays =
       widget.existing?.weekdays.toSet() ?? {};
@@ -360,22 +372,35 @@ class _NexCommitmentEditorDialogState extends State<NexCommitmentEditorDialog> {
 
     final now = DateTime.now().toUtc();
     final details = <String, dynamic>{
-      if (_cadence == NexCadence.weeks && _selectedWeekdays.isNotEmpty)
-        'weekdays': _selectedWeekdays.toList(),
+      ...?widget.existing?.details,
+      if (_cadence == NexCadence.weeks) 'weekdays': _selectedWeekdays.toList(),
     };
 
-    final commitment = NexCommitment(
-      id: widget.existing?.id ?? newUuidV7(),
-      title: title,
-      cadence: _cadence,
-      every: _every,
-      dueAt: _dueAt,
-      createdAt: widget.existing?.createdAt ?? now,
-      updatedAt: now,
-      notify: _notify,
-      rev: (widget.existing?.rev ?? 0) + 1,
-      details: details,
-    );
+    final base =
+        widget.existing ??
+        NexCommitment(
+          id: widget.existing?.id ?? newUuidV7(),
+          title: title,
+          cadence: _cadence,
+          every: _every,
+          dueAt: _dueAt,
+          createdAt: widget.existing?.createdAt ?? now,
+          updatedAt: now,
+          notify: _notify,
+          rev: (widget.existing?.rev ?? 0) + 1,
+          details: details,
+        );
+    final commitment = widget.existing == null
+        ? base
+        : base.copyWith(
+            title: title,
+            cadence: _cadence,
+            every: _every,
+            dueAt: _dueAt,
+            updatedAt: now,
+            notify: _notify,
+            details: details,
+          );
 
     Navigator.pop(context, commitment);
   }
@@ -386,8 +411,7 @@ class _NexCommitmentEditorDialogState extends State<NexCommitmentEditorDialog> {
     final isFa = Localizations.localeOf(context).languageCode == 'fa';
     final weekdays = commitmentWeekdays(isFa);
 
-    return AlertDialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+    return NexAlertDialog(
       title: Text(
         widget.existing == null ? l.commitmentNew : l.commitmentEdit,
         style: const TextStyle(fontWeight: FontWeight.w700),
@@ -409,6 +433,45 @@ class _NexCommitmentEditorDialogState extends State<NexCommitmentEditorDialog> {
               ),
             ),
             const SizedBox(height: 12),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.event_outlined),
+              title: Text(l.customDateTime),
+              subtitle: Text(
+                nexDisplayDate(
+                  _dueAt,
+                  solar:
+                      NexPanelScope.maybeOf(context)?.S.solarCalendar ?? isFa,
+                  persian: isFa,
+                  time: true,
+                ),
+              ),
+              onTap: () async {
+                final day = await showDesktopDatePicker(
+                  context,
+                  initialDate: _dueAt,
+                  firstDate: DateTime(2000),
+                  lastDate: DateTime(2100),
+                  solar:
+                      NexPanelScope.maybeOf(context)?.S.solarCalendar ?? isFa,
+                );
+                if (day == null || !context.mounted) return;
+                final time = await showTimePicker(
+                  context: context,
+                  initialTime: TimeOfDay.fromDateTime(_dueAt),
+                );
+                if (time == null || !mounted) return;
+                setState(
+                  () => _dueAt = DateTime(
+                    day.year,
+                    day.month,
+                    day.day,
+                    time.hour,
+                    time.minute,
+                  ),
+                );
+              },
+            ),
             Row(
               children: [
                 Expanded(

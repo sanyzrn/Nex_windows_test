@@ -93,7 +93,7 @@ Future<void> panelSmoke(String output) async {
     await c.bootstrap(
       preset: Settings()
         ..language = 'en'
-        ..dock = ['note', 'timeline', 'clip', 'calc', 'more'],
+        ..dock = ['note', 'timeline', 'clip', 'timer', 'more'],
       useNative: false,
     );
     await native.setWindowMode('window', show: false);
@@ -134,7 +134,7 @@ Future<void> panelSmoke(String output) async {
       final readerHold = c.holdOpen(modal: false);
       c.S.panelPinned = true;
       await hover('clip');
-      await hover('calc');
+      await hover('timer');
       readerHold();
       await checkpoint('hover completed $i');
       final shown = await native.diagnostics();

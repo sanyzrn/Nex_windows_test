@@ -97,6 +97,7 @@ class _ToolsDirectoryState extends State<_ToolsDirectory> {
             ),
           ),
           const SizedBox(height: 16),
+          NexToolsShelves(query: query),
           NexModuleShelf(query: query),
           if (filtered.isEmpty)
             Padding(padding: const EdgeInsets.all(24), child: Text(l.empty)),

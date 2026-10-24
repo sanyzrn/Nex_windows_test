@@ -24,13 +24,24 @@ void main() {
     FlutterSecureStorage.setMockInitialValues({});
   });
   test(
-    'modules start off; switches persist independently and keep vault data',
+    'paused modules stay off with saved switches and keep vault data',
     () async {
+      SharedPreferences.setMockInitialValues({
+        for (final module in DesktopModule.values)
+          'windows.module.${module.name}': true,
+      });
       final modules = DesktopModules();
       addTearDown(modules.dispose);
       await modules.initialize();
       expect(DesktopModule.values.any(modules.enabled), isFalse);
-      await modules.setEnabled(DesktopModule.vault, true);
+      for (final module in DesktopModule.values) {
+        await modules.setEnabled(module, true);
+      }
+      expect(DesktopModule.values.any(modules.enabled), isFalse);
+      final prefs = await SharedPreferences.getInstance();
+      for (final module in DesktopModule.values) {
+        expect(prefs.getBool('windows.module.${module.name}'), isTrue);
+      }
       final entry = VaultEntry(
         id: 'synthetic',
         kind: VaultKind.message,
@@ -43,9 +54,9 @@ void main() {
       final reopened = DesktopModules();
       addTearDown(reopened.dispose);
       await reopened.initialize();
-      expect(reopened.enabled(DesktopModule.pdf), isTrue);
-      expect(reopened.enabled(DesktopModule.vault), isFalse);
-      expect(reopened.enabled(DesktopModule.cycle), isFalse);
+      expect(DesktopModule.values.any(reopened.enabled), isFalse);
+      expect(prefs.getBool('windows.module.pdf'), isTrue);
+      expect(prefs.getBool('windows.module.vault'), isFalse);
       expect((await reopened.vault.read()).entries.single.id, entry.id);
     },
   );

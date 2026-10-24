@@ -4,10 +4,19 @@ import 'package:nex_ui/nex_ui.dart';
 import '../l10n/app_localizations.dart';
 import 'features_state.dart';
 
-Future<void> showScheduledNotes(BuildContext context) => showDialog<void>(
-  context: context,
-  builder: (_) => const _ScheduledDialog(),
-);
+Future<void> showScheduledNotes(BuildContext context) {
+  final features = NexScope.of(context);
+  final panel = NexPanelScope.maybeOf(context);
+  return showDialog<void>(
+    context: context,
+    builder: (_) => NexScope(
+      features: features,
+      child: panel == null
+          ? const _ScheduledDialog()
+          : NexPanelScope(controller: panel, child: const _ScheduledDialog()),
+    ),
+  );
+}
 
 class _ScheduledDialog extends StatefulWidget {
   const _ScheduledDialog();

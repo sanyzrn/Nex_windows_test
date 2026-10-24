@@ -11,6 +11,7 @@ import '../core/display_identity.dart';
 import '../core/controller.dart' show PanelController, Settings;
 import 'tool_organizer.dart';
 import 'modules/modules.dart';
+import 'modules/module_controller.dart';
 import 'test_notification.dart';
 import '../ui/widgets.dart';
 import '../l10n/app_localizations.dart';
@@ -19,6 +20,7 @@ import '../l10n/intelligence_strings.dart';
 import 'intelligence/settings.dart';
 import '../l10n/desktop_strings.dart';
 import '../updates/widgets.dart';
+import '../ui/desktop_dropdown.dart';
 
 part 'settings_display_appearance.dart';
 part 'settings_shortcuts_backup.dart';
@@ -115,7 +117,9 @@ abstract class _SettingsStateBase extends State<NexSettingsView> {
       '${l.appLanguage} ${l.light} ${l.dark} ${l.followSystem} ${l.themePalette} ${l.customAccent} ${l.textScale} ${l.solarCalendar} ${l.settingsDensity}',
       '${l.hotkey} ${l.pasteOnClick} ${l.magnify}',
       '${l.restore} ${l.recoveryKey} ${l.importNotes}',
-      '${l.modulesTitle} ${l.modulePdf} ${l.moduleVault} ${l.modulePortrait} ${l.moduleCycle}',
+      DesktopModules.available
+          ? '${l.modulesTitle} ${l.modulePdf} ${l.moduleVault} ${l.modulePortrait} ${l.moduleCycle}'
+          : '',
       '${l.applicationName} ${d.t('whatsNew')}',
       '${AiStrings.of(context).t('provider')} ${AiStrings.of(context).t('model')} Gemini YouTube',
     ];
@@ -378,7 +382,12 @@ class _SettingRow extends StatelessWidget {
               const SizedBox(width: 14),
               Semantics(
                 label: title,
-                child: DesktopFocusRing(child: control),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxWidth: constraints.maxWidth * .62,
+                  ),
+                  child: DesktopFocusRing(child: control),
+                ),
               ),
             ],
           );

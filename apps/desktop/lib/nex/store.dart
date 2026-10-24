@@ -155,6 +155,9 @@ class DesktopStore {
           try {
             // Only synchronous repository calls here: one message is one commit.
             final scheduled = SqliteScheduledNoteRepository(db, notes);
+            if (notes.releaseDueSetAside().isNotEmpty) {
+              reply.send([-2, true, null]);
+            }
             if (const {
               'timeline',
               'search',
@@ -374,6 +377,27 @@ class DesktopStore {
                 result = null;
               case 'trash':
                 result = maintenance.deletedNotes();
+              case 'setAside':
+                result = notes.setAside(
+                  a['id'] as String,
+                  until: a['until'] as DateTime?,
+                );
+                reply.send([-2, true, null]);
+              case 'bringBack':
+                notes.bringBack(a['id'] as String);
+                result = null;
+                reply.send([-2, true, null]);
+              case 'setAsideNotes':
+                result = notes.listSetAside(
+                  limit: (a['limit'] as int? ?? 500).clamp(1, 10000),
+                );
+              case 'libraryCounts':
+                result = <String, int>{
+                  'aside': notes.setAsideCount(),
+                  'tags': notes.listTags().length,
+                  'threads': threads.list().length,
+                  'trash': maintenance.deletedNotes().length,
+                };
               case 'pin':
                 result = notes.pinNote(a['id'] as String);
               case 'unpin':
@@ -459,8 +483,10 @@ class DesktopStore {
                   int limit,
                 ) => notes.db
                     .select(
-                      'SELECT id FROM notes WHERE deleted_at IS NULL $filter ORDER BY $order LIMIT ?',
-                      [limit],
+                      'SELECT id FROM notes WHERE deleted_at IS NULL '
+                      'AND (set_aside_at IS NULL OR (set_aside_until IS NOT NULL AND set_aside_until <= ?)) '
+                      '$filter ORDER BY $order LIMIT ?',
+                      [DateTime.now().toUtc().toIso8601String(), limit],
                     )
                     .map((row) => notes.getById(row['id'] as String))
                     .whereType<Note>()

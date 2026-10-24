@@ -7,6 +7,10 @@ enum DesktopModule { pdf, vault, portrait, cycle }
 
 /// Device-only switches: never imported from another device's backup.
 class DesktopModules extends ChangeNotifier {
+  // Temporarily paused for redesign. Keep saved switches and module data so
+  // restoring availability does not require a migration or discard user data.
+  static const available = false;
+
   DesktopModules({DesktopPrivateSession? privateSession, VaultStore? vault})
     : privateSession = privateSession ?? DesktopPrivateSession(),
       vault = vault ?? VaultStore();
@@ -26,8 +30,9 @@ class DesktopModules extends ChangeNotifier {
   }
 
   bool enabled(DesktopModule module) =>
-      _prefs?.getBool('windows.module.${module.name}') ?? false;
+      available && (_prefs?.getBool('windows.module.${module.name}') ?? false);
   Future<void> setEnabled(DesktopModule module, bool value) async {
+    if (value && !available) return;
     await initialize();
     if (!await _prefs!.setBool('windows.module.${module.name}', value)) {
       throw StateError('Could not save module switch');

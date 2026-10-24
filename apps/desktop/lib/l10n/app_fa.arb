@@ -362,7 +362,7 @@
   "workspaceClipboardHint": "چیزهایی که کپی کرده‌اید، آمادهٔ استفاده.",
   "workspaceAwakeHint": "صفحه را هنگام کار روشن نگه دار.",
   "workspaceTimerHint": "کمی زمان برای تمرکز.",
-  "workspaceCalculatorHint": "حساب‌های کوچک روزمره.",
+  "workspaceCalculatorHint": "باز کردن ماشین‌حساب ویندوز.",
   "workspaceColorHint": "انتخاب رنگ از هر جای صفحه.",
   "workspaceReaderTitle": "جایی برای برگشتن به فکرها.",
   "workspaceReaderHint": "یادداشتی از فهرست انتخاب کن؛ این صفحه برای خواندن آن است.",
@@ -434,7 +434,7 @@
   "themePalette": "تم برنامه",
   "hexColor": "کد HEX رنگ",
   "backupSaved": "نسخهٔ پشتیبان ذخیره شد",
-  "commitmentsTitle": "تعهدات و کارهای تکرارشونده",
+  "commitmentsTitle": "موارد تکرارشونده",
   "commitmentNew": "تعهد جدید",
   "commitmentEdit": "ویرایش تعهد",
   "commitmentEmpty": "هنوز تعهد یا کار تکرارشونده‌ای ثبت نشده است.",
@@ -819,5 +819,127 @@
   "moduleBack": "بازگشت",
   "moduleAdd": "افزودن",
   "moduleCancel": "لغو",
-  "moduleSearch": "جست‌وجوی عنوان‌های خصوصی"
+  "moduleSearch": "جست‌وجوی عنوان‌های خصوصی",
+  "libraryTitle": "کتابخانه",
+  "@libraryTitle": {
+    "description": "Settings group: tags, recently deleted, storage"
+  },
+  "libraryTagsHint": "نام و رنگ برای آنچه دسته می‌کنید",
+  "libraryTrashHint": "۳۰ روز نگه داشته می‌شود",
+  "libraryTagCount": "{count, plural, =0{هنوز برچسبی نیست} other{{count} برچسب}}",
+  "libraryThreadCount": "{count, plural, =0{هنوز رشته‌ای نیست} other{{count} رشته}}",
+  "libraryTrashCount": "{count, plural, =0{خالی} other{{count} یادداشت · ۳۰ روز نگه داشته می‌شود}}",
+  "toolsSectionPrivate": "خصوصی",
+  "toolsSectionEveryday": "روزمره",
+  "toolsPrivateHint": "جدا از یادداشت‌ها، جست‌وجو و هوش مصنوعی.",
+  "toolsMessages": "پیام‌های ذخیره‌شدهٔ خصوصی",
+  "toolsMessagesHint": "فضایی خصوصی برای متن‌های شما",
+  "vaultPasswordsHint": "حساب‌ها، رمزها و ورود از فایل Chrome.",
+  "vaultCardsHint": "اطلاعات کارت و شبا، آمادهٔ کپی.",
+  "scheduledTitle": "زمان‌بندی‌شده‌ها",
+  "scheduledSubtitle": "یادداشت‌هایی که در راه‌اند",
+  "threadsSubtitle": "یادداشت‌های یک موضوع، کنار هم و بدون جابه‌جایی",
+  "toolsGeneratorHint": "ساخت و کپی رمز قوی",
+  "setAside": "کنار بگذار",
+  "setAsideSheetTitle": "تا کِی کنار بگذارم؟",
+  "setAsideSheetHint": "از صفحه‌ی اصلی می‌رود ولی در کتابخانه می‌ماند. با جستجو همچنان پیدایش می‌کنی.",
+  "setAsideUntilBack": "تا خودم برش گردانم",
+  "setAsideThisEvening": "امروز عصر",
+  "setAsideTomorrow": "فردا صبح",
+  "setAsideNextWeek": "هفته‌ی بعد",
+  "setAsidePickDate": "انتخاب تاریخ…",
+  "setAsideDone": "کنار گذاشته شد",
+  "setAsideDoneUntil": "تا {when} کنار گذاشته شد",
+  "setAsideGroupDone": "{count} یادداشت کنار گذاشته شد",
+  "setAsideBackBanner": "{count} یادداشت از کنار گذاشتن برگشتند",
+  "setAsideBringBack": "برگردان",
+  "setAsideSection": "کنار گذاشته‌ها",
+  "setAsideSectionHint": "از صفحه‌ی اصلی کنار رفته‌اند، نه حذف",
+  "setAsidePageTitle": "کنار گذاشته‌ها",
+  "setAsideEmptyTitle": "چیزی کنار گذاشته نشده",
+  "setAsideEmptyBody": "یادداشتی را نگه دار و «کنار بگذار» را بزن تا فعلاً از سر راه برود.",
+  "setAsideBackOn": "برمی‌گردد {when}",
+  "setAsideUntilFurther": "تا خودت برش گردانی",
+  "setAsideMark": "کنار گذاشته",
+  "setAsideCountLabel": "{count, plural, other{{count} یادداشت کنار گذاشته}}",
+  "setAsideAllClear": "همه‌چیز مرتب است",
+  "setAsideView": "دیدن کنار گذاشته‌ها",
+  "vaultImportCsv": "ورود رمزهای Chrome",
+  "vaultImportCsvConfirm": "این فایل CSV رمزهای بدون رمزنگاری دارد. به فضای خصوصی همین دستگاه وارد شود؟",
+  "vaultImportCsvResult": "افزوده: {added} · تکراری: {duplicates} · ردشده: {skipped}",
+  "@vaultImportCsvResult": {
+    "placeholders": {
+      "added": {
+        "type": "int"
+      },
+      "duplicates": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      }
+    }
+  },
+  "@libraryTagCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "@libraryThreadCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "@libraryTrashCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "@setAsideDoneUntil": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "@setAsideGroupDone": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "@setAsideBackBanner": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "@setAsideBackOn": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "@setAsideCountLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  }
 }

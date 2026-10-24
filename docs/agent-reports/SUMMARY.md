@@ -332,3 +332,21 @@ No app/shared-package/data code or behavior test was changed, skipped or loosene
 [CI report](CI_0.28.md) records the failed/refresh runs and review evidence.
 The main comparison/build/native/installer/update gates and automatic publication
 are pending at this report commit. No Windows/phone physical acceptance is claimed.
+
+
+### Local draft — Tools/Library follow-up, 2026-10-24
+
+Owner requested pausing modules, system Calculator, and Android Tools/Library
+destinations; explicitly no push yet. See [local draft](DRAFT_TOOLS.md).
+PDF/Cycle/Portrait and legacy module controls remain paused; three private Tools
+entries reuse protected Windows storage/authentication. Added discoverable
+Scheduled, password generator, Recurring and Library locations. Ported Android
+Set aside with documented additive shared-package sync and bounded Chrome CSV
+import. Recurring editing preserves existing metadata and offers date/time.
+
+Standalone Dart analysis passed for desktop/affected tests, core and data;
+36 data/migration/backup/commitment tests passed; localization and diff checks
+passed. Flutter startup was auto-review blocked on cloud metadata access and
+was not retried. Flutter/widget/Windows/visual/native/install checks not run.
+No dependency/lockfile, identity, updater, baseline or version changes.
+No commit/push/merge/CI dispatch/release. Remaining owner edits stay on this draft.

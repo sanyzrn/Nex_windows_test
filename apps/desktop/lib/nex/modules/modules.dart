@@ -161,6 +161,7 @@ class _NexModulesSettingsState extends State<NexModulesSettings> {
   DesktopModule? saving;
   @override
   Widget build(BuildContext context) {
+    if (!DesktopModules.available) return const SizedBox.shrink();
     final features = NexScope.maybeOf(context);
     if (features == null) return const SizedBox.shrink();
     final modules = features.modules;
@@ -237,6 +238,7 @@ class NexModuleShelf extends StatelessWidget {
   final String query;
   @override
   Widget build(BuildContext context) {
+    if (!DesktopModules.available) return const SizedBox.shrink();
     final f = NexScope.maybeOf(context);
     if (f == null) return const SizedBox.shrink();
     final modules = f.modules;

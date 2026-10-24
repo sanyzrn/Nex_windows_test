@@ -8,17 +8,23 @@ import '../../l10n/desktop_format.dart';
 import '../desktop_editing_direction.dart';
 import 'module_controller.dart';
 import 'vault_store.dart';
+import 'password_import.dart';
 
 class DesktopVaultView extends StatefulWidget {
-  const DesktopVaultView({super.key, required this.modules});
+  const DesktopVaultView({
+    super.key,
+    required this.modules,
+    this.initialKind = VaultKind.password,
+  });
   final DesktopModules modules;
+  final VaultKind initialKind;
   @override
   State<DesktopVaultView> createState() => _DesktopVaultViewState();
 }
 
 class _DesktopVaultViewState extends State<DesktopVaultView> {
   VaultSnapshot? snapshot;
-  VaultKind kind = VaultKind.password;
+  late VaultKind kind = widget.initialKind;
   VaultEntry? editing;
   bool failed = false;
   String query = '';
@@ -133,6 +139,13 @@ class _DesktopVaultViewState extends State<DesktopVaultView> {
                 icon: const Icon(Icons.add),
                 label: Text(l.moduleAdd),
               ),
+              if (kind == VaultKind.password)
+                TextButton.icon(
+                  onPressed: () =>
+                      importDesktopPasswordCsv(context, widget.modules),
+                  icon: const Icon(Icons.file_download_outlined),
+                  label: Text(l.vaultImportCsv),
+                ),
               if (draft != null)
                 TextButton.icon(
                   key: const ValueKey('vault-resume-draft'),
@@ -144,7 +157,9 @@ class _DesktopVaultViewState extends State<DesktopVaultView> {
           ),
           const SizedBox(height: NexSpacing.sm),
           if (!snapshot!.entries.any(
-            (e) => e.kind == kind && e.title.toLowerCase().contains(query),
+            (e) =>
+                e.kind == kind &&
+                e.fields.values.any((v) => v.toLowerCase().contains(query)),
           ))
             Padding(
               padding: const EdgeInsets.all(NexSpacing.lg),
@@ -154,7 +169,10 @@ class _DesktopVaultViewState extends State<DesktopVaultView> {
               in snapshot!.entries
                   .where(
                     (e) =>
-                        e.kind == kind && e.title.toLowerCase().contains(query),
+                        e.kind == kind &&
+                        e.fields.values.any(
+                          (v) => v.toLowerCase().contains(query),
+                        ),
                   )
                   .toList()
                 ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt)))

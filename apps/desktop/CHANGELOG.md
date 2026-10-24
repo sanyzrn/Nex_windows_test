@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.30.0 — 2026-10-24
+
+- Unified desktop buttons and field styling, including a framed monitor picker and matching palette, language, shortcut, tool-location, thread and clock selectors.
+- Calculator opens Windows Calculator. PDF, Cycle and Writing portrait modules are temporarily paused without deleting saved data.
+- Tools offers separate private password, bank-card and saved-message entries with existing Windows protection, plus Chrome CSV password import.
+- Scheduled notes, password generation and Recurring have visible Tools entry points. Recurring supports choosing its due date/time and preserves existing metadata when edited.
+- Library offers Set aside, Tags, Threads and Trash. Set aside supports manual or timed return, batch actions and Undo while retaining search and reminders.
+
 ## 0.28.0 — 2026-10-23
 
 - Cycle period editing, deletion and typical-length settings use the shared Nex dialog shell, including its optional glass appearance.

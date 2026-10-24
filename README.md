@@ -6,7 +6,7 @@
 
 A local-first notebook and desktop toolkit for Windows, with English and Persian interfaces. Work in a full desktop window or a compact panel at either screen edge.
 
-**Current app version: `0.28.0+22` · Windows 10/11 · x64**
+**Current app version: `0.30.0+23` · Windows 10/11 · x64**
 
 [Download the latest installer](https://github.com/sanyzrn/Nex_windows_test/releases/latest) · [What's new](apps/desktop/CHANGELOG.md) · [Report a bug](https://github.com/sanyzrn/Nex_windows_test/issues/new/choose) · [فارسی](#راهنمای-فارسی)
 
@@ -27,14 +27,17 @@ These are Windows widget snapshots, not installed-app verification.
 - Choose a theme, language, calendar and dock layout. Tool selection is searchable and paginated.
 - Read the full English/Persian release history offline from Settings → About Nex.
 
-### Optional modules (0.24.0)
+### Tools and Library (0.30.0)
 
-Enable PDF reader, Private area, Writing portrait or Cycle independently in
-Settings → Docked tools & apps. They start off; disabling keeps their data.
-Private area and Cycle share a two-minute Windows Hello unlock. Vault entries
-stay in Windows secure storage and out of library backups; cycle records remain
-in the Android-compatible library. Writing statistics stay local; the optional
-AI portrait asks before sending a short note sample. [B8 details and checks](docs/agent-reports/B8.md).
+Tools has separate protected Passwords, Bank cards and Private saved messages,
+plus Scheduled notes, password generation and Recurring. Passwords can import
+Chrome CSV exports; private entries stay in Windows secure storage, outside note
+search, AI and library backups. Calculator launches Windows Calculator.
+
+PDF reader, Cycle and Writing portrait are temporarily paused; their saved data
+is preserved. The Library folder button opens Set aside, Tags, Threads and Trash.
+Set aside hides notes from the main list while keeping search and reminders;
+choose a return date or bring them back manually. Bulk actions offer Undo.
 
 The note schema, attachment and backup handling, and 14 palette identities are aligned with the [recorded DbsNex Android source](https://github.com/sanyzrn/DbsNex/tree/34514226260dc8b1d3da35f91082dbfa9ce46b93). [Cross-platform contract and validation](docs/CROSS_PLATFORM_0150.md). Windows keeps its own version and native integrations.
 
@@ -132,7 +135,9 @@ About Nex. When upgrading from a pre-0.21.0 build, install the latest stable
 installer once; those older versions do not contain the updater.
 [Design and update contract](docs/WINDOWS_0210.md).
 
-### 0.26 acceptance
+### 0.26 historical acceptance
+
+PDF, Cycle and Writing portrait described below are paused in 0.30.0.
 
 Window close hides to tray; use tray Quit to exit. Tools are independently enabled
 in Settings → Tools. PDF: Ctrl+O opens, Ctrl+F focuses search, Ctrl+G picks a page.

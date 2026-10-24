@@ -9,6 +9,69 @@ part of 'library_view.dart';
 /// Note mutation actions: delete with undo, and the card context menu.
 mixin _LibraryActions on _LibraryStateBase {
   @override
+  Future<void> _openLibraryLocations() async {
+    final l = AppLocalizations.of(context)!;
+    final result = await showDesktopCollection<String>(
+      context,
+      l.libraryTitle,
+      const NexLibraryLocations(),
+    );
+    if (!mounted) return;
+    switch (result) {
+      case 'tags':
+        await showTagManager(context, NexScope.of(context));
+      case 'threads':
+        final picked = await showDialog<String>(
+          context: context,
+          builder: (ctx) => NexAlertDialog(
+            title: Text(l.threads),
+            content: SizedBox(
+              width: 420,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: threads.isEmpty
+                      ? [Text(l.empty)]
+                      : [
+                          for (final item in threads)
+                            ListTile(
+                              title: Text(item.name),
+                              onTap: () => Navigator.pop(ctx, item.id),
+                            ),
+                        ],
+                ),
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: Text(l.close),
+              ),
+            ],
+          ),
+        );
+        if (!mounted || picked == null) return;
+        setState(() {
+          thread = picked;
+          trash = false;
+        });
+      case 'trash':
+        _detailRelease?.call();
+        _detailRelease = null;
+        setState(() {
+          trash = true;
+          thread = tag = null;
+          datePreset = LibraryDatePreset.any;
+          selectedNote = null;
+          _selectedIds.clear();
+        });
+      default:
+        break;
+    }
+    if (mounted) await load();
+  }
+
+  @override
   Future<void> _deleteNote(Note note) async {
     final id = note.id;
     _lastDeletedId = id;
@@ -62,6 +125,11 @@ mixin _LibraryActions on _LibraryStateBase {
         ),
         nexMenuItem(value: 'copy', icon: Icons.copy_rounded, label: l.copy),
         nexMenuItem(
+          value: 'aside',
+          icon: Icons.archive_outlined,
+          label: l.setAside,
+        ),
+        nexMenuItem(
           value: 'remind',
           icon: Icons.alarm_add_outlined,
           label: l.remind,
@@ -105,6 +173,16 @@ mixin _LibraryActions on _LibraryStateBase {
             if (mounted) await load();
           },
         );
+      case 'aside':
+        await setDesktopNotesAside(context, [note]);
+        if (mounted) {
+          if (selectedNote?.id == note.id) {
+            _detailRelease?.call();
+            _detailRelease = null;
+            setState(() => selectedNote = null);
+          }
+          await load();
+        }
       case 'delete':
         await _deleteNote(note);
     }
