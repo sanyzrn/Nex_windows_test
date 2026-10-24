@@ -138,6 +138,22 @@ class DesktopShelfTile extends StatelessWidget {
 class NexToolsShelves extends StatelessWidget {
   const NexToolsShelves({super.key, this.query = ''});
   final String query;
+  Widget _tiles(List<Widget> tiles) {
+    if (tiles.length == 1) return tiles.single;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        NexResponsiveGrid(
+          minWidth: 200,
+          children: tiles.length.isOdd
+              ? tiles.take(tiles.length - 1).toList()
+              : tiles,
+        ),
+        if (tiles.length.isOdd) ...[const SizedBox(height: 14), tiles.last],
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final features = NexScope.maybeOf(context);
@@ -247,7 +263,7 @@ class NexToolsShelves extends StatelessWidget {
           const SizedBox(height: 4),
           Text(l.toolsPrivateHint),
           const SizedBox(height: 12),
-          NexResponsiveGrid(minWidth: 200, children: private),
+          _tiles(private),
           const SizedBox(height: 24),
         ],
         if (everyday.isNotEmpty) ...[
@@ -256,7 +272,7 @@ class NexToolsShelves extends StatelessWidget {
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 12),
-          NexResponsiveGrid(minWidth: 200, children: everyday),
+          _tiles(everyday),
           const SizedBox(height: 24),
         ],
       ],
