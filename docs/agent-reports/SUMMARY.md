@@ -350,3 +350,19 @@ passed. Flutter startup was auto-review blocked on cloud metadata access and
 was not retried. Flutter/widget/Windows/visual/native/install checks not run.
 No dependency/lockfile, identity, updater, baseline or version changes.
 No commit/push/merge/CI dispatch/release. Remaining owner edits stay on this draft.
+
+### 0.30.0 — owner-authorized UI polish and release preparation
+
+The owner authorized pushing the collected Tools/Library work and publishing
+0.30.0+23. Button families share desktop corners/minimums; the monitor, palette,
+language, hotkey, tool placement, thread and clock selectors share a framed
+keyboard-accessible field. Paired changelogs, version declarations, README and
+release-history count are updated. See DRAFT_TOOLS.md for scope and Android sync.
+
+Windows refresh 40114222891 passed 230 visual tests; all 147 changed images were
+reviewed, including four new monitor/Library captures. Final shelf refinement
+refresh 40115042065 passed 230; the two additional wide Tools changes were also
+reviewed. Existing dimensions and all comparison tolerances are unchanged.
+Standalone analysis/localization/diff checks passed; 36 data tests passed earlier.
+Full final-source Windows CI/native/installer/update validation and automatic
+publication remain pending at this report commit. No physical acceptance claimed.

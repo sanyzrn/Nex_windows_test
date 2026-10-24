@@ -186,6 +186,13 @@ void main() {
     await tester.tap(find.text('Tools'));
     await _settle(tester);
     expect(find.byType(NexLibraryView), findsNothing);
+    // The private/everyday shelves precede utilities; use the visible search
+    // rather than assuming every utility has already been built below the fold.
+    await tester.enterText(
+      find.byKey(const ValueKey('workspace-tools-search')),
+      'Emoji',
+    );
+    await _settle(tester);
     final emojiTile = find.text('Emoji');
     expect(emojiTile, findsOneWidget);
     await tester.ensureVisible(emojiTile);
@@ -196,6 +203,11 @@ void main() {
     // window header explicitly rather than assuming one tooltip globally.
     expect(find.byKey(const ValueKey('window-back-to-tools')), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('window-back-to-tools')));
+    await _settle(tester);
+    await tester.enterText(
+      find.byKey(const ValueKey('workspace-tools-search')),
+      'Emoji',
+    );
     await _settle(tester);
     expect(emojiTile, findsOneWidget);
 
