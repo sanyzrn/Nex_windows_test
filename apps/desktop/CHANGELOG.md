@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.33.0 — 2026-10-28
+
+- Dialogs and the window's content card use the same 16 px corners as the cards inside them, so a dialog no longer looks like it belongs to another app.
+- The action row in a note (Copy, Pin, Remind, Delete) is a light bordered strip instead of a grey slab.
+
 ## 0.32.0 — 2026-10-28
 
 - Tags in the sidebar: each with its colour and how many notes carry it. Click one to see only those notes in the Library; click it again to clear. The Library's Tags filter is still there.
