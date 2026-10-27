@@ -169,9 +169,12 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
           padding: const EdgeInsetsDirectional.fromSTEB(12, 8, 8, 4),
           child: LayoutBuilder(
             builder: (context, box) {
-              final stacked =
-                  box.maxWidth / MediaQuery.textScalerOf(context).scale(1) <
-                  320;
+              final scaledWidth =
+                  box.maxWidth / MediaQuery.textScalerOf(context).scale(1);
+              final stacked = scaledWidth < 320;
+              // The Ctrl+F hint is a nicety: below ~480 px it squeezes the
+              // field's own hint text, so it gives way first.
+              final showHint = scaledWidth >= 480;
               final search = Focus(
                 canRequestFocus: false,
                 skipTraversal: true,
@@ -220,7 +223,7 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
                                 load();
                               },
                             )
-                          : stacked
+                          : stacked || !showHint
                           ? null
                           : Padding(
                               padding: const EdgeInsetsDirectional.only(

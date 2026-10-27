@@ -126,7 +126,7 @@ class _NoteIntelligenceState extends State<NoteIntelligencePanel> {
     return NexSoftCard(
       key: const ValueKey('note-intelligence'),
       accent: theme.colorScheme.primary,
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -140,9 +140,7 @@ class _NoteIntelligenceState extends State<NoteIntelligencePanel> {
               Expanded(
                 child: Text(
                   DesktopStrings.of(context).t('noteAi'),
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: theme.textTheme.titleSmall,
                 ),
               ),
               IconButton(
@@ -182,10 +180,10 @@ class _NoteIntelligenceState extends State<NoteIntelligencePanel> {
                       ? null
                       : () => _run(action ?? () => _process(task)),
                   style: IconButton.styleFrom(
-                    minimumSize: const Size(52, 52),
-                    padding: const EdgeInsets.all(14),
+                    minimumSize: const Size(44, 44),
+                    padding: const EdgeInsets.all(11),
                   ),
-                  icon: Icon(icon, size: 23),
+                  icon: Icon(icon, size: 21),
                 );
                 Future<void> choose(String task) async {
                   final chosen = await showDialog<bool>(

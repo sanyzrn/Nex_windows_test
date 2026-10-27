@@ -79,8 +79,8 @@ void main() {
       expect(sections(fa), sections(en));
       expect(
         sections(fa).length,
-        17,
-      ); // Includes the 0.31.0 release section.
+        18,
+      ); // Includes the 0.32.0 release section.
     },
   );
 

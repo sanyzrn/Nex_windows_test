@@ -24,6 +24,7 @@ import 'dock.dart' show AppIconImage;
 import 'flyout.dart' show buildPanelView;
 import 'svg_icon.dart';
 import 'widgets.dart';
+import 'rail_tags.dart';
 import 'window_caption.dart';
 import '../updates/widgets.dart';
 

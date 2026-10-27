@@ -76,6 +76,31 @@ class NexFeatures extends ChangeNotifier {
     await synchronizeReminders?.call();
   }
 
+  /// The tag the Library is filtered to, or null. The Library keeps it
+  /// current; the sidebar reads it to show which tag is open.
+  String? libraryTag;
+
+  String? _requestedTag;
+  bool _tagRequested = false;
+
+  /// The sidebar asks the Library to show one tag, or all notes for null. The
+  /// Library may not be mounted yet, so the request waits to be taken.
+  void requestLibraryTag(String? id) {
+    _requestedTag = id;
+    _tagRequested = true;
+    notifyListeners();
+  }
+
+  /// The pending tag request, if any. The inner value is the tag id (null
+  /// meaning "all notes"); a null result means nothing was asked.
+  ({String? id})? takeRequestedTag() {
+    if (!_tagRequested) return null;
+    _tagRequested = false;
+    final id = _requestedTag;
+    _requestedTag = null;
+    return (id: id);
+  }
+
   Note? _requestedNote;
 
   /// A palette result may arrive before the library is mounted.
