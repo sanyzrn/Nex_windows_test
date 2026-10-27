@@ -161,6 +161,7 @@ class _NexModulesSettingsState extends State<NexModulesSettings> {
   DesktopModule? saving;
   @override
   Widget build(BuildContext context) {
+    if (!DesktopModules.available) return const SizedBox.shrink();
     final features = NexScope.maybeOf(context);
     if (features == null) return const SizedBox.shrink();
     final modules = features.modules;
@@ -190,9 +191,7 @@ class _NexModulesSettingsState extends State<NexModulesSettings> {
                 l.failed,
                 style: TextStyle(color: Theme.of(context).colorScheme.error),
               ),
-            for (final module in DesktopModule.values.where(
-              DesktopModules.isOffered,
-            )) ...[
+            for (final module in DesktopModule.values) ...[
               SwitchListTile.adaptive(
                 key: ValueKey('module-switch-${module.name}'),
                 contentPadding: EdgeInsets.zero,
@@ -239,6 +238,7 @@ class NexModuleShelf extends StatelessWidget {
   final String query;
   @override
   Widget build(BuildContext context) {
+    if (!DesktopModules.available) return const SizedBox.shrink();
     final f = NexScope.maybeOf(context);
     if (f == null) return const SizedBox.shrink();
     final modules = f.modules;

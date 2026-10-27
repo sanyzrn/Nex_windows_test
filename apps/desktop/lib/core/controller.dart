@@ -299,6 +299,10 @@ abstract class PanelStateBase extends ChangeNotifier implements PanelHoldable {
       borderRadius: BorderRadius.circular(12),
       borderSide: BorderSide(color: scheme.onSurface.withValues(alpha: .16)),
     );
+    final buttonShape = WidgetStatePropertyAll<OutlinedBorder>(
+      RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    );
+    const buttonSize = WidgetStatePropertyAll(Size(44, 44));
     return base.copyWith(
       inputDecorationTheme: base.inputDecorationTheme.copyWith(
         filled: true,
@@ -309,17 +313,38 @@ abstract class PanelStateBase extends ChangeNotifier implements PanelHoldable {
         ),
         border: outline,
         enabledBorder: outline,
+        disabledBorder: outline,
         focusedBorder: outline.copyWith(
           borderSide: BorderSide(color: scheme.primary, width: 1.5),
+        ),
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: base.filledButtonTheme.style?.copyWith(
+          shape: buttonShape,
+          minimumSize: buttonSize,
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: base.textButtonTheme.style?.copyWith(
+          shape: buttonShape,
+          minimumSize: buttonSize,
+        ),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          minimumSize: const Size(44, 44),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(12),
           ),
           side: BorderSide(color: scheme.outline),
-          minimumSize: const Size(0, 36),
+          minimumSize: const Size(44, 44),
         ),
       ),
       iconButtonTheme: IconButtonThemeData(

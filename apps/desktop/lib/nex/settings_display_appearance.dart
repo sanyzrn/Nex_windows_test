@@ -217,19 +217,31 @@ mixin _SettingsDisplayAppearance on _SettingsStateBase {
               const Divider(height: 1),
               _SettingRow(
                 title: l.monitor,
-                control: DropdownButton<int>(
-                  borderRadius: nexDropdownRadius,
-                  dropdownColor: nexDropdownColor(context),
+                control: DesktopDropdown<int>(
+                  key: const ValueKey('monitor-selection'),
                   value: c.S.monitor.clamp(0, c.screens.length - 1),
                   items: [
                     for (var i = 0; i < c.screens.length; i++)
                       DropdownMenuItem(
                         value: i,
-                        child: Text(
-                          desktopDigits(
-                            context,
-                            '${l.monitor} ${displayNumber(c.screens[i], i)}',
-                          ),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.desktop_windows_outlined,
+                              size: 18,
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                desktopDigits(
+                                  context,
+                                  '${l.monitor} ${displayNumber(c.screens[i], i)}',
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                   ],
@@ -358,13 +370,10 @@ mixin _SettingsDisplayAppearance on _SettingsStateBase {
           const Divider(height: 1),
           _SettingRow(
             title: l.themePalette,
-            control: DropdownButton<String>(
-              borderRadius: nexDropdownRadius,
-              dropdownColor: nexDropdownColor(context),
+            control: DesktopDropdown<String>(
               value: nexThemePresets.any((p) => p.id == c.S.preset)
                   ? c.S.preset
                   : 'classic',
-              underline: const SizedBox.shrink(),
               items: nexThemePresets
                   .map(
                     (v) => DropdownMenuItem(
@@ -381,7 +390,13 @@ mixin _SettingsDisplayAppearance on _SettingsStateBase {
                             ),
                           ),
                           const SizedBox(width: 8),
-                          Text(nexThemePresetLabel(context, v.id)),
+                          Expanded(
+                            child: Text(
+                              nexThemePresetLabel(context, v.id),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -469,11 +484,8 @@ mixin _SettingsDisplayAppearance on _SettingsStateBase {
           const Divider(height: 1),
           _SettingRow(
             title: l.appLanguage,
-            control: DropdownButton<String>(
-              borderRadius: nexDropdownRadius,
-              dropdownColor: nexDropdownColor(context),
+            control: DesktopDropdown<String>(
               value: c.S.language,
-              underline: const SizedBox.shrink(),
               items: [
                 DropdownMenuItem(value: 'system', child: Text(l.followSystem)),
                 DropdownMenuItem(value: 'fa', child: Text(l.persian)),

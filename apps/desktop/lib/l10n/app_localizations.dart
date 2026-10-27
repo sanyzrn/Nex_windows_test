@@ -62,7 +62,8 @@ import 'app_localizations_fa.dart';
 /// be consistent with the languages listed in the AppLocalizations.supportedLocales
 /// property.
 abstract class AppLocalizations {
-  AppLocalizations(String locale) : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+  AppLocalizations(String locale)
+    : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
@@ -70,7 +71,8 @@ abstract class AppLocalizations {
     return Localizations.of<AppLocalizations>(context, AppLocalizations);
   }
 
-  static const LocalizationsDelegate<AppLocalizations> delegate = _AppLocalizationsDelegate();
+  static const LocalizationsDelegate<AppLocalizations> delegate =
+      _AppLocalizationsDelegate();
 
   /// A list of this localizations delegate along with the default localizations
   /// delegates.
@@ -82,17 +84,18 @@ abstract class AppLocalizations {
   /// Additional delegates can be added by appending to this list in
   /// MaterialApp. This list does not have to be used at all if a custom list
   /// of delegates is preferred or required.
-  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
-    delegate,
-    GlobalMaterialLocalizations.delegate,
-    GlobalCupertinoLocalizations.delegate,
-    GlobalWidgetsLocalizations.delegate,
-  ];
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
+      <LocalizationsDelegate<dynamic>>[
+        delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ];
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
     Locale('en'),
-    Locale('fa')
+    Locale('fa'),
   ];
 
   /// No description provided for @capture.
@@ -3664,9 +3667,98 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Search private titles'**
   String get moduleSearch;
+
+  String get libraryTitle;
+
+  String get libraryTagsHint;
+
+  String get libraryTrashHint;
+
+  String libraryTagCount(int count);
+
+  String libraryThreadCount(int count);
+
+  String libraryTrashCount(int count);
+
+  String get toolsSectionPrivate;
+
+  String get toolsSectionEveryday;
+
+  String get toolsPrivateHint;
+
+  String get toolsMessages;
+
+  String get toolsMessagesHint;
+
+  String get vaultPasswordsHint;
+
+  String get vaultCardsHint;
+
+  String get scheduledTitle;
+
+  String get scheduledSubtitle;
+
+  String get threadsSubtitle;
+
+  String get toolsGeneratorHint;
+
+  String get setAside;
+
+  String get setAsideSheetTitle;
+
+  String get setAsideSheetHint;
+
+  String get setAsideUntilBack;
+
+  String get setAsideThisEvening;
+
+  String get setAsideTomorrow;
+
+  String get setAsideNextWeek;
+
+  String get setAsidePickDate;
+
+  String get setAsideDone;
+
+  String setAsideDoneUntil(String when);
+
+  String setAsideGroupDone(int count);
+
+  String setAsideBackBanner(int count);
+
+  String get setAsideBringBack;
+
+  String get setAsideSection;
+
+  String get setAsideSectionHint;
+
+  String get setAsidePageTitle;
+
+  String get setAsideEmptyTitle;
+
+  String get setAsideEmptyBody;
+
+  String setAsideBackOn(String when);
+
+  String get setAsideUntilFurther;
+
+  String get setAsideMark;
+
+  String setAsideCountLabel(int count);
+
+  String get setAsideAllClear;
+
+  String get setAsideView;
+
+  String get vaultImportCsv;
+
+  String get vaultImportCsvConfirm;
+
+  String vaultImportCsvResult(int added, int duplicates, int skipped);
 }
 
-class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
+class _AppLocalizationsDelegate
+    extends LocalizationsDelegate<AppLocalizations> {
   const _AppLocalizationsDelegate();
 
   @override
@@ -3675,25 +3767,26 @@ class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> 
   }
 
   @override
-  bool isSupported(Locale locale) => <String>['en', 'fa'].contains(locale.languageCode);
+  bool isSupported(Locale locale) =>
+      <String>['en', 'fa'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
 }
 
 AppLocalizations lookupAppLocalizations(Locale locale) {
-
-
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
-    case 'en': return AppLocalizationsEn();
-    case 'fa': return AppLocalizationsFa();
+    case 'en':
+      return AppLocalizationsEn();
+    case 'fa':
+      return AppLocalizationsFa();
   }
 
   throw FlutterError(
     'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
     'an issue with the localizations generation tool. Please file an issue '
     'on GitHub with a reproducible sample app and the gen-l10n configuration '
-    'that was used.'
+    'that was used.',
   );
 }

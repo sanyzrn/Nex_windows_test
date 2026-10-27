@@ -107,6 +107,17 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
                   },
                 ),
                 _BannerIcon(
+                  icon: Icons.archive_outlined,
+                  tooltip: l.setAside,
+                  color: scheme.onPrimaryContainer,
+                  onPressed: () async {
+                    await setDesktopNotesAside(context, chosen);
+                    if (!mounted) return;
+                    setState(() => _selectedIds.clear());
+                    await load();
+                  },
+                ),
+                _BannerIcon(
                   icon: Icons.delete_outline_rounded,
                   tooltip: l.delete,
                   color: scheme.onPrimaryContainer,
@@ -250,6 +261,12 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
               final actions = Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  IconButton(
+                    key: const ValueKey('library-locations'),
+                    tooltip: l.libraryTitle,
+                    onPressed: _openLibraryLocations,
+                    icon: const Icon(Icons.folder_copy_outlined),
+                  ),
                   if (NexPanelScope.maybeOf(context)?.isWindowMode ?? true) ...[
                     IconButton(
                       tooltip: AiStrings.of(context).t('board'),

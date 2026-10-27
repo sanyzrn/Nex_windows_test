@@ -24,42 +24,17 @@ mixin _SettingsShortcutsBackup on _SettingsStateBase {
           _SettingRow(
             title: l.hotkey,
             subtitle: l.hotkeyInUse,
-            control: DropdownButton<String>(
-              borderRadius: nexDropdownRadius,
-              dropdownColor: nexDropdownColor(context),
+            control: DesktopDropdown<String>(
               value: c.S.hotkey,
-              underline: const SizedBox.shrink(),
               items: ['N', 'Q', 'Space']
                   .map(
                     (v) => DropdownMenuItem(
                       value: v,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 3,
-                            ),
-                            decoration: BoxDecoration(
-                              color: scheme.surfaceContainerHighest,
-                              borderRadius: BorderRadius.circular(6),
-                              border: Border.all(
-                                color: scheme.outlineVariant.withValues(
-                                  alpha: 0.5,
-                                ),
-                              ),
-                            ),
-                            child: Text(
-                              'Ctrl + Alt + $v',
-                              style: const TextStyle(
-                                fontFamily: 'Inter',
-                                fontWeight: FontWeight.w600,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ),
-                        ],
+                      child: Text(
+                        'Ctrl + Alt + $v',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textDirection: TextDirection.ltr,
                       ),
                     ),
                   )

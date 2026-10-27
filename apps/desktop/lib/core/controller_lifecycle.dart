@@ -203,6 +203,11 @@ mixin PanelLifecycle on PanelStateBase {
   /// Opens a utility tool inside the window shell's Tools section.
   @override
   void openWindowTool(String id) {
+    final tool = ToolInfo.of(id);
+    if (tool.kind == ToolKind.action) {
+      runAction(tool.action!);
+      return;
+    }
     windowSection.value = 'tools';
     windowTool.value = id;
     notifyListeners();

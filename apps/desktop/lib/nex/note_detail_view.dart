@@ -6,6 +6,8 @@
 /// Owns [NexNoteDetail] and its inline editing state.
 library;
 
+import '../ui/desktop_dropdown.dart';
+
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
@@ -538,11 +540,8 @@ class _NexNoteDetailState extends State<NexNoteDetail> {
                                   )
                                   .toList(),
                             ),
-                            DropdownButton<String>(
-                              borderRadius: nexDropdownRadius,
-                              dropdownColor: nexDropdownColor(context),
+                            DesktopDropdown<String>(
                               hint: Text(l.joinThread),
-                              isExpanded: true,
                               items: availableThreads
                                   .where(
                                     (t) =>

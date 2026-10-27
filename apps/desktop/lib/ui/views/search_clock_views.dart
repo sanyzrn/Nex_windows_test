@@ -1,4 +1,4 @@
-import 'package:nex_ui/nex_ui.dart';
+import '../desktop_dropdown.dart';
 import '../../l10n/desktop_format.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/utility_strings.dart';
@@ -323,51 +323,31 @@ class _SmallXState extends State<_SmallX> {
 
 class _ZonePicker extends StatelessWidget {
   const _ZonePicker({required this.current, required this.onAdd});
-
   final List<String> current;
   final ValueChanged<String> onAdd;
-
   @override
-  Widget build(BuildContext context) {
-    final p = LiquidScope.paletteOf(context);
-    final remaining = kZones.where((z) => !current.contains(z)).toList();
-    return DropdownButtonHideUnderline(
-      child: DropdownButton<String>(
-        borderRadius: nexDropdownRadius,
-        dropdownColor: nexDropdownColor(context),
-        isExpanded: true,
-        hint: Text(
-          utilityLabel(context, 'utility30'),
-          style: TextStyle(
-            fontFamily: Theme.of(context).textTheme.bodyMedium?.fontFamily,
-            fontFamilyFallback: const ['Segoe UI'],
-            fontSize: 13,
-            color: p.ink,
+  Widget build(BuildContext context) => DesktopDropdown<String>(
+    hint: Text(
+      utilityLabel(context, 'utility30'),
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+    ),
+    items: [
+      for (final z in kZones.where((z) => !current.contains(z)))
+        DropdownMenuItem(
+          value: z,
+          child: Text(
+            utilityLabelForText(
+              context,
+              z.split('/').last.replaceAll('_', ' '),
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
-        style: TextStyle(
-          fontFamily: Theme.of(context).textTheme.bodyMedium?.fontFamily,
-          fontFamilyFallback: const ['Segoe UI'],
-          fontSize: 13,
-          color: p.ink,
-        ),
-        icon: const SizedBox.shrink(),
-        items: [
-          for (final z in remaining)
-            DropdownMenuItem(
-              value: z,
-              child: Text(
-                utilityLabelForText(
-                  context,
-                  z.split('/').last.replaceAll('_', ' '),
-                ),
-              ),
-            ),
-        ],
-        onChanged: (z) {
-          if (z != null) onAdd(z);
-        },
-      ),
-    );
-  }
+    ],
+    onChanged: (z) {
+      if (z != null) onAdd(z);
+    },
+  );
 }

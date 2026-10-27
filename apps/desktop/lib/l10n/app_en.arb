@@ -383,7 +383,7 @@
   "workspaceClipboardHint": "What you copied, ready to use.",
   "workspaceAwakeHint": "Keep your screen with you.",
   "workspaceTimerHint": "A little time to focus.",
-  "workspaceCalculatorHint": "Work out the little things.",
+  "workspaceCalculatorHint": "Open Windows Calculator.",
   "workspaceColorHint": "Pick a colour from anywhere.",
   "workspaceReaderTitle": "A place to return to.",
   "workspaceReaderHint": "Pick a note on the side. Your words get the whole page.",
@@ -455,7 +455,7 @@
   "themePalette": "App theme",
   "hexColor": "HEX color",
   "backupSaved": "Backup saved",
-  "commitmentsTitle": "Commitments & cadences",
+  "commitmentsTitle": "Recurring",
   "commitmentNew": "New commitment",
   "commitmentEdit": "Edit commitment",
   "commitmentEmpty": "No commitments recorded yet.",
@@ -819,5 +819,136 @@
   "moduleBack": "Back",
   "moduleAdd": "Add",
   "moduleCancel": "Cancel",
-  "moduleSearch": "Search private titles"
+  "moduleSearch": "Search private titles",
+  "libraryTitle": "Library",
+  "@libraryTitle": {
+    "description": "Settings group: tags, recently deleted, storage"
+  },
+  "libraryTagsHint": "Colour and name what you file",
+  "libraryTrashHint": "Kept for 30 days",
+  "libraryTagCount": "{count, plural, =0{No tags yet} =1{1 tag} other{{count} tags}}",
+  "@libraryTagCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "libraryThreadCount": "{count, plural, =0{No threads yet} =1{1 thread} other{{count} threads}}",
+  "@libraryThreadCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "libraryTrashCount": "{count, plural, =0{No deleted notes} =1{1 note · kept 30 days} other{{count} notes · kept 30 days}}",
+  "@libraryTrashCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "toolsSectionPrivate": "Private",
+  "toolsSectionEveryday": "Everyday",
+  "toolsPrivateHint": "Separate from notes, search and AI.",
+  "toolsMessages": "Private saved messages",
+  "@toolsMessages": {
+    "description": "The private messages tool, on the Tools page and pinned"
+  },
+  "toolsMessagesHint": "A private space for your words",
+  "@toolsMessagesHint": {
+    "description": "Line under the private messages tool"
+  },
+  "vaultPasswordsHint": "Accounts, passwords and Chrome CSV import.",
+  "vaultCardsHint": "Card details and IBAN, ready to copy.",
+  "scheduledTitle": "Scheduled",
+  "scheduledSubtitle": "Notes on their way",
+  "threadsSubtitle": "Notes about the same thing, gathered without moving them",
+  "toolsGeneratorHint": "Create and copy a strong password",
+  "@toolsGeneratorHint": {
+    "description": "Line under the password generator tool"
+  },
+  "setAside": "Set aside",
+  "setAsideSheetTitle": "Set aside until…",
+  "setAsideSheetHint": "It leaves the home screen but stays in your library. You can still find it by searching.",
+  "setAsideUntilBack": "Until I bring it back",
+  "setAsideThisEvening": "This evening",
+  "setAsideTomorrow": "Tomorrow morning",
+  "setAsideNextWeek": "Next week",
+  "setAsidePickDate": "Pick a date…",
+  "setAsideDone": "Set aside",
+  "setAsideDoneUntil": "Set aside until {when}",
+  "@setAsideDoneUntil": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "setAsideGroupDone": "{count} notes set aside",
+  "@setAsideGroupDone": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "setAsideBackBanner": "{count} notes are back from being set aside",
+  "@setAsideBackBanner": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "setAsideBringBack": "Bring back",
+  "setAsideSection": "Set aside",
+  "setAsideSectionHint": "Off the home screen, not gone",
+  "setAsidePageTitle": "Set aside",
+  "setAsideEmptyTitle": "Nothing set aside",
+  "setAsideEmptyBody": "Hold a note and choose Set aside to keep it out of the way for now.",
+  "setAsideBackOn": "Back {when}",
+  "@setAsideBackOn": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "setAsideUntilFurther": "Until you bring it back",
+  "setAsideMark": "Set aside",
+  "setAsideCountLabel": "{count, plural, =1{1 note set aside} other{{count} notes set aside}}",
+  "@setAsideCountLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "setAsideAllClear": "All clear",
+  "setAsideView": "See what’s set aside",
+  "vaultImportCsv": "Import Chrome CSV",
+  "vaultImportCsvConfirm": "The CSV contains unencrypted passwords. Import into this device’s private space?",
+  "vaultImportCsvResult": "Added: {added} · Duplicates: {duplicates} · Skipped: {skipped}",
+  "@vaultImportCsvResult": {
+    "placeholders": {
+      "added": {
+        "type": "int"
+      },
+      "duplicates": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      }
+    }
+  }
 }

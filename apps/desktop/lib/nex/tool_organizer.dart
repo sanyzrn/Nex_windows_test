@@ -1,4 +1,4 @@
-import 'package:nex_ui/nex_ui.dart';
+import '../ui/desktop_dropdown.dart';
 import '../l10n/desktop_format.dart';
 import 'package:flutter/material.dart';
 import '../core/controller.dart';
@@ -157,12 +157,10 @@ class _NexToolOrganizerState extends State<NexToolOrganizer> {
                                   ),
                                 ),
                                 const SizedBox(width: 8),
-                                DropdownButton<String>(
-                                  borderRadius: nexDropdownRadius,
-                                  dropdownColor: nexDropdownColor(context),
+                                DesktopDropdown<String>(
+                                  width: 130,
                                   key: ValueKey('tool-placement-${t.id}'),
                                   value: placement(t.id),
-                                  underline: const SizedBox(),
                                   items: [
                                     for (final entry in labels.entries)
                                       if (!t.dockOnly || entry.key != 'more')

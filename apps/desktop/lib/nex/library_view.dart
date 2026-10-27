@@ -33,6 +33,8 @@ import 'shortcuts_dialog.dart';
 import 'store.dart';
 import 'tag_manager.dart';
 import 'library_date_filter.dart';
+import 'collection_shelves.dart';
+import 'set_aside.dart';
 
 part 'library_actions.dart';
 part 'library_filter_widgets.dart';
@@ -54,6 +56,7 @@ abstract class _LibraryStateBase extends State<NexLibraryView> {
   Future<void> _deleteNote(Note note);
   Future<void> _undoLastDelete();
   void _showCardContextMenu(Offset globalPosition, Note note);
+  Future<void> _openLibraryLocations();
 
   final query = TextEditingController();
   final scroll = ScrollController();

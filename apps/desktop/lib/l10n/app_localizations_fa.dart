@@ -174,7 +174,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get backup => 'پشتیبان کامل';
 
   @override
-  String get backupInfo => 'قالب نکس: کتابخانه خواندنی است؛ تنظیمات رمزگذاری می‌شوند. کلید بازیابی را نگه دار.';
+  String get backupInfo =>
+      'قالب نکس: کتابخانه خواندنی است؛ تنظیمات رمزگذاری می‌شوند. کلید بازیابی را نگه دار.';
 
   @override
   String get recoveryKey => 'کلید بازیابی';
@@ -285,7 +286,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get utility27 => 'برای چسباندن کلیک کن';
 
   @override
-  String get utility28 => 'متن‌های پرکاربرد مثل نشانی، پاسخ و امضا را ذخیره کن…';
+  String get utility28 =>
+      'متن‌های پرکاربرد مثل نشانی، پاسخ و امضا را ذخیره کن…';
 
   @override
   String get utility29 => 'یک شهر اضافه کن';
@@ -733,7 +735,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get addAudio => 'افزودن صدا';
 
   @override
-  String get noClipboardImage => 'ابتدا تصویری کپی کن یا «افزودن تصویر» را بزن.';
+  String get noClipboardImage =>
+      'ابتدا تصویری کپی کن یا «افزودن تصویر» را بزن.';
 
   @override
   String get recording => 'در حال ضبط… برای ذخیره، توقف را بزن.';
@@ -786,13 +789,16 @@ class AppLocalizationsFa extends AppLocalizations {
   String get windowRemember => 'به‌خاطر سپردن اندازه و جای پنجره';
 
   @override
-  String get windowRememberHint => 'خاموش: نکس همیشه با همان اندازه و در گوشهٔ پایین‌راست صفحه باز می‌شود.';
+  String get windowRememberHint =>
+      'خاموش: نکس همیشه با همان اندازه و در گوشهٔ پایین‌راست صفحه باز می‌شود.';
 
   @override
-  String get modeDescription => 'پنجرهٔ دسکتاپ تجربهٔ اصلی است و پنل کناری برای ثبت سریع در دسترس می‌ماند. هر دو حالت از همان یادداشت‌ها، رسانه‌ها و تنظیمات استفاده می‌کنند.';
+  String get modeDescription =>
+      'پنجرهٔ دسکتاپ تجربهٔ اصلی است و پنل کناری برای ثبت سریع در دسترس می‌ماند. هر دو حالت از همان یادداشت‌ها، رسانه‌ها و تنظیمات استفاده می‌کنند.';
 
   @override
-  String get edgePanelOnly => 'این تنظیم مخصوص پنل کناری است؛ برای استفاده، حالت نمایش را عوض کن.';
+  String get edgePanelOnly =>
+      'این تنظیم مخصوص پنل کناری است؛ برای استفاده، حالت نمایش را عوض کن.';
 
   @override
   String get switchToPanel => 'تغییر به پنل کناری';
@@ -904,7 +910,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get emptyLibraryTitle => 'کتابخانه‌ات خالی است';
 
   @override
-  String get emptyLibraryHint => 'اول ثبت، بعد فکر کردن. همه‌چیز روی همین رایانه می‌ماند.';
+  String get emptyLibraryHint =>
+      'اول ثبت، بعد فکر کردن. همه‌چیز روی همین رایانه می‌ماند.';
 
   @override
   String get emptyLibraryWrite => 'نوشتن اولین یادداشت';
@@ -994,7 +1001,8 @@ class AppLocalizationsFa extends AppLocalizations {
   }
 
   @override
-  String get restoreConfirmBody => 'بازیابی، همهٔ یادداشت‌ها، برچسب‌ها و رسانه‌های فعلی را با این نسخهٔ پشتیبان جایگزین می‌کند. این کار قابل بازگشت نیست.';
+  String get restoreConfirmBody =>
+      'بازیابی، همهٔ یادداشت‌ها، برچسب‌ها و رسانه‌های فعلی را با این نسخهٔ پشتیبان جایگزین می‌کند. این کار قابل بازگشت نیست.';
 
   @override
   String get copyKey => 'کپی کلید';
@@ -1024,7 +1032,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get appLanguage => 'زبان برنامه';
 
   @override
-  String get libraryUnavailable => 'کتابخانهٔ یادداشت‌ها هنوز روی این دستگاه در دسترس نیست.';
+  String get libraryUnavailable =>
+      'کتابخانهٔ یادداشت‌ها هنوز روی این دستگاه در دسترس نیست.';
 
   @override
   String get workspaceLocal => 'خصوصی؛ روی همین دستگاه';
@@ -1036,7 +1045,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get workspaceCaptureTitle => 'جایی برای\nفکرهای تو.';
 
   @override
-  String get workspaceCaptureDescription => 'یک فکر، یک فهرست، یک یادآور کوچک. بنویس؛ نکس نگهش می‌دارد.';
+  String get workspaceCaptureDescription =>
+      'یک فکر، یک فهرست، یک یادآور کوچک. بنویس؛ نکس نگهش می‌دارد.';
 
   @override
   String get workspaceCaptureFooter => 'ذخیره روی همین دستگاه؛ همیشه در دسترس.';
@@ -1045,7 +1055,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get workspaceToolsTitle => 'جعبه‌ابزار روزمرهٔ تو';
 
   @override
-  String get workspaceToolsDescription => 'ابزارهای کاربردی ویندوز، یک‌جا و در دسترس.';
+  String get workspaceToolsDescription =>
+      'ابزارهای کاربردی ویندوز، یک‌جا و در دسترس.';
 
   @override
   String get workspaceEssentials => 'دم‌دست';
@@ -1054,7 +1065,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get workspaceUtilityHint => 'باز کردن ابزار';
 
   @override
-  String get workspaceClipboardHint => 'چیزهایی که کپی کرده‌اید، آمادهٔ استفاده.';
+  String get workspaceClipboardHint =>
+      'چیزهایی که کپی کرده‌اید، آمادهٔ استفاده.';
 
   @override
   String get workspaceAwakeHint => 'صفحه را هنگام کار روشن نگه دار.';
@@ -1063,7 +1075,7 @@ class AppLocalizationsFa extends AppLocalizations {
   String get workspaceTimerHint => 'کمی زمان برای تمرکز.';
 
   @override
-  String get workspaceCalculatorHint => 'حساب‌های کوچک روزمره.';
+  String get workspaceCalculatorHint => "باز کردن ماشین‌حساب ویندوز.";
 
   @override
   String get workspaceColorHint => 'انتخاب رنگ از هر جای صفحه.';
@@ -1072,7 +1084,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get workspaceReaderTitle => 'جایی برای برگشتن به فکرها.';
 
   @override
-  String get workspaceReaderHint => 'یادداشتی از فهرست انتخاب کن؛ این صفحه برای خواندن آن است.';
+  String get workspaceReaderHint =>
+      'یادداشتی از فهرست انتخاب کن؛ این صفحه برای خواندن آن است.';
 
   @override
   String get workspaceToolsSearch => 'جست‌وجوی ابزار…';
@@ -1090,13 +1103,15 @@ class AppLocalizationsFa extends AppLocalizations {
   String get testNotification => 'آزمایش اعلان‌ها';
 
   @override
-  String get testNotificationHint => 'یک اعلان همین حالا و یکی دیگر ۱۵ ثانیه بعد نشان می‌دهد تا هر دو راه رساندن یادآورها را بسنجید.';
+  String get testNotificationHint =>
+      'یک اعلان همین حالا و یکی دیگر ۱۵ ثانیه بعد نشان می‌دهد تا هر دو راه رساندن یادآورها را بسنجید.';
 
   @override
   String get testNotificationRun => 'ارسال آزمایشی';
 
   @override
-  String get testNotificationSent => 'ویندوز هر دو اعلان آزمایشی را پذیرفت. اگر نمایش داده نشدند، تنظیمات اعلان‌ها و حالت مزاحم نشوید را بررسی کن.';
+  String get testNotificationSent =>
+      'ویندوز هر دو اعلان آزمایشی را پذیرفت. اگر نمایش داده نشدند، تنظیمات اعلان‌ها و حالت مزاحم نشوید را بررسی کن.';
 
   @override
   String testNotificationFailed(String detail) {
@@ -1110,7 +1125,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get testNotificationLater => 'اعلان زمان‌بندی‌شدهٔ آزمایشی رسید.';
 
   @override
-  String get reminderDeliveryFailed => 'زمان ذخیره شد، اما ویندوز نتوانست اعلان را زمان‌بندی کند. تنظیمات اعلان ویندوز را بررسی کن و دوباره تلاش کن.';
+  String get reminderDeliveryFailed =>
+      'زمان ذخیره شد، اما ویندوز نتوانست اعلان را زمان‌بندی کند. تنظیمات اعلان ویندوز را بررسی کن و دوباره تلاش کن.';
 
   @override
   String get reminderSaveFailed => 'یادآور ذخیره نشد. دوباره تلاش کن.';
@@ -1128,7 +1144,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get workspaceViewAll => 'دیدن همه';
 
   @override
-  String get workspaceStartHint => 'یادداشت بعدی از اینجا شروع می‌شود؛ نوشته‌های اخیر هم کنار دست تو هستند.';
+  String get workspaceStartHint =>
+      'یادداشت بعدی از اینجا شروع می‌شود؛ نوشته‌های اخیر هم کنار دست تو هستند.';
 
   @override
   String get workspaceNoRecent => 'یادداشت‌هایی که ثبت کنی اینجا دیده می‌شوند.';
@@ -1146,7 +1163,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get saving => 'در حال ذخیره…';
 
   @override
-  String get clipboardSaveFailed => 'ذخیرهٔ تاریخچهٔ کلیپ‌بورد انجام نشد. این تغییرها هنوز پس از اجرای دوباره محفوظ نیستند.';
+  String get clipboardSaveFailed =>
+      'ذخیرهٔ تاریخچهٔ کلیپ‌بورد انجام نشد. این تغییرها هنوز پس از اجرای دوباره محفوظ نیستند.';
 
   @override
   String get clipboardRetry => 'تلاش دوباره برای ذخیره';
@@ -1158,7 +1176,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get manageTags => 'مدیریت برچسب‌ها';
 
   @override
-  String get tagDeleteHint => 'این برچسب از همهٔ یادداشت‌ها حذف شود؟ یادداشت‌ها حفظ می‌شوند.';
+  String get tagDeleteHint =>
+      'این برچسب از همهٔ یادداشت‌ها حذف شود؟ یادداشت‌ها حفظ می‌شوند.';
 
   @override
   String get tagNameRequired => 'یک نام غیرتکراری برای برچسب وارد کن.';
@@ -1230,7 +1249,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get noteAttachments => 'پیوست‌ها';
 
   @override
-  String get backupCompatibility => 'یادداشت‌ها، پیوست‌ها و ظاهر بین نسخه‌های نکس منتقل می‌شوند. کلیپ‌بورد، تنظیمات دستگاه، خزانهٔ موبایل و کلیدهای هوش روی دستگاه خود می‌مانند.';
+  String get backupCompatibility =>
+      'یادداشت‌ها، پیوست‌ها و ظاهر بین نسخه‌های نکس منتقل می‌شوند. کلیپ‌بورد، تنظیمات دستگاه، خزانهٔ موبایل و کلیدهای هوش روی دستگاه خود می‌مانند.';
 
   @override
   String get scheduledNotes => 'یادداشت‌های زمان‌بندی‌شده';
@@ -1239,10 +1259,12 @@ class AppLocalizationsFa extends AppLocalizations {
   String get releaseNow => 'نمایش همین حالا';
 
   @override
-  String get portableLibraryBackup => 'پشتیبان قابل انتقال کتابخانه · همهٔ نسخه‌های نکس';
+  String get portableLibraryBackup =>
+      'پشتیبان قابل انتقال کتابخانه · همهٔ نسخه‌های نکس';
 
   @override
-  String get importBackupConfirm => 'این فایل خروجی نکس است. یادداشت‌ها و پیوست‌های آن به کتابخانه اضافه می‌شوند و یادداشت‌های فعلی حفظ می‌شوند.';
+  String get importBackupConfirm =>
+      'این فایل خروجی نکس است. یادداشت‌ها و پیوست‌های آن به کتابخانه اضافه می‌شوند و یادداشت‌های فعلی حفظ می‌شوند.';
 
   @override
   String get importNotes => 'ورود یادداشت‌ها';
@@ -1260,7 +1282,7 @@ class AppLocalizationsFa extends AppLocalizations {
   String get backupSaved => 'نسخهٔ پشتیبان ذخیره شد';
 
   @override
-  String get commitmentsTitle => 'تعهدات و کارهای تکرارشونده';
+  String get commitmentsTitle => "موارد تکرارشونده";
 
   @override
   String get commitmentNew => 'تعهد جدید';
@@ -1438,10 +1460,12 @@ class AppLocalizationsFa extends AppLocalizations {
   String get windowCloseAction => 'پس از بستن پنجره در سینی سیستم فعال بماند';
 
   @override
-  String get windowCloseTrayHint => 'بستن، پنجره را پنهان می‌کند. از سینی سیستم بازش کن؛ خروج، داده‌ها را ذخیره می‌کند و برنامه را می‌بندد.';
+  String get windowCloseTrayHint =>
+      'بستن، پنجره را پنهان می‌کند. از سینی سیستم بازش کن؛ خروج، داده‌ها را ذخیره می‌کند و برنامه را می‌بندد.';
 
   @override
-  String get windowCloseQuitHint => 'خاموش: بستن پنجره، داده‌ها را ذخیره می‌کند و از نکس خارج می‌شود.';
+  String get windowCloseQuitHint =>
+      'خاموش: بستن پنجره، داده‌ها را ذخیره می‌کند و از نکس خارج می‌شود.';
 
   @override
   String get reminderSnooze => '۱۰ دقیقه بعد';
@@ -1453,43 +1477,50 @@ class AppLocalizationsFa extends AppLocalizations {
   String get modulesTitle => 'ماژول‌های اختیاری';
 
   @override
-  String get modulesHint => 'ابزارهای موردنیازت را انتخاب کن. با خاموش کردن هرکدام، داده‌هایش حفظ می‌شود.';
+  String get modulesHint =>
+      'ابزارهای موردنیازت را انتخاب کن. با خاموش کردن هرکدام، داده‌هایش حفظ می‌شود.';
 
   @override
   String get modulePdf => 'PDFخوان';
 
   @override
-  String get modulePdfHint => 'مطالعه و جست‌وجوی آفلاین سند؛ ورق زدن یا رفتن به صفحهٔ دلخواه.';
+  String get modulePdfHint =>
+      'مطالعه و جست‌وجوی آفلاین سند؛ ورق زدن یا رفتن به صفحهٔ دلخواه.';
 
   @override
   String get moduleVault => 'فضای خصوصی';
 
   @override
-  String get moduleVaultHint => 'رمزها، کارت‌های بانکی و پیام‌های خصوصی، با محافظت Windows Hello.';
+  String get moduleVaultHint =>
+      'رمزها، کارت‌های بانکی و پیام‌های خصوصی، با محافظت Windows Hello.';
 
   @override
   String get modulePortrait => 'پرترهٔ نوشتاری';
 
   @override
-  String get modulePortraitHint => 'نوشته‌هایت به زبان آمار، همراه با بازتابی اختیاری از هوش مصنوعی.';
+  String get modulePortraitHint =>
+      'نوشته‌هایت به زبان آمار، همراه با بازتابی اختیاری از هوش مصنوعی.';
 
   @override
   String get moduleCycle => 'چرخه';
 
   @override
-  String get moduleCycleHint => 'فضایی آرام و قفل‌شده برای ثبت دوره‌ها و حال‌وهوای روزانه.';
+  String get moduleCycleHint =>
+      'فضایی آرام و قفل‌شده برای ثبت دوره‌ها و حال‌وهوای روزانه.';
 
   @override
   String get moduleOpen => 'باز کردن ماژول';
 
   @override
-  String get moduleDisabled => 'این ماژول خاموش است. آن را در تنظیمات ← ابزارها فعال کن.';
+  String get moduleDisabled =>
+      'این ماژول خاموش است. آن را در تنظیمات ← ابزارها فعال کن.';
 
   @override
   String get privateLocked => 'فضای خصوصی قفل است';
 
   @override
-  String get privateHint => 'با Windows Hello، ابزارهای خصوصی را با یک‌بار تأیید باز کن. قفل دو دقیقه بعد از آخرین فعالیت برمی‌گردد. با خارج شدن از نکس، محتوا پنهان می‌شود.';
+  String get privateHint =>
+      'با Windows Hello، ابزارهای خصوصی را با یک‌بار تأیید باز کن. قفل دو دقیقه بعد از آخرین فعالیت برمی‌گردد. با خارج شدن از نکس، محتوا پنهان می‌شود.';
 
   @override
   String get privateUnlock => 'باز کردن با Windows Hello';
@@ -1498,25 +1529,30 @@ class AppLocalizationsFa extends AppLocalizations {
   String get privateReason => 'باز کردن ابزارهای خصوصی در نکس';
 
   @override
-  String get privateUnavailable => 'تأیید لغو شد یا در دسترس نبود. Windows Hello را در گزینه‌های ورود ویندوز تنظیم کن و دوباره امتحان کن.';
+  String get privateUnavailable =>
+      'تأیید لغو شد یا در دسترس نبود. Windows Hello را در گزینه‌های ورود ویندوز تنظیم کن و دوباره امتحان کن.';
 
   @override
   String get privateLockNow => 'قفل کردن ابزارهای خصوصی';
 
   @override
-  String get privateCopyHint => 'به‌صورت خصوصی کپی شد. اگر محتوای کلیپ‌بورد عوض نشود، نکس آن را پس از ۳۰ ثانیه پاک می‌کند.';
+  String get privateCopyHint =>
+      'به‌صورت خصوصی کپی شد. اگر محتوای کلیپ‌بورد عوض نشود، نکس آن را پس از ۳۰ ثانیه پاک می‌کند.';
 
   @override
-  String get privateDeviceOnly => 'فقط در فضای امن ویندوز ذخیره می‌شود؛ خارج از یادداشت‌ها، جست‌وجو، هوش مصنوعی و پشتیبان کتابخانه.';
+  String get privateDeviceOnly =>
+      'فقط در فضای امن ویندوز ذخیره می‌شود؛ خارج از یادداشت‌ها، جست‌وجو، هوش مصنوعی و پشتیبان کتابخانه.';
 
   @override
-  String get privateReadFailed => 'خواندن فضای خصوصی ممکن نشد. چیزی بازنویسی نشده است.';
+  String get privateReadFailed =>
+      'خواندن فضای خصوصی ممکن نشد. چیزی بازنویسی نشده است.';
 
   @override
   String get privateDraft => 'ادامهٔ پیش‌نویس ذخیره‌شده';
 
   @override
-  String get privateDraftHint => 'هنگام نوشتن، پیش‌نویس به‌صورت امن ذخیره می‌شود.';
+  String get privateDraftHint =>
+      'هنگام نوشتن، پیش‌نویس به‌صورت امن ذخیره می‌شود.';
 
   @override
   String get vaultPasswords => 'رمزهای عبور';
@@ -1582,13 +1618,15 @@ class AppLocalizationsFa extends AppLocalizations {
   String get pdfChoose => 'انتخاب فایل PDF';
 
   @override
-  String get pdfChooseHint => 'یک PDF از دستگاه باز کن یا PDF پیوست یادداشت را بخوان. سند از این دستگاه خارج نمی‌شود.';
+  String get pdfChooseHint =>
+      'یک PDF از دستگاه باز کن یا PDF پیوست یادداشت را بخوان. سند از این دستگاه خارج نمی‌شود.';
 
   @override
   String get pdfSearch => 'جست‌وجو در این سند';
 
   @override
-  String get pdfSearchEmpty => 'متن مطابقی پیدا نشد. جست‌وجو در صفحات اسکن‌شده به OCR نیاز دارد.';
+  String get pdfSearchEmpty =>
+      'متن مطابقی پیدا نشد. جست‌وجو در صفحات اسکن‌شده به OCR نیاز دارد.';
 
   @override
   String pdfPage(String page, String total) {
@@ -1605,7 +1643,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get pdfPassword => 'رمز سند';
 
   @override
-  String get pdfFailed => 'باز کردن یا نمایش PDF ممکن نشد. فایل و رمز آن را بررسی کن و دوباره امتحان کن.';
+  String get pdfFailed =>
+      'باز کردن یا نمایش PDF ممکن نشد. فایل و رمز آن را بررسی کن و دوباره امتحان کن.';
 
   @override
   String get pdfSearchFailed => 'جست‌وجوی سند انجام نشد. دوباره امتحان کن.';
@@ -1661,19 +1700,23 @@ class AppLocalizationsFa extends AppLocalizations {
   String get portraitRewrite => 'نوشتن پرترهٔ تازه';
 
   @override
-  String get portraitThreshold => 'برای پرترهٔ نوشتاری، دست‌کم ۳۰ یادداشت در ۷ روز لازم است. آمار محلی همیشه در دسترس است.';
+  String get portraitThreshold =>
+      'برای پرترهٔ نوشتاری، دست‌کم ۳۰ یادداشت در ۷ روز لازم است. آمار محلی همیشه در دسترس است.';
 
   @override
   String get portraitConsentTitle => 'نمونه‌ای از یادداشت‌ها ارسال شود؟';
 
   @override
-  String get portraitConsent => 'فقط با ادامه دادن، نکس حداکثر ۸۰ گزیدهٔ کوتاه از یادداشت‌ها و آمار نوشتن را به ارائه‌دهندهٔ هوش مصنوعی انتخابی می‌فرستد. ابزارهای خصوصی و داده‌های چرخه ارسال نمی‌شوند. این متن یک بازتاب است، نه ارزیابی روان‌شناختی.';
+  String get portraitConsent =>
+      'فقط با ادامه دادن، نکس حداکثر ۸۰ گزیدهٔ کوتاه از یادداشت‌ها و آمار نوشتن را به ارائه‌دهندهٔ هوش مصنوعی انتخابی می‌فرستد. ابزارهای خصوصی و داده‌های چرخه ارسال نمی‌شوند. این متن یک بازتاب است، نه ارزیابی روان‌شناختی.';
 
   @override
-  String get portraitAiOff => 'برای نوشتن پرترهٔ اختیاری، ارائه‌دهندهٔ متنی را در تنظیمات هوش مصنوعی فعال و آزمایش کن و دسترسی به یادداشت‌ها را بده.';
+  String get portraitAiOff =>
+      'برای نوشتن پرترهٔ اختیاری، ارائه‌دهندهٔ متنی را در تنظیمات هوش مصنوعی فعال و آزمایش کن و دسترسی به یادداشت‌ها را بده.';
 
   @override
-  String get portraitFailed => 'پرترهٔ کاملی دریافت نشد. پرترهٔ قبلی حفظ شده است.';
+  String get portraitFailed =>
+      'پرترهٔ کاملی دریافت نشد. پرترهٔ قبلی حفظ شده است.';
 
   @override
   String get portraitStrengths => 'نقاط قوت در نوشته‌هایت';
@@ -1690,10 +1733,12 @@ class AppLocalizationsFa extends AppLocalizations {
   }
 
   @override
-  String get cyclePrivacy => 'داده‌های چرخه وارد یادداشت‌ها و جست‌وجو نمی‌شوند. پشتیبان کتابخانه آن‌ها را دربرمی‌گیرد؛ دسترسی هوش مصنوعی انتخابی جداگانه است.';
+  String get cyclePrivacy =>
+      'داده‌های چرخه وارد یادداشت‌ها و جست‌وجو نمی‌شوند. پشتیبان کتابخانه آن‌ها را دربرمی‌گیرد؛ دسترسی هوش مصنوعی انتخابی جداگانه است.';
 
   @override
-  String get cycleEstimate => 'این‌ها فقط برآورد تقویمی‌اند؛ تشخیص پزشکی یا روش پیشگیری از بارداری نیستند.';
+  String get cycleEstimate =>
+      'این‌ها فقط برآورد تقویمی‌اند؛ تشخیص پزشکی یا روش پیشگیری از بارداری نیستند.';
 
   @override
   String cycleDay(String day) {
@@ -1833,7 +1878,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get cycleLuteal => 'پیش از دوره';
 
   @override
-  String get cycleUncertain => 'با ثبت چرخه‌های بیشتر، برآوردها روشن‌تر می‌شوند.';
+  String get cycleUncertain =>
+      'با ثبت چرخه‌های بیشتر، برآوردها روشن‌تر می‌شوند.';
 
   @override
   String get cycleToday => 'امروز';
@@ -1852,4 +1898,204 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get moduleSearch => 'جست‌وجوی عنوان‌های خصوصی';
+
+  @override
+  String get libraryTitle => 'کتابخانه';
+
+  @override
+  String get libraryTagsHint => 'نام و رنگ برای آنچه دسته می‌کنید';
+
+  @override
+  String get libraryTrashHint => '۳۰ روز نگه داشته می‌شود';
+
+  @override
+  String libraryTagCount(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString برچسب',
+      zero: 'هنوز برچسبی نیست',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String libraryThreadCount(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString رشته',
+      zero: 'هنوز رشته‌ای نیست',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String libraryTrashCount(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString یادداشت · ۳۰ روز نگه داشته می‌شود',
+      zero: 'خالی',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get toolsSectionPrivate => 'خصوصی';
+
+  @override
+  String get toolsSectionEveryday => 'روزمره';
+
+  @override
+  String get toolsPrivateHint => 'جدا از یادداشت‌ها، جست‌وجو و هوش مصنوعی.';
+
+  @override
+  String get toolsMessages => 'پیام‌های ذخیره‌شدهٔ خصوصی';
+
+  @override
+  String get toolsMessagesHint => 'فضایی خصوصی برای متن‌های شما';
+
+  @override
+  String get vaultPasswordsHint => 'حساب‌ها، رمزها و ورود از فایل Chrome.';
+
+  @override
+  String get vaultCardsHint => 'اطلاعات کارت و شبا، آمادهٔ کپی.';
+
+  @override
+  String get scheduledTitle => 'زمان‌بندی‌شده‌ها';
+
+  @override
+  String get scheduledSubtitle => 'یادداشت‌هایی که در راه‌اند';
+
+  @override
+  String get threadsSubtitle =>
+      'یادداشت‌های یک موضوع، کنار هم و بدون جابه‌جایی';
+
+  @override
+  String get toolsGeneratorHint => 'ساخت و کپی رمز قوی';
+
+  @override
+  String get setAside => 'کنار بگذار';
+
+  @override
+  String get setAsideSheetTitle => 'تا کِی کنار بگذارم؟';
+
+  @override
+  String get setAsideSheetHint =>
+      'از صفحه‌ی اصلی می‌رود ولی در کتابخانه می‌ماند. با جستجو همچنان پیدایش می‌کنی.';
+
+  @override
+  String get setAsideUntilBack => 'تا خودم برش گردانم';
+
+  @override
+  String get setAsideThisEvening => 'امروز عصر';
+
+  @override
+  String get setAsideTomorrow => 'فردا صبح';
+
+  @override
+  String get setAsideNextWeek => 'هفته‌ی بعد';
+
+  @override
+  String get setAsidePickDate => 'انتخاب تاریخ…';
+
+  @override
+  String get setAsideDone => 'کنار گذاشته شد';
+
+  @override
+  String setAsideDoneUntil(String when) {
+    return 'تا $when کنار گذاشته شد';
+  }
+
+  @override
+  String setAsideGroupDone(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return '$countString یادداشت کنار گذاشته شد';
+  }
+
+  @override
+  String setAsideBackBanner(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return '$countString یادداشت از کنار گذاشتن برگشتند';
+  }
+
+  @override
+  String get setAsideBringBack => 'برگردان';
+
+  @override
+  String get setAsideSection => 'کنار گذاشته‌ها';
+
+  @override
+  String get setAsideSectionHint => 'از صفحه‌ی اصلی کنار رفته‌اند، نه حذف';
+
+  @override
+  String get setAsidePageTitle => 'کنار گذاشته‌ها';
+
+  @override
+  String get setAsideEmptyTitle => 'چیزی کنار گذاشته نشده';
+
+  @override
+  String get setAsideEmptyBody =>
+      'یادداشتی را نگه دار و «کنار بگذار» را بزن تا فعلاً از سر راه برود.';
+
+  @override
+  String setAsideBackOn(String when) {
+    return 'برمی‌گردد $when';
+  }
+
+  @override
+  String get setAsideUntilFurther => 'تا خودت برش گردانی';
+
+  @override
+  String get setAsideMark => 'کنار گذاشته';
+
+  @override
+  String setAsideCountLabel(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString یادداشت کنار گذاشته',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get setAsideAllClear => 'همه‌چیز مرتب است';
+
+  @override
+  String get setAsideView => 'دیدن کنار گذاشته‌ها';
+
+  @override
+  String get vaultImportCsv => "ورود رمزهای Chrome";
+
+  @override
+  String get vaultImportCsvConfirm =>
+      "این فایل CSV رمزهای بدون رمزنگاری دارد. به فضای خصوصی همین دستگاه وارد شود؟";
+
+  @override
+  String vaultImportCsvResult(int added, int duplicates, int skipped) =>
+      "افزوده: $added · تکراری: $duplicates · ردشده: $skipped";
 }

@@ -213,6 +213,10 @@ mixin PanelActions on PanelStateBase {
   @override
   void runAction(String action) {
     switch (action) {
+      case 'calc':
+        close();
+        unawaited(native.launch('calc.exe').catchError((_) {}));
+        break;
       case 'shot':
         close();
         unawaited(native.screenshot().catchError((_) {}));

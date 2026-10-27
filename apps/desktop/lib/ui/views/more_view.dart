@@ -5,6 +5,7 @@ import '../../core/controller.dart';
 import '../dock.dart';
 import '../flyout.dart';
 import '../widgets.dart';
+import '../../nex/collection_shelves.dart';
 
 /// The "More" tools grid. Tiles can be dragged onto the dock.
 class MoreView extends StatelessWidget {
@@ -23,26 +24,31 @@ class MoreView extends StatelessWidget {
         ),
         ConstrainedBox(
           constraints: const BoxConstraints(minHeight: 70, maxHeight: 400),
-          child: more.isEmpty
-              ? Empty(utilityLabel(context, 'utility14'))
-              : ScrollConfiguration(
-                  behavior: ScrollConfiguration.of(
-                    context,
-                  ).copyWith(scrollbars: false),
-                  child: SingleChildScrollView(
-                    key: c.zoneKeys['more'],
-                    child: ValueListenableBuilder<DragInfo?>(
-                      valueListenable: c.dragInfo,
-                      builder: (context, drag, _) {
-                        return Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: _tiles(c, more, drag),
-                        );
-                      },
-                    ),
+          child: ScrollConfiguration(
+            behavior: ScrollConfiguration.of(
+              context,
+            ).copyWith(scrollbars: false),
+            child: SingleChildScrollView(
+              key: c.zoneKeys['more'],
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const NexToolsShelves(),
+                  if (more.isEmpty) Empty(utilityLabel(context, 'utility14')),
+                  ValueListenableBuilder<DragInfo?>(
+                    valueListenable: c.dragInfo,
+                    builder: (context, drag, _) {
+                      return Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: _tiles(c, more, drag),
+                      );
+                    },
                   ),
-                ),
+                ],
+              ),
+            ),
+          ),
         ),
       ],
     );

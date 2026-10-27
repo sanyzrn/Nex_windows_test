@@ -336,6 +336,7 @@ void main() {
         final s = AiStrings.of(context);
         await walk(tester, [
           find.byKey(const ValueKey('library-search')),
+          find.byKey(const ValueKey('library-locations')),
           find.byTooltip(s.t('board')),
           find.byTooltip(s.t('list')),
           find.byKey(const ValueKey('manage-tags')),
