@@ -123,7 +123,11 @@ void main() {
     f.write('first note');
     await f.session.flushed;
     final id = f.session.id!;
+    // Recent notes order by update time. Two writes in one clock tick tie, and
+    // the tie falls to the newer note's id — so the edit has to land later.
+    await Future<void>.delayed(const Duration(milliseconds: 20));
     await f.store.call<Note>('capture', {'text': 'newer note'});
+    await Future<void>.delayed(const Duration(milliseconds: 20));
     await f.store.call<Note>('capture', {'id': id, 'text': 'edited in reader'});
     final note = await f.store.call<Note>('get', {'id': id});
     f.reflectReaderEdit(note);
