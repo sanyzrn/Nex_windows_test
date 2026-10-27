@@ -1,1 +1,1 @@
-0.31.0+24: regenerate Windows-only baselines for the quieter window (type density, slim sidebar, Capture grid, Library cards, Tools and Settings tiles). Review every changed image. Preserve all comparison tolerances and behavior checks.
+0.32.0+25: regenerate Windows-only baselines for the sidebar tags, tighter sidebar rows, the Library list search field, the Intelligence introduction and the note AI card. Review every changed image. Preserve all comparison tolerances and behavior checks.

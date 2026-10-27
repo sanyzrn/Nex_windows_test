@@ -54,13 +54,16 @@ and white space doing the work that borders and headings did.
 3. **Tools and Settings — done in 0.31.0.** One compact tile for tools and for
    the Private / Everyday shelves; Settings without the banner, with smaller
    rows, cards and option tiles.
-4. **Next.** Library: tag and type filters moved into the rail (with counts, as
-   in the reference) so the chip row under the search can go; the list view and
-   the reader at the same density; the note reader's toolbar. Intelligence page
-   and its settings at the same type scale. Dialogs and pickers (palette,
-   reminder, tag manager) at 12 px radius. A pass over the edge panel, which is
-   deliberately unchanged here.
-5. **Windows tools.** The Tools page is now a plain grid with a "Windows"
+4. **Sidebar tags and calmer pages — done in 0.32.0.** Tags in the sidebar with
+   their colour and count; one click filters the Library, a second clears it
+   (`NexRailTags`, `NexFeatures.requestLibraryTag`). Tighter sidebar rows, the
+   Library list's search keeps its hint beside the reader, a smaller
+   Intelligence introduction and note AI card.
+5. **Next.** Type filter beside the tags; the Library list view and the reader's
+   toolbar at the same density; Intelligence settings; dialogs and pickers
+   (palette, reminder, tag manager) at 12 px radius; a pass over the edge
+   panel, which is deliberately unchanged so far.
+6. **Windows tools.** The Tools page is now a plain grid with a "Windows"
    section waiting: drop a tile in `NexToolsShelves` (`collection_shelves.dart`)
    or add an id to the tool registry (`core/registry.dart`) and it takes the
    same shape. Nothing else needs to change for a new tool to look at home.

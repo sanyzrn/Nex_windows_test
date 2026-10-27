@@ -149,6 +149,12 @@ class _WindowNavRail extends StatelessWidget {
                       selected: section == 'tools',
                       onPressed: () => controller.selectWindowSection('tools'),
                     ),
+                    if (features != null)
+                      NexRailTags(
+                        features: features!,
+                        controller: controller,
+                        section: section,
+                      ),
                   ],
                 ),
               ),

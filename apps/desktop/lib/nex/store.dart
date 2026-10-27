@@ -405,6 +405,8 @@ class DesktopStore {
                 result = null;
               case 'tags':
                 result = notes.listTags();
+              case 'tagUsage':
+                result = maintenance.tagUsage();
               case 'createTag':
                 notes.upsertTag(name: a['name'] as String);
                 result = null;

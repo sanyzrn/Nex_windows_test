@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.32.0 — 2026-10-28
+
+- Tags in the sidebar: each with its colour and how many notes carry it. Click one to see only those notes in the Library; click it again to clear. The Library's Tags filter is still there.
+- The sidebar's rows are tighter, and the Library's search field keeps its hint text when the note reader is open.
+- Intelligence opens with a smaller introduction, and the Nex AI card in a note takes less room.
+
 ## 0.31.0 — 2026-10-27
 
 - A quieter window: smaller type, a slimmer sidebar with one New note button, and the panel switch, theme, shortcuts and search as a row of small icons.

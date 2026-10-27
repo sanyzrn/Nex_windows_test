@@ -2,7 +2,7 @@
 [Setup]
 AppId={{48B6A24D-07D7-4DE8-8D6C-801190DF6A42}
 AppName=Nex
-AppVersion=0.31.0+24
+AppVersion=0.32.0+25
 AppPublisher=Nex
 DefaultDirName={localappdata}\Programs\Nex
 DefaultGroupName=Nex
@@ -22,13 +22,13 @@ LicenseFile=..\LICENSE
 SetupIconFile=..\windows\runner\resources\app_icon.ico
 UninstallDisplayIcon={app}\nex_desktop.exe
 OutputDir=..\build\installer\output
-OutputBaseFilename=Nex-Windows-Setup-0.31.0-x64
+OutputBaseFilename=Nex-Windows-Setup-0.32.0-x64
 Compression=lzma2
 SolidCompression=yes
 AppMutex=Local\NexDesktopSingleton
 CloseApplications=no
 RestartApplications=no
-VersionInfoVersion=0.31.0.24
+VersionInfoVersion=0.32.0.25
 VersionInfoDescription=Nex Windows installer
 
 [Languages]

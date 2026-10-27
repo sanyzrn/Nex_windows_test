@@ -370,6 +370,7 @@ class NexWorkspaceDestination extends StatelessWidget {
                 // the 8px gap between rows keeps the 48px acquisition pitch
                 // Material asks for, and every item keeps its keyboard ring.
                 minimumSize: Size(40, dense ? 34 : 40),
+                tapTargetSize: dense ? MaterialTapTargetSize.shrinkWrap : null,
                 padding: EdgeInsets.symmetric(
                   horizontal: compact ? 0 : (dense ? 10 : 12),
                   vertical: dense ? 6 : 9,

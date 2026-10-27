@@ -120,6 +120,14 @@ abstract class _LibraryStateBase extends State<NexLibraryView> {
       selectedNote = requested;
       _selectedIds.clear();
     }
+    final asked = features.takeRequestedTag();
+    if (asked != null) {
+      tag = asked.id;
+      trash = false;
+      _libraryRevision = features.libraryRevision;
+      load();
+      return;
+    }
     final revision = features.libraryRevision;
     if (_libraryRevision != revision) {
       _libraryRevision = revision;
@@ -142,6 +150,12 @@ abstract class _LibraryStateBase extends State<NexLibraryView> {
     _searchDebounce?.cancel();
     final database = store;
     final token = ++generation;
+    final features = NexScope.of(context);
+    if (features.libraryTag != tag) {
+      features.libraryTag = tag;
+      // The sidebar shows which tag is open; tell it once this frame is done.
+      scheduleMicrotask(features.notify);
+    }
     setState(() {
       loading = true;
       failure = null;

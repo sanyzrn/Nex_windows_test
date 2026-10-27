@@ -435,40 +435,38 @@ class _AssistantState extends State<DesktopAssistant> {
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
                                 if (ai.turns.isEmpty) ...[
-                                  const SizedBox(height: 22),
+                                  const SizedBox(height: 12),
                                   Align(
                                     alignment: AlignmentDirectional.centerStart,
                                     child: Container(
-                                      padding: const EdgeInsets.all(18),
+                                      padding: const EdgeInsets.all(12),
                                       decoration: BoxDecoration(
                                         color: c.primaryContainer,
-                                        borderRadius: BorderRadius.circular(24),
+                                        borderRadius: BorderRadius.circular(16),
                                       ),
                                       child: Icon(
                                         Icons.auto_awesome_rounded,
                                         color: c.onPrimaryContainer,
-                                        size: 34,
+                                        size: 24,
                                       ),
                                     ),
                                   ),
-                                  const SizedBox(height: 24),
+                                  const SizedBox(height: 14),
                                   Text(
                                     s.t('studio'),
-                                    style: theme.textTheme.headlineMedium
-                                        ?.copyWith(
-                                          fontWeight: FontWeight.w700,
-                                          letterSpacing: -.5,
-                                        ),
-                                  ),
-                                  const SizedBox(height: 12),
-                                  Text(
-                                    DesktopStrings.of(context).t('askHint'),
-                                    style: theme.textTheme.bodyLarge?.copyWith(
-                                      color: c.onSurfaceVariant,
-                                      height: 1.8,
+                                    style: theme.textTheme.titleLarge?.copyWith(
+                                      letterSpacing: -.3,
                                     ),
                                   ),
-                                  const SizedBox(height: 28),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    DesktopStrings.of(context).t('askHint'),
+                                    style: theme.textTheme.bodyMedium?.copyWith(
+                                      color: c.onSurfaceVariant,
+                                      height: 1.6,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 18),
                                   NexResponsiveGrid(
                                     minWidth: 210,
                                     maxColumns: 3,
