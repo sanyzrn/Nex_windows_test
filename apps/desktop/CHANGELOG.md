@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.34.0 — 2026-10-28
+
+- Cards that sit side by side are now one height: the Tools and shelf tiles, the Intelligence suggestions and Settings groups. Every tile in the Tools page has the same size.
+- New note in the editor's footer is smaller and no longer crowds the word count.
+- The window can no longer be made narrower than 460 px, where the layouts started to collide.
+
 ## 0.33.0 — 2026-10-28
 
 - Dialogs and the window's content card use the same 16 px corners as the cards inside them, so a dialog no longer looks like it belongs to another app.

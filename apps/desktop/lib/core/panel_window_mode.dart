@@ -12,8 +12,8 @@ class WindowFrameHelper {
   static Map<String, dynamic>? validateBounds({
     required Map<String, dynamic>? bounds,
     required List<Map<String, dynamic>> screens,
-    int minWidth = 400,
-    int minHeight = 300,
+    int minWidth = 460,
+    int minHeight = 520,
   }) {
     if (bounds == null) return null;
     final x = (bounds['x'] as num?)?.toInt();

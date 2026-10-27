@@ -468,6 +468,7 @@ class _AssistantState extends State<DesktopAssistant> {
                                   ),
                                   const SizedBox(height: 18),
                                   NexResponsiveGrid(
+                                    equalHeights: true,
                                     minWidth: 210,
                                     maxColumns: 3,
                                     children: [

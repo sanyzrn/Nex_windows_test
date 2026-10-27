@@ -100,7 +100,7 @@ class _ToolsDirectoryState extends State<_ToolsDirectory> {
               ),
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 16),
           NexToolsShelves(query: query),
           NexModuleShelf(query: query),
           if (filtered.isEmpty)
@@ -148,31 +148,16 @@ class _ToolsDirectoryState extends State<_ToolsDirectory> {
     );
   }
 
-  Widget _grid(List<String> ids, PanelController controller) => LayoutBuilder(
-    builder: (context, constraints) {
-      final scaledWidth =
-          constraints.maxWidth / MediaQuery.textScalerOf(context).scale(1);
-      final columns = scaledWidth >= 1000
-          ? 4
-          : scaledWidth >= 700
-          ? 3
-          : scaledWidth >= 460
-          ? 2
-          : 1;
-      final width = (constraints.maxWidth - (columns - 1) * 10) / columns;
-      return Wrap(
+  Widget _grid(List<String> ids, PanelController controller) =>
+      NexResponsiveGrid(
+        equalHeights: true,
+        minWidth: 240,
+        maxColumns: 4,
         spacing: 10,
-        runSpacing: 10,
         children: [
-          for (final id in ids)
-            SizedBox(
-              width: width,
-              child: _ToolTile(controller: controller, id: id),
-            ),
+          for (final id in ids) _ToolTile(controller: controller, id: id),
         ],
       );
-    },
-  );
 }
 
 class _ToolTile extends StatelessWidget {
@@ -228,56 +213,65 @@ class _ToolTile extends StatelessWidget {
           onTap: id == 'awake' && controller.awakeBusy ? null : _open,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
-            child: Row(
-              children: [
-                Container(
-                  width: 34,
-                  height: 34,
-                  decoration: BoxDecoration(
-                    color: accent.withValues(alpha: .18),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Center(
-                    child: _ToolIcon(
-                      controller: controller,
-                      id: id,
-                      color: accent,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                minHeight: nexTileMinHeight - 22,
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 34,
+                    height: 34,
+                    decoration: BoxDecoration(
+                      color: accent.withValues(alpha: .18),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Center(
+                      child: _ToolIcon(
+                        controller: controller,
+                        id: id,
+                        color: accent,
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        utilityLabelForText(context, ToolInfo.of(id).name),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.titleSmall,
-                      ),
-                      if (description != null) ...[
-                        const SizedBox(height: 2),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
                         Text(
-                          description,
+                          utilityLabelForText(context, ToolInfo.of(id).name),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(color: c.onSurfaceVariant),
+                          style: Theme.of(context).textTheme.titleSmall,
                         ),
+                        if (description != null) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            description,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(color: c.onSurfaceVariant),
+                          ),
+                        ],
                       ],
-                    ],
+                    ),
                   ),
-                ),
-                if (id == 'awake' && controller.awakeBusy)
-                  const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                else if (active)
-                  Icon(Icons.check_circle_rounded, size: 17, color: c.primary),
-              ],
+                  if (id == 'awake' && controller.awakeBusy)
+                    const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  else if (active)
+                    Icon(
+                      Icons.check_circle_rounded,
+                      size: 17,
+                      color: c.primary,
+                    ),
+                ],
+              ),
             ),
           ),
         ),

@@ -1,2 +1,1 @@
-0.33.0+26: regenerate Windows-only baselines for 16 px dialog and window-card corners and the lighter note action row. Review every changed image. Preserve all comparison tolerances and behavior checks.
-Refresh after merge: the 0.33 merge landed before its baselines were regenerated.
+0.34.0+27: regenerate Windows-only baselines for equal-height cards in grids, the smaller New note button, uniform tool tiles and the 460 px minimum window width. Review every changed image. Preserve all comparison tolerances and behavior checks.

@@ -175,6 +175,11 @@ class NexFeatureCard extends StatelessWidget {
   }
 }
 
+/// The height of one tile in a tools or shelf grid — a name and two lines.
+/// Every tile on a page is this tall, whatever it says, so the grid reads as
+/// one family.
+const double nexTileMinHeight = 74;
+
 class NexResponsiveGrid extends StatelessWidget {
   const NexResponsiveGrid({
     super.key,
@@ -182,10 +187,16 @@ class NexResponsiveGrid extends StatelessWidget {
     this.minWidth = 240,
     this.maxColumns = 2,
     this.spacing = 14,
+    this.equalHeights = false,
   });
   final List<Widget> children;
   final double minWidth, spacing;
   final int maxColumns;
+
+  /// Cards in one row take the tallest one's height. Off by default: it asks
+  /// every child for its intrinsic height, which a `ListTile` (settings rows)
+  /// answers without counting wrapped lines.
+  final bool equalHeights;
   @override
   Widget build(BuildContext context) => LayoutBuilder(
     builder: (context, box) {
@@ -195,11 +206,39 @@ class NexResponsiveGrid extends StatelessWidget {
         maxColumns,
       );
       final width = (box.maxWidth - (columns - 1) * spacing) / columns;
-      return Wrap(
-        spacing: spacing,
-        runSpacing: spacing,
+      if (!equalHeights) {
+        return Wrap(
+          spacing: spacing,
+          runSpacing: spacing,
+          children: [
+            for (final child in children) SizedBox(width: width, child: child),
+          ],
+        );
+      }
+      // Cards in one row are one height: the tallest sets it. A Wrap left
+      // each card as tall as its own words, and a row of boxes in three
+      // heights looked like a mistake.
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          for (final child in children) SizedBox(width: width, child: child),
+          for (var start = 0; start < children.length; start += columns) ...[
+            if (start > 0) SizedBox(height: spacing),
+            IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  for (var i = 0; i < columns; i++) ...[
+                    if (i > 0) SizedBox(width: spacing),
+                    Expanded(
+                      child: start + i < children.length
+                          ? children[start + i]
+                          : const SizedBox.shrink(),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
         ],
       );
     },

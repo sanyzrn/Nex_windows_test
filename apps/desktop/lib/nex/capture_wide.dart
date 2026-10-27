@@ -230,7 +230,7 @@ mixin CaptureWide on CaptureViewBase {
                                       },
                                     ),
                                   ),
-                                  const SizedBox(width: 4),
+                                  const SizedBox(width: 14),
                                   if (cramped)
                                     IconButton(
                                       tooltip: l.newNote,
@@ -245,12 +245,19 @@ mixin CaptureWide on CaptureViewBase {
                                       onPressed: f.startingNewNote
                                           ? null
                                           : () => f.fresh(),
-                                      icon: const Icon(Icons.add, size: 15),
+                                      icon: const Icon(Icons.add, size: 14),
                                       label: Text(l.newNote),
                                       style: FilledButton.styleFrom(
-                                        visualDensity: VisualDensity.standard,
+                                        visualDensity: VisualDensity.compact,
+                                        minimumSize: const Size(0, 32),
                                         padding: const EdgeInsets.symmetric(
-                                          horizontal: 8,
+                                          horizontal: 12,
+                                        ),
+                                        textStyle: theme.textTheme.labelMedium,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            10,
+                                          ),
                                         ),
                                       ),
                                     ),
