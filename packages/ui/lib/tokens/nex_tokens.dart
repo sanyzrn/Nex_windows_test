@@ -827,7 +827,9 @@ ThemeData _theme({
       backgroundColor: cardSurface,
       surfaceTintColor: Colors.transparent,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(NexRadius.xl),
+        // 16, like every card in the window: a 28 dialog over a calm page
+        // looked like a different app.
+        borderRadius: BorderRadius.circular(NexRadius.md + 4),
         // A dialog can open over a sheet with the same fill. Its boundary
         // must remain visible even when the two surfaces match.
         side: liquidGlass ? BorderSide.none : BorderSide(color: border),

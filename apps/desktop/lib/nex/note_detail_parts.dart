@@ -241,8 +241,9 @@ class NoteActionBar extends StatelessWidget {
     // two columns and wrapping labels instead of a shrunken font.
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: scheme.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(NexRadius.lg),
+        color: scheme.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(NexRadius.md),
+        border: Border.all(color: scheme.outlineVariant.withValues(alpha: .6)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(4),

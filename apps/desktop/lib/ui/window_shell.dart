@@ -139,7 +139,7 @@ class _NexWindowShellState extends State<NexWindowShell> {
                       color: scheme.surface,
                       clipBehavior: Clip.antiAlias,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(NexRadius.xl),
+                        borderRadius: BorderRadius.circular(NexRadius.md + 4),
                         side: BorderSide(
                           color: scheme.outlineVariant.withValues(alpha: .5),
                         ),
