@@ -471,7 +471,7 @@ void NativeBridge::SetWindowMode(const std::string& mode, int x, int y, int w,
 
   const auto monitors = CollectMonitors();
   const bool saved =
-      !compact && w >= 320 && h >= 320 && x > -32000 && y > -32000;
+      !compact && w >= 460 && h >= 520 && x > -32000 && y > -32000;
   bool placed = false;
   if (saved && !monitors.empty()) {
     const RECT frame{x, y, x + w, y + h};
@@ -976,7 +976,8 @@ bool NativeBridge::OnMessage(HWND hwnd, UINT message, WPARAM wparam, LPARAM lpar
     const UINT dpi = FlutterDesktopGetDpiForMonitor(
         MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST));
     const double scale = dpi == 0 ? 1.0 : dpi / 96.0;
-    mmi->ptMinTrackSize.x = static_cast<LONG>(380 * scale);
+    // Narrower than the compact card (460) makes the layouts collide.
+    mmi->ptMinTrackSize.x = static_cast<LONG>(460 * scale);
     mmi->ptMinTrackSize.y = static_cast<LONG>(520 * scale);
     MONITORINFO mi{};
     mi.cbSize = sizeof(mi);

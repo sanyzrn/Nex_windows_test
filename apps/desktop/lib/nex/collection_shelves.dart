@@ -106,47 +106,52 @@ class DesktopShelfTile extends StatelessWidget {
           onTap: onTap,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
-            child: Row(
-              children: [
-                Container(
-                  width: 34,
-                  height: 34,
-                  decoration: BoxDecoration(
-                    color: accent.withValues(alpha: .18),
-                    borderRadius: BorderRadius.circular(10),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                minHeight: nexTileMinHeight - 22,
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 34,
+                    height: 34,
+                    decoration: BoxDecoration(
+                      color: accent.withValues(alpha: .18),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Icon(icon, size: 19, color: scheme.onSurface),
                   ),
-                  child: Icon(icon, size: 19, color: scheme.onSurface),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.titleSmall,
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        subtitle,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: scheme.onSurfaceVariant,
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.titleSmall,
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 2),
+                        Text(
+                          subtitle,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: scheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                if (locked)
-                  Icon(
-                    Icons.lock_outline,
-                    size: 15,
-                    color: scheme.onSurfaceVariant,
-                  ),
-              ],
+                  if (locked)
+                    Icon(
+                      Icons.lock_outline,
+                      size: 15,
+                      color: scheme.onSurfaceVariant,
+                    ),
+                ],
+              ),
             ),
           ),
         ),
@@ -168,6 +173,7 @@ class NexToolsShelves extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         NexResponsiveGrid(
+          equalHeights: true,
           minWidth: 240,
           maxColumns: 4,
           spacing: 10,
@@ -332,6 +338,7 @@ class _NexLibraryLocationsState extends State<NexLibraryLocations> {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
       child: NexResponsiveGrid(
+        equalHeights: true,
         minWidth: 200,
         children: [
           DesktopShelfTile(

@@ -8,7 +8,7 @@ Declared version: **0.26.0+20**. [Product guide](../../README.md) ·
 
 - `lib/ui/window_shell.dart` composes the native caption, section header and content
   card. `kWindowWideAt` (960 logical px) chooses the labelled rail or slim rail.
-  The default window is 460×760 dip with a 380×520 minimum; size/position memory
+  The default window is 460×760 dip with a 460×520 minimum; size/position memory
   is optional. Large text can widen rails and wrap/scroll content.
 - The panel shell provides edge reveal, dock, hover navigation and flyouts. Holds
   protect recordings, native pickers, active drags and modal operations. Both modes
