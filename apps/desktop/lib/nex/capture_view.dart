@@ -194,18 +194,21 @@ abstract class CaptureViewBase extends StatelessWidget {
     BuildContext context,
     NexFeatures f,
     AppLocalizations l,
-    PanelController? c,
-  ) {
+    PanelController? c, {
+    bool dense = false,
+  }) {
     return Wrap(
-      spacing: 8,
-      runSpacing: 8,
+      spacing: dense ? 6 : 8,
+      runSpacing: dense ? 6 : 8,
       children: [
         _CaptureAction(
+          dense: dense,
           label: l.pasteText,
           onPressed: () => _pasteText(f),
           icon: Icons.content_paste_rounded,
         ),
         _CaptureAction(
+          dense: dense,
           label: l.addImage,
           onPressed: f.importing
               ? null
@@ -225,11 +228,13 @@ abstract class CaptureViewBase extends StatelessWidget {
           icon: Icons.add_photo_alternate_outlined,
         ),
         _CaptureAction(
+          dense: dense,
           label: l.attach,
           onPressed: f.importing ? null : () => _choose(context, f),
           icon: Icons.attach_file_rounded,
         ),
         _CaptureAction(
+          dense: dense,
           label: l.addAudio,
           onPressed: f.importing
               ? null
@@ -251,6 +256,7 @@ abstract class CaptureViewBase extends StatelessWidget {
           icon: Icons.audio_file_outlined,
         ),
         _CaptureAction(
+          dense: dense,
           label: f.recordingAt == null ? l.record : l.stop,
           onPressed: f.recordingBusy ? null : () => f.record(c),
           icon: f.recordingAt == null
@@ -259,6 +265,7 @@ abstract class CaptureViewBase extends StatelessWidget {
         ),
         if (c != null)
           _CaptureAction(
+            dense: dense,
             label: l.pastePhoto,
             onPressed: () => f.guard(() async {
               final image = await c.native.currentClipboardImage();

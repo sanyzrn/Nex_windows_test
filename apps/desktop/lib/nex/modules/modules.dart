@@ -190,7 +190,9 @@ class _NexModulesSettingsState extends State<NexModulesSettings> {
                 l.failed,
                 style: TextStyle(color: Theme.of(context).colorScheme.error),
               ),
-            for (final module in DesktopModule.values) ...[
+            for (final module in DesktopModule.values.where(
+              DesktopModules.isOffered,
+            )) ...[
               SwitchListTile.adaptive(
                 key: ValueKey('module-switch-${module.name}'),
                 contentPadding: EdgeInsets.zero,

@@ -17,12 +17,17 @@ mixin CaptureWide on CaptureViewBase {
         // its own; below ~420 the label gives way to an icon so the row
         // never has to shove anything off the edge.
         final cramped = constraints.maxWidth < 420;
+        // On the wide home the editor is a quiet card and the actions a row
+        // of small chips; the compact page keeps its tiles.
+        final calm = embedded && !small;
         final body = Padding(
           padding: embedded ? EdgeInsets.zero : EdgeInsets.all(small ? 16 : 24),
           child: Align(
-            alignment: Alignment.topCenter,
+            alignment: embedded
+                ? AlignmentDirectional.topStart
+                : Alignment.topCenter,
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 720),
+              constraints: BoxConstraints(maxWidth: calm ? 760 : 720),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -45,9 +50,9 @@ mixin CaptureWide on CaptureViewBase {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Padding(
-                          padding: const EdgeInsetsDirectional.fromSTEB(
-                            18,
-                            14,
+                          padding: EdgeInsetsDirectional.fromSTEB(
+                            calm ? 16 : 18,
+                            calm ? 10 : 14,
                             12,
                             0,
                           ),
@@ -57,16 +62,20 @@ mixin CaptureWide on CaptureViewBase {
                                 f.checklist
                                     ? Icons.checklist_rounded
                                     : Icons.edit_note_rounded,
-                                size: 19,
+                                size: calm ? 17 : 19,
                                 color: scheme.primary,
                               ),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
                                   f.checklist ? l.checklist : l.workspaceCreate,
-                                  style: theme.textTheme.titleSmall?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                                  style:
+                                      (calm
+                                              ? theme.textTheme.labelLarge
+                                              : theme.textTheme.titleSmall)
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.w600,
+                                          ),
                                 ),
                               ),
                               Tooltip(
@@ -111,13 +120,13 @@ mixin CaptureWide on CaptureViewBase {
                                 controller: f.composer,
                                 focusNode: f.focus,
                                 autofocus: true,
-                                minLines: 6,
+                                minLines: calm ? 4 : 6,
                                 maxLines: small ? 12 : 16,
                                 textAlignVertical: TextAlignVertical.top,
                                 textDirection: direction,
                                 keyboardType: TextInputType.multiline,
                                 style: theme.textTheme.bodyLarge?.copyWith(
-                                  fontSize: 16,
+                                  fontSize: calm ? 15 : 16,
                                   height: 1.6,
                                 ),
                                 decoration: InputDecoration(
@@ -125,10 +134,12 @@ mixin CaptureWide on CaptureViewBase {
                                   hintStyle: theme.textTheme.bodyLarge
                                       ?.copyWith(
                                         color: scheme.onSurfaceVariant,
-                                        fontSize: 16,
+                                        fontSize: calm ? 15 : 16,
                                       ),
                                   filled: false,
-                                  contentPadding: const EdgeInsets.all(18),
+                                  contentPadding: EdgeInsets.all(
+                                    calm ? 16 : 18,
+                                  ),
                                   border: InputBorder.none,
                                   enabledBorder: InputBorder.none,
                                   focusedBorder: InputBorder.none,
@@ -155,15 +166,21 @@ mixin CaptureWide on CaptureViewBase {
                                 children: [
                                   Semantics(
                                     label: l.checklist,
-                                    child: Switch(
-                                      value: f.checklist,
-                                      onChanged:
-                                          f.session.id == null && !f.saving
-                                          ? (v) {
-                                              f.checklist = v;
-                                              f.notify();
-                                            }
-                                          : null,
+                                    child: SizedBox(
+                                      width: calm ? 40 : null,
+                                      height: calm ? 26 : null,
+                                      child: FittedBox(
+                                        child: Switch(
+                                          value: f.checklist,
+                                          onChanged:
+                                              f.session.id == null && !f.saving
+                                              ? (v) {
+                                                  f.checklist = v;
+                                                  f.notify();
+                                                }
+                                              : null,
+                                        ),
+                                      ),
                                     ),
                                   ),
                                   const SizedBox(width: 2),
@@ -246,7 +263,7 @@ mixin CaptureWide on CaptureViewBase {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  _actions(context, f, l, c),
+                  _actions(context, f, l, c, dense: calm),
                   if (f.importing || f.recordingBusy)
                     const Padding(
                       padding: EdgeInsets.only(top: 8),
@@ -317,13 +334,40 @@ class _CaptureAction extends StatelessWidget {
     required this.label,
     required this.icon,
     required this.onPressed,
+    this.dense = false,
   });
   final String label;
   final IconData icon;
   final VoidCallback? onPressed;
+
+  /// A small chip that sizes to its label: the quiet row under the wide
+  /// home's editor.
+  final bool dense;
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    if (dense) {
+      return DesktopFocusRing(
+        child: OutlinedButton.icon(
+          onPressed: onPressed,
+          icon: Icon(icon, size: 14),
+          label: Text(
+            label,
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+          ),
+          style: OutlinedButton.styleFrom(
+            foregroundColor: scheme.onSurfaceVariant,
+            side: BorderSide(color: scheme.outlineVariant),
+            visualDensity: VisualDensity.compact,
+            minimumSize: const Size(0, 30),
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        ),
+      );
+    }
     return LayoutBuilder(
       builder: (context, constraints) {
         // In a narrow column the actions are icon-over-label tiles, three

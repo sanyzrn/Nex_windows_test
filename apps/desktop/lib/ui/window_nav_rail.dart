@@ -13,7 +13,7 @@ class _WindowNavRail extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context)!;
     final c = Theme.of(context).colorScheme;
-    var railWidth = 206.0;
+    var railWidth = 192.0;
     final scaler = MediaQuery.textScalerOf(context);
     if (scaler.scale(1) > 1) {
       for (final label in [
@@ -22,7 +22,6 @@ class _WindowNavRail extends StatelessWidget {
         AiStrings.of(context).t('ai'),
         l.navTools,
         l.settings,
-        l.switchToPanel,
         l.newNote,
       ]) {
         for (final word in label.split(RegExp(r'\s+'))) {
@@ -37,7 +36,7 @@ class _WindowNavRail extends StatelessWidget {
             textDirection: Directionality.of(context),
           )..layout();
           // Outer padding + button padding + icon/gap, with a rounding guard.
-          final needed = painter.width.ceilToDouble() + 82;
+          final needed = painter.width.ceilToDouble() + 74;
           if (needed > railWidth) railWidth = needed;
           painter.dispose();
         }
@@ -48,8 +47,8 @@ class _WindowNavRail extends StatelessWidget {
       builder: (context, section, _) => Container(
         key: const ValueKey('workspace-sidebar'),
         width: railWidth,
-        margin: const EdgeInsetsDirectional.fromSTEB(8, 0, 8, 10),
-        padding: const EdgeInsets.symmetric(horizontal: 12),
+        margin: const EdgeInsetsDirectional.fromSTEB(6, 0, 6, 8),
+        padding: const EdgeInsets.symmetric(horizontal: 8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -58,36 +57,37 @@ class _WindowNavRail extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const SizedBox(height: 16),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Container(
-                          width: 32,
-                          height: 32,
-                          decoration: BoxDecoration(
-                            color: c.primary,
-                            borderRadius: BorderRadius.circular(9),
+                    const SizedBox(height: 14),
+                    Padding(
+                      padding: const EdgeInsetsDirectional.only(start: 4),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 24,
+                            height: 24,
+                            decoration: BoxDecoration(
+                              color: c.primary,
+                              borderRadius: BorderRadius.circular(7),
+                            ),
+                            child: Icon(
+                              Icons.edit_note_rounded,
+                              size: 15,
+                              color: c.onPrimary,
+                            ),
                           ),
-                          child: Icon(
-                            Icons.edit_note_rounded,
-                            size: 19,
-                            color: c.onPrimary,
+                          const SizedBox(width: 8),
+                          Text(
+                            l.workspaceBrand,
+                            style: Theme.of(context).textTheme.titleSmall
+                                ?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: -.2,
+                                ),
                           ),
-                        ),
-                        const SizedBox(width: 10),
-                        Text(
-                          l.workspaceBrand,
-                          style: Theme.of(context).textTheme.titleMedium
-                              ?.copyWith(
-                                fontSize: 19,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: -.5,
-                              ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 18),
                     FilledButton(
                       key: const ValueKey('workspace-new-note'),
                       onPressed: () {
@@ -96,24 +96,25 @@ class _WindowNavRail extends StatelessWidget {
                       },
                       style: FilledButton.styleFrom(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 12,
+                          horizontal: 10,
+                          vertical: 8,
                         ),
-                        minimumSize: const Size(40, 42),
+                        minimumSize: const Size(40, 34),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(10),
                         ),
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.add_rounded, size: 19),
+                          const Icon(Icons.add_rounded, size: 17),
                           const SizedBox(width: 8),
                           Expanded(child: Text(l.newNote)),
                         ],
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12),
                     NexWorkspaceDestination(
+                      dense: true,
                       icon: Icons.edit_note_outlined,
                       label: l.navCapture,
                       selected: section == 'capture',
@@ -121,8 +122,9 @@ class _WindowNavRail extends StatelessWidget {
                       onPressed: () =>
                           controller.selectWindowSection('capture'),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 2),
                     NexWorkspaceDestination(
+                      dense: true,
                       icon: Icons.auto_stories_outlined,
                       label: l.library,
                       selected: section == 'library',
@@ -130,16 +132,18 @@ class _WindowNavRail extends StatelessWidget {
                       onPressed: () =>
                           controller.selectWindowSection('library'),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 2),
                     NexWorkspaceDestination(
+                      dense: true,
                       icon: Icons.auto_awesome_outlined,
                       label: AiStrings.of(context).t('ai'),
                       selected: section == 'assistant',
                       onPressed: () =>
                           controller.selectWindowSection('assistant'),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 2),
                     NexWorkspaceDestination(
+                      dense: true,
                       icon: Icons.grid_view_outlined,
                       label: l.navTools,
                       selected: section == 'tools',
@@ -160,48 +164,22 @@ class _WindowNavRail extends StatelessWidget {
                       ),
               ),
             NexWorkspaceDestination(
+              dense: true,
               icon: Icons.settings_outlined,
               iconWidget: NexUpdateDot(
                 updates: features?.updates,
-                child: const Icon(Icons.settings_outlined, size: 19),
+                child: const Icon(Icons.settings_outlined, size: 18),
               ),
               label: l.settings,
               selected: section == 'settings',
               onPressed: () => controller.selectWindowSection('settings'),
             ),
-            const SizedBox(height: 4),
-            NexWorkspaceDestination(
-              icon: Icons.view_sidebar_outlined,
-              label: l.switchToPanel,
-              onPressed: () => controller.setWindowMode('panel'),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.shield_outlined,
-                    size: 14,
-                    color: c.onSurfaceVariant,
-                  ),
-                  const SizedBox(width: 7),
-                  Expanded(
-                    child: Text(
-                      l.workspaceLocal,
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: c.onSurfaceVariant,
-                        height: 1.5,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 8),
-            Divider(color: c.outlineVariant, height: 1),
-            const SizedBox(height: 4),
+            const SizedBox(height: 6),
+            // The panel switch, the theme, the shortcuts and the search are
+            // one row of small icons: what used to be a labelled row and a
+            // privacy paragraph under the destinations was noise on every
+            // screen. The privacy line stays, as the shield's tooltip.
             Row(
-              mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 _RailIcon(
                   tooltip: controller.palette.isLight ? l.dark : l.light,
@@ -216,13 +194,11 @@ class _WindowNavRail extends StatelessWidget {
                     controller.refresh();
                   },
                 ),
-                const SizedBox(width: 2),
                 _RailIcon(
                   tooltip: '${l.keyboardShortcuts} (${ShortcutLabels.help})',
                   icon: Icons.keyboard_outlined,
                   onPressed: () => showShortcutsDialog(context),
                 ),
-                const SizedBox(width: 2),
                 _RailIcon(
                   tooltip:
                       '${l.workspaceSearch} (${ShortcutLabels.commandPalette})',
@@ -233,9 +209,27 @@ class _WindowNavRail extends StatelessWidget {
                     features: features,
                   ),
                 ),
+                _RailIcon(
+                  key: const ValueKey('workspace-switch-panel'),
+                  tooltip: l.switchToPanel,
+                  icon: Icons.view_sidebar_outlined,
+                  onPressed: () => controller.setWindowMode('panel'),
+                ),
+                const Spacer(),
+                Tooltip(
+                  message: l.workspaceLocal,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 6),
+                    child: Icon(
+                      Icons.shield_outlined,
+                      size: 15,
+                      color: c.onSurfaceVariant,
+                    ),
+                  ),
+                ),
               ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 6),
           ],
         ),
       ),
@@ -243,11 +237,12 @@ class _WindowNavRail extends StatelessWidget {
   }
 }
 
-/// A quiet 34px square icon button for the rail's footer row — the same
+/// A quiet 32px square icon button for the rail's footer row — the same
 /// target Windows puts in its own nav panes, with the keyboard focus ring
 /// every other control here keeps.
 class _RailIcon extends StatelessWidget {
   const _RailIcon({
+    super.key,
     required this.tooltip,
     required this.icon,
     required this.onPressed,
@@ -264,8 +259,8 @@ class _RailIcon extends StatelessWidget {
       onPressed: onPressed,
       style: IconButton.styleFrom(
         foregroundColor: c.onSurfaceVariant,
-        minimumSize: const Size(34, 34),
-        maximumSize: const Size(34, 34),
+        minimumSize: const Size(32, 32),
+        maximumSize: const Size(32, 32),
         padding: EdgeInsets.zero,
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),

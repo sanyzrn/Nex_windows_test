@@ -9,7 +9,7 @@ class NexSoftCard extends StatelessWidget {
     super.key,
     required this.child,
     this.accent,
-    this.padding = const EdgeInsets.all(22),
+    this.padding = const EdgeInsets.all(18),
   });
   final Widget child;
   final Color? accent;
@@ -39,7 +39,7 @@ class NexSoftCard extends StatelessWidget {
                   c.surfaceContainerLowest,
                 ],
               ),
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: contrast
               ? c.outline
@@ -58,7 +58,7 @@ class NexIconBadge extends StatelessWidget {
     super.key,
     required this.icon,
     this.color,
-    this.size = 44,
+    this.size = 36,
     this.filled = false,
   });
   final IconData icon;
@@ -105,12 +105,19 @@ class NexSettingsLink extends StatelessWidget {
   final Widget? leading;
   @override
   Widget build(BuildContext context) => ListTile(
-    contentPadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 7),
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-    leading: leading ?? NexIconBadge(icon: icon, color: color, size: 38),
-    title: Text(title, style: Theme.of(context).textTheme.titleSmall),
-    subtitle: subtitle == null ? null : Text(subtitle!),
-    trailing: trailing ?? const Icon(Icons.chevron_right_rounded),
+    contentPadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    leading: leading ?? NexIconBadge(icon: icon, color: color, size: 32),
+    title: Text(
+      title,
+      style: Theme.of(
+        context,
+      ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+    ),
+    subtitle: subtitle == null
+        ? null
+        : Text(subtitle!, style: Theme.of(context).textTheme.bodySmall),
+    trailing: trailing ?? const Icon(Icons.chevron_right_rounded, size: 20),
     onTap: onTap,
   );
 }
@@ -134,13 +141,17 @@ class NexFeatureCard extends StatelessWidget {
     final c = Theme.of(context).colorScheme;
     return NexSoftCard(
       accent: value && onChanged != null ? c.primary : null,
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              NexIconBadge(icon: icon, filled: value && onChanged != null),
+              NexIconBadge(
+                icon: icon,
+                size: 32,
+                filled: value && onChanged != null,
+              ),
               const Spacer(),
               Semantics(
                 label: title,
@@ -148,17 +159,12 @@ class NexFeatureCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          Text(
-            title,
-            style: Theme.of(
-              context,
-            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 10),
+          Text(title, style: Theme.of(context).textTheme.titleSmall),
+          const SizedBox(height: 4),
           Text(
             description,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: c.onSurfaceVariant,
               height: 1.5,
             ),
@@ -321,14 +327,23 @@ class NexWorkspaceDestination extends StatelessWidget {
     required this.onPressed,
     this.selected = false,
     this.compact = false,
+    this.dense = false,
     this.shortcut,
     this.iconWidget,
+    this.trailing,
   });
   final IconData icon;
   final String label;
   final VoidCallback onPressed;
   final bool selected;
   final bool compact;
+
+  /// The quiet desktop rail row: a short, small row with a neutral wash for
+  /// the current place instead of the accent's.
+  final bool dense;
+
+  /// A count or a mark at the far end of a dense row.
+  final Widget? trailing;
   final String? shortcut;
   final Widget? iconWidget;
 
@@ -343,20 +358,24 @@ class NexWorkspaceDestination extends StatelessWidget {
           onPressed: onPressed,
           style:
               TextButton.styleFrom(
-                foregroundColor: selected ? c.primary : c.onSurfaceVariant,
+                foregroundColor: dense
+                    ? (selected ? c.onSurface : c.onSurfaceVariant)
+                    : (selected ? c.primary : c.onSurfaceVariant),
                 backgroundColor: selected
-                    ? c.primary.withValues(alpha: .09)
+                    ? (dense
+                          ? c.onSurface.withValues(alpha: .07)
+                          : c.primary.withValues(alpha: .09))
                     : Colors.transparent,
                 // 40px is the desktop rail convention (WinUINavigationView);
                 // the 8px gap between rows keeps the 48px acquisition pitch
                 // Material asks for, and every item keeps its keyboard ring.
-                minimumSize: const Size(40, 40),
+                minimumSize: Size(40, dense ? 34 : 40),
                 padding: EdgeInsets.symmetric(
-                  horizontal: compact ? 0 : 12,
-                  vertical: 9,
+                  horizontal: compact ? 0 : (dense ? 10 : 12),
+                  vertical: dense ? 6 : 9,
                 ),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(dense ? 10 : 16),
                 ),
               ).copyWith(
                 side: WidgetStateProperty.resolveWith(
@@ -369,8 +388,8 @@ class NexWorkspaceDestination extends StatelessWidget {
               ? (iconWidget ?? Icon(icon, size: 20))
               : Row(
                   children: [
-                    iconWidget ?? Icon(icon, size: 19),
-                    const SizedBox(width: 11),
+                    iconWidget ?? Icon(icon, size: dense ? 18 : 19),
+                    SizedBox(width: dense ? 10 : 11),
                     Expanded(
                       child: Text(
                         label,
@@ -382,6 +401,7 @@ class NexWorkspaceDestination extends StatelessWidget {
                         ),
                       ),
                     ),
+                    ?trailing,
                   ],
                 ),
         ),

@@ -38,6 +38,10 @@ part 'record_stop_button.dart';
 /// icon-over-label column.
 const double kWindowWideAt = 960;
 
+/// How much smaller the desktop window sets its type than the edge panel:
+/// a pointer needs no touch-sized text, and a wide page reads calmer small.
+const double kWindowTypeDensity = .92;
+
 /// The surface behind the content card: the surface tone washed with the
 /// accent, so every theme gets a window of its own colour rather than a
 /// neutral grey.

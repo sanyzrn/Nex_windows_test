@@ -74,147 +74,70 @@ class _NexWorkspaceHomeState extends State<NexWorkspaceHome> {
         nexDigits('${_overview[key] ?? 0}', persian: fa);
     final recent = (_overview['recent'] as List?)?.cast<Note>() ?? [];
     final pins = (_overview['pins'] as List?)?.cast<Note>() ?? [];
-    final scale = MediaQuery.textScalerOf(context).scale(1);
+    final scheduled = _overview['scheduled'] as int? ?? 0;
     return LayoutBuilder(
       builder: (context, box) {
-        final wide = box.maxWidth >= 860 && scale < 1.5;
-        // The compact window: writing comes first. The hero line and the
-        // counters (both also in the library) would push the editor below the
-        // fold of a 460 px card.
         final compactPage = box.maxWidth < 620;
-        final columns = box.maxWidth >= 1000 && scale < 1.3
-            ? 3
-            : box.maxWidth >= 620 && scale < 1.6
-            ? 2
-            : 1;
-        final stats = Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            _SummaryCount(
-              icon: Icons.notes_rounded,
-              count: count('total'),
-              label: l.workspaceTotal,
-            ),
-            _SummaryCount(
-              icon: Icons.push_pin_outlined,
-              count: count('pinned'),
-              label: l.workspacePinned,
-            ),
-            _SummaryCount(
-              icon: Icons.attach_file_rounded,
-              count: count('media'),
-              label: l.workspaceMedia,
-            ),
-            if ((_overview['scheduled'] as int? ?? 0) > 0)
-              ActionChip(
-                avatar: const Icon(Icons.schedule_outlined, size: 16),
-                label: Text('${l.scheduledNotes} · ${count('scheduled')}'),
-                onPressed: () => showScheduledNotes(context),
-              ),
-          ],
+        final small = Theme.of(context).textTheme.labelMedium?.copyWith(
+          color: scheme.onSurfaceVariant,
+          fontWeight: FontWeight.w600,
         );
-        final intro = Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              l.workspaceNotebook,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w700,
-                letterSpacing: -.6,
-              ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              l.workspaceStartHint,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: scheme.onSurfaceVariant,
-                height: 1.5,
-              ),
-            ),
-          ],
-        );
-        final quickTools = <(String, IconData, String)>[
-          ('clip', Icons.content_paste_rounded, l.clipboard),
-          ('timer', Icons.timer_outlined, l.workspaceFocus),
-          ('calc', Icons.calculate_outlined, l.workspaceCalculate),
-        ].where((entry) => !(c?.S.hidden.contains(entry.$1) ?? false)).toList();
-        final shelf = NexWorkspaceCard(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _ShelfHeading(
-                icon: Icons.push_pin_outlined,
-                title: l.workspacePinned,
-              ),
-              const SizedBox(height: 12),
-              if (pins.isEmpty)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 20),
-                  child: Text(
-                    l.workspaceNoPinned,
-                    style: TextStyle(color: scheme.onSurfaceVariant),
-                  ),
-                ),
-              for (final note in pins)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: _NotePreview(note: note, quiet: true),
-                ),
-              if (quickTools.isNotEmpty) ...[
-                const SizedBox(height: 12),
-                Divider(height: 1, color: scheme.outlineVariant),
-                const SizedBox(height: 16),
-                _ShelfHeading(
-                  icon: Icons.bolt_outlined,
-                  title: l.workspaceEssentials,
-                ),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 6,
-                  runSpacing: 6,
-                  children: [
-                    for (final entry in quickTools)
-                      ActionChip(
-                        avatar: Icon(entry.$2, size: 16),
-                        label: Text(entry.$3),
-                        onPressed: c == null
-                            ? null
-                            : () => c.openWindowTool(entry.$1),
-                        visualDensity: VisualDensity.compact,
-                        side: BorderSide.none,
-                        backgroundColor: scheme.primary.withValues(alpha: .07),
+        // One quiet line of heading: a label, how many, and what is next.
+        Widget heading(String title, {String? number, Widget? trailing}) =>
+            Padding(
+              padding: const EdgeInsets.only(top: 22, bottom: 10),
+              child: Row(
+                children: [
+                  Text(title, style: small),
+                  if (number != null) ...[
+                    const SizedBox(width: 8),
+                    Text(
+                      number,
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: scheme.onSurfaceVariant,
                       ),
+                    ),
                   ],
-                ),
+                  const Spacer(),
+                  ?trailing,
+                ],
+              ),
+            );
+        Widget grid(List<Note> notes) => LayoutBuilder(
+          builder: (context, constraints) {
+            final scale = MediaQuery.textScalerOf(context).scale(1);
+            final columns = ((constraints.maxWidth + 12) / (250 * scale + 12))
+                .floor()
+                .clamp(1, 5);
+            final width = (constraints.maxWidth - (columns - 1) * 12) / columns;
+            return Wrap(
+              spacing: 12,
+              runSpacing: 12,
+              children: [
+                for (final note in notes)
+                  SizedBox(
+                    width: width,
+                    height: _NotePreview.heightFor(context),
+                    child: _NotePreview(note: note),
+                  ),
               ],
-            ],
-          ),
+            );
+          },
         );
         return SingleChildScrollView(
           key: const PageStorageKey('workspace-home-scroll'),
-          padding: EdgeInsets.all(box.maxWidth < 600 ? 16 : 28),
+          padding: EdgeInsets.fromLTRB(
+            box.maxWidth < 600 ? 16 : 28,
+            box.maxWidth < 600 ? 12 : 14,
+            box.maxWidth < 600 ? 16 : 28,
+            24,
+          ),
           child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 1160),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  if (wide)
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Expanded(child: intro),
-                        const SizedBox(width: 20),
-                        stats,
-                      ],
-                    )
-                  else if (!compactPage) ...[
-                    intro,
-                    const SizedBox(height: 16),
-                    stats,
-                  ],
                   if (NexScope.of(context).reminderDeliveryFailed)
                     _HomeMessage(
                       l.reminderDeliveryFailed,
@@ -228,79 +151,58 @@ class _NexWorkspaceHomeState extends State<NexWorkspaceHome> {
                             ),
                     ),
                   if (_error != null) _HomeMessage(_error!, onRetry: _load),
-                  SizedBox(height: compactPage ? 4 : 24),
-                  if (wide)
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Expanded(
-                          flex: 7,
-                          child: NexCaptureView(compact: false, embedded: true),
-                        ),
-                        const SizedBox(width: 20),
-                        Expanded(flex: 4, child: shelf),
-                      ],
-                    )
-                  else ...[
-                    const NexCaptureView(compact: false, embedded: true),
-                    const SizedBox(height: 20),
-                    shelf,
-                  ],
-                  const SizedBox(height: 20),
-                  const IntelligenceBrief(),
-                  const SizedBox(height: 28),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _ShelfHeading(
-                          icon: Icons.history_rounded,
-                          title: l.workspaceRecent,
-                        ),
-                      ),
-                      TextButton.icon(
-                        onPressed: c == null
-                            ? null
-                            : () => c.selectWindowSection('library'),
-                        icon: const Icon(Icons.arrow_forward_rounded, size: 16),
-                        label: Text(l.workspaceViewAll),
-                      ),
-                    ],
+                  SizedBox(height: compactPage ? 4 : 8),
+                  const Align(
+                    alignment: AlignmentDirectional.topStart,
+                    child: NexCaptureView(compact: false, embedded: true),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 16),
+                  const IntelligenceBrief(),
+                  if (pins.isNotEmpty) ...[
+                    heading(l.workspacePinned, number: count('pinned')),
+                    grid(pins),
+                  ],
+                  heading(
+                    l.workspaceRecent,
+                    number: count('total'),
+                    trailing: Wrap(
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        if (scheduled > 0)
+                          TextButton.icon(
+                            onPressed: () => showScheduledNotes(context),
+                            icon: const Icon(Icons.schedule_outlined, size: 15),
+                            label: Text(
+                              '${l.scheduledNotes} · ${count('scheduled')}',
+                            ),
+                            style: TextButton.styleFrom(
+                              visualDensity: VisualDensity.compact,
+                            ),
+                          ),
+                        TextButton(
+                          onPressed: c == null
+                              ? null
+                              : () => c.selectWindowSection('library'),
+                          style: TextButton.styleFrom(
+                            visualDensity: VisualDensity.compact,
+                          ),
+                          child: Text(l.workspaceViewAll),
+                        ),
+                      ],
+                    ),
+                  ),
                   if (_revision >= 0 && _overview.isEmpty && _error == null)
-                    NexWorkspaceCard(
-                      child: Text(
-                        l.workspaceLoading,
-                        style: TextStyle(color: scheme.onSurfaceVariant),
-                      ),
+                    Text(
+                      l.workspaceLoading,
+                      style: TextStyle(color: scheme.onSurfaceVariant),
                     )
                   else if (recent.isEmpty)
-                    NexWorkspaceCard(
-                      child: Text(
-                        l.workspaceNoRecent,
-                        style: TextStyle(color: scheme.onSurfaceVariant),
-                      ),
+                    Text(
+                      l.workspaceNoRecent,
+                      style: TextStyle(color: scheme.onSurfaceVariant),
                     )
                   else
-                    LayoutBuilder(
-                      builder: (context, constraints) {
-                        final width =
-                            (constraints.maxWidth - (columns - 1) * 12) /
-                            columns;
-                        return Wrap(
-                          spacing: 12,
-                          runSpacing: 12,
-                          children: [
-                            for (final note in recent)
-                              SizedBox(
-                                width: width,
-                                child: _NotePreview(note: note),
-                              ),
-                          ],
-                        );
-                      },
-                    ),
-                  const SizedBox(height: 16),
+                    grid(recent),
                 ],
               ),
             ),
@@ -309,68 +211,6 @@ class _NexWorkspaceHomeState extends State<NexWorkspaceHome> {
       },
     );
   }
-}
-
-class _SummaryCount extends StatelessWidget {
-  const _SummaryCount({
-    required this.icon,
-    required this.count,
-    required this.label,
-  });
-  final IconData icon;
-  final String count, label;
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 9),
-      decoration: BoxDecoration(
-        color: scheme.primary.withValues(alpha: .06),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 13, color: scheme.primary),
-          const SizedBox(width: 6),
-          Text(
-            count,
-            style: Theme.of(
-              context,
-            ).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w700),
-          ),
-          const SizedBox(width: 4),
-          Text(
-            label,
-            style: Theme.of(
-              context,
-            ).textTheme.labelSmall?.copyWith(color: scheme.onSurfaceVariant),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ShelfHeading extends StatelessWidget {
-  const _ShelfHeading({required this.icon, required this.title});
-  final IconData icon;
-  final String title;
-  @override
-  Widget build(BuildContext context) => Row(
-    children: [
-      Icon(icon, size: 17, color: Theme.of(context).colorScheme.primary),
-      const SizedBox(width: 8),
-      Expanded(
-        child: Text(
-          title,
-          style: Theme.of(
-            context,
-          ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
-        ),
-      ),
-    ],
-  );
 }
 
 class _HomeMessage extends StatelessWidget {
@@ -414,102 +254,161 @@ class _HomeMessage extends StatelessWidget {
   );
 }
 
+/// A note as a small card on the home page: a title, a few lines, and the
+/// tag and the time at the foot — tinted by its tag's colour, otherwise paper.
 class _NotePreview extends StatelessWidget {
-  const _NotePreview({required this.note, this.quiet = false});
-  final bool quiet;
+  const _NotePreview({required this.note});
   final Note note;
+
+  /// The height every card in the grid has; text size grows it.
+  static double heightFor(BuildContext context) =>
+      128 + 44 * (MediaQuery.textScalerOf(context).scale(1) - 1).clamp(0, 2);
+
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     final l = AppLocalizations.of(context)!;
     final fa = Localizations.localeOf(context).languageCode == 'fa';
-    final caption = note.displayText?.trim();
-    final label = caption?.isNotEmpty == true
-        ? caption!
-        : noteTypeLabel(l, note.type);
+    final text = (note.displayText ?? '').trim();
+    final lines = text.split('\n').where((s) => s.trim().isNotEmpty).toList();
+    final first = lines.firstOrNull?.trim() ?? '';
+    final rest = lines.skip(1).join('\n').trim();
+    final named = note.title?.trim() ?? '';
+    // A short first line over more text is a title. A single thought is the
+    // card's text: a title would only cut it off.
+    final String title, body;
+    if (named.isNotEmpty) {
+      title = named;
+      body = text;
+    } else if (rest.isNotEmpty && first.length <= 60) {
+      title = first;
+      body = rest;
+    } else if (text.isEmpty) {
+      title = '';
+      body = noteTypeLabel(l, note.type);
+    } else {
+      title = '';
+      body = text;
+    }
     final photo = note.type == NoteType.photo && note.mediaUri != null;
-    return TextButton(
-      key: ValueKey('workspace-note-${note.id}'),
-      onPressed: () {
-        NexScope.of(context).requestNote(note);
-        NexPanelScope.maybeOf(context)?.selectWindowSection('library');
-      },
-      style: TextButton.styleFrom(
-        alignment: AlignmentDirectional.centerStart,
-        foregroundColor: scheme.onSurface,
-        backgroundColor: nexNoteCardColor(
-          note,
-          Theme.of(context),
-          highContrast: MediaQuery.highContrastOf(context),
-        ),
-        padding: EdgeInsets.all(quiet ? 10 : 16),
-        minimumSize: const Size(0, 40),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-          side: BorderSide(color: scheme.outlineVariant),
-        ),
+    final tag = note.tags.firstOrNull;
+    final tint = nexNoteCardColor(
+      note,
+      theme,
+      highContrast: MediaQuery.highContrastOf(context),
+    );
+    final small = theme.textTheme.labelSmall?.copyWith(
+      color: scheme.onSurfaceVariant,
+    );
+    return Material(
+      color: tint,
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(14),
+        side: BorderSide(color: scheme.outlineVariant.withValues(alpha: .6)),
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 32,
-            height: 32,
-            clipBehavior: Clip.antiAlias,
-            decoration: BoxDecoration(
-              color: scheme.primary.withValues(alpha: .08),
-              borderRadius: BorderRadius.circular(9),
-            ),
-            child: photo
-                ? Image.file(
-                    File(note.mediaUri!),
-                    fit: BoxFit.cover,
-                    // A 32px thumbnail never needs the full bitmap; decoding
-                    // whole camera photos for the shelf was jank and memory
-                    // for nothing.
-                    cacheWidth: 96,
-                    errorBuilder: (_, error, stack) => Icon(
-                      Icons.image_outlined,
-                      size: 16,
-                      color: scheme.primary,
+      child: InkWell(
+        key: ValueKey('workspace-note-${note.id}'),
+        onTap: () {
+          NexScope.of(context).requestNote(note);
+          NexPanelScope.maybeOf(context)?.selectWindowSection('library');
+        },
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(14, 12, 14, 10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (title.isNotEmpty) ...[
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textDirection: nexDirectionOf(title),
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontSize: 14,
+                        ),
+                      ),
                     ),
-                  )
-                : Icon(
-                    nexNoteTypeIcon(note.type.wireName),
-                    size: 16,
-                    color: scheme.primary,
-                  ),
-          ),
-          const SizedBox(width: 9),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  maxLines: quiet ? 2 : 3,
-                  overflow: TextOverflow.ellipsis,
-                  textDirection: nexDirectionOf(label),
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+                  ],
                 ),
-                const SizedBox(height: 3),
-                Text(
-                  nexDisplayDate(
-                    note.updatedAt,
-                    solar:
-                        NexPanelScope.maybeOf(context)?.S.solarCalendar ?? fa,
-                    persian: fa,
-                  ),
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: scheme.onSurfaceVariant,
-                  ),
-                ),
+                const SizedBox(height: 4),
               ],
-            ),
+              Expanded(
+                child: photo
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.file(
+                          File(note.mediaUri!),
+                          fit: BoxFit.cover,
+                          // A card never needs the full camera bitmap.
+                          cacheWidth: 480,
+                          errorBuilder: (_, error, stack) => Icon(
+                            Icons.image_outlined,
+                            color: scheme.onSurfaceVariant,
+                          ),
+                        ),
+                      )
+                    : Text(
+                        body,
+                        maxLines: 4,
+                        overflow: TextOverflow.ellipsis,
+                        textDirection: nexDirectionOf(body),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                          height: 1.5,
+                        ),
+                      ),
+              ),
+              const SizedBox(height: 6),
+              Row(
+                children: [
+                  if (note.pinnedAt != null)
+                    Padding(
+                      padding: const EdgeInsetsDirectional.only(end: 6),
+                      child: Icon(
+                        Icons.push_pin,
+                        size: 12,
+                        color: scheme.onSurfaceVariant,
+                      ),
+                    ),
+                  if (tag != null) ...[
+                    Container(
+                      width: 6,
+                      height: 6,
+                      decoration: BoxDecoration(
+                        color: nexParseTagColor(tag.color) ?? scheme.outline,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 5),
+                    Flexible(
+                      child: Text(
+                        tag.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: small?.copyWith(color: scheme.onSurface),
+                      ),
+                    ),
+                  ],
+                  const Spacer(),
+                  Text(
+                    nexDisplayDate(
+                      note.updatedAt,
+                      solar:
+                          NexPanelScope.maybeOf(context)?.S.solarCalendar ?? fa,
+                      persian: fa,
+                    ),
+                    style: small,
+                  ),
+                ],
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
