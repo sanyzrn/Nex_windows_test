@@ -135,21 +135,21 @@ abstract class _SettingsStateBase extends State<NexSettingsView> {
           .toList();
       if (matching.isEmpty) return const SizedBox.shrink();
       return NexSoftCard(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10),
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
               child: Text(
                 d.t(title),
-                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
                   color: scheme.onSurfaceVariant,
                 ),
               ),
             ),
             for (var n = 0; n < matching.length; n++) ...[
-              if (n != 0) const Divider(height: 1, indent: 56),
+              if (n != 0) const Divider(height: 1, indent: 44),
               DesktopFocusRing(
                 child: NexSettingsLink(
                   key: ValueKey('settings-open-${matching[n]}'),
@@ -157,7 +157,7 @@ abstract class _SettingsStateBase extends State<NexSettingsView> {
                   leading: matching[n] == 5
                       ? NexUpdateDot(
                           updates: f?.updates,
-                          child: NexIconBadge(icon: icons[5], size: 38),
+                          child: NexIconBadge(icon: icons[5], size: 32),
                         )
                       : null,
                   title: names[matching[n]],
@@ -179,61 +179,27 @@ abstract class _SettingsStateBase extends State<NexSettingsView> {
           vertical: widget.windowLayout ? 0 : 16,
         ),
         child: Column(
-          spacing: 18,
+          spacing: widget.windowLayout ? 14 : 18,
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             if (category == null) ...[
-              if (widget.windowLayout)
-                NexSoftCard(
-                  accent: scheme.primary,
-                  child: LayoutBuilder(
-                    builder: (context, box) {
-                      final intro = NexWorkspaceIntro(
-                        title: d.t('settingsIntro'),
-                        description: d.t('settingsHint'),
-                        compact: true,
-                      );
-                      const icon = NexIconBadge(
-                        icon: Icons.tune_rounded,
-                        size: 54,
-                      );
-                      final scale = MediaQuery.textScalerOf(context).scale(1);
-                      if (scale > 1 && box.maxWidth / scale < 180) {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            icon,
-                            const SizedBox(height: NexSpacing.md),
-                            intro,
-                          ],
-                        );
-                      }
-                      return Row(
-                        children: [
-                          icon,
-                          const SizedBox(width: 18),
-                          Expanded(child: intro),
-                        ],
-                      );
-                    },
-                  ),
-                ),
               TextField(
                 key: const ValueKey('settings-search'),
                 controller: search,
                 onChanged: (v) => setState(() => query = v),
                 decoration: InputDecoration(
                   hintText: d.t('searchSettings'),
-                  prefixIcon: const Icon(Icons.search_rounded),
+                  prefixIcon: const Icon(Icons.search_rounded, size: 18),
+                  isDense: true,
                   filled: true,
                   fillColor: scheme.surfaceContainerLow,
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(24),
+                    borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide.none,
                   ),
                   enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(24),
+                    borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide.none,
                   ),
                 ),
@@ -301,19 +267,17 @@ class _SettingsCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              NexIconBadge(icon: icon, color: iconColor),
-              const SizedBox(width: 14),
+              NexIconBadge(icon: icon, color: iconColor, size: 32),
+              const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   title,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
+                  style: Theme.of(context).textTheme.titleMedium,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 22),
+          const SizedBox(height: 14),
           ...children,
         ],
       ),

@@ -96,9 +96,9 @@ class _SectionHeader extends StatelessWidget {
       _ => l.capture,
     };
     final small = MediaQuery.sizeOf(context).width < 760;
-    final style = Theme.of(context).textTheme.titleMedium?.copyWith(
-      fontWeight: FontWeight.w700,
-      letterSpacing: -.2,
+    final style = Theme.of(context).textTheme.titleSmall?.copyWith(
+      fontWeight: FontWeight.w600,
+      letterSpacing: -.1,
     );
     void search() => showCommandPalette(
       context,
@@ -108,9 +108,9 @@ class _SectionHeader extends StatelessWidget {
     return Padding(
       padding: EdgeInsetsDirectional.fromSTEB(
         small ? 18 : 22,
-        small ? 10 : 12,
+        small ? 10 : 10,
         small ? 10 : 16,
-        6,
+        4,
       ),
       child: LayoutBuilder(
         builder: (context, box) {
@@ -165,7 +165,7 @@ class _SectionHeader extends StatelessWidget {
               OutlinedButton.icon(
                 key: const ValueKey('workspace-command'),
                 onPressed: search,
-                icon: const Icon(Icons.search_outlined, size: 15),
+                icon: const Icon(Icons.search_outlined, size: 14),
                 label: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -179,7 +179,9 @@ class _SectionHeader extends StatelessWidget {
                   foregroundColor: c.onSurfaceVariant,
                   side: BorderSide(color: c.outlineVariant),
                   shape: const StadiumBorder(),
-                  minimumSize: const Size(0, 32),
+                  minimumSize: const Size(0, 30),
+                  visualDensity: VisualDensity.compact,
+                  textStyle: Theme.of(context).textTheme.labelMedium,
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                 ),
               ),

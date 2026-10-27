@@ -46,24 +46,27 @@ class _ToolsDirectoryState extends State<_ToolsDirectory> {
     final grouped = <String>{};
     return LayoutBuilder(
       builder: (context, constraints) => ListView(
-        padding: EdgeInsets.all(constraints.maxWidth < 650 ? 16 : 24),
+        padding: EdgeInsets.fromLTRB(
+          constraints.maxWidth < 650 ? 16 : 28,
+          constraints.maxWidth < 650 ? 12 : 14,
+          constraints.maxWidth < 650 ? 16 : 28,
+          24,
+        ),
         children: [
-          NexWorkspaceIntro(
-            title: l.workspaceToolsTitle,
-            description: l.workspaceToolsDescription,
-            compact: constraints.maxWidth < 650,
-          ),
-          const SizedBox(height: 14),
           Align(
             alignment: AlignmentDirectional.centerStart,
             child: SizedBox(
-              width: 320,
+              width: 280,
               child: TextField(
                 key: const ValueKey('workspace-tools-search'),
                 controller: search,
                 decoration: InputDecoration(
                   hintText: l.workspaceToolsSearch,
-                  prefixIcon: const Icon(Icons.search_outlined, size: 17),
+                  prefixIcon: const Icon(Icons.search_outlined, size: 16),
+                  prefixIconConstraints: const BoxConstraints(
+                    minWidth: 36,
+                    minHeight: 32,
+                  ),
                   suffixIcon: query.isEmpty
                       ? null
                       : IconButton(
@@ -90,22 +93,22 @@ class _ToolsDirectoryState extends State<_ToolsDirectory> {
                       width: nexFocusRingWidth,
                     ),
                   ),
-                  contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 8),
+                  isDense: true,
                 ),
                 onChanged: (value) => setState(() => query = value),
               ),
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
           NexToolsShelves(query: query),
           NexModuleShelf(query: query),
           if (filtered.isEmpty)
             Padding(padding: const EdgeInsets.all(24), child: Text(l.empty)),
           if (essentials.isNotEmpty) ...[
             _sectionLabel(l.workspaceEssentials),
-            const SizedBox(height: 10),
+            const SizedBox(height: 8),
             _grid(essentials, c),
-            const SizedBox(height: 20),
           ],
           for (final group in groups)
             if (others.any(
@@ -114,7 +117,7 @@ class _ToolsDirectoryState extends State<_ToolsDirectory> {
                   : group.$2.contains(id),
             )) ...[
               _sectionLabel(group.$1),
-              const SizedBox(height: 10),
+              const SizedBox(height: 8),
               _grid(
                 others.where((id) {
                   final included = group.$2.isEmpty
@@ -125,7 +128,6 @@ class _ToolsDirectoryState extends State<_ToolsDirectory> {
                 }).toList(),
                 c,
               ),
-              const SizedBox(height: 20),
             ],
         ],
       ),
@@ -134,11 +136,14 @@ class _ToolsDirectoryState extends State<_ToolsDirectory> {
 
   Widget _sectionLabel(String text) {
     final scheme = Theme.of(context).colorScheme;
-    return Text(
-      text,
-      style: Theme.of(context).textTheme.labelLarge?.copyWith(
-        fontWeight: FontWeight.w600,
-        color: scheme.onSurfaceVariant,
+    return Padding(
+      padding: const EdgeInsets.only(top: 22),
+      child: Text(
+        text,
+        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+          fontWeight: FontWeight.w600,
+          color: scheme.onSurfaceVariant,
+        ),
       ),
     );
   }
@@ -147,9 +152,11 @@ class _ToolsDirectoryState extends State<_ToolsDirectory> {
     builder: (context, constraints) {
       final scaledWidth =
           constraints.maxWidth / MediaQuery.textScalerOf(context).scale(1);
-      final columns = scaledWidth >= 860
+      final columns = scaledWidth >= 1000
+          ? 4
+          : scaledWidth >= 700
           ? 3
-          : scaledWidth >= 520
+          : scaledWidth >= 460
           ? 2
           : 1;
       final width = (constraints.maxWidth - (columns - 1) * 10) / columns;
@@ -189,55 +196,46 @@ class _ToolTile extends StatelessWidget {
     final c = Theme.of(context).colorScheme;
     final l = AppLocalizations.of(context)!;
     final active = id == 'awake' && controller.awake;
-    final description = switch (id) {
+    final String? description = switch (id) {
       'clip' => l.workspaceClipboardHint,
       'awake' => l.workspaceAwakeHint,
       'timer' => l.workspaceTimerHint,
       'calc' => l.workspaceCalculatorHint,
       'color' => l.workspaceColorHint,
-      _ => l.workspaceUtilityHint,
+      _ => null,
     };
-    // Every tile carries the Android grid's coloured icon chip: a per-tool
-    // hue at a low tint behind a same-hue icon, so the directory scans by
-    // category the way the phone's quick-access grid does.
+    // A tile is a small row: the tool's coloured chip, its name, one line of
+    // what it does. The hue is the only colour a tile has.
     final accent = NexColors.toolAccent(id, c.onSurfaceVariant);
-    return TextButton(
-      onPressed: id == 'awake' && controller.awakeBusy ? null : _open,
-      style:
-          TextButton.styleFrom(
-            foregroundColor: c.onSurface,
-            backgroundColor: active
-                ? c.primary.withValues(alpha: .09)
-                : c.surfaceContainerLowest,
-            padding: EdgeInsets.zero,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(24),
-            ),
-            alignment: AlignmentDirectional.centerStart,
-          ).copyWith(
-            side: WidgetStateProperty.resolveWith(
-              (states) => BorderSide(
-                color: states.contains(WidgetState.focused) || active
-                    ? c.primary
-                    : c.outlineVariant.withValues(alpha: 0),
-                width: states.contains(WidgetState.focused) ? 2 : 1,
+    final shape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(12),
+      side: BorderSide(
+        color: active ? c.primary : c.outlineVariant.withValues(alpha: .6),
+      ),
+    );
+    return DesktopFocusRing(
+      radius: 12,
+      child: Material(
+        color: active
+            ? c.primary.withValues(alpha: .09)
+            : Color.alphaBlend(
+                accent.withValues(alpha: .07),
+                c.surfaceContainerLowest,
               ),
-            ),
-          ),
-      child: NexSoftCard(
-        accent: accent,
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+        shape: shape,
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: id == 'awake' && controller.awakeBusy ? null : _open,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+            child: Row(
               children: [
                 Container(
-                  width: 48,
-                  height: 48,
+                  width: 34,
+                  height: 34,
                   decoration: BoxDecoration(
-                    color: accent.withValues(alpha: .15),
-                    borderRadius: BorderRadius.circular(16),
+                    color: accent.withValues(alpha: .18),
+                    borderRadius: BorderRadius.circular(10),
                   ),
                   child: Center(
                     child: _ToolIcon(
@@ -247,39 +245,41 @@ class _ToolTile extends StatelessWidget {
                     ),
                   ),
                 ),
-                const Spacer(),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        utilityLabelForText(context, ToolInfo.of(id).name),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
+                      if (description != null) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          description,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(color: c.onSurfaceVariant),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
                 if (id == 'awake' && controller.awakeBusy)
                   const SizedBox(
-                    width: 18,
-                    height: 18,
+                    width: 16,
+                    height: 16,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                else
-                  Icon(
-                    active
-                        ? Icons.check_circle_rounded
-                        : Icons.arrow_forward_rounded,
-                    size: 18,
-                    color: active ? c.primary : c.onSurfaceVariant,
-                  ),
+                else if (active)
+                  Icon(Icons.check_circle_rounded, size: 17, color: c.primary),
               ],
             ),
-            const SizedBox(height: 20),
-            Text(
-              utilityLabelForText(context, ToolInfo.of(id).name),
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              description,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                height: 1.5,
-                color: c.onSurfaceVariant,
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

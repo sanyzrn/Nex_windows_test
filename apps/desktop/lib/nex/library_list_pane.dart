@@ -194,15 +194,16 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
                     decoration: InputDecoration(
                       hintText: l.search,
                       hintMaxLines: stacked ? 3 : 1,
-                      // The Android app's search fields are capsules; a stadium
-                      // here matches it and separates search from the card edges
-                      // around it.
+                      isDense: true,
+                      // A soft rounded field, not a capsule: it sits beside a
+                      // row of small controls and should weigh no more than
+                      // them.
                       enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(999),
+                        borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide(color: scheme.outlineVariant),
                       ),
                       focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(999),
+                        borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide(
                           color: scheme.primary,
                           width: nexFocusRingWidth,
@@ -650,10 +651,10 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
                       if (notes[i].pinnedAt == null) i,
                   ];
                   final delegate = SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: (box.maxWidth / 310).floor().clamp(2, 5),
+                    crossAxisCount: (box.maxWidth / 270).floor().clamp(2, 5),
                     mainAxisExtent: nexBoardCardHeight(context),
-                    crossAxisSpacing: 14,
-                    mainAxisSpacing: 14,
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 12,
                   );
                   List<Widget> section(
                     String label,

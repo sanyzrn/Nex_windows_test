@@ -333,7 +333,11 @@ class RightPanelApp extends StatelessWidget {
           data: MediaQuery.of(context).copyWith(
             textScaler: _SharedTextScaler(
               MediaQuery.textScalerOf(context),
-              controller.S.uiScale,
+              // The desktop window sets its type a notch smaller than the
+              // edge panel and the phone: a pointer needs no touch-sized
+              // text, and a wide page reads calmer in small type.
+              controller.S.uiScale *
+                  (controller.isWindowMode ? kWindowTypeDensity : 1),
             ),
           ),
           child: NexPanelScope(

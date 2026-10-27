@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:nex_ui/nex_ui.dart';
 import '../l10n/app_localizations.dart';
+import '../ui/desktop_accessibility.dart';
 import 'features_state.dart';
 import 'commitments.dart';
 import 'scheduled_notes.dart';
@@ -88,48 +89,67 @@ class DesktopShelfTile extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final accent = NexColors.toolAccent(accentId, scheme.primary);
-    return OutlinedButton(
-      onPressed: onTap,
-      style: OutlinedButton.styleFrom(
-        padding: const EdgeInsets.all(18),
-        alignment: AlignmentDirectional.centerStart,
-        foregroundColor: scheme.onSurface,
-        backgroundColor: accent.withValues(alpha: .06),
-        side: BorderSide(color: accent.withValues(alpha: .45)),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: accent.withValues(alpha: .18),
-                  borderRadius: BorderRadius.circular(14),
+    final shape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(12),
+      side: BorderSide(color: scheme.outlineVariant.withValues(alpha: .6)),
+    );
+    return DesktopFocusRing(
+      radius: 12,
+      child: Material(
+        color: Color.alphaBlend(
+          accent.withValues(alpha: .07),
+          scheme.surfaceContainerLowest,
+        ),
+        shape: shape,
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+            child: Row(
+              children: [
+                Container(
+                  width: 34,
+                  height: 34,
+                  decoration: BoxDecoration(
+                    color: accent.withValues(alpha: .18),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(icon, size: 19, color: scheme.onSurface),
                 ),
-                child: Icon(icon, color: scheme.onSurface),
-              ),
-              const Spacer(),
-              if (locked)
-                Icon(
-                  Icons.lock_outline,
-                  size: 18,
-                  color: scheme.onSurfaceVariant,
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.titleSmall,
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-            ],
-          ),
-          const SizedBox(height: 18),
-          Text(title, style: theme.textTheme.titleMedium),
-          const SizedBox(height: 6),
-          Text(
-            subtitle,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: scheme.onSurfaceVariant,
+                if (locked)
+                  Icon(
+                    Icons.lock_outline,
+                    size: 15,
+                    color: scheme.onSurfaceVariant,
+                  ),
+              ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }
@@ -138,18 +158,21 @@ class DesktopShelfTile extends StatelessWidget {
 class NexToolsShelves extends StatelessWidget {
   const NexToolsShelves({super.key, this.query = ''});
   final String query;
+  TextStyle? _label(BuildContext context) =>
+      Theme.of(context).textTheme.labelMedium?.copyWith(
+        fontWeight: FontWeight.w600,
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
+      );
   Widget _tiles(List<Widget> tiles) {
-    if (tiles.length == 1) return tiles.single;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         NexResponsiveGrid(
-          minWidth: 200,
-          children: tiles.length.isOdd
-              ? tiles.take(tiles.length - 1).toList()
-              : tiles,
+          minWidth: 240,
+          maxColumns: 4,
+          spacing: 10,
+          children: tiles,
         ),
-        if (tiles.length.isOdd) ...[const SizedBox(height: 14), tiles.last],
       ],
     );
   }
@@ -256,24 +279,22 @@ class NexToolsShelves extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         if (private.isNotEmpty) ...[
+          Text(l.toolsSectionPrivate, style: _label(context)),
+          const SizedBox(height: 2),
           Text(
-            l.toolsSectionPrivate,
-            style: Theme.of(context).textTheme.titleMedium,
+            l.toolsPrivateHint,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
           ),
-          const SizedBox(height: 4),
-          Text(l.toolsPrivateHint),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           _tiles(private),
-          const SizedBox(height: 24),
+          const SizedBox(height: 4),
         ],
         if (everyday.isNotEmpty) ...[
-          Text(
-            l.toolsSectionEveryday,
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 12),
+          Text(l.toolsSectionEveryday, style: _label(context)),
+          const SizedBox(height: 8),
           _tiles(everyday),
-          const SizedBox(height: 24),
         ],
       ],
     );
