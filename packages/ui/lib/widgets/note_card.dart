@@ -44,7 +44,7 @@ Color nexNoteCardColor(
 }
 
 double nexBoardCardHeight(BuildContext context) =>
-    252 +
+    200 +
     (NexCardDensity.of(context).inset - 12) * 4 +
     125 * (MediaQuery.textScalerOf(context).scale(1) - 1).clamp(0, 2);
 
@@ -286,7 +286,7 @@ class _BoardBody extends StatelessWidget {
       color: color,
       clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(14),
         side: BorderSide(
           color: picked
               ? c.primary
@@ -299,7 +299,7 @@ class _BoardBody extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.all(18),
+          padding: const EdgeInsets.all(14),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -360,7 +360,7 @@ class _BoardBody extends StatelessWidget {
                   ],
                 ],
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 10),
               Expanded(
                 child: ClipRect(
                   child: Column(
@@ -389,13 +389,13 @@ class _BoardBody extends StatelessWidget {
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           textDirection: nexDirectionOf(title),
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w700,
-                            height: 1.5,
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            height: 1.4,
                           ),
                         ),
                         if (note.type == NoteType.checklist) ...[
-                          const SizedBox(height: 8),
+                          const SizedBox(height: 6),
                           Flexible(
                             child: LayoutBuilder(
                               builder: (context, box) {
@@ -466,16 +466,16 @@ class _BoardBody extends StatelessWidget {
                             ),
                           ),
                         ] else if (body.isNotEmpty) ...[
-                          const SizedBox(height: 10),
+                          const SizedBox(height: 6),
                           Flexible(
                             child: Text(
                               body,
                               maxLines: 5,
                               overflow: TextOverflow.ellipsis,
                               textDirection: nexDirectionOf(body),
-                              style: theme.textTheme.bodyMedium?.copyWith(
+                              style: theme.textTheme.bodySmall?.copyWith(
                                 color: c.onSurfaceVariant,
-                                height: 1.65,
+                                height: 1.55,
                               ),
                             ),
                           ),
@@ -509,9 +509,9 @@ class _BoardBody extends StatelessWidget {
                   ),
                 ),
               if (note.tags.isNotEmpty) ...[
-                const SizedBox(height: 14),
+                const SizedBox(height: 8),
                 Divider(height: 1, color: c.onSurface.withValues(alpha: .08)),
-                const SizedBox(height: 10),
+                const SizedBox(height: 8),
                 Row(
                   children: [
                     for (final tag in note.tags.take(2))

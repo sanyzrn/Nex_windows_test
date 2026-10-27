@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.31.0 — 2026-10-27
+
+- A quieter window: smaller type, a slimmer sidebar with one New note button, and the panel switch, theme, shortcuts and search as a row of small icons.
+- Capture is the editor and your notes: no hero line, counters or side card. Pinned and recent notes are small tag-tinted cards in a grid, with the counts beside their headings; actions sit under the editor as small chips.
+- Library cards are smaller (four columns on a wide window) and the search field is a soft rounded field.
+- Tools, the Private and Everyday shelves and Settings share one compact look: a small coloured chip, a name and one line; the Settings banner and oversized option tiles are gone.
+- The assistant brief on Capture appears only when a provider is set.
+
 ## 0.30.0 — 2026-10-24
 
 - Unified desktop buttons and field styling, including a framed monitor picker and matching palette, language, shortcut, tool-location, thread and clock selectors.

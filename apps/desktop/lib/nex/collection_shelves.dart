@@ -289,13 +289,12 @@ class NexToolsShelves extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           _tiles(private),
-          const SizedBox(height: 22),
+          const SizedBox(height: 4),
         ],
         if (everyday.isNotEmpty) ...[
           Text(l.toolsSectionEveryday, style: _label(context)),
           const SizedBox(height: 8),
           _tiles(everyday),
-          const SizedBox(height: 22),
         ],
       ],
     );

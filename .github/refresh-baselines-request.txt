@@ -1,2 +1,1 @@
-0.30.0+23: refresh Windows-only baselines for unified desktop controls (including monitor selection), paused optional modules, private Tools/Library shelves and release metadata. Review every changed image. Preserve all comparison tolerances and behavior checks.
-Final visual review refinement: let the last private/everyday Tools card span the row, matching Android shelves rather than leaving an empty cell. Re-render and retain existing test tolerances.
+0.31.0+24: regenerate Windows-only baselines for the quieter window (type density, slim sidebar, Capture grid, Library cards, Tools and Settings tiles). Review every changed image. Preserve all comparison tolerances and behavior checks.

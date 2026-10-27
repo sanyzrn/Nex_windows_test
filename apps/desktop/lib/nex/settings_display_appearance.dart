@@ -298,11 +298,12 @@ mixin _SettingsDisplayAppearance on _SettingsStateBase {
         iconColor: scheme.tertiary,
         title: l.settingsAppearance,
         children: [
-          Text(l.colorMode, style: Theme.of(context).textTheme.titleSmall),
-          const SizedBox(height: 12),
+          Text(l.colorMode, style: Theme.of(context).textTheme.labelLarge),
+          const SizedBox(height: 8),
           NexResponsiveGrid(
             minWidth: 135,
             maxColumns: 3,
+            spacing: 8,
             children: [
               for (final mode in ['light', 'dark', 'system'])
                 _AppearanceChoice(
@@ -331,19 +332,20 @@ mixin _SettingsDisplayAppearance on _SettingsStateBase {
                 ),
             ],
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: 12),
           const Divider(height: 1),
           // Card density (IDEAS.md): compact / standard / readable, feeding
           // the NexCardDensityScope around the library.
-          const SizedBox(height: 18),
+          const SizedBox(height: 12),
           Text(
             l.settingsDensity,
-            style: Theme.of(context).textTheme.titleSmall,
+            style: Theme.of(context).textTheme.labelLarge,
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           NexResponsiveGrid(
             minWidth: 145,
             maxColumns: 3,
+            spacing: 8,
             children: [
               for (final density in ['compact', 'standard', 'readable'])
                 _AppearanceChoice(
@@ -605,24 +607,26 @@ class _AppearanceChoice extends StatelessWidget {
         child: OutlinedButton(
           onPressed: onTap,
           style: OutlinedButton.styleFrom(
-            padding: const EdgeInsets.all(18),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            minimumSize: const Size(0, 44),
             backgroundColor: selected
                 ? c.primary.withValues(alpha: .09)
                 : c.surface,
             foregroundColor: selected ? c.primary : c.onSurface,
             side: BorderSide(
-              color: selected ? c.primary : c.outline,
-              width: selected ? 2 : 1,
+              color: selected ? c.primary : c.outlineVariant,
+              width: selected ? 1.5 : 1,
             ),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(12),
             ),
           ),
-          child: Column(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: 30),
-              const SizedBox(height: 14),
-              Text(label, textAlign: TextAlign.center),
+              Icon(icon, size: 18),
+              const SizedBox(width: 8),
+              Flexible(child: Text(label, textAlign: TextAlign.center)),
             ],
           ),
         ),

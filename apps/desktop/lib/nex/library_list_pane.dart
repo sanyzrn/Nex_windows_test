@@ -651,10 +651,10 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
                       if (notes[i].pinnedAt == null) i,
                   ];
                   final delegate = SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: (box.maxWidth / 310).floor().clamp(2, 5),
+                    crossAxisCount: (box.maxWidth / 270).floor().clamp(2, 5),
                     mainAxisExtent: nexBoardCardHeight(context),
-                    crossAxisSpacing: 14,
-                    mainAxisSpacing: 14,
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 12,
                   );
                   List<Widget> section(
                     String label,

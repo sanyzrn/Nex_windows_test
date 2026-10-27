@@ -86,19 +86,25 @@ class _NexWorkspaceHomeState extends State<NexWorkspaceHome> {
         Widget heading(String title, {String? number, Widget? trailing}) =>
             Padding(
               padding: const EdgeInsets.only(top: 22, bottom: 10),
-              child: Row(
+              child: Wrap(
+                alignment: WrapAlignment.spaceBetween,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                runSpacing: 4,
                 children: [
-                  Text(title, style: small),
-                  if (number != null) ...[
-                    const SizedBox(width: 8),
-                    Text(
-                      number,
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: scheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                  const Spacer(),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Flexible(child: Text(title, style: small)),
+                      if (number != null) ...[
+                        const SizedBox(width: 8),
+                        Text(
+                          number,
+                          style: Theme.of(context).textTheme.labelSmall
+                              ?.copyWith(color: scheme.onSurfaceVariant),
+                        ),
+                      ],
+                    ],
+                  ),
                   ?trailing,
                 ],
               ),
