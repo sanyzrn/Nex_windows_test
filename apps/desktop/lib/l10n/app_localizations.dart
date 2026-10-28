@@ -2129,7 +2129,7 @@ abstract class AppLocalizations {
   /// No description provided for @workspaceCalculatorHint.
   ///
   /// In en, this message translates to:
-  /// **'Work out the little things.'**
+  /// **'Open Windows Calculator.'**
   String get workspaceCalculatorHint;
 
   /// No description provided for @workspaceColorHint.
@@ -2519,7 +2519,7 @@ abstract class AppLocalizations {
   /// No description provided for @commitmentsTitle.
   ///
   /// In en, this message translates to:
-  /// **'Commitments & cadences'**
+  /// **'Recurring'**
   String get commitmentsTitle;
 
   /// No description provided for @commitmentNew.
@@ -3668,92 +3668,268 @@ abstract class AppLocalizations {
   /// **'Search private titles'**
   String get moduleSearch;
 
+  /// Settings group: tags, recently deleted, storage
+  ///
+  /// In en, this message translates to:
+  /// **'Library'**
   String get libraryTitle;
 
+  /// No description provided for @libraryTagsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Colour and name what you file'**
   String get libraryTagsHint;
 
+  /// No description provided for @libraryTrashHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Kept for 30 days'**
   String get libraryTrashHint;
 
+  /// No description provided for @libraryTagCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No tags yet} =1{1 tag} other{{count} tags}}'**
   String libraryTagCount(int count);
 
+  /// No description provided for @libraryThreadCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No threads yet} =1{1 thread} other{{count} threads}}'**
   String libraryThreadCount(int count);
 
+  /// No description provided for @libraryTrashCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No deleted notes} =1{1 note · kept 30 days} other{{count} notes · kept 30 days}}'**
   String libraryTrashCount(int count);
 
+  /// No description provided for @toolsSectionPrivate.
+  ///
+  /// In en, this message translates to:
+  /// **'Private'**
   String get toolsSectionPrivate;
 
+  /// No description provided for @toolsSectionEveryday.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyday'**
   String get toolsSectionEveryday;
 
+  /// No description provided for @toolsPrivateHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Separate from notes, search and AI.'**
   String get toolsPrivateHint;
 
+  /// The private messages tool, on the Tools page and pinned
+  ///
+  /// In en, this message translates to:
+  /// **'Private saved messages'**
   String get toolsMessages;
 
+  /// Line under the private messages tool
+  ///
+  /// In en, this message translates to:
+  /// **'A private space for your words'**
   String get toolsMessagesHint;
 
+  /// No description provided for @vaultPasswordsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Accounts, passwords and Chrome CSV import.'**
   String get vaultPasswordsHint;
 
+  /// No description provided for @vaultCardsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Card details and IBAN, ready to copy.'**
   String get vaultCardsHint;
 
+  /// No description provided for @scheduledTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Scheduled'**
   String get scheduledTitle;
 
+  /// No description provided for @scheduledSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes on their way'**
   String get scheduledSubtitle;
 
+  /// No description provided for @threadsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes about the same thing, gathered without moving them'**
   String get threadsSubtitle;
 
+  /// Line under the password generator tool
+  ///
+  /// In en, this message translates to:
+  /// **'Create and copy a strong password'**
   String get toolsGeneratorHint;
 
+  /// No description provided for @setAside.
+  ///
+  /// In en, this message translates to:
+  /// **'Set aside'**
   String get setAside;
 
+  /// No description provided for @setAsideSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set aside until…'**
   String get setAsideSheetTitle;
 
+  /// No description provided for @setAsideSheetHint.
+  ///
+  /// In en, this message translates to:
+  /// **'It leaves the home screen but stays in your library. You can still find it by searching.'**
   String get setAsideSheetHint;
 
+  /// No description provided for @setAsideUntilBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Until I bring it back'**
   String get setAsideUntilBack;
 
+  /// No description provided for @setAsideThisEvening.
+  ///
+  /// In en, this message translates to:
+  /// **'This evening'**
   String get setAsideThisEvening;
 
+  /// No description provided for @setAsideTomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Tomorrow morning'**
   String get setAsideTomorrow;
 
+  /// No description provided for @setAsideNextWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Next week'**
   String get setAsideNextWeek;
 
+  /// No description provided for @setAsidePickDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a date…'**
   String get setAsidePickDate;
 
+  /// No description provided for @setAsideDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Set aside'**
   String get setAsideDone;
 
+  /// No description provided for @setAsideDoneUntil.
+  ///
+  /// In en, this message translates to:
+  /// **'Set aside until {when}'**
   String setAsideDoneUntil(String when);
 
+  /// No description provided for @setAsideGroupDone.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} notes set aside'**
   String setAsideGroupDone(int count);
 
+  /// No description provided for @setAsideBackBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} notes are back from being set aside'**
   String setAsideBackBanner(int count);
 
+  /// No description provided for @setAsideBringBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Bring back'**
   String get setAsideBringBack;
 
+  /// No description provided for @setAsideSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Set aside'**
   String get setAsideSection;
 
+  /// No description provided for @setAsideSectionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Off the home screen, not gone'**
   String get setAsideSectionHint;
 
+  /// No description provided for @setAsidePageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set aside'**
   String get setAsidePageTitle;
 
+  /// No description provided for @setAsideEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing set aside'**
   String get setAsideEmptyTitle;
 
+  /// No description provided for @setAsideEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Hold a note and choose Set aside to keep it out of the way for now.'**
   String get setAsideEmptyBody;
 
+  /// No description provided for @setAsideBackOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Back {when}'**
   String setAsideBackOn(String when);
 
+  /// No description provided for @setAsideUntilFurther.
+  ///
+  /// In en, this message translates to:
+  /// **'Until you bring it back'**
   String get setAsideUntilFurther;
 
+  /// No description provided for @setAsideMark.
+  ///
+  /// In en, this message translates to:
+  /// **'Set aside'**
   String get setAsideMark;
 
+  /// No description provided for @setAsideCountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 note set aside} other{{count} notes set aside}}'**
   String setAsideCountLabel(int count);
 
+  /// No description provided for @setAsideAllClear.
+  ///
+  /// In en, this message translates to:
+  /// **'All clear'**
   String get setAsideAllClear;
 
+  /// No description provided for @setAsideView.
+  ///
+  /// In en, this message translates to:
+  /// **'See what’s set aside'**
   String get setAsideView;
 
+  /// No description provided for @vaultImportCsv.
+  ///
+  /// In en, this message translates to:
+  /// **'Import Chrome CSV'**
   String get vaultImportCsv;
 
+  /// No description provided for @vaultImportCsvConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'The CSV contains unencrypted passwords. Import into this device’s private space?'**
   String get vaultImportCsvConfirm;
 
+  /// No description provided for @vaultImportCsvResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Added: {added} · Duplicates: {duplicates} · Skipped: {skipped}'**
   String vaultImportCsvResult(int added, int duplicates, int skipped);
 }
 

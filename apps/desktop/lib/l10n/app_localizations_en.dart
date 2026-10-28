@@ -1074,7 +1074,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get workspaceTimerHint => 'A little time to focus.';
 
   @override
-  String get workspaceCalculatorHint => "Open Windows Calculator.";
+  String get workspaceCalculatorHint => 'Open Windows Calculator.';
 
   @override
   String get workspaceColorHint => 'Pick a colour from anywhere.';
@@ -1282,7 +1282,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get backupSaved => 'Backup saved';
 
   @override
-  String get commitmentsTitle => "Recurring";
+  String get commitmentsTitle => 'Recurring';
 
   @override
   String get commitmentNew => 'New commitment';
@@ -1951,7 +1951,7 @@ class AppLocalizationsEn extends AppLocalizations {
       locale: localeName,
       other: '$countString notes · kept 30 days',
       one: '1 note · kept 30 days',
-      zero: 'Empty',
+      zero: 'No deleted notes',
     );
     return '$_temp0';
   }
@@ -2093,13 +2093,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get setAsideView => 'See what’s set aside';
 
   @override
-  String get vaultImportCsv => "Import Chrome CSV";
+  String get vaultImportCsv => 'Import Chrome CSV';
 
   @override
   String get vaultImportCsvConfirm =>
-      "The CSV contains unencrypted passwords. Import into this device’s private space?";
+      'The CSV contains unencrypted passwords. Import into this device’s private space?';
 
   @override
-  String vaultImportCsvResult(int added, int duplicates, int skipped) =>
-      "Added: $added · Duplicates: $duplicates · Skipped: $skipped";
+  String vaultImportCsvResult(int added, int duplicates, int skipped) {
+    return 'Added: $added · Duplicates: $duplicates · Skipped: $skipped';
+  }
 }

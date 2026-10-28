@@ -4,6 +4,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nex_desktop/ui/desktop_dropdown.dart';
+import 'package:nex_desktop/l10n/app_localizations.dart';
 import 'support/review_fixture.dart';
 
 void main() {
@@ -60,6 +61,17 @@ void main() {
           }
           for (var frame = 0; frame < 45; frame++) {
             await t.pump(const Duration(milliseconds: 16));
+          }
+          if (target == 'locations') {
+            final l = AppLocalizations.of(t.element(entry))!;
+            final loaded = find.text(l.libraryTrashCount(0));
+            for (var i = 0; i < 40 && loaded.evaluate().isEmpty; i++) {
+              await t.runAsync(
+                () => Future<void>.delayed(const Duration(milliseconds: 50)),
+              );
+              await t.pump();
+            }
+            expect(loaded, findsOneWidget);
           }
           expect(t.takeException(), isNull);
           if (target == 'monitor') {

@@ -1075,7 +1075,7 @@ class AppLocalizationsFa extends AppLocalizations {
   String get workspaceTimerHint => 'کمی زمان برای تمرکز.';
 
   @override
-  String get workspaceCalculatorHint => "باز کردن ماشین‌حساب ویندوز.";
+  String get workspaceCalculatorHint => 'باز کردن ماشین‌حساب ویندوز.';
 
   @override
   String get workspaceColorHint => 'انتخاب رنگ از هر جای صفحه.';
@@ -1282,7 +1282,7 @@ class AppLocalizationsFa extends AppLocalizations {
   String get backupSaved => 'نسخهٔ پشتیبان ذخیره شد';
 
   @override
-  String get commitmentsTitle => "موارد تکرارشونده";
+  String get commitmentsTitle => 'موارد تکرارشونده';
 
   @override
   String get commitmentNew => 'تعهد جدید';
@@ -2089,13 +2089,14 @@ class AppLocalizationsFa extends AppLocalizations {
   String get setAsideView => 'دیدن کنار گذاشته‌ها';
 
   @override
-  String get vaultImportCsv => "ورود رمزهای Chrome";
+  String get vaultImportCsv => 'ورود رمزهای Chrome';
 
   @override
   String get vaultImportCsvConfirm =>
-      "این فایل CSV رمزهای بدون رمزنگاری دارد. به فضای خصوصی همین دستگاه وارد شود؟";
+      'این فایل CSV رمزهای بدون رمزنگاری دارد. به فضای خصوصی همین دستگاه وارد شود؟';
 
   @override
-  String vaultImportCsvResult(int added, int duplicates, int skipped) =>
-      "افزوده: $added · تکراری: $duplicates · ردشده: $skipped";
+  String vaultImportCsvResult(int added, int duplicates, int skipped) {
+    return 'افزوده: $added · تکراری: $duplicates · ردشده: $skipped';
+  }
 }
