@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import '../../ui/desktop_dropdown.dart';
 import 'package:flutter/services.dart';
 import 'package:nex_ai/cloud.dart';
 import 'package:nex_core/nex_core.dart';
@@ -6,6 +8,7 @@ import 'package:nex_ui/nex_ui.dart';
 import '../../l10n/intelligence_strings.dart';
 import '../../l10n/desktop_strings.dart';
 import '../features_state.dart';
+import 'controller.dart';
 import 'settings.dart';
 import 'workspace.dart';
 
@@ -27,6 +30,18 @@ class _NoteIntelligenceState extends State<NoteIntelligencePanel> {
   List<String> _tags = [];
   AiOutputLanguage _language = AiOutputLanguage.english;
   NexRewriteStyle _style = NexRewriteStyle.fix;
+  bool _started = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_started) return;
+    _started = true;
+    // The card only appears once a provider is set, so the settings have to
+    // be read here rather than inside the card.
+    unawaited(NexScope.of(context).intelligence.initialize());
+  }
+
   Future<void> _run(Future<void> Function() action) async {
     setState(() => _failure = null);
     try {
@@ -123,6 +138,22 @@ class _NoteIntelligenceState extends State<NoteIntelligencePanel> {
     final ai = NexScope.of(context).intelligence,
         s = AiStrings.of(context),
         theme = Theme.of(context);
+    return ListenableBuilder(
+      listenable: ai,
+      // Until a provider is set there is nothing to offer a note; the way in
+      // is Settings and the Intelligence page, not a card on every note.
+      builder: (context, child) =>
+          ai.ready && ai.enabled ? child! : const SizedBox.shrink(),
+      child: _card(context, ai, s, theme),
+    );
+  }
+
+  Widget _card(
+    BuildContext context,
+    DesktopIntelligence ai,
+    AiStrings s,
+    ThemeData theme,
+  ) {
     return NexSoftCard(
       key: const ValueKey('note-intelligence'),
       accent: theme.colorScheme.primary,
@@ -194,6 +225,8 @@ class _NoteIntelligenceState extends State<NoteIntelligencePanel> {
                         width: 340,
                         child: task == 'translate'
                             ? DropdownButtonFormField<AiOutputLanguage>(
+                                style: desktopDropdownStyle(context),
+                                isDense: true,
                                 borderRadius: nexDropdownRadius,
                                 dropdownColor: nexDropdownColor(context),
                                 initialValue: _language,
@@ -215,6 +248,8 @@ class _NoteIntelligenceState extends State<NoteIntelligencePanel> {
                                 },
                               )
                             : DropdownButtonFormField<NexRewriteStyle>(
+                                style: desktopDropdownStyle(context),
+                                isDense: true,
                                 borderRadius: nexDropdownRadius,
                                 dropdownColor: nexDropdownColor(context),
                                 initialValue: _style,

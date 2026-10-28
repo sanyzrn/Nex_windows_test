@@ -67,3 +67,10 @@ class _DesktopDropdownState<T> extends State<DesktopDropdown<T>> {
     ),
   );
 }
+
+/// The text a dropdown shows its choice in: body size, not the 18 px title
+/// Material falls back to.
+TextStyle? desktopDropdownStyle(BuildContext context) => Theme.of(context)
+    .textTheme
+    .bodyMedium
+    ?.copyWith(color: Theme.of(context).colorScheme.onSurface);

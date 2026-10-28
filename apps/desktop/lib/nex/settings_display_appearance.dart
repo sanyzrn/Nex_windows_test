@@ -183,7 +183,7 @@ mixin _SettingsDisplayAppearance on _SettingsStateBase {
           _SettingRow(
             title: l.windowRemember,
             subtitle: l.windowRememberHint,
-            control: Switch(
+            control: NexSwitch(
               key: const ValueKey('window-remember'),
               value: c.S.windowRemember,
               onChanged: (v) async {
@@ -279,7 +279,7 @@ mixin _SettingsDisplayAppearance on _SettingsStateBase {
           const Divider(height: 1),
           _SettingRow(
             title: l.startup,
-            control: Switch(
+            control: NexSwitch(
               value: c.S.startup,
               onChanged: (v) async {
                 await c.native.setStartup(v);
@@ -474,7 +474,7 @@ mixin _SettingsDisplayAppearance on _SettingsStateBase {
           const Divider(height: 1),
           _SettingRow(
             title: l.solarCalendar,
-            control: Switch(
+            control: NexSwitch(
               value: c.S.solarCalendar ?? c.resolvedLanguage == 'fa',
               onChanged: (v) {
                 c.S.solarCalendar = v;

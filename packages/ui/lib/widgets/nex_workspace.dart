@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../tokens/nex_tokens.dart';
 import '../tokens/nex_contrast.dart';
+import 'nex_switch.dart';
 
 /// Shared with the Windows settings, assistant and utility directory. Tonal
 /// groups and a quiet coloured edge mirror Nex's Android surfaces.
@@ -155,7 +156,7 @@ class NexFeatureCard extends StatelessWidget {
               const Spacer(),
               Semantics(
                 label: title,
-                child: Switch(value: value, onChanged: onChanged),
+                child: NexSwitch(value: value, onChanged: onChanged),
               ),
             ],
           ),

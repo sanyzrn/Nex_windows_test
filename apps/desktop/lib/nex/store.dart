@@ -407,6 +407,14 @@ class DesktopStore {
                 result = notes.listTags();
               case 'tagUsage':
                 result = maintenance.tagUsage();
+              case 'typeCounts':
+                result = <String, int>{
+                  for (final row in notes.db.select(
+                    'SELECT type, COUNT(*) AS n FROM notes '
+                    'WHERE deleted_at IS NULL GROUP BY type',
+                  ))
+                    row['type'] as String: row['n'] as int,
+                };
               case 'createTag':
                 notes.upsertTag(name: a['name'] as String);
                 result = null;

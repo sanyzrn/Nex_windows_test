@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import '../../ui/desktop_dropdown.dart';
 import '../../l10n/desktop_format.dart';
 import '../../ui/desktop_accessibility.dart';
 import 'package:flutter/material.dart';
@@ -213,7 +214,7 @@ class _SettingsState extends State<DesktopIntelligenceSettings> {
       builder: (context, _) {
         if (!ai.ready) return const Center(child: CircularProgressIndicator());
         Widget toggle(String title, String key, [bool fallback = false]) =>
-            SwitchListTile.adaptive(
+            NexSwitchTile(
               contentPadding: EdgeInsets.zero,
               title: Text(s.t(title)),
               value: ai.flag(key, fallback),
@@ -261,6 +262,8 @@ class _SettingsState extends State<DesktopIntelligenceSettings> {
         ) => Padding(
           padding: const EdgeInsets.symmetric(vertical: 8),
           child: DropdownButtonFormField<String>(
+            style: desktopDropdownStyle(context),
+            isDense: true,
             borderRadius: nexDropdownRadius,
             dropdownColor: nexDropdownColor(context),
             initialValue: values.contains(ai.string(pref))
@@ -620,7 +623,7 @@ class _SettingsState extends State<DesktopIntelligenceSettings> {
                       ),
                       Semantics(
                         label: s.t('enabled'),
-                        child: Switch.adaptive(
+                        child: NexSwitch(
                           value: ai.flag('ai.enabled'),
                           onChanged: (v) =>
                               _run(() => ai.setValue('ai.enabled', v)),
@@ -784,6 +787,8 @@ class _SettingsState extends State<DesktopIntelligenceSettings> {
               toggle('allowActions', 'ai.allowActions', true),
               toggle('cycle', 'cycle.assistant_access'),
               DropdownButtonFormField<int>(
+                style: desktopDropdownStyle(context),
+                isDense: true,
                 borderRadius: nexDropdownRadius,
                 dropdownColor: nexDropdownColor(context),
                 initialValue:

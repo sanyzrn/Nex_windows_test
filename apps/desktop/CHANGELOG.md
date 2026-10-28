@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.37.0 — 2026-10-28
+
+- Note types in the sidebar, under the tags: Text, Checklist, Link and the rest, each with how many notes it has. Click one to see only those notes in the Library; click again to clear.
+- Switches are smaller everywhere, and text fields and dropdowns are shorter, with body-size text.
+- The Recurring and Scheduled dialogs no longer repeat their title and are a more sensible size.
+- The Nex AI card in a note appears only once a provider is set.
+
 ## 0.36.0 — 2026-10-28
 
 - The Library toolbar's four buttons (locations, board, list, tags) are one family: the same size and glyph, with a quiet wash on the view that is on.

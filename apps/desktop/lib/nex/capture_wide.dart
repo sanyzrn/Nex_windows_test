@@ -166,21 +166,15 @@ mixin CaptureWide on CaptureViewBase {
                                 children: [
                                   Semantics(
                                     label: l.checklist,
-                                    child: SizedBox(
-                                      width: calm ? 40 : null,
-                                      height: calm ? 26 : null,
-                                      child: FittedBox(
-                                        child: Switch(
-                                          value: f.checklist,
-                                          onChanged:
-                                              f.session.id == null && !f.saving
-                                              ? (v) {
-                                                  f.checklist = v;
-                                                  f.notify();
-                                                }
-                                              : null,
-                                        ),
-                                      ),
+                                    child: NexSwitch(
+                                      value: f.checklist,
+                                      onChanged:
+                                          f.session.id == null && !f.saving
+                                          ? (v) {
+                                              f.checklist = v;
+                                              f.notify();
+                                            }
+                                          : null,
                                     ),
                                   ),
                                   const SizedBox(width: 2),
