@@ -1,4 +1,5 @@
 import 'package:nex_ui/nex_ui.dart';
+import '../ui/desktop_dropdown.dart';
 import 'package:flutter/material.dart';
 import 'package:nex_core/nex_core.dart';
 import '../l10n/app_localizations.dart';
@@ -89,6 +90,7 @@ class _SolarDatePickerState extends State<_SolarDatePicker> {
               : 90) *
           MediaQuery.textScalerOf(context).scale(1).clamp(1.0, 2.0),
       child: DropdownButtonFormField<int>(
+        style: desktopDropdownStyle(context),
         borderRadius: nexDropdownRadius,
         dropdownColor: nexDropdownColor(context),
         key: ValueKey('solar-$id-$value'),

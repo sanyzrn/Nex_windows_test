@@ -5,6 +5,7 @@
 /// Reminder picker dialog with Android parity quick choices and repeat options.
 library;
 
+import '../ui/desktop_dropdown.dart';
 import 'package:nex_ui/nex_ui.dart';
 
 import 'desktop_date_picker.dart';
@@ -279,6 +280,8 @@ class _ReminderPickerDialogState extends State<_ReminderPickerDialog> {
               ),
               const SizedBox(height: 8),
               DropdownButtonFormField<NoteRepeat>(
+                style: desktopDropdownStyle(context),
+                isDense: true,
                 borderRadius: nexDropdownRadius,
                 dropdownColor: nexDropdownColor(context),
                 initialValue: _repeat,

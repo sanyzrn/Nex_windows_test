@@ -80,6 +80,26 @@ class NexFeatures extends ChangeNotifier {
   /// current; the sidebar reads it to show which tag is open.
   String? libraryTag;
 
+  /// The note type the Library is filtered to, or null.
+  NoteType? libraryType;
+  NoteType? _requestedType;
+  bool _typeRequested = false;
+
+  /// The sidebar asks the Library to show one type of note, or all for null.
+  void requestLibraryType(NoteType? type) {
+    _requestedType = type;
+    _typeRequested = true;
+    notifyListeners();
+  }
+
+  ({NoteType? type})? takeRequestedType() {
+    if (!_typeRequested) return null;
+    _typeRequested = false;
+    final type = _requestedType;
+    _requestedType = null;
+    return (type: type);
+  }
+
   String? _requestedTag;
   bool _tagRequested = false;
 

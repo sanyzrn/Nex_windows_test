@@ -155,6 +155,12 @@ class _WindowNavRail extends StatelessWidget {
                         controller: controller,
                         section: section,
                       ),
+                    if (features != null)
+                      NexRailTypes(
+                        features: features!,
+                        controller: controller,
+                        section: section,
+                      ),
                   ],
                 ),
               ),

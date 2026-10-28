@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nex_core/nex_core.dart' show NoteType;
 import 'package:nex_desktop/nex/features_state.dart';
 
 import 'support/review_fixture.dart';
@@ -44,6 +45,15 @@ void main() {
     await t.tap(work);
     await _settle(t);
     expect(features.libraryTag, isNull);
+    // Types: the fixture holds text, checklist and link notes.
+    final checklist = find.byKey(const ValueKey('rail-type-checklist'));
+    expect(checklist, findsOneWidget);
+    await t.tap(checklist);
+    await _settle(t);
+    expect(features.libraryType, NoteType.checklist);
+    await t.tap(checklist);
+    await _settle(t);
+    expect(features.libraryType, isNull);
     expect(t.takeException(), isNull);
 
     await t.pumpWidget(const SizedBox());

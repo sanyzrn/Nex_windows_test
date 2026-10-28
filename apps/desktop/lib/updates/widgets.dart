@@ -112,7 +112,7 @@ class NexUpdateCard extends StatelessWidget {
             if (!compact) ...[
               const ReleaseNotesButton(),
               const SizedBox(height: 18),
-              SwitchListTile.adaptive(
+              NexSwitchTile(
                 contentPadding: EdgeInsets.zero,
                 title: Text(s.t('automatic')),
                 subtitle: Text(s.t('automaticHint')),

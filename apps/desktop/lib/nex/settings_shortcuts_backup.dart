@@ -53,7 +53,7 @@ mixin _SettingsShortcutsBackup on _SettingsStateBase {
           const Divider(height: 1),
           _SettingRow(
             title: l.pasteOnClick,
-            control: Switch(
+            control: NexSwitch(
               value: c.S.paste,
               onChanged: (v) {
                 c.S.paste = v;
@@ -65,7 +65,7 @@ mixin _SettingsShortcutsBackup on _SettingsStateBase {
           const Divider(height: 1),
           _SettingRow(
             title: l.magnify,
-            control: Switch(
+            control: NexSwitch(
               value: c.S.magnify,
               onChanged: (v) {
                 c.S.magnify = v;

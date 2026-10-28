@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:nex_ui/nex_ui.dart';
 import '../l10n/app_localizations.dart';
@@ -29,8 +30,8 @@ Future<T?> showDesktopCollection<T>(
           insetPadding: const EdgeInsets.all(NexSpacing.md),
           clipBehavior: Clip.antiAlias,
           child: SizedBox(
-            width: 900,
-            height: MediaQuery.sizeOf(context).height * .9,
+            width: 760,
+            height: math.min(MediaQuery.sizeOf(context).height * .9, 640),
             child: Column(
               children: [
                 Padding(
@@ -44,7 +45,7 @@ Future<T?> showDesktopCollection<T>(
                       Expanded(
                         child: Text(
                           title,
-                          style: Theme.of(context).textTheme.titleLarge,
+                          style: Theme.of(context).textTheme.titleMedium,
                         ),
                       ),
                       IconButton(

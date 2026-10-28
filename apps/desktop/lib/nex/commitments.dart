@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../ui/desktop_dropdown.dart';
 import 'package:flutter/material.dart';
 import 'package:nex_core/nex_core.dart';
 import 'package:nex_ui/nex_ui.dart';
@@ -143,28 +144,8 @@ class _NexCommitmentsViewState extends State<NexCommitmentsView> {
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
           child: Row(
             children: [
-              Container(
-                width: 32,
-                height: 32,
-                decoration: BoxDecoration(
-                  color: scheme.primary.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(9),
-                ),
-                child: Icon(
-                  Icons.event_repeat_rounded,
-                  size: 18,
-                  color: scheme.primary,
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  l.commitmentsTitle,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
-                ),
-              ),
+              // The dialog around this view already carries the title.
+              const Spacer(),
               FilledButton.tonalIcon(
                 style: FilledButton.styleFrom(
                   shape: RoundedRectangleBorder(
@@ -476,6 +457,8 @@ class _NexCommitmentEditorDialogState extends State<NexCommitmentEditorDialog> {
               children: [
                 Expanded(
                   child: DropdownButtonFormField<NexCadence>(
+                    style: desktopDropdownStyle(context),
+                    isDense: true,
                     borderRadius: nexDropdownRadius,
                     dropdownColor: nexDropdownColor(context),
                     initialValue: _cadence,
@@ -552,7 +535,7 @@ class _NexCommitmentEditorDialogState extends State<NexCommitmentEditorDialog> {
               ),
             ],
             const SizedBox(height: 12),
-            SwitchListTile(
+            NexSwitchTile(
               contentPadding: EdgeInsets.zero,
               title: Text(l.commitmentNotification),
               value: _notify,
