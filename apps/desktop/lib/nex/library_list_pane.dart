@@ -261,12 +261,20 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
                   ),
                 ),
               );
+              // One family of toolbar buttons: the same size, the same glyph
+              // size, and a quiet wash on whichever view is on.
+              final wash = scheme.onSurface.withValues(alpha: .08);
+              ButtonStyle toolbar({bool on = false}) => IconButton.styleFrom(
+                iconSize: 20,
+                backgroundColor: on ? wash : null,
+              );
               final actions = Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   IconButton(
                     key: const ValueKey('library-locations'),
                     tooltip: l.libraryTitle,
+                    style: toolbar(),
                     onPressed: _openLibraryLocations,
                     icon: const Icon(Icons.folder_copy_outlined),
                   ),
@@ -274,20 +282,23 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
                     IconButton(
                       tooltip: AiStrings.of(context).t('board'),
                       isSelected: board,
+                      style: toolbar(on: board),
                       onPressed: () => setState(() => board = true),
                       icon: const Icon(Icons.grid_view_outlined),
                     ),
                     IconButton(
                       tooltip: AiStrings.of(context).t('list'),
                       isSelected: !board,
+                      style: toolbar(on: !board),
                       onPressed: () => setState(() => board = false),
                       icon: const Icon(Icons.view_agenda_outlined),
                     ),
                   ],
-                  IconButton.filledTonal(
+                  IconButton(
                     key: const ValueKey('manage-tags'),
                     tooltip: l.manageTags,
-                    icon: const Icon(Icons.sell_outlined, size: 18),
+                    style: toolbar(),
+                    icon: const Icon(Icons.sell_outlined),
                     onPressed: () async {
                       await showTagManager(context, NexScope.of(context));
                       if (!mounted) return;
