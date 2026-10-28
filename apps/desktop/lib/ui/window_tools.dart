@@ -237,6 +237,7 @@ class _ToolTile extends StatelessWidget {
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
+                      mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
@@ -346,11 +347,12 @@ class _ToolCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Align(
-      alignment: AlignmentDirectional.centerStart,
+      alignment: Alignment.topCenter,
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(24),
         child: Container(
-          constraints: const BoxConstraints(maxWidth: 430),
+          width: 720,
+          constraints: const BoxConstraints(maxWidth: 720),
           decoration: BoxDecoration(
             color: scheme.surfaceContainerLowest,
             borderRadius: BorderRadius.circular(16),

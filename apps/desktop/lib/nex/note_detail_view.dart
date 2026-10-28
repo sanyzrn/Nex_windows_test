@@ -488,79 +488,97 @@ class _NexNoteDetailState extends State<NexNoteDetail> {
                           ),
                         ],
                         const SizedBox(height: 12),
-                        ExpansionTile(
-                          title: Text(l.tagsAndThreads),
-                          tilePadding: EdgeInsets.zero,
-                          children: [
-                            Align(
-                              alignment: AlignmentDirectional.centerStart,
-                              child: TextButton.icon(
-                                key: const ValueKey('note-existing-tag'),
-                                onPressed: pickTag,
-                                icon: const Icon(Icons.sell_outlined),
-                                label: Text(l.chooseExistingTag),
-                              ),
+                        Card(
+                          margin: EdgeInsets.zero,
+                          clipBehavior: Clip.antiAlias,
+                          child: ExpansionTile(
+                            leading: const Icon(Icons.label_outline_rounded),
+                            title: Text(l.tagsAndThreads),
+                            childrenPadding: const EdgeInsets.fromLTRB(
+                              16,
+                              0,
+                              16,
+                              16,
                             ),
-                            DesktopEditingDirection(
-                              controller: tag,
-                              multiline: false,
-                              builder: (context, direction) => TextField(
-                                controller: tag,
-                                textDirection: direction,
-                                decoration: InputDecoration(hintText: l.addTag),
-                                onSubmitted: (name) async {
-                                  await run('tag', {'name': name});
-                                  tag.clear();
-                                },
-                              ),
-                            ),
-                            DesktopEditingDirection(
-                              controller: thread,
-                              multiline: false,
-                              builder: (context, direction) => TextField(
-                                controller: thread,
-                                textDirection: direction,
-                                decoration: InputDecoration(
-                                  hintText: l.addThread,
+                            children: [
+                              Align(
+                                alignment: AlignmentDirectional.centerStart,
+                                child: TextButton.icon(
+                                  key: const ValueKey('note-existing-tag'),
+                                  onPressed: pickTag,
+                                  icon: const Icon(Icons.sell_outlined),
+                                  label: Text(l.chooseExistingTag),
                                 ),
-                                onSubmitted: (name) async {
-                                  await run('thread', {'name': name});
-                                  thread.clear();
+                              ),
+                              DesktopEditingDirection(
+                                controller: tag,
+                                multiline: false,
+                                builder: (context, direction) => TextField(
+                                  controller: tag,
+                                  textDirection: direction,
+                                  decoration: InputDecoration(
+                                    hintText: l.addTag,
+                                  ),
+                                  onSubmitted: (name) async {
+                                    await run('tag', {'name': name});
+                                    tag.clear();
+                                  },
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              DesktopEditingDirection(
+                                controller: thread,
+                                multiline: false,
+                                builder: (context, direction) => TextField(
+                                  controller: thread,
+                                  textDirection: direction,
+                                  decoration: InputDecoration(
+                                    hintText: l.addThread,
+                                  ),
+                                  onSubmitted: (name) async {
+                                    await run('thread', {'name': name});
+                                    thread.clear();
+                                  },
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Wrap(
+                                spacing: 8,
+                                runSpacing: 8,
+                                children: memberships
+                                    .map(
+                                      (t) => InputChip(
+                                        label: Text(t.name),
+                                        onDeleted: () => run('leaveThread', {
+                                          'thread': t.id,
+                                        }),
+                                      ),
+                                    )
+                                    .toList(),
+                              ),
+                              const SizedBox(height: 8),
+                              DesktopDropdown<String>(
+                                hint: Text(l.joinThread),
+                                items: availableThreads
+                                    .where(
+                                      (t) =>
+                                          !memberships.any((m) => m.id == t.id),
+                                    )
+                                    .map(
+                                      (t) => DropdownMenuItem(
+                                        value: t.id,
+                                        child: Text(t.name),
+                                      ),
+                                    )
+                                    .toList(),
+                                onChanged: (id) {
+                                  if (id != null) {
+                                    run('joinThread', {'thread': id});
+                                  }
                                 },
                               ),
-                            ),
-                            Wrap(
-                              children: memberships
-                                  .map(
-                                    (t) => InputChip(
-                                      label: Text(t.name),
-                                      onDeleted: () =>
-                                          run('leaveThread', {'thread': t.id}),
-                                    ),
-                                  )
-                                  .toList(),
-                            ),
-                            DesktopDropdown<String>(
-                              hint: Text(l.joinThread),
-                              items: availableThreads
-                                  .where(
-                                    (t) =>
-                                        !memberships.any((m) => m.id == t.id),
-                                  )
-                                  .map(
-                                    (t) => DropdownMenuItem(
-                                      value: t.id,
-                                      child: Text(t.name),
-                                    ),
-                                  )
-                                  .toList(),
-                              onChanged: (id) {
-                                if (id != null) {
-                                  run('joinThread', {'thread': id});
-                                }
-                              },
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                         if (failure != null)
                           Text(

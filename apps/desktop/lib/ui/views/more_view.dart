@@ -38,10 +38,12 @@ class MoreView extends StatelessWidget {
                   ValueListenableBuilder<DragInfo?>(
                     valueListenable: c.dragInfo,
                     builder: (context, drag, _) {
-                      return Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: _tiles(c, more, drag),
+                      return LayoutBuilder(
+                        builder: (context, box) => Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: _tiles(c, more, drag, box.maxWidth),
+                        ),
                       );
                     },
                   ),
@@ -54,17 +56,22 @@ class MoreView extends StatelessWidget {
     );
   }
 
-  List<Widget> _tiles(PanelController c, List<String> more, DragInfo? drag) {
+  List<Widget> _tiles(
+    PanelController c,
+    List<String> more,
+    DragInfo? drag,
+    double width,
+  ) {
     final tiles = <Widget>[];
     var idx = 0;
     for (final id in more) {
       if (drag?.zone == 'more' && drag!.insertIdx == idx) {
-        tiles.add(const _TilePlaceholder());
+        tiles.add(_TilePlaceholder(width: width));
       }
       tiles.add(
         SizedBox(
           key: c.toolKey(id),
-          width: 84,
+          width: width,
           child: _Tile(
             controller: c,
             id: id,
@@ -76,14 +83,15 @@ class MoreView extends StatelessWidget {
       idx++;
     }
     if (drag?.zone == 'more' && drag!.insertIdx == idx) {
-      tiles.add(const _TilePlaceholder());
+      tiles.add(_TilePlaceholder(width: width));
     }
     return tiles;
   }
 }
 
 class _TilePlaceholder extends StatelessWidget {
-  const _TilePlaceholder();
+  const _TilePlaceholder({required this.width});
+  final double width;
 
   @override
   Widget build(BuildContext context) {
@@ -93,7 +101,7 @@ class _TilePlaceholder extends StatelessWidget {
       duration: const Duration(milliseconds: 250),
       curve: kPop,
       builder: (context, t, child) => Container(
-        width: 84,
+        width: width,
         constraints: const BoxConstraints(minHeight: 66),
         decoration: BoxDecoration(
           border: Border.all(width: 2, color: p.muted.withValues(alpha: t)),

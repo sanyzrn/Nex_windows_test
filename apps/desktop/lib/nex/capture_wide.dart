@@ -27,7 +27,9 @@ mixin CaptureWide on CaptureViewBase {
                 ? AlignmentDirectional.topStart
                 : Alignment.topCenter,
             child: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: calm ? 760 : 720),
+              constraints: BoxConstraints(
+                maxWidth: embedded ? double.infinity : 720,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [

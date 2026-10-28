@@ -79,7 +79,6 @@ mixin PanelActions on PanelStateBase {
     final kids = list
         .where((x) => x != draggingId && (withHidden || !S.hidden.contains(x)))
         .toList();
-    final isGrid = zone == 'more';
     for (var i = 0; i < kids.length; i++) {
       final key = toolKeys[kids[i]];
       final ctx = key?.currentContext;
@@ -89,13 +88,7 @@ mixin PanelActions on PanelStateBase {
           box.getTransformTo(null),
           Offset.zero & box.size,
         );
-        final hit = isGrid
-            ? (p.dy < rect.bottom &&
-                      (resolvedLanguage == 'fa'
-                          ? p.dx > rect.center.dx
-                          : p.dx < rect.center.dx)) ||
-                  p.dy < rect.top
-            : p.dy < rect.top + rect.height / 2;
+        final hit = p.dy < rect.top + rect.height / 2;
         if (hit) return i;
       }
     }

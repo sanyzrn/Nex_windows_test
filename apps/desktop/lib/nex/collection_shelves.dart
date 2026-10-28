@@ -125,6 +125,7 @@ class DesktopShelfTile extends StatelessWidget {
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
+                      mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
@@ -255,17 +256,6 @@ class NexToolsShelves extends StatelessWidget {
             }
           },
         ),
-      if (matches(l.scheduledTitle, l.scheduledSubtitle))
-        DesktopShelfTile(
-          key: const ValueKey('tools-scheduled'),
-          title: l.scheduledTitle,
-          subtitle: l.scheduledSubtitle,
-          icon: Icons.schedule_send_outlined,
-          accentId: 'clip',
-          onTap: () => unawaited(
-            withPanelHold(context, () => showScheduledNotes(context)),
-          ),
-        ),
       if (matches(l.commitmentsTitle, l.commitmentTitleHint))
         DesktopShelfTile(
           key: const ValueKey('tools-recurring'),
@@ -376,6 +366,16 @@ class _NexLibraryLocationsState extends State<NexLibraryLocations> {
             icon: Icons.timeline_outlined,
             accentId: 'timer',
             onTap: () => Navigator.pop(context, 'threads'),
+          ),
+          DesktopShelfTile(
+            key: const ValueKey('library-scheduled'),
+            title: l.scheduledTitle,
+            subtitle: l.scheduledSubtitle,
+            icon: Icons.schedule_send_outlined,
+            accentId: 'clip',
+            onTap: () => unawaited(
+              withPanelHold(context, () => showScheduledNotes(context)),
+            ),
           ),
           DesktopShelfTile(
             key: const ValueKey('library-trash'),

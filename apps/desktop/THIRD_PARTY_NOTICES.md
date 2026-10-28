@@ -44,3 +44,7 @@ PDF reading under their bundled package licenses. PDFium's pinned
 `chromium/7811` Windows distribution and all 16 included upstream notices are
 preserved in [assets/notices/pdfium.txt](assets/notices/pdfium.txt) and registered
 in About → Licenses. PDFium is downloaded at build time and included in setup.
+
+## Unicode Emoji data
+
+The emoji picker includes names and sequences from Unicode Emoji 18.0, © Unicode, Inc. The Unicode License V3 is included in [assets/notices/unicode.txt](assets/notices/unicode.txt) and in the application licences page.

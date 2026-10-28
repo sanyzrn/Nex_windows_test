@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:nex_ui/nex_ui.dart';
+import 'package:nex_core/nex_core.dart';
+import '../nex/features_state.dart';
 import '../l10n/app_localizations.dart';
 import '../l10n/desktop_strings.dart';
 
@@ -17,13 +19,36 @@ class ReleaseNotesButton extends StatelessWidget {
   );
 }
 
-Future<void> showReleaseNotes(BuildContext context) => showDialog<void>(
-  context: context,
-  builder: (_) => const _ReleaseNotesDialog(),
-);
+Future<void> showReleaseNotes(BuildContext context) {
+  final fa = Localizations.localeOf(context).languageCode == 'fa';
+  final solar = NexPanelScope.maybeOf(context)?.S.solarCalendar ?? fa;
+  return showDialog<void>(
+    context: context,
+    builder: (_) => _ReleaseNotesDialog(solar: solar, persian: fa),
+  );
+}
+
+String formatReleaseNoteDates(
+  String text, {
+  required bool solar,
+  required bool persian,
+}) {
+  if (!solar) return text;
+  final headings = RegExp(
+    r'^(##[^\n]*?)(\d{4}-\d{2}-\d{2})(?=\s*$)',
+    multiLine: true,
+  );
+  return text.replaceAllMapped(headings, (match) {
+    final date = DateTime.tryParse(match.group(2)!);
+    return date == null
+        ? match.group(0)!
+        : '${match.group(1)}${nexDisplayDate(date, solar: true, persian: persian)}';
+  });
+}
 
 class _ReleaseNotesDialog extends StatefulWidget {
-  const _ReleaseNotesDialog();
+  const _ReleaseNotesDialog({required this.solar, required this.persian});
+  final bool solar, persian;
   @override
   State<_ReleaseNotesDialog> createState() => _ReleaseNotesDialogState();
 }
@@ -58,7 +83,15 @@ class _ReleaseNotesDialogState extends State<_ReleaseNotesDialog> {
           if (!state.hasData) {
             return const Center(child: CircularProgressIndicator());
           }
-          return SingleChildScrollView(child: NexMarkdown(state.data!));
+          return SingleChildScrollView(
+            child: NexMarkdown(
+              formatReleaseNoteDates(
+                state.data!,
+                solar: widget.solar,
+                persian: widget.persian,
+              ),
+            ),
+          );
         },
       ),
     ),

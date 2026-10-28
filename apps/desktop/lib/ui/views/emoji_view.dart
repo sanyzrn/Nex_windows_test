@@ -26,7 +26,7 @@ class _EmojiViewState extends State<EmojiView> {
     super.didChangeDependencies();
     if (!_catInit) {
       _catInit = true;
-      cat = LiquidScope.panelOf(context).S.recentEmoji.isEmpty ? '😀' : '🕘';
+      cat = '😀';
     }
   }
 
@@ -73,7 +73,7 @@ class _EmojiViewState extends State<EmojiView> {
             ),
           ],
         ),
-        Row(
+        Wrap(
           children: [
             for (final key in ['🕘', ...kEmojiCategories.keys])
               _CatButton(
@@ -87,7 +87,7 @@ class _EmojiViewState extends State<EmojiView> {
           ],
         ),
         SizedBox(
-          height: 220,
+          height: c.isWindowMode ? 420 : 220,
           child: list.isEmpty
               ? Empty(
                   _search.text.isNotEmpty
@@ -100,8 +100,8 @@ class _EmojiViewState extends State<EmojiView> {
                       behavior: ScrollConfiguration.of(
                         context,
                       ).copyWith(scrollbars: false),
-                      child: GridView.count(
-                        crossAxisCount: 7,
+                      child: GridView.extent(
+                        maxCrossAxisExtent: 46,
                         childAspectRatio: 36 / 36,
                         padding: const EdgeInsets.only(bottom: 10),
                         children: [
@@ -161,7 +161,8 @@ class _CatButtonState extends State<_CatButton> {
   @override
   Widget build(BuildContext context) {
     final p = LiquidScope.paletteOf(context);
-    return Expanded(
+    return SizedBox(
+      width: 38,
       child: MouseRegion(
         onEnter: (_) => setState(() => _hover = true),
         onExit: (_) => setState(() => _hover = false),

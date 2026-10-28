@@ -77,10 +77,21 @@ void main() {
       }
 
       expect(sections(fa), sections(en));
+      expect(sections(fa).length, 25); // Includes the 0.39.0 release section.
+    },
+  );
+
+  test(
+    'release headings follow the selected calendar without changing body dates',
+    () {
+      const source = '## 0.38.0 — 2026-10-28\n\n- 2026-10-28';
       expect(
-        sections(fa).length,
-        24,
-      ); // Includes the 0.38.0 release section.
+        formatReleaseNoteDates(source, solar: false, persian: true),
+        source,
+      );
+      final solar = formatReleaseNoteDates(source, solar: true, persian: true);
+      expect(solar, contains('۱۴۰۵/۰۸/۰۶'));
+      expect(solar, contains('- 2026-10-28'));
     },
   );
 

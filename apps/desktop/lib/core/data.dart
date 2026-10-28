@@ -1,3 +1,5 @@
+import 'emoji_data.dart';
+
 /// Emoji data ported 1:1 from the original ui.html: category key,
 /// then "emoji keywords" entries. Search matches the keywords.
 const Map<String, String> kEmojiCategories = {
@@ -13,6 +15,9 @@ const Map<String, String> kEmojiCategories = {
       '🍎 apple|🍌 banana|🍉 watermelon|🍇 grapes|🍓 strawberry|🍒 cherry|🍑 peach|🥑 avocado|🍆 eggplant|🌶️ pepper hot|🥕 carrot|🌽 corn|🍞 bread|🧀 cheese|🍔 burger|🍟 fries|🍕 pizza|🌭 hotdog|🌮 taco|🍣 sushi|🍜 ramen noodles|🍩 donut|🍪 cookie|🎂 cake birthday|🍫 chocolate|🍿 popcorn|☕ coffee|🍵 tea|🧋 boba|🍺 beer|🍷 wine|🥂 cheers',
   '💡':
       '⚽ soccer football|🏀 basketball|🎮 game controller|🎲 dice|🎯 target dart|🏆 trophy win|🥇 gold medal|🎸 guitar|🎹 piano|🎧 headphones music|🎵 music note|🎬 movie|📷 camera|💻 laptop|🖥️ desktop computer|⌨️ keyboard|🖱️ mouse|📱 phone|🔋 battery|💡 idea bulb|🔦 flashlight|📚 books|📝 memo note|✏️ pencil|📌 pin|📎 paperclip|✂️ scissors|🔒 lock|🔑 key|🔨 hammer|🛠️ tools|⚙️ gear settings|🧲 magnet|💰 money bag|💳 card|📦 package box|✉️ envelope mail|📅 calendar|⏰ alarm clock|⌛ hourglass|🚀 rocket|✈️ plane|🚗 car|🏠 house home|🎁 gift',
+  '🚗': '',
+  '⚽': '',
+  '🏳️': '',
   '✅':
       '✅ check done yes|☑️ checkbox|✔️ check mark|❌ cross no wrong|❎ cross box|➕ plus|➖ minus|➗ divide|✖️ multiply|❓ question|❗ exclamation|‼️ double exclamation|⚠️ warning|🚫 prohibited|⛔ no entry|🔴 red circle|🟠 orange circle|🟡 yellow circle|🟢 green circle|🔵 blue circle|🟣 purple circle|⚫ black circle|⚪ white circle|🔺 triangle|🔶 diamond|▶️ play|⏸️ pause|⏹️ stop|🔁 repeat|🔀 shuffle|⬆️ up arrow|⬇️ down arrow|⬅️ left arrow|➡️ right arrow|↩️ return|🔗 link|©️ copyright|®️ registered|™️ trademark|#️⃣ hash|🆗 ok|🆕 new|🆒 cool|🔞 18',
 };
@@ -24,15 +29,24 @@ class EmojiEntry {
   final String category;
 }
 
-final List<EmojiEntry> kAllEmoji = [
-  for (final e in kEmojiCategories.entries)
-    for (final item in e.value.split('|'))
-      EmojiEntry(
-        item.substring(0, item.indexOf(' ')),
-        item.substring(item.indexOf(' ') + 1),
-        e.key,
-      ),
-];
+final List<EmojiEntry> kAllEmoji = () {
+  final seen = <String>{};
+  final entries = <EmojiEntry>[];
+  for (final category in kEmojiCategories.entries) {
+    for (final item in [
+      if (category.value.isNotEmpty) ...category.value.split('|'),
+      ...?kUnicodeEmoji[category.key],
+    ]) {
+      final split = item.indexOf(' ');
+      if (split < 0) continue;
+      final emoji = item.substring(0, split);
+      if (seen.add(emoji)) {
+        entries.add(EmojiEntry(emoji, item.substring(split + 1), category.key));
+      }
+    }
+  }
+  return entries;
+}();
 
 /// Default dock/more widget order, ported 1:1.
 const List<String> kDefaultDock = [

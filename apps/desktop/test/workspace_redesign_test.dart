@@ -82,6 +82,37 @@ void main() {
     expect(selected, isTrue);
   });
 
+  testWidgets('wide capture editor fills the same content column', (t) async {
+    await _boot(t, width: 1600);
+    final editor = t
+        .getSize(find.byKey(const ValueKey('workspace-editor')))
+        .width;
+    expect(editor, greaterThan(1000));
+    expect(t.takeException(), isNull);
+  });
+
+  testWidgets('scheduled notes are available in library locations', (t) async {
+    final c = await _boot(t);
+    c.selectWindowSection('library');
+    for (var i = 0; i < 10; i++) {
+      await t.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 50)),
+      );
+      await t.pump(const Duration(milliseconds: 100));
+    }
+    await t.tap(find.byKey(const ValueKey('library-locations')));
+    await t.pumpAndSettle();
+    expect(find.byKey(const ValueKey('library-scheduled')), findsOneWidget);
+    await t.tap(find.byKey(const ValueKey('library-scheduled')));
+    await t.pump(const Duration(milliseconds: 300));
+    await t.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 100)),
+    );
+    await t.pump(const Duration(milliseconds: 300));
+    expect(find.byKey(const ValueKey('tools-scheduled')), findsNothing);
+    expect(t.takeException(), isNull);
+  });
+
   testWidgets('sidebar collapses while writing stays available', (t) async {
     await _boot(t, width: 700);
     // The compact rail is a slim 76px lane of icon-over-label tiles.

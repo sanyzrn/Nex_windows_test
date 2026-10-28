@@ -74,7 +74,7 @@ class _ClipboardViewState extends State<ClipboardView> {
             ],
           ),
         ConstrainedBox(
-          constraints: const BoxConstraints(maxHeight: 300),
+          constraints: BoxConstraints(maxHeight: c.isWindowMode ? 560 : 300),
           child: list.isEmpty
               ? Empty(utilityLabel(context, 'utility0'))
               : ScrollConfiguration(

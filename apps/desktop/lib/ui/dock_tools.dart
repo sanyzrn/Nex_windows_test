@@ -156,33 +156,43 @@ class ToolVisualState extends State<ToolVisual> {
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 350),
               curve: kPop,
-              transform: Matrix4.translationValues(0, _hover ? -3 : 0, 0),
+
               decoration: BoxDecoration(
                 color: widget.active ? p.inv : (_hover ? p.soft2 : p.soft),
-                borderRadius: BorderRadius.circular(_hover ? 18 : 14),
+                borderRadius: BorderRadius.circular(12),
               ),
-              padding: const EdgeInsets.symmetric(vertical: 13, horizontal: 4),
+              padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 12),
+              constraints: const BoxConstraints(minHeight: 74),
               child: Opacity(
                 opacity: widget.dimmed ? .35 : 1,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
+                child: Row(
                   children: [
-                    SizedBox(height: 24, child: Center(child: icon)),
-                    const SizedBox(height: 6),
-                    Text(
-                      utilityLabelForText(context, info.name),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontFamily: Theme.of(
-                          context,
-                        ).textTheme.bodyMedium?.fontFamily,
-                        fontFamilyFallback: const [
-                          'Segoe UI',
-                          'Segoe UI Emoji',
-                        ],
-                        fontSize: 11,
-                        color: widget.active ? p.invInk : p.ink,
+                    Container(
+                      width: 34,
+                      height: 34,
+                      decoration: BoxDecoration(
+                        color: p.soft2,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Center(child: icon),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        utilityLabelForText(context, info.name),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontFamily: Theme.of(
+                            context,
+                          ).textTheme.bodyMedium?.fontFamily,
+                          fontFamilyFallback: const [
+                            'Segoe UI',
+                            'Segoe UI Emoji',
+                          ],
+                          fontSize: 12,
+                          color: widget.active ? p.invInk : p.ink,
+                        ),
                       ),
                     ),
                   ],

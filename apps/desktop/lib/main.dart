@@ -226,6 +226,9 @@ void main(List<String> arguments) async {
   }
   LicenseRegistry.addLicense(() async* {
     yield LicenseEntryWithLineBreaks([
+      'Unicode Emoji Data',
+    ], await rootBundle.loadString('assets/notices/unicode.txt'));
+    yield LicenseEntryWithLineBreaks([
       'PDFium',
     ], await rootBundle.loadString('assets/notices/pdfium.txt'));
     yield LicenseEntryWithLineBreaks([

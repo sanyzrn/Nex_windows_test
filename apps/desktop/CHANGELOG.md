@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.39.0 — 2026-10-29
+
+- Release history follows the selected calendar; scheduled notes are now in Library locations.
+- The note editor, wide capture, tools, assistant cards and panel layouts have been refined for consistent spacing and contrast.
+- The emoji picker opens on the full catalog and adds thousands of categorized Unicode emoji.
+
 ## 0.38.0 — 2026-10-28
 
 - The edge panel's editor shows your last notes under it as small tinted cards you can swipe along; one tap opens the note in the panel's Library.

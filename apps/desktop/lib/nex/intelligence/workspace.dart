@@ -532,6 +532,14 @@ class _AssistantState extends State<DesktopAssistant> {
                                                         ),
                                                       ).text
                                                     : turn.content,
+                                                style: theme.textTheme.bodyLarge
+                                                    ?.copyWith(
+                                                      color:
+                                                          turn.role ==
+                                                              ChatRole.user
+                                                          ? c.onPrimaryContainer
+                                                          : c.onSurface,
+                                                    ),
                                               ),
                                             ),
                                             if (turn.role == ChatRole.assistant)
@@ -983,28 +991,31 @@ class _PromptTile extends StatelessWidget {
   final IconData icon;
   final VoidCallback? onPressed;
   @override
-  Widget build(BuildContext context) => TextButton(
-    onPressed: onPressed,
-    style: TextButton.styleFrom(
-      padding: EdgeInsets.zero,
-      alignment: AlignmentDirectional.centerStart,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-    ),
-    child: NexSoftCard(
-      accent: Theme.of(context).colorScheme.primary,
-      padding: const EdgeInsets.all(18),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          NexIconBadge(icon: icon, size: 38),
-          const SizedBox(height: 16),
-          Text(
-            label,
-            style: Theme.of(
-              context,
-            ).textTheme.titleSmall?.copyWith(height: 1.5),
+  Widget build(BuildContext context) => NexSoftCard(
+    accent: Theme.of(context).colorScheme.primary,
+    padding: EdgeInsets.zero,
+    child: Material(
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(16),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onPressed,
+        child: Padding(
+          padding: const EdgeInsets.all(18),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              NexIconBadge(icon: icon, size: 38),
+              const SizedBox(height: 16),
+              Text(
+                label,
+                style: Theme.of(
+                  context,
+                ).textTheme.titleSmall?.copyWith(height: 1.5),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     ),
   );
