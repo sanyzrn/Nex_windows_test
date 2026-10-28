@@ -27,6 +27,7 @@ import 'core/controller.dart';
 import 'core/native.dart';
 import 'core/clipboard_smoke.dart';
 import 'ui/shell.dart';
+import 'ui/desktop_theme.dart';
 import 'ui/window_shell.dart';
 
 void main(List<String> arguments) async {
@@ -328,7 +329,9 @@ class RightPanelApp extends StatelessWidget {
         locale: Locale(controller.resolvedLanguage),
         supportedLocales: AppLocalizations.supportedLocales,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
-        theme: controller.appTheme,
+        theme: controller.isWindowMode
+            ? nexDesktopTheme(controller.appTheme)
+            : controller.appTheme,
         builder: (context, child) => MediaQuery(
           data: MediaQuery.of(context).copyWith(
             textScaler: _SharedTextScaler(

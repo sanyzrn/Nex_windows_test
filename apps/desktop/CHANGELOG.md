@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.35.0 — 2026-10-28
+
+- Buttons in the window now match its cards: 12 px corners and a 34 px height instead of 44 px capsules, including dialogs and the small icon buttons.
+- Dropdowns are smaller, with body-size text.
+- Intelligence settings: a smaller introduction and collapsible panels that are all one height.
+
 ## 0.34.0 — 2026-10-28
 
 - Cards that sit side by side are now one height: the Tools and shelf tiles, the Intelligence suggestions and Settings groups. Every tile in the Tools page has the same size.
