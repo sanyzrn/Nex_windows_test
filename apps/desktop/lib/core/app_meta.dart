@@ -9,18 +9,18 @@
 /// so the version can only ever be bumped once per file set.
 library;
 
-const String kAppVersionString = '0.37.0+30';
+const String kAppVersionString = '0.38.0+31';
 
 /// `major.minor.build` for display, e.g. `Nex Windows v0.12.0 (Build 8)`.
-const String kAppShortVersion = '0.37.0';
+const String kAppShortVersion = '0.38.0';
 
 /// The `+n` build number.
-const int kAppBuild = 30;
+const int kAppBuild = 31;
 
 /// Windows resource version `major.minor.patch.build` as written in
 /// `Runner.rc` (`VERSION_AS_NUMBER`) and `nex.iss` (`VersionInfoVersion`).
-const String kAppResourceVersion = '0.37.0.30';
+const String kAppResourceVersion = '0.38.0.31';
 
 /// Installer file name without extension, as configured in `nex.iss`
 /// (`OutputBaseFilename`).
-const String kInstallerFileBase = 'Nex-Windows-Setup-0.37.0-x64';
+const String kInstallerFileBase = 'Nex-Windows-Setup-0.38.0-x64';

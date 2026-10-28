@@ -19,6 +19,7 @@ import '../core/controller.dart';
 import '../l10n/app_localizations.dart';
 import '../ui/desktop_accessibility.dart';
 import 'features_state.dart';
+import 'panel_recent.dart';
 part 'capture_wide.dart';
 
 abstract class CaptureViewBase extends StatelessWidget {
@@ -158,7 +159,12 @@ abstract class CaptureViewBase extends StatelessWidget {
               Text(l.checklist, style: Theme.of(context).textTheme.bodySmall),
             ],
           ),
-          _actions(context, f, l, c),
+          const SizedBox(height: 6),
+          SizedBox(
+            width: double.infinity,
+            child: _actions(context, f, l, c, dense: true),
+          ),
+          NexPanelRecent(features: f, controller: c),
           if (f.importing || f.recordingBusy)
             const Padding(
               padding: EdgeInsets.only(top: 12),

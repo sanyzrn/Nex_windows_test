@@ -329,9 +329,7 @@ class RightPanelApp extends StatelessWidget {
         locale: Locale(controller.resolvedLanguage),
         supportedLocales: AppLocalizations.supportedLocales,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
-        theme: controller.isWindowMode
-            ? nexDesktopTheme(controller.appTheme)
-            : controller.appTheme,
+        theme: nexDesktopTheme(controller.appTheme),
         builder: (context, child) => MediaQuery(
           data: MediaQuery.of(context).copyWith(
             textScaler: _SharedTextScaler(

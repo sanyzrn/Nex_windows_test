@@ -71,7 +71,7 @@ class Flyout extends StatelessWidget {
         final sy = .1 > (.25 + .75 * clamp01(gs)) * stY
             ? .1
             : (.25 + .75 * clamp01(gs)) * stY;
-        final radius = 22 + (1 - clamp01(gs)) * 60;
+        final radius = 18 + (1 - clamp01(gs)) * 60;
 
         final dockOffset = 78 * controller.S.panelScale + 12;
         return Positioned(
@@ -160,66 +160,79 @@ class _PanelHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context)!;
     final features = NexScope.maybeOf(context);
-    return Padding(
-      padding: const EdgeInsetsDirectional.fromSTEB(20, 16, 12, 8),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  l.applicationName,
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    fontSize: 10,
+    final scheme = Theme.of(context).colorScheme;
+    // A breath of the accent at the top of the card, fading out by the first
+    // control: enough to say which surface this is without painting it.
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            scheme.primary.withValues(alpha: .09),
+            scheme.primary.withValues(alpha: 0),
+          ],
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsetsDirectional.fromSTEB(20, 16, 12, 8),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    l.applicationName,
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      fontSize: 10,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  utilityLabelForText(context, ToolInfo.of(id).name),
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
+                  const SizedBox(height: 3),
+                  Text(
+                    utilityLabelForText(context, ToolInfo.of(id).name),
+                    style: Theme.of(context).textTheme.titleSmall,
                   ),
-                ),
-              ],
-            ),
-          ),
-          IconButton(
-            key: const ValueKey('panel-pin'),
-            tooltip: controller.S.panelPinned ? l.unpinPanel : l.pinPanel,
-            isSelected: controller.S.panelPinned,
-            style: IconButton.styleFrom(
-              backgroundColor: controller.S.panelPinned
-                  ? Theme.of(context).colorScheme.primaryContainer
-                  : null,
-              foregroundColor: controller.S.panelPinned
-                  ? Theme.of(context).colorScheme.onPrimaryContainer
-                  : null,
-            ),
-            onPressed: controller.togglePanelPin,
-            icon: const Icon(Icons.push_pin_outlined, size: 19),
-            selectedIcon: const Icon(Icons.push_pin_rounded, size: 19),
-          ),
-          if (features?.recordingAt != null)
-            IconButton(
-              tooltip: l.stop,
-              onPressed: features!.recordingBusy
-                  ? null
-                  : () => features.record(controller),
-              icon: Icon(
-                Icons.stop_circle_outlined,
-                color: Theme.of(context).colorScheme.error,
-                size: 19,
+                ],
               ),
             ),
-          IconButton(
-            tooltip: l.close,
-            onPressed: controller.close,
-            icon: const Icon(Icons.close_rounded, size: 19),
-          ),
-        ],
+            IconButton(
+              key: const ValueKey('panel-pin'),
+              tooltip: controller.S.panelPinned ? l.unpinPanel : l.pinPanel,
+              isSelected: controller.S.panelPinned,
+              style: IconButton.styleFrom(
+                backgroundColor: controller.S.panelPinned
+                    ? Theme.of(context).colorScheme.primaryContainer
+                    : null,
+                foregroundColor: controller.S.panelPinned
+                    ? Theme.of(context).colorScheme.onPrimaryContainer
+                    : null,
+              ),
+              onPressed: controller.togglePanelPin,
+              icon: const Icon(Icons.push_pin_outlined, size: 19),
+              selectedIcon: const Icon(Icons.push_pin_rounded, size: 19),
+            ),
+            if (features?.recordingAt != null)
+              IconButton(
+                tooltip: l.stop,
+                onPressed: features!.recordingBusy
+                    ? null
+                    : () => features.record(controller),
+                icon: Icon(
+                  Icons.stop_circle_outlined,
+                  color: Theme.of(context).colorScheme.error,
+                  size: 19,
+                ),
+              ),
+            IconButton(
+              tooltip: l.close,
+              onPressed: controller.close,
+              icon: const Icon(Icons.close_rounded, size: 19),
+            ),
+          ],
+        ),
       ),
     );
   }
