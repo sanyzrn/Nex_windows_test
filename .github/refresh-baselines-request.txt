@@ -1,1 +1,1 @@
-0.35.0+28: regenerate Windows-only baselines for 34 px rounded buttons, smaller dropdowns and the tighter Intelligence settings. Review every changed image. Preserve all comparison tolerances and behavior checks.
+0.36.0+29: regenerate Windows-only baselines for the unified Library toolbar buttons. Review every changed image. Preserve all comparison tolerances and behavior checks.

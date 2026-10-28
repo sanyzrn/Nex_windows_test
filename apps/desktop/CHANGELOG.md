@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.36.0 — 2026-10-28
+
+- The Library toolbar's four buttons (locations, board, list, tags) are one family: the same size and glyph, with a quiet wash on the view that is on.
+
 ## 0.35.0 — 2026-10-28
 
 - Buttons in the window now match its cards: 12 px corners and a 34 px height instead of 44 px capsules, including dialogs and the small icon buttons.
