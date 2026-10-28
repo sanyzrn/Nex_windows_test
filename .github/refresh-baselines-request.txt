@@ -1,1 +1,1 @@
-0.37.0+30: regenerate Windows-only baselines for the sidebar type filter, smaller switches, shorter fields and dropdowns, the lighter Recurring and Scheduled dialogs and the hidden note AI card. Review every changed image. Preserve all comparison tolerances and behavior checks.
+0.38.0+31: regenerate Windows-only baselines for the edge panel upgrade: recent-notes strip, chip actions, accent wash on panel headers, 18 px card corners and the rounded 34 px buttons in panel mode. Review every changed image. Preserve all comparison tolerances and behavior checks.

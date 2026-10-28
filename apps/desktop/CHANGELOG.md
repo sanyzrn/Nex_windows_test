@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.38.0 — 2026-10-28
+
+- The edge panel's editor shows your last notes under it as small tinted cards you can swipe along; one tap opens the note in the panel's Library.
+- The editor's actions (Paste text, Add image, Attach files…) are a row of small chips instead of six tiles, so the panel is half as tall.
+- Panel headers carry a faint wash of the accent and a smaller title; the card's corners are 18 px, like the window's.
+- The window's rounded 34 px buttons and shorter fields now apply in the edge panel too.
+
 ## 0.37.0 — 2026-10-28
 
 - Note types in the sidebar, under the tags: Text, Checklist, Link and the rest, each with how many notes it has. Click one to see only those notes in the Library; click again to clear.

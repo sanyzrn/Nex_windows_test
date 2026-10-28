@@ -360,6 +360,7 @@ class _CaptureAction extends StatelessWidget {
             foregroundColor: scheme.onSurfaceVariant,
             side: BorderSide(color: scheme.outlineVariant),
             visualDensity: VisualDensity.compact,
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             minimumSize: const Size(0, 30),
             padding: const EdgeInsets.symmetric(horizontal: 10),
             shape: RoundedRectangleBorder(
