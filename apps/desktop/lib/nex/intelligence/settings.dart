@@ -286,11 +286,13 @@ class _SettingsState extends State<DesktopIntelligenceSettings> {
         final c = theme.colorScheme;
         Widget section(String title, IconData icon, List<Widget> children) =>
             NexSoftCard(
+              // Every collapsible panel on the page is one height closed.
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
               child: ExpansionTile(
                 tilePadding: EdgeInsets.zero,
                 childrenPadding: const EdgeInsets.only(bottom: 8),
                 leading: Icon(icon, color: c.primary),
-                title: Text(title, style: theme.textTheme.titleMedium),
+                title: Text(title, style: theme.textTheme.titleSmall),
                 children: children,
               ),
             );
@@ -595,23 +597,21 @@ class _SettingsState extends State<DesktopIntelligenceSettings> {
                     children: [
                       const NexIconBadge(
                         icon: Icons.auto_awesome_rounded,
-                        size: 54,
+                        size: 40,
                       ),
-                      const SizedBox(width: 16),
+                      const SizedBox(width: 14),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
                               d.t(ai.enabled ? 'aiStatusOn' : 'aiStatusOff'),
-                              style: theme.textTheme.titleLarge?.copyWith(
-                                fontWeight: FontWeight.w700,
-                              ),
+                              style: theme.textTheme.titleMedium,
                             ),
-                            const SizedBox(height: 6),
+                            const SizedBox(height: 4),
                             Text(
                               d.t('aiStatusHint'),
-                              style: theme.textTheme.bodyMedium?.copyWith(
+                              style: theme.textTheme.bodySmall?.copyWith(
                                 color: c.onSurfaceVariant,
                               ),
                             ),
@@ -628,7 +628,7 @@ class _SettingsState extends State<DesktopIntelligenceSettings> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 10),
                   DesktopFocusRing(
                     child: CheckboxListTile(
                       contentPadding: EdgeInsets.zero,
@@ -645,7 +645,7 @@ class _SettingsState extends State<DesktopIntelligenceSettings> {
             ),
             const SizedBox(height: 18),
             NexSoftCard(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
               child: Column(
                 children: [
                   NexSettingsLink(

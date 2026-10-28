@@ -37,7 +37,14 @@ class _DesktopDropdownState<T> extends State<DesktopDropdown<T>> {
         child: InputDecorator(
           isFocused: focused,
           isHovering: hovering,
-          decoration: InputDecoration(enabled: widget.onChanged != null),
+          decoration: InputDecoration(
+            enabled: widget.onChanged != null,
+            isDense: true,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 8,
+            ),
+          ),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<T>(
               value: widget.value,
@@ -49,7 +56,10 @@ class _DesktopDropdownState<T> extends State<DesktopDropdown<T>> {
               menuMaxHeight: 320,
               borderRadius: nexDropdownRadius,
               dropdownColor: nexDropdownColor(context),
-              icon: const Icon(Icons.expand_more_rounded),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+              icon: const Icon(Icons.expand_more_rounded, size: 20),
             ),
           ),
         ),
