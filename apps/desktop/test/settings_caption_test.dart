@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nex_desktop/core/controller.dart';
 import 'package:nex_desktop/core/native.dart';
@@ -99,6 +100,32 @@ void main() {
       },
     );
   }
+  testWidgets(
+    'the complete caption height drags, including logo and empty corners',
+    (t) async {
+      final c = await _boot(t, width: 700, caption: true);
+      final native = c.native as _Native;
+      final rect = t.getRect(find.byType(NexWindowCaption));
+      for (final point in [
+        Offset(rect.left + 2, rect.top + 2),
+        Offset(rect.left + 20, rect.top + 18),
+        Offset(rect.right - 125, rect.bottom - 2),
+        Offset(rect.center.dx, rect.bottom - 2),
+      ]) {
+        native.commands.clear();
+        await t.dragFrom(
+          point,
+          const Offset(35, 0),
+          kind: PointerDeviceKind.mouse,
+        );
+        await t.pump();
+        expect(native.commands, ['drag'], reason: '$point');
+        await t.pump(const Duration(milliseconds: 400));
+      }
+      expect(t.takeException(), isNull);
+    },
+  );
+
   testWidgets(
     'caption controls stay on physical right in RTL and dispatch native commands',
     (t) async {

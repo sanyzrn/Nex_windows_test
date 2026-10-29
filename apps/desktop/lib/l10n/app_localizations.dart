@@ -824,6 +824,48 @@ abstract class AppLocalizations {
   /// **'Caption'**
   String get caption;
 
+  /// No description provided for @addCaption.
+  ///
+  /// In en, this message translates to:
+  /// **'Add caption'**
+  String get addCaption;
+
+  /// No description provided for @editCaption.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit caption'**
+  String get editCaption;
+
+  /// No description provided for @noCaption.
+  ///
+  /// In en, this message translates to:
+  /// **'No caption'**
+  String get noCaption;
+
+  /// No description provided for @details.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get details;
+
+  /// No description provided for @created.
+  ///
+  /// In en, this message translates to:
+  /// **'Created'**
+  String get created;
+
+  /// No description provided for @detailsEdited.
+  ///
+  /// In en, this message translates to:
+  /// **'Last changed'**
+  String get detailsEdited;
+
+  /// No description provided for @detailsNotEdited.
+  ///
+  /// In en, this message translates to:
+  /// **'Not changed since'**
+  String get detailsNotEdited;
+
   /// No description provided for @persian.
   ///
   /// In en, this message translates to:

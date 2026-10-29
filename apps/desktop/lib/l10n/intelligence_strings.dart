@@ -119,6 +119,18 @@ class AiStrings {
     'on': ['On', 'فعال'],
     'off': ['Off', 'خاموش'],
     'result': ['Result', 'نتیجه'],
+    'appendCaptionTitle': [
+      'This item already has a caption',
+      'این آیتم از قبل کپشن دارد',
+    ],
+    'appendCaptionBody': [
+      'Keep the existing caption and append this result, or replace the caption completely.',
+      'نتیجه به انتهای کپشن فعلی اضافه شود یا کاملاً جایگزین آن شود؟',
+    ],
+    'captionChanged': [
+      'The caption changed while this dialog was open. Nothing was replaced. Try again.',
+      'کپشن هنگام باز بودن این پنجره تغییر کرده است؛ چیزی جایگزین نشد. دوباره تلاش کنید.',
+    ],
     'copy': ['Copy', 'کپی'],
     'saveNote': ['Save as a new note', 'ذخیره به‌عنوان یادداشت تازه'],
     'append': ['Add to caption', 'افزودن به توضیح'],

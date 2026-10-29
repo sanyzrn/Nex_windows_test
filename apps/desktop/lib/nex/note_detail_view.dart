@@ -10,6 +10,7 @@ import '../ui/desktop_dropdown.dart';
 
 import 'dart:async';
 import 'dart:io';
+import 'dart:ui' show BoxWidthStyle;
 import 'package:flutter/material.dart';
 import 'desktop_editing_direction.dart';
 import 'package:flutter/services.dart';
@@ -18,9 +19,11 @@ import 'package:nex_core/nex_core.dart';
 import 'package:nex_ui/nex_ui.dart';
 
 import '../l10n/app_localizations.dart';
+import '../l10n/intelligence_strings.dart';
 import '../ui/desktop_accessibility.dart';
 import 'features_state.dart';
 import 'note_copy.dart';
+import 'note_caption.dart';
 import 'notices.dart';
 import 'tag_picker.dart';
 import 'note_detail_parts.dart';
@@ -43,8 +46,7 @@ class _NexNoteDetailState extends State<NexNoteDetail> {
   late Note note = widget.note;
   late final editor = TextEditingController(text: note.content ?? '');
   final tag = TextEditingController(), thread = TextEditingController();
-  late final caption = TextEditingController(text: note.caption ?? '');
-  final captionFocus = FocusNode();
+
   List<NoteThread> memberships = [], availableThreads = [];
   AudioPlayer? _player;
   // Windows has no mobile audio-session activation; let its media backend own
@@ -55,6 +57,83 @@ class _NexNoteDetailState extends State<NexNoteDetail> {
   bool editing = false;
   int editRevision = 0;
   bool _threadsLoaded = false;
+
+  Future<bool> _appendCaption(String text) async {
+    final features = NexScope.of(context), s = AiStrings.of(context);
+    final id = note.id;
+    final current = await features.store.call<Note?>('get', {'id': id});
+    if (!mounted || current == null || current.isDeleted) return false;
+    var replace = false;
+    if (current.caption?.trim().isNotEmpty == true) {
+      final choice = await showDialog<bool>(
+        context: context,
+        builder: (dialog) => AlertDialog(
+          title: Text(s.t('appendCaptionTitle')),
+          content: Text(s.t('appendCaptionBody')),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialog),
+              child: Text(s.t('cancel')),
+            ),
+            OutlinedButton(
+              key: const ValueKey('append-caption-choice'),
+              onPressed: () => Navigator.pop(dialog, false),
+              child: Text(s.t('append')),
+            ),
+            FilledButton(
+              key: const ValueKey('replace-caption-choice'),
+              onPressed: () => Navigator.pop(dialog, true),
+              child: Text(s.t('replace')),
+            ),
+          ],
+        ),
+      );
+      if (choice == null || !mounted) return false;
+      replace = choice;
+    }
+    var saved = true;
+    await features.guard(() async {
+      if (replace) {
+        saved = await features.store.call<bool>('replaceCaption', {
+          'id': id,
+          'text': text,
+          'expectedCaption': current.caption,
+        });
+      } else {
+        await features.store.call<void>('appendCaption', {
+          'id': id,
+          'text': text,
+        });
+      }
+    }, rethrowError: true);
+    if (mounted) {
+      await _refreshNote();
+      if (!saved && mounted) {
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(SnackBar(content: Text(s.t('captionChanged'))));
+      }
+    }
+    return saved;
+  }
+
+  Future<void> _refreshNote() async {
+    final id = note.id;
+    final fresh = await NexScope.of(
+      context,
+    ).store.call<Note?>('get', {'id': id});
+    if (!mounted || note.id != id || fresh == null || fresh.rev < note.rev) {
+      return;
+    }
+    NexScope.of(context).reflectReaderEdit(fresh);
+    setState(() {
+      note = fresh;
+      if (!editing && editor.text != (fresh.content ?? '')) {
+        editor.text = fresh.content ?? '';
+      }
+    });
+  }
+
   @override
   void didUpdateWidget(covariant NexNoteDetail oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -62,9 +141,6 @@ class _NexNoteDetailState extends State<NexNoteDetail> {
     note = widget.note;
     if (!editing) {
       if (editor.text != (note.content ?? '')) editor.text = note.content ?? '';
-    }
-    if (!captionFocus.hasFocus && caption.text != (note.caption ?? '')) {
-      caption.text = note.caption ?? '';
     }
   }
 
@@ -101,6 +177,8 @@ class _NexNoteDetailState extends State<NexNoteDetail> {
     bool rethrowError = false,
   }) async {
     final revision = ++editRevision;
+    final id = note.id;
+
     try {
       final store = NexScope.of(context).store;
       final features = NexScope.of(context);
@@ -115,15 +193,20 @@ class _NexNoteDetailState extends State<NexNoteDetail> {
           await store.call<dynamic>(command, {'id': note.id, ...args});
         }, rethrowError: true);
       }
-      if (!mounted) return;
+      if (!mounted || note.id != id) return;
       if (['thread', 'joinThread', 'leaveThread'].contains(command)) {
         await loadThreads();
       }
-      final refreshed = await store.call<Note?>('get', {'id': note.id});
-      if (mounted && refreshed != null && revision == editRevision) {
+      final refreshed = await store.call<Note?>('get', {'id': id});
+      if (mounted &&
+          note.id == id &&
+          refreshed != null &&
+          refreshed.rev >= note.rev &&
+          (revision == editRevision || command == 'appendCaption')) {
         if (command == 'capture') features.reflectReaderEdit(refreshed);
         setState(() {
           note = refreshed;
+
           failure = null;
         });
       }
@@ -162,8 +245,7 @@ class _NexNoteDetailState extends State<NexNoteDetail> {
     editor.dispose();
     tag.dispose();
     thread.dispose();
-    caption.dispose();
-    captionFocus.dispose();
+
     super.dispose();
   }
 
@@ -221,6 +303,7 @@ class _NexNoteDetailState extends State<NexNoteDetail> {
                               minLines: 3,
                               maxLines: 10,
                               textDirection: direction,
+                              selectionWidthStyle: BoxWidthStyle.tight,
                               onChanged: (text) =>
                                   run('capture', {'text': text}),
                             ),
@@ -251,33 +334,28 @@ class _NexNoteDetailState extends State<NexNoteDetail> {
                                 note.originalFilename ?? '',
                               ),
                             ),
-                          NexSelectableLines(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                NexTextSurface(note.displayText ?? ''),
-                                if (note.type == NoteType.text ||
-                                    note.type == NoteType.checklist)
-                                  const SizedBox.shrink(),
-                              ],
+                          if (note.type == NoteType.link) ...[
+                            if (note.title?.trim().isNotEmpty == true)
+                              NexTextSurface(note.title!, selectable: true),
+                            NexTextSurface(
+                              note.content ?? '',
+                              selectable: true,
                             ),
-                          ),
+                            if (note.linkExcerpt?.trim().isNotEmpty == true)
+                              NexTextSurface(
+                                note.linkExcerpt!,
+                                selectable: true,
+                              ),
+                          ],
                         ],
-                        if ((note.type != NoteType.text &&
-                                note.type != NoteType.checklist) ||
+                        if (note.type != NoteType.text ||
                             note.caption?.trim().isNotEmpty == true) ...[
                           const SizedBox(height: 12),
-                          DesktopEditingDirection(
-                            controller: caption,
-                            multiline: true,
-                            builder: (context, direction) => TextField(
-                              controller: caption,
-                              focusNode: captionFocus,
-                              textDirection: direction,
-                              decoration: InputDecoration(hintText: l.caption),
-                              onChanged: (text) =>
-                                  run('caption', {'text': text}),
-                            ),
+                          NexNoteCaption(
+                            note: note,
+                            onSave: (text) => run('caption', {
+                              'text': text,
+                            }, rethrowError: true),
                           ),
                         ],
                         if (!editing && note.type == NoteType.text)
@@ -292,8 +370,16 @@ class _NexNoteDetailState extends State<NexNoteDetail> {
                                   ),
                             )
                           else
-                            NexSelectableLines(
-                              child: NexMarkdown(note.content!),
+                            NexSelectionArea(
+                              child: NexSelectableLines(
+                                child: nexLooksLikeMarkdown(note.content!)
+                                    ? NexMarkdown(
+                                        note.content!,
+                                        preserveLineBreaks: true,
+                                        selectable: false,
+                                      )
+                                    : NexTextSurface(note.content!),
+                              ),
                             ),
                         if (!editing && note.type == NoteType.checklist) ...[
                           if (parseChecklist(note.content ?? '').isEmpty)
@@ -378,16 +464,8 @@ class _NexNoteDetailState extends State<NexNoteDetail> {
                         NoteIntelligencePanel(
                           key: ValueKey('ai-${note.id}'),
                           note: note,
-                          onChanged: () async {
-                            final fresh = await features.store.call<Note?>(
-                              'get',
-                              {'id': note.id},
-                            );
-                            if (mounted && fresh != null) {
-                              features.reflectReaderEdit(fresh);
-                              setState(() => note = fresh);
-                            }
-                          },
+                          onChanged: _refreshNote,
+                          onAppendCaption: _appendCaption,
                         ),
                         const SizedBox(height: 18),
                         NoteActionBar(

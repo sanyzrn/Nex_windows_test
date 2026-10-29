@@ -6,6 +6,35 @@ import 'package:nex_ui/nex_ui.dart';
 /// A card is a picture of a note. Once a note's body can carry formatting, a
 /// card that prints the markers is a picture of the source instead.
 void main() {
+  testWidgets('board recency follows edits rather than the original capture', (
+    t,
+  ) async {
+    final updated = DateTime.utc(2026, 10, 29, 12);
+    final note = Note(
+      id: 'recent-edit',
+      type: NoteType.photo,
+      createdAt: DateTime.utc(2020),
+      updatedAt: updated,
+      deviceId: 'test',
+      rev: 2,
+      syncState: SyncState.pending,
+    );
+    await t.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: NexCardTimeScope(
+            now: updated.add(const Duration(minutes: 7)),
+            child: SizedBox(
+              width: 400,
+              child: NoteCard(note: note, board: true),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(find.text('7m'), findsOneWidget);
+  });
+
   Note textNote(String body) => Note(
     id: 'n1',
     type: NoteType.text,
@@ -60,6 +89,30 @@ void main() {
       findsAtLeastNWidgets(1),
     );
     handle.dispose();
+  });
+
+  testWidgets('list and board previews retain consecutive Enters', (
+    tester,
+  ) async {
+    const text = 'خط اول\n\nخط دوم\n\n\nخط سوم';
+    for (final board in [false, true]) {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SizedBox(
+              width: 400,
+              child: NoteCard(note: textNote(text), board: board),
+            ),
+          ),
+        ),
+      );
+      final rendered = tester
+          .widgetList<Text>(find.byType(Text))
+          .map((widget) => widget.data ?? widget.textSpan?.toPlainText() ?? '')
+          .join('\n');
+      expect(rendered, contains(text));
+      expect(tester.takeException(), isNull);
+    }
   });
 
   group('a card asked to show its whole note', () {

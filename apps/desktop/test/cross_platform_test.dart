@@ -7,6 +7,7 @@ import 'package:nex_data/nex_data.dart';
 import 'package:nex_desktop/core/controller.dart';
 import 'package:nex_desktop/l10n/app_localizations.dart';
 import 'package:nex_desktop/nex/features.dart';
+import 'package:nex_desktop/nex/note_caption.dart';
 import 'package:nex_desktop/nex/store.dart';
 import 'package:nex_ui/nex_ui.dart';
 import '../../../packages/data/test/fixtures/android_full_backup_codec.dart'
@@ -243,6 +244,114 @@ void main() {
   );
 
   testWidgets(
+    'Android photo captions edit and round-trip with their independent fields intact',
+    (t) async {
+      await t.runAsync(restoreMobile);
+      final photos = (await t.runAsync(
+        () => features.store.call<List<Note>>('timeline'),
+      ))!.where((note) => note.type == NoteType.photo).toList();
+      expect(photos, isNotEmpty);
+      final photo = photos.first;
+      final original = photo.toJson();
+      await t.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: NexScope(
+            features: features,
+            child: Scaffold(
+              body: NexNoteCaption(
+                note: photo,
+                onSave: (text) => features.store.call<void>('caption', {
+                  'id': photo.id,
+                  'text': text,
+                }),
+              ),
+            ),
+          ),
+        ),
+      );
+      await t.pumpAndSettle();
+      expect(find.byKey(const ValueKey('note-caption-field')), findsNothing);
+      if (photo.title?.isNotEmpty == true && photo.title != photo.caption) {
+        expect(find.text(photo.title!), findsNothing);
+      }
+      await t.tap(find.byKey(const ValueKey('edit-note-caption')));
+      await t.pumpAndSettle();
+      final field = find.byKey(const ValueKey('note-caption-field'));
+      expect(t.widget<TextField>(field).controller!.text, photo.caption ?? '');
+      await t.enterText(field, 'شرح ویرایش‌شده در ویندوز\nخط دوم');
+      await t.tap(find.byKey(const ValueKey('save-note-caption')));
+      await t.runAsync(() async {
+        final edited = await features.store.call<Note>('get', {'id': photo.id});
+        for (final key in [
+          'id',
+          'type',
+          'content',
+          'title',
+          'ocr_text',
+          'transcript_text',
+          'media_hash',
+        ]) {
+          expect(edited.toJson()[key], original[key], reason: key);
+        }
+        final output = '${root.path}/caption-return.nexfull';
+        final key = await features.store.call<String>('fullBackup', {
+          'output': output,
+          'settings': Settings().backupSettings(),
+        });
+        final unpacked = '${root.path}/android-caption-return';
+        android.FullBackup.unpack(
+          output,
+          unpacked,
+          key,
+          modelHash: '',
+          modelBytes: 0,
+        );
+        final restoredDb = '${root.path}/return.sqlite';
+        NexBackupArchive.restore(
+          liveDbPath: restoredDb,
+          mediaDir: '${root.path}/return-media',
+          backupFile: '$unpacked/library.nexbak',
+        );
+        final db = NexDatabase.open(restoredDb);
+        try {
+          final returned = SqliteNoteRepository(db).getById(photo.id)!;
+          for (final field in [
+            'id',
+            'type',
+            'caption',
+            'title',
+            'ocr_text',
+            'transcript_text',
+            'content',
+            'media_hash',
+            'rev',
+            'device_id',
+            'sync_state',
+          ]) {
+            expect(
+              returned.toJson()[field],
+              edited.toJson()[field],
+              reason: field,
+            );
+          }
+        } finally {
+          db.close();
+        }
+      });
+      await t.pumpWidget(const SizedBox());
+      PaintingBinding.instance.imageCache
+        ..clear()
+        ..clearLiveImages();
+      await t.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 80)),
+      );
+      expect(t.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
     'restored Android attachments and legacy captions remain readable and editable',
     (tester) async {
       await tester.runAsync(restoreMobile);
@@ -278,6 +387,8 @@ void main() {
       expect(find.text('invoice.txt'), findsOneWidget);
       expect(find.text('پیوست قابل جستجو'), findsOneWidget);
       expect(find.text('Attach files'), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('edit-note-caption')));
+      await tester.pumpAndSettle();
       final captionField = find.byWidgetPredicate(
         (widget) =>
             widget is TextField &&
@@ -285,6 +396,7 @@ void main() {
       );
       expect(captionField, findsOneWidget);
       await tester.enterText(captionField, 'توضیح ویرایش‌شده در ویندوز');
+      await tester.tap(find.byKey(const ValueKey('save-note-caption')));
       final edited = await tester.runAsync(
         () => features.store.call<Note>('get', {'id': note.id}),
       );

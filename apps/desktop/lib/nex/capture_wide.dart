@@ -112,6 +112,7 @@ mixin CaptureWide on CaptureViewBase {
                                 maxLines: small ? 12 : 16,
                                 textAlignVertical: TextAlignVertical.top,
                                 textDirection: direction,
+                                selectionWidthStyle: BoxWidthStyle.tight,
                                 keyboardType: TextInputType.multiline,
                                 style: theme.textTheme.bodyLarge?.copyWith(
                                   fontSize: calm ? 15 : 16,

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nex_data/nex_data.dart';
+import 'package:nex_core/nex_core.dart' show nexDisplayDate;
 import 'package:nex_desktop/l10n/app_localizations.dart';
 import 'package:nex_desktop/nex/features.dart';
 import 'package:nex_desktop/nex/library_date_filter.dart';
@@ -160,6 +161,86 @@ void main() {
   );
 
   for (final language in ['en', 'fa']) {
+    testWidgets(
+      '$language: update dates and layout actions follow the actual pane',
+      (t) async {
+        t.view.physicalSize = const Size(700, 1100);
+        t.view.devicePixelRatio = 1;
+        addTearDown(t.view.reset);
+        late Directory root;
+        late NexFeatures features;
+        final updated = DateTime(2026, 10, 28, 12);
+        await t.runAsync(() async {
+          root = await Directory.systemTemp.createTemp('nex-library-updated-');
+          final db = NexDatabase.open('${root.path}/nex.sqlite');
+          final repo = SqliteNoteRepository(db);
+          for (var i = 0; i < 2; i++) {
+            repo.insert(
+              Note(
+                id: 'updated-$i',
+                type: NoteType.text,
+                content: 'Edited note $i',
+                createdAt: DateTime(2020 + i, 1, 2),
+                updatedAt: updated,
+                deviceId: 'test',
+                rev: 1,
+                syncState: SyncState.pending,
+              ),
+            );
+          }
+          db.close();
+          features = NexFeatures(await DesktopStore.open(root.path, 'test'));
+        });
+        addTearDown(() async {
+          await t.pumpWidget(const SizedBox());
+          await t.runAsync(() async {
+            await features.close();
+            await root.delete(recursive: true);
+          });
+        });
+        await t.pumpWidget(
+          MaterialApp(
+            locale: Locale(language),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            theme: nexLightTheme(),
+            home: NexScope(
+              features: features,
+              child: const Scaffold(body: NexLibraryView()),
+            ),
+          ),
+        );
+        await _wait(t, () => _ids(t).length == 2);
+        final list = find.byKey(const ValueKey('library-layout-list'));
+        final board = find.byKey(const ValueKey('library-layout-board'));
+        await t.tap(list);
+        await t.pump();
+        final shown = nexDisplayDate(
+          updated,
+          solar: language == 'fa',
+          persian: language == 'fa',
+        );
+        expect(
+          find.text(shown),
+          findsOneWidget,
+        ); // Two different creation dates, one updated day.
+        await t.tap(board);
+        await t.pump();
+        expect(find.text(shown), findsNothing);
+        t.view.physicalSize = const Size(639, 1100);
+        await t.pump();
+        expect(list, findsNothing);
+        expect(board, findsNothing);
+        expect(find.text(shown), findsOneWidget);
+        t.view.physicalSize = const Size(640, 1100);
+        await t.pump();
+        expect(list, findsOneWidget);
+        expect(t.widget<IconButton>(board).isSelected, isTrue);
+        expect(find.text(shown), findsNothing);
+        expect(t.takeException(), isNull);
+      },
+    );
+
     testWidgets(
       'date presets combine, clear and fit narrow layouts: $language',
       (t) async {

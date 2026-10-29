@@ -42,6 +42,8 @@ part 'library_keys.dart';
 part 'library_list_pane.dart';
 part 'library_workspace.dart';
 
+const _libraryBoardMinWidth = 640.0;
+
 class NexLibraryView extends StatefulWidget {
   const NexLibraryView({super.key});
   @override

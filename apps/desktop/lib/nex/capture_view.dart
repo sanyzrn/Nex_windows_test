@@ -8,6 +8,7 @@ library;
 
 import '../l10n/desktop_format.dart';
 import 'dart:async';
+import 'dart:ui' show BoxWidthStyle;
 import 'package:flutter/material.dart';
 import 'desktop_editing_direction.dart';
 import 'package:flutter/services.dart';
@@ -130,6 +131,8 @@ abstract class CaptureViewBase extends StatelessWidget {
                     context,
                   ).textTheme.bodyLarge?.copyWith(fontSize: 15, height: 1.6),
                   textDirection: direction,
+                  // Keep RTL word highlights within the selected glyphs.
+                  selectionWidthStyle: BoxWidthStyle.tight,
                   decoration: InputDecoration(
                     hintText: l.captureHint,
                     filled: true,

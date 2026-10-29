@@ -374,6 +374,27 @@ class AppLocalizationsFa extends AppLocalizations {
   String get caption => 'توضیح';
 
   @override
+  String get addCaption => 'افزودن شرح';
+
+  @override
+  String get editCaption => 'ویرایش شرح';
+
+  @override
+  String get noCaption => 'بدون شرح';
+
+  @override
+  String get details => 'جزئیات';
+
+  @override
+  String get created => 'ساخته شده';
+
+  @override
+  String get detailsEdited => 'آخرین تغییر';
+
+  @override
+  String get detailsNotEdited => 'بدون تغییر از همان موقع';
+
+  @override
   String get persian => 'فارسی';
 
   @override

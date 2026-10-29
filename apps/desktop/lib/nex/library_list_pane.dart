@@ -278,8 +278,11 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
                     onPressed: _openLibraryLocations,
                     icon: const Icon(Icons.folder_copy_outlined),
                   ),
-                  if (NexPanelScope.maybeOf(context)?.isWindowMode ?? true) ...[
+                  if ((NexPanelScope.maybeOf(context)?.isWindowMode ?? true) &&
+                      !trash &&
+                      box.maxWidth + 20 >= _libraryBoardMinWidth) ...[
                     IconButton(
+                      key: const ValueKey('library-layout-board'),
                       tooltip: AiStrings.of(context).t('board'),
                       isSelected: board,
                       style: toolbar(on: board),
@@ -287,6 +290,7 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
                       icon: const Icon(Icons.grid_view_outlined),
                     ),
                     IconButton(
+                      key: const ValueKey('library-layout-list'),
                       tooltip: AiStrings.of(context).t('list'),
                       isSelected: !board,
                       style: toolbar(on: !board),
@@ -439,7 +443,8 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
           Expanded(
             child: LayoutBuilder(
               builder: (context, box) {
-                final grid = board && !trash && box.maxWidth >= 640;
+                final grid =
+                    board && !trash && box.maxWidth >= _libraryBoardMinWidth;
                 Widget itemBuilder(BuildContext context, int index) {
                   if (index == notes.length) {
                     return const Center(
@@ -451,7 +456,7 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
                   }
                   final note = notes[index];
                   final date = nexDisplayDate(
-                    note.createdAt,
+                    note.updatedAt,
                     solar:
                         NexPanelScope.maybeOf(context)?.S.solarCalendar ?? fa,
                     persian: fa,
@@ -459,7 +464,7 @@ mixin _LibraryListPane on _LibraryStateBase, _LibraryWorkspace {
                   final prior = index == 0
                       ? null
                       : nexDisplayDate(
-                          notes[index - 1].createdAt,
+                          notes[index - 1].updatedAt,
                           solar:
                               NexPanelScope.maybeOf(context)?.S.solarCalendar ??
                               fa,

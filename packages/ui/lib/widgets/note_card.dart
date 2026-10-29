@@ -238,7 +238,7 @@ class NoteCard extends StatelessWidget {
     // version of the card showing its own source.
     NexMarkdownText.preview(note.displayText ?? ''),
     strings.relativeTime(
-      nexRelativeTimeOf(note.createdAt, now: NexCardTimeScope.maybeOf(context)),
+      nexRelativeTimeOf(note.updatedAt, now: NexCardTimeScope.maybeOf(context)),
     ),
   ].where((value) => value.isNotEmpty).join('. ');
 }
@@ -271,7 +271,6 @@ class _BoardBody extends StatelessWidget {
                 : note.aiSourceText ?? note.caption ?? note.displayText ?? '')
             .split('\n')
             .map(NexMarkdownText.preview)
-            .where((s) => s.trim().isNotEmpty)
             .toList();
     final text = lines.join('\n');
     final title = note.title?.trim().isNotEmpty == true
@@ -324,7 +323,7 @@ class _BoardBody extends StatelessWidget {
                     child: Text(
                       strings.relativeTime(
                         nexRelativeTimeOf(
-                          note.createdAt,
+                          note.updatedAt,
                           now: NexCardTimeScope.maybeOf(context),
                         ),
                       ),

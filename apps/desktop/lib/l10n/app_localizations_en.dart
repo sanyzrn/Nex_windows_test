@@ -374,6 +374,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get caption => 'Caption';
 
   @override
+  String get addCaption => 'Add caption';
+
+  @override
+  String get editCaption => 'Edit caption';
+
+  @override
+  String get noCaption => 'No caption';
+
+  @override
+  String get details => 'Details';
+
+  @override
+  String get created => 'Created';
+
+  @override
+  String get detailsEdited => 'Last changed';
+
+  @override
+  String get detailsNotEdited => 'Not changed since';
+
+  @override
   String get persian => 'Persian';
 
   @override

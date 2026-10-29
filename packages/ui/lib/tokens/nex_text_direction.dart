@@ -323,13 +323,8 @@ class NexTextSurface extends StatelessWidget {
       // wrap into the whole budget — and it is the right one for a preview:
       // the first three lines of somebody's note tell you more about it than
       // the first three rows of its first sentence.
-      final all = text.split('\n');
-      // In a short preview a blank line is a row that says nothing, so it is
-      // dropped there; with room to spare it is the gap between paragraphs
-      // the writer put in, and it stays.
-      final lines = maxLines != null && maxLines! <= 3
-          ? all.where((line) => line.trim().isNotEmpty).toList()
-          : all;
+      // Blank lines carry the writer's paragraph spacing, even in previews.
+      final lines = text.split('\n');
       if (lines.isEmpty) return _paragraph(null);
       // Split only when the lines actually disagree. A note written wholly in
       // one language is one paragraph, and saying so matters once the text

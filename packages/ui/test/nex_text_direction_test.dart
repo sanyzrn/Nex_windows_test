@@ -213,8 +213,8 @@ void main() {
       Offset(1, paragraph.size.height - 2),
     );
     expect(secondRow.offset, lessThan(first.length));
-    // The blank line between paragraphs is not spent as a row.
-    expect(paragraph.text.toPlainText().contains('\n\n'), isFalse);
+    // Preview truncation must not rewrite the author's paragraph spacing.
+    expect(paragraph.text.toPlainText().contains('\n\n'), isTrue);
   });
 
   testWidgets('mixed-direction lines share the budget in reading order', (

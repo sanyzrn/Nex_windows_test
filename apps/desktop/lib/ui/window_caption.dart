@@ -16,6 +16,7 @@ class NexWindowCaption extends StatelessWidget {
       child: Directionality(
         textDirection: TextDirection.ltr,
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Expanded(
               child: GestureDetector(

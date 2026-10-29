@@ -1,4 +1,6 @@
+import 'package:flutter/gestures.dart' show kPrimaryButton;
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:nex_ui/nex_ui.dart';
 
 /// The active paragraph's first strong letter, using UTF-16 selection offsets.
@@ -14,9 +16,8 @@ TextDirection? desktopEditingDirection(TextEditingValue value) {
   );
 }
 
-/// Never writes to the controller, replaces EditableText, or intercepts keys.
-/// Hold direction during composition and range drags; rebuild only on an actual
-/// direction change, so IME/undo/selection remain Flutter-owned.
+/// Holds direction during composition and range drags, and corrects a tap
+/// landing across a newline. Text, keyboard input and undo remain Flutter-owned.
 class DesktopEditingDirection extends StatefulWidget {
   const DesktopEditingDirection({
     super.key,
@@ -34,6 +35,66 @@ class DesktopEditingDirection extends StatefulWidget {
 
 class _DesktopEditingDirectionState extends State<DesktopEditingDirection> {
   TextDirection? direction;
+  final _fieldKey = GlobalKey();
+  Offset? _pointerDown;
+
+  bool _normalizingSelection = false;
+
+  void _keepCaretOnClickedLine() {
+    final point = _pointerDown;
+    if (!widget.multiline || point == null || _normalizingSelection) return;
+    final value = widget.controller.value;
+    if (!value.selection.isValid ||
+        !value.selection.isCollapsed ||
+        value.composing.isValid && !value.composing.isCollapsed) {
+      return;
+    }
+    RenderEditable? editable;
+    void findEditable(RenderObject object) {
+      if (object is RenderEditable) {
+        editable = object;
+      } else if (editable == null) {
+        object.visitChildren(findEditable);
+      }
+    }
+
+    final root = _fieldKey.currentContext?.findRenderObject();
+    if (root == null) return;
+    findEditable(root);
+    final render = editable;
+    if (render == null || !render.hasSize) return;
+    final local = render.globalToLocal(point);
+    if (!render.size.contains(local)) return;
+    final position = value.selection.extent;
+    // Only normalize the result of this pointer's hit test, never an unrelated
+    // keyboard selection or a previous caret while a gesture is starting.
+    if (render.getPositionForPoint(point).offset != position.offset) return;
+    final current = render.getLocalRectForCaret(position);
+    if (local.dy >= current.top && local.dy <= current.bottom) return;
+    final candidates = [
+      TextPosition(offset: position.offset, affinity: TextAffinity.upstream),
+      if (position.offset > 0 && value.text[position.offset - 1] == '\n')
+        TextPosition(offset: position.offset - 1),
+    ];
+    for (final candidate in candidates) {
+      final rect = render.getLocalRectForCaret(candidate);
+      if (local.dy >= rect.top && local.dy <= rect.bottom) {
+        // This listener is registered before EditableText's listener. Correct
+        // the hit test synchronously, before its caret can paint or scroll.
+        _normalizingSelection = true;
+        try {
+          widget.controller.selection = TextSelection.collapsed(
+            offset: candidate.offset,
+            affinity: candidate.affinity,
+          );
+        } finally {
+          _normalizingSelection = false;
+        }
+        return;
+      }
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -51,6 +112,8 @@ class _DesktopEditingDirectionState extends State<DesktopEditingDirection> {
   }
 
   void update() {
+    if (_normalizingSelection) return;
+    _keepCaretOnClickedLine();
     final value = widget.controller.value;
     if (value.composing.isValid && !value.composing.isCollapsed) return;
     if (value.selection.isValid && !value.selection.isCollapsed) return;
@@ -69,8 +132,23 @@ class _DesktopEditingDirectionState extends State<DesktopEditingDirection> {
   }
 
   @override
-  Widget build(BuildContext context) => Directionality(
-    textDirection: direction ?? Directionality.of(context),
-    child: Builder(builder: (inner) => widget.builder(inner, direction)),
+  Widget build(BuildContext context) => Listener(
+    key: _fieldKey,
+    onPointerDown: (event) {
+      _pointerDown = event.buttons == kPrimaryButton ? event.position : null;
+      _keepCaretOnClickedLine();
+    },
+    onPointerMove: (event) {
+      if (_pointerDown != null &&
+          (event.position - _pointerDown!).distance > 4) {
+        _pointerDown = null;
+      }
+    },
+    onPointerUp: (_) => _pointerDown = null,
+    onPointerCancel: (_) => _pointerDown = null,
+    child: Directionality(
+      textDirection: direction ?? Directionality.of(context),
+      child: Builder(builder: (inner) => widget.builder(inner, direction)),
+    ),
   );
 }

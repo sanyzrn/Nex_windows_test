@@ -35,10 +35,10 @@ class NexNoteTile extends StatelessWidget {
     final scheme = theme.colorScheme;
     final l = AppLocalizations.of(context)!;
     final fa = Localizations.localeOf(context).languageCode == 'fa';
-    final text = (note.displayText ?? '').trim();
-    final lines = text.split('\n').where((s) => s.trim().isNotEmpty).toList();
+    final text = note.displayText ?? '';
+    final lines = text.split('\n');
     final first = lines.firstOrNull?.trim() ?? '';
-    final rest = lines.skip(1).join('\n').trim();
+    final rest = lines.skip(1).join('\n');
     final named = note.title?.trim() ?? '';
     // A short first line over more text is a title. A single thought is the
     // card's text: a title would only cut it off.
@@ -46,10 +46,10 @@ class NexNoteTile extends StatelessWidget {
     if (named.isNotEmpty) {
       title = named;
       body = text;
-    } else if (rest.isNotEmpty && first.length <= 60) {
+    } else if (rest.trim().isNotEmpty && first.length <= 60) {
       title = first;
       body = rest;
-    } else if (text.isEmpty) {
+    } else if (text.trim().isEmpty) {
       title = '';
       body = noteTypeLabel(l, note.type);
     } else {

@@ -127,6 +127,72 @@ class NoteMetadataLine extends StatelessWidget {
 
   final Note note;
 
+  Future<void> _showDetails(BuildContext context) => withPanelHold(context, () {
+    final l = AppLocalizations.of(context)!;
+    final fa = Localizations.localeOf(context).languageCode == 'fa';
+    final solar = NexPanelScope.maybeOf(context)?.S.solarCalendar ?? fa;
+    String when(DateTime at) {
+      final local = at.toLocal();
+      final time = [
+        local.hour,
+        local.minute,
+        local.second,
+      ].map((part) => part.toString().padLeft(2, '0')).join(':');
+      return '${nexDisplayDate(at, solar: solar, persian: fa)} · '
+          '${nexDigits(time, persian: fa)}';
+    }
+
+    return showDialog<void>(
+      context: context,
+      builder: (dialog) => AlertDialog(
+        scrollable: true,
+        title: Text(l.details),
+        content: SizedBox(
+          width: 380,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.category_outlined),
+                title: Text(noteTypeLabel(l, note.type)),
+              ),
+              ListTile(
+                leading: const Icon(Icons.add_circle_outline),
+                title: Text(l.created),
+                subtitle: Text(
+                  when(note.createdAt),
+                  key: const ValueKey('note-created-at'),
+                  textDirection: TextDirection.ltr,
+                ),
+              ),
+              ListTile(
+                leading: const Icon(Icons.edit_outlined),
+                title: Text(
+                  note.updatedAt.isAtSameMomentAs(note.createdAt)
+                      ? l.detailsNotEdited
+                      : l.detailsEdited,
+                ),
+                subtitle: note.updatedAt.isAtSameMomentAs(note.createdAt)
+                    ? null
+                    : Text(
+                        when(note.updatedAt),
+                        key: const ValueKey('note-updated-at'),
+                        textDirection: TextDirection.ltr,
+                      ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialog),
+            child: Text(l.close),
+          ),
+        ],
+      ),
+    );
+  });
+
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context)!;
@@ -174,12 +240,20 @@ class NoteMetadataLine extends StatelessWidget {
         ),
       ],
     ];
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-      child: Wrap(
-        crossAxisAlignment: WrapCrossAlignment.center,
-        runSpacing: 2,
-        children: fragments,
+    return Tooltip(
+      message: l.details,
+      child: InkWell(
+        key: const ValueKey('note-details-open'),
+        borderRadius: BorderRadius.circular(8),
+        onTap: () => _showDetails(context),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+          child: Wrap(
+            crossAxisAlignment: WrapCrossAlignment.center,
+            runSpacing: 2,
+            children: fragments,
+          ),
+        ),
       ),
     );
   }

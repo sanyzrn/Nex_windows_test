@@ -222,7 +222,8 @@ class DesktopStore {
                 reply.send([-2, true, null]);
               case 'aiEnrich':
                 final noteId = a['id'] as String;
-                if (notes.getById(noteId) == null) {
+                final enrichmentTarget = notes.getById(noteId);
+                if (enrichmentTarget == null || enrichmentTarget.isDeleted) {
                   throw StateError('Note is unavailable');
                 }
                 switch (a['field']) {
@@ -527,6 +528,27 @@ class DesktopStore {
               case 'caption':
                 notes.setCaption(a['id'] as String, a['text'] as String);
                 result = null;
+              case 'appendCaption':
+                final captionTarget = notes.getById(a['id'] as String);
+                if (captionTarget == null ||
+                    captionTarget.isDeleted ||
+                    !notes.appendCaption(
+                      a['id'] as String,
+                      a['text'] as String,
+                    )) {
+                  throw StateError('Note is unavailable');
+                }
+                result = null;
+              case 'replaceCaption':
+                final captionToReplace = notes.getById(a['id'] as String);
+                result =
+                    captionToReplace != null &&
+                    !captionToReplace.isDeleted &&
+                    notes.replaceCaption(
+                      a['id'] as String,
+                      a['text'] as String,
+                      expectedCaption: a['expectedCaption'] as String?,
+                    );
               case 'workspace':
                 final totals = notes.db.select('''SELECT COUNT(*) AS total,
                   SUM(CASE WHEN pinned_at IS NOT NULL THEN 1 ELSE 0 END) AS pinned,
