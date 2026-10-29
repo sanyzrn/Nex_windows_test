@@ -1,6 +1,6 @@
 # Windows CI and releases
 
-Current application: **0.26.0+20**, release tag **v0.26.0** (after green CI). `main` contains
+Current application: **0.40.1+34**, release tag **v0.40.1** (after green CI). `main` contains
 one current source tree at the repository root. Build caches and installer
 EXEs are excluded from Git; installers belong in Releases.
 
@@ -16,11 +16,15 @@ drift; dimensions and other screenshots remain exact.
 ## Build and publish
 
 During 0.40.1 test-version UI work, the desktop CI temporarily excludes the
-`golden` and `review` tags so stale screenshots do not block installers.
+`golden` and `review` tags so stale screenshots do not block installers. The
+flaky bulk-pin GUI fixture is separately tagged `quarantined` after run
+40885950193 exhausted the job deadline; pin domain tests still run.
 Functional tests, analysis, shared-package checks, native smoke checks and
 installer verification remain blocking. Baselines and visual tests are retained.
-To restore visual gating after reviewing/updating the affected images, remove
-`--exclude-tags "golden || review"` from the desktop test step. Local visual
+Local and CI checks share [verify_windows.ps1](../tools/verify_windows.ps1);
+see [local verification](LOCAL_VERIFICATION.md) for commands and reports.
+To restore visual gating after reviewing/updating the affected images, update
+the excluded tags in that script. Local visual
 checks remain available with `flutter test --no-pub --tags "golden || review"`.
 
 1. Update version declarations, changelog and current documentation.

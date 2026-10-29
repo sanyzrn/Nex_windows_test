@@ -8,7 +8,19 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'support/windows_emoji_comparator.dart';
 
 Future<void> testExecutable(FutureOr<void> Function() testMain) async {
-  TestWidgetsFlutterBinding.ensureInitialized();
+  final binding = TestWidgetsFlutterBinding.ensureInitialized();
+  if (binding is AutomatedTestWidgetsFlutterBinding) {
+    // testWidgets supplies its own ten-minute timeout, overriding the CLI
+    // default. Bound it here too, so a wedged fixture cannot occupy CI all day.
+    binding.defaultTestTimeout = const Timeout(
+      Duration(
+        seconds: int.fromEnvironment(
+          'NEX_TEST_TIMEOUT_SECONDS',
+          defaultValue: 120,
+        ),
+      ),
+    );
+  }
   SharedPreferences.setMockInitialValues({});
   FlutterSecureStorage.setMockInitialValues({});
   await (FontLoader(

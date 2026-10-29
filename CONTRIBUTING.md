@@ -6,6 +6,11 @@ Bug reports, workflow feedback and pull requests are welcome in Persian or Engli
 
 Use Windows x64, Flutter **3.44.8** and Visual Studio's Desktop development with C++ workload. `apps/desktop` depends on the four shared packages already included in this repository. Do not reapply the transfer patches in `patches/`.
 
+For the complete local pre-push check, run `powershell -NoProfile -File
+.\tools\verify_windows.ps1 -Offline` from the repository root. See
+[local verification](docs/LOCAL_VERIFICATION.md) for stage selection, logs and
+the temporarily quarantined visual/GUI fixtures.
+
 ```powershell
 cd apps/desktop
 flutter pub get --enforce-lockfile

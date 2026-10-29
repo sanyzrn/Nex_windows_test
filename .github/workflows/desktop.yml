@@ -76,34 +76,20 @@ jobs:
       # Keep regression, persistence, accessibility and interaction tests blocking.
       - name: Run functional tests (visual baselines temporarily paused)
         id: desktop-tests
-        working-directory: apps/desktop
-        run: flutter test --no-pub --exclude-tags "golden || review"
+        shell: pwsh
+        run: ./tools/verify_windows.ps1 -Stage Desktop -NoRestore
 
       - name: Test shared UI package
-        working-directory: packages/ui
         shell: pwsh
-        run: |
-          flutter pub get --enforce-lockfile
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          flutter analyze --no-pub
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          flutter test --no-pub
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+        run: ./tools/verify_windows.ps1 -Stage Ui
 
       - name: Analyze and test core and data packages
         shell: pwsh
-        run: |
-          foreach ($package in @('core', 'data')) {
-            Push-Location "packages/$package"
-            try {
-              dart pub get --enforce-lockfile
-              if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-              dart analyze
-              if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-              dart test
-              if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-            } finally { Pop-Location }
-          }
+        run: ./tools/verify_windows.ps1 -Stage CoreData
+
+      - name: Test Android-compatible cloud AI adapters
+        shell: pwsh
+        run: ./tools/verify_windows.ps1 -Stage Ai
 
       # Retain the existing matrix while visual comparisons are paused.
       - name: Upload reviewed screenshot matrix
@@ -192,33 +178,19 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
-      - name: Test Android-compatible cloud AI adapters
-        working-directory: packages/ai
-        shell: pwsh
-        run: |
-          flutter pub get --enforce-lockfile
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          flutter analyze --no-pub
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          flutter test --no-pub
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-
       # ADR-035: cloud transport is shared product code; only the on-device
       # inference runtime must remain removable. Windows has no local binding.
       - name: Verify on-device AI runtime is removable (Rule 3)
-        working-directory: packages/ai
         shell: pwsh
-        run: |
-          (Get-Content -LiteralPath pubspec.yaml) |
-            Where-Object { $_ -notmatch '^  flutter_litert_lm:' } |
-            Set-Content -LiteralPath pubspec.yaml -Encoding utf8
-          Remove-Item -LiteralPath lib/nex_ai.dart, lib/src/litert_chat_adapter.dart, lib/src/local_chat_placeholder.dart
-          Push-Location ../../apps/desktop
-          try {
-            flutter pub get
-            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-            flutter analyze --no-pub
-            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-            flutter test --no-pub --exclude-tags "golden || review"
-            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          } finally { Pop-Location }
+        run: ./tools/verify_windows.ps1 -Stage Runtime
+
+      - name: Upload local and CI verification reports
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: verification-reports
+          path: |
+            apps/desktop/build/local-ci/*.log
+            apps/desktop/build/local-ci/*-report.json
+          if-no-files-found: ignore
+          retention-days: 14

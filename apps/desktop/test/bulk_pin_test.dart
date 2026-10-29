@@ -1,3 +1,9 @@
+// Quarantined: this GUI fixture can deadlock under concurrent Windows CI
+// (run 40885950193). Domain pin tests remain blocking; run this file explicitly
+// with --tags quarantined while investigating the fixture's async scheduling.
+@Tags(['quarantined'])
+library;
+
 import 'dart:io';
 
 import 'package:flutter/material.dart';
