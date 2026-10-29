@@ -7,6 +7,7 @@
 - Show last-edit dates on Library lists and cards, with creation and update timestamps available in note details.
 - Hide layout controls when the pane is too narrow and make the full title-bar surface draggable.
 - Preserve shared note fields and Android backup compatibility.
+
 ## 0.40.0 — 2026-10-29
 
 - Quick capture offers Note, Checklist and Link modes in one steady editor, preserving the draft when switching modes.

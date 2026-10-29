@@ -60,7 +60,9 @@ void main() {
           hint.getMinIntrinsicWidth(double.infinity),
           lessThanOrEqualTo(hint.size.width + .01),
         );
-        for (final tooltip in [ai.t('board'), ai.t('list'), l.manageTags]) {
+        expect(find.byTooltip(ai.t('board')), findsNothing);
+        expect(find.byTooltip(ai.t('list')), findsNothing);
+        for (final tooltip in [l.manageTags]) {
           final action = find.byTooltip(tooltip);
           expect(action, findsOneWidget);
           expect(t.getRect(action).right, lessThanOrEqualTo(380));

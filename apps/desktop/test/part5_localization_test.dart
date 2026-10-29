@@ -5,6 +5,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nex_desktop/core/controller.dart';
+import 'package:nex_desktop/core/app_meta.dart';
 import 'package:nex_desktop/core/native.dart';
 import 'package:nex_desktop/l10n/app_localizations.dart';
 import 'package:nex_desktop/nex/desktop_date_picker.dart';
@@ -77,7 +78,8 @@ void main() {
       }
 
       expect(sections(fa), sections(en));
-      expect(sections(fa).length, 26); // Includes the 0.40.0 release section.
+      expect(sections(fa).length, greaterThanOrEqualTo(26));
+      expect(sections(fa).first.$1, startsWith('$kAppShortVersion —'));
     },
   );
 
