@@ -60,24 +60,10 @@ mixin CaptureWide on CaptureViewBase {
                           ),
                           child: Row(
                             children: [
-                              Icon(
-                                f.checklist
-                                    ? Icons.checklist_rounded
-                                    : Icons.edit_note_rounded,
-                                size: calm ? 17 : 19,
-                                color: scheme.primary,
-                              ),
-                              const SizedBox(width: 8),
                               Expanded(
-                                child: Text(
-                                  f.checklist ? l.checklist : l.workspaceCreate,
-                                  style:
-                                      (calm
-                                              ? theme.textTheme.labelLarge
-                                              : theme.textTheme.titleSmall)
-                                          ?.copyWith(
-                                            fontWeight: FontWeight.w600,
-                                          ),
+                                child: _CaptureModeSelector(
+                                  features: f,
+                                  labels: l,
                                 ),
                               ),
                               Tooltip(
@@ -163,31 +149,6 @@ mixin CaptureWide on CaptureViewBase {
                             spacing: 12,
                             runSpacing: 4,
                             children: [
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Semantics(
-                                    label: l.checklist,
-                                    child: NexSwitch(
-                                      value: f.checklist,
-                                      onChanged:
-                                          f.session.id == null && !f.saving
-                                          ? (v) {
-                                              f.checklist = v;
-                                              f.notify();
-                                            }
-                                          : null,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 2),
-                                  Flexible(
-                                    child: Text(
-                                      l.checklist,
-                                      style: theme.textTheme.labelMedium,
-                                    ),
-                                  ),
-                                ],
-                              ),
                               Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [

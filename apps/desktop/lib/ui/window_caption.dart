@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../core/controller.dart';
 import '../l10n/app_localizations.dart';
+import 'nex_logotype.dart';
 
 class NexWindowCaption extends StatelessWidget {
   const NexWindowCaption({super.key, required this.controller});
@@ -8,7 +9,6 @@ class NexWindowCaption extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context)!;
-    final scheme = Theme.of(context).colorScheme;
     return SizedBox(
       height: 36,
       // No bar of its own: the caption is the window surface itself — the
@@ -23,35 +23,9 @@ class NexWindowCaption extends StatelessWidget {
                 onPanStart: (_) => controller.native.windowCommand('drag'),
                 onDoubleTap: () => controller.native.windowCommand('maximize'),
                 onSecondaryTap: () => controller.native.windowCommand('menu'),
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 14),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 20,
-                        height: 20,
-                        decoration: BoxDecoration(
-                          color: scheme.primary,
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Icon(
-                          Icons.edit_note_rounded,
-                          color: scheme.onPrimary,
-                          size: 14,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        l.applicationName,
-                        style: TextStyle(
-                          fontSize: 12.5,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: .3,
-                          color: scheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
+                child: const Padding(
+                  padding: EdgeInsets.only(left: 14),
+                  child: Row(children: [NexStaticLogotype(height: 9)]),
                 ),
               ),
             ),

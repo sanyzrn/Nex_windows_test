@@ -14,7 +14,15 @@ ThemeData nexDesktopTheme(ThemeData base) {
   );
   ButtonStyle? tuned(ButtonStyle? style) => (style ?? const ButtonStyle())
       .copyWith(shape: shape, minimumSize: minimum, padding: padding);
+  // Compact card titles should share the body size throughout the desktop.
+  // Keep their weight and colour so titles remain distinct from descriptions.
+  final body = base.textTheme.bodyMedium;
+  final compactTitle = base.textTheme.titleSmall?.copyWith(
+    fontSize: body?.fontSize,
+    height: body?.height,
+  );
   return base.copyWith(
+    textTheme: base.textTheme.copyWith(titleSmall: compactTitle),
     // A text field is as tall as the buttons beside it. Its icons keep the
     // 48 px target by default, which is what made every field 48 tall.
     inputDecorationTheme: base.inputDecorationTheme.copyWith(

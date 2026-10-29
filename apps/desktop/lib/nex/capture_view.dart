@@ -13,7 +13,7 @@ import 'desktop_editing_direction.dart';
 import 'package:flutter/services.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:nex_ui/nex_ui.dart';
-import 'package:nex_core/nex_core.dart' show nexDigits;
+import 'package:nex_core/nex_core.dart' show nexDigits, NoteType;
 
 import '../core/controller.dart';
 import '../l10n/app_localizations.dart';
@@ -102,6 +102,7 @@ abstract class CaptureViewBase extends StatelessWidget {
               ),
             ],
           ),
+          _CaptureModeSelector(features: f, labels: l),
           CallbackShortcuts(
             bindings: {
               const SingleActivator(
@@ -141,23 +142,6 @@ abstract class CaptureViewBase extends StatelessWidget {
                 ),
               ),
             ),
-          ),
-          Row(
-            children: [
-              DesktopFocusRing(
-                child: Checkbox(
-                  semanticLabel: l.checklist,
-                  value: f.checklist,
-                  onChanged: f.session.id == null && !f.saving
-                      ? (v) {
-                          f.checklist = v!;
-                          f.notify();
-                        }
-                      : null,
-                ),
-              ),
-              Text(l.checklist, style: Theme.of(context).textTheme.bodySmall),
-            ],
           ),
           const SizedBox(height: 6),
           SizedBox(
@@ -308,7 +292,7 @@ abstract class CaptureViewBase extends StatelessWidget {
           text: value.replaceRange(start, end, text),
           selection: TextSelection.collapsed(offset: start + text.length),
         );
-        await session.write(f.composer.text, checklist: f.checklist);
+        await session.write(f.composer.text, type: f.captureType);
       } else if (c != null) {
         final image = await c.native.currentClipboardImage();
         if (!context.mounted || !identical(session, f.session)) return;
@@ -342,3 +326,31 @@ abstract class CaptureViewBase extends StatelessWidget {
 /// The composed capture view. Same library, so the mixin and this class
 /// share every private member.
 class NexCaptureView = CaptureViewBase with CaptureWide;
+
+class _CaptureModeSelector extends StatelessWidget {
+  const _CaptureModeSelector({required this.features, required this.labels});
+  final NexFeatures features;
+  final AppLocalizations labels;
+
+  @override
+  Widget build(BuildContext context) => Wrap(
+    spacing: 4,
+    runSpacing: 4,
+    children: [
+      for (final (type, label, icon) in [
+        (NoteType.text, labels.note, Icons.notes_rounded),
+        (NoteType.checklist, labels.checklist, Icons.checklist_rounded),
+        (NoteType.link, labels.link, Icons.link_rounded),
+      ])
+        ChoiceChip(
+          key: ValueKey('capture-mode-${type.name}'),
+          label: Text(label),
+          avatar: Icon(icon, size: 16),
+          selected: features.captureType == type,
+          showCheckmark: false,
+          onSelected: (_) => features.selectCaptureType(type),
+          visualDensity: VisualDensity.compact,
+        ),
+    ],
+  );
+}

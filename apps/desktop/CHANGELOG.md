@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.40.0 — 2026-10-29
+
+- Quick capture offers Note, Checklist and Link modes in one steady editor, preserving the draft when switching modes.
+- Card typography is more consistent across the desktop interface.
+- The title bar and sidebar now show the Nex wordmark; the sidebar mark follows the theme and animates periodically.
+
 ## 0.39.0 — 2026-10-29
 
 - Release history follows the selected calendar; scheduled notes are now in Library locations.

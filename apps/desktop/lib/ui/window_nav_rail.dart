@@ -58,33 +58,11 @@ class _WindowNavRail extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     const SizedBox(height: 14),
-                    Padding(
-                      padding: const EdgeInsetsDirectional.only(start: 4),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 24,
-                            height: 24,
-                            decoration: BoxDecoration(
-                              color: c.primary,
-                              borderRadius: BorderRadius.circular(7),
-                            ),
-                            child: Icon(
-                              Icons.edit_note_rounded,
-                              size: 15,
-                              color: c.onPrimary,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            l.workspaceBrand,
-                            style: Theme.of(context).textTheme.titleSmall
-                                ?.copyWith(
-                                  fontWeight: FontWeight.w700,
-                                  letterSpacing: -.2,
-                                ),
-                          ),
-                        ],
+                    const Padding(
+                      padding: EdgeInsetsDirectional.only(start: 4),
+                      child: Align(
+                        alignment: AlignmentDirectional.centerStart,
+                        child: NexLivingLogotype(height: 18),
                       ),
                     ),
                     const SizedBox(height: 18),

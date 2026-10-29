@@ -45,7 +45,18 @@ class NexFeatures extends ChangeNotifier {
   CaptureSession session;
   final composer = TextEditingController();
   final focus = FocusNode();
-  bool checklist = false;
+  NoteType captureType = NoteType.text;
+  bool get checklist => captureType == NoteType.checklist;
+  set checklist(bool value) =>
+      captureType = value ? NoteType.checklist : NoteType.text;
+
+  void selectCaptureType(NoteType type) {
+    if (captureType == type) return;
+    captureType = type;
+    notify();
+    if (composer.text.isNotEmpty) write(composer.text);
+  }
+
   Future<bool>? _freshTask;
   bool get startingNewNote => _freshTask != null;
   int _saving = 0;
@@ -176,7 +187,7 @@ class NexFeatures extends ChangeNotifier {
     _saving++;
     notify();
     unawaited(
-      guard(() => session.write(text, checklist: checklist)).whenComplete(() {
+      guard(() => session.write(text, type: captureType)).whenComplete(() {
         _saving--;
         notify();
       }),

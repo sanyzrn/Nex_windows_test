@@ -26,6 +26,7 @@ import 'svg_icon.dart';
 import 'widgets.dart';
 import 'rail_tags.dart';
 import 'window_caption.dart';
+import 'nex_logotype.dart';
 import '../updates/widgets.dart';
 
 part 'window_nav_rail.dart';

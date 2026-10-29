@@ -266,7 +266,52 @@ class DesktopStore {
               case 'capture':
                 final text = a['text'] as String;
                 final oldId = a['id'] as String?;
-                if (oldId != null) {
+                final selected = a['type'] as String?;
+                if (selected != null) {
+                  final requested = NoteType.values.firstWhere(
+                    (t) => t.name == selected,
+                  );
+                  final url = requested == NoteType.link
+                      ? normaliseUrl(text)
+                      : null;
+                  final effective = requested == NoteType.link && url == null
+                      ? NoteType.text
+                      : requested;
+                  final content = effective == NoteType.checklist
+                      ? formatChecklist(
+                          text
+                              .split('\n')
+                              .where((line) => line.isNotEmpty)
+                              .map(
+                                (line) =>
+                                    ChecklistItem(text: line, done: false),
+                              )
+                              .toList(),
+                        )
+                      : url ?? text;
+                  if (oldId != null) {
+                    final current = notes.getById(oldId);
+                    if (current == null || current.deletedAt != null) {
+                      throw StateError('Capture note is no longer available');
+                    }
+                    notes.updateCapture(oldId, effective, content);
+                    result = notes.getById(oldId);
+                  } else if (content.isEmpty) {
+                    result = null;
+                  } else if (effective == NoteType.link) {
+                    result = capture.submitLinkCapture(content);
+                  } else if (effective == NoteType.checklist) {
+                    result = capture.submitChecklistCapture(
+                      text
+                          .split('\n')
+                          .where((line) => line.isNotEmpty)
+                          .map((line) => ChecklistItem(text: line, done: false))
+                          .toList(),
+                    );
+                  } else {
+                    result = capture.submitTextCapture(content);
+                  }
+                } else if (oldId != null) {
                   final current = notes.getById(oldId);
                   if (current == null || current.deletedAt != null) {
                     throw StateError('Capture note is no longer available');
@@ -797,13 +842,14 @@ class CaptureSession {
   int revision = 0;
   Future<void> _tail = Future.value();
   Object? _error;
-  Future<void> write(String text, {bool checklist = false}) {
+  Future<void> write(String text, {bool checklist = false, NoteType? type}) {
     revision++;
     final task = _tail.then((_) async {
       final note = await store.call<Note?>('capture', {
         'id': id,
         'text': text,
         'checklist': checklist,
+        if (type != null) 'type': type.name,
       });
       id = note?.id ?? id;
       _error = null;

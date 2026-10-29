@@ -259,6 +259,24 @@ WHERE id = ? AND deleted_at IS NULL
     });
   }
 
+  /// Update the active capture's representation without changing its identity.
+  void updateCapture(String noteId, NoteType type, String content) {
+    db.together(() {
+      final now = DateTime.now().toUtc().toIso8601String();
+      db.execute(
+        "UPDATE notes SET type = ?, content = ?, updated_at = ?, rev = rev + 1, sync_state = 'pending' ${localDeviceId != null ? ', device_id = ?' : ''} WHERE id = ? AND deleted_at IS NULL",
+        [
+          type.wireName,
+          content,
+          now,
+          if (localDeviceId != null) localDeviceId,
+          noteId,
+        ],
+      );
+      _reindex(noteId);
+    });
+  }
+
   /// Changes representation in place: tags, reminders, title and identity survive.
   ///
   /// With [uri], a text note becomes the Markdown file at that path — the

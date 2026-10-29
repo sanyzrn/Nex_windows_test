@@ -293,15 +293,16 @@ void main() {
     );
 
     testWidgets(
-      '$language capture editor, toggle and six actions follow source order',
+      '$language capture modes, editor and six actions follow source order',
       (tester) async {
         await boot(tester, language, width: 460);
         final scope = find.byType(NexCaptureView);
         final l = AppLocalizations.of(tester.element(scope))!;
         Finder within(Finder f) => find.descendant(of: scope, matching: f);
         await walk(tester, [
+          for (final type in ['text', 'checklist', 'link'])
+            within(find.byKey(ValueKey('capture-mode-$type'))),
           within(find.byKey(const ValueKey('capture-field'))),
-          within(find.byType(Switch)),
           within(find.byTooltip(l.newNote)),
           for (final label in [
             l.pasteText,
@@ -313,13 +314,6 @@ void main() {
           ])
             within(find.byTooltip(label)),
         ]);
-        expect(
-          tester
-              .getSemantics(within(find.byType(Switch)))
-              .getSemanticsData()
-              .label,
-          contains(l.checklist),
-        );
         expect(tester.takeException(), isNull);
       },
     );
