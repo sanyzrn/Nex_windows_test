@@ -243,7 +243,10 @@ void main() {
           expect(f.importedCount, 0);
         }
         expect(c.interacting, false);
-        await t.tap(find.byType(Checkbox), kind: PointerDeviceKind.mouse);
+        await t.tap(
+          find.byKey(const ValueKey('capture-mode-checklist')),
+          kind: PointerDeviceKind.mouse,
+        );
         await t.pump();
         expect(f.checklist, true);
         await t.pumpWidget(const SizedBox());
