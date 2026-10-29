@@ -5,6 +5,7 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../l10n/app_localizations.dart';
 
 abstract final class NexBrand {
   /// The wordmark's n, e and the ink strokes of the x.
@@ -144,7 +145,7 @@ class NexStaticLogotype extends StatelessWidget {
     final bounds = NexBrand.wordBounds;
     final colors = Theme.of(context).colorScheme;
     return Semantics(
-      label: 'Nex',
+      label: AppLocalizations.of(context)?.applicationName,
       image: true,
       child: CustomPaint(
         size: Size(height * bounds.width / bounds.height, height),
@@ -246,7 +247,7 @@ class _NexLivingLogotypeState extends State<NexLivingLogotype>
     final theme = Theme.of(context);
     final bounds = NexBrand.wordBounds;
     return Semantics(
-      label: 'Nex',
+      label: AppLocalizations.of(context)?.applicationName,
       image: true,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
