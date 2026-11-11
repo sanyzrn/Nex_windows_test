@@ -46,33 +46,37 @@ class NexSwitch extends StatelessWidget {
   );
 
   @override
-  Widget build(BuildContext context) => SizedBox.fromSize(
-    size: size,
-    child: FittedBox(
-      fit: BoxFit.contain,
-      child: Switch(
-        value: value,
-        inactiveTrackColor: Theme.of(context).brightness == Brightness.dark
-            ? const Color(0xFF53565C)
-            : const Color(0xFFC1C5CB),
-        inactiveThumbColor: Theme.of(context).brightness == Brightness.dark
-            ? const Color(0xFFE0E3E8)
-            : const Color(0xFF4A4F57),
-        trackOutlineWidth: const WidgetStatePropertyAll(1.5),
-        trackOutlineColor: WidgetStateProperty.resolveWith(
-          (states) => states.contains(WidgetState.selected)
-              ? Colors.transparent
-              : Theme.of(context).colorScheme.onSurfaceVariant,
+  Widget build(BuildContext context) {
+    // Scheme-derived resting colours, not hardcoded cool greys. The old
+    // constants sat ~185° away from the warm palettes' hue — the same
+    // off-hue defect the tokens file fixed for the comfort borders — and
+    // overrode the switch theme every palette tunes in
+    // nexApplyThemePreset.
+    final scheme = Theme.of(context).colorScheme;
+    return SizedBox.fromSize(
+      size: size,
+      child: FittedBox(
+        fit: BoxFit.contain,
+        child: Switch(
+          value: value,
+          inactiveTrackColor: scheme.surfaceContainerHighest,
+          inactiveThumbColor: scheme.onSurfaceVariant,
+          trackOutlineWidth: const WidgetStatePropertyAll(1.5),
+          trackOutlineColor: WidgetStateProperty.resolveWith(
+            (states) => states.contains(WidgetState.selected)
+                ? Colors.transparent
+                : scheme.onSurfaceVariant,
+          ),
+          onChanged: onChanged,
+          // Pinned here rather than left to the theme, because the scale factor
+          // is only correct against a known size: with the tap padding on, the
+          // control measures 52x48 and `BoxFit.contain` would fit that taller
+          // box into the same width and shrink it further than intended.
+          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
         ),
-        onChanged: onChanged,
-        // Pinned here rather than left to the theme, because the scale factor
-        // is only correct against a known size: with the tap padding on, the
-        // control measures 52x48 and `BoxFit.contain` would fit that taller
-        // box into the same width and shrink it further than intended.
-        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       ),
-    ),
-  );
+    );
+  }
 }
 
 /// A settings row with a [NexSwitch] on the end.

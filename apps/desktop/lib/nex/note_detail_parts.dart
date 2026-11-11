@@ -162,7 +162,11 @@ class NoteMetadataLine extends StatelessWidget {
                 subtitle: Text(
                   when(note.createdAt),
                   key: const ValueKey('note-created-at'),
+                  // LTR keeps 'date · time' in reading order, and the
+                  // explicit right alignment keeps the line flush with the
+                  // RTL dialog instead of hugging the opposite edge.
                   textDirection: TextDirection.ltr,
+                  textAlign: TextAlign.right,
                 ),
               ),
               ListTile(
@@ -178,6 +182,7 @@ class NoteMetadataLine extends StatelessWidget {
                         when(note.updatedAt),
                         key: const ValueKey('note-updated-at'),
                         textDirection: TextDirection.ltr,
+                        textAlign: TextAlign.right,
                       ),
               ),
             ],

@@ -266,7 +266,7 @@ class TimerView extends StatelessWidget {
             for (final m in [1, 5, 10, 25])
               Expanded(
                 child: Padding(
-                  padding: EdgeInsets.only(right: m == 25 ? 0 : 6),
+                  padding: EdgeInsetsDirectional.only(end: m == 25 ? 0 : 6),
                   child: Btn(
                     onPressed: () => c.timerPreset(m),
                     child: Text(

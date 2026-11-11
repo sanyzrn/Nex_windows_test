@@ -349,7 +349,9 @@ class NexShortcutHint extends StatelessWidget {
           label,
           style: Theme.of(context).textTheme.labelSmall?.copyWith(
             color: c.onSurfaceVariant,
-            fontSize: 10,
+            // 11, not 10: the window's 0.92 type density took a 10px label
+            // to 9.2px effective — under the ramp's readable floor.
+            fontSize: 11,
             letterSpacing: 0,
           ),
         ),

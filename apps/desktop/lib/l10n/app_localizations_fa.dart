@@ -1969,7 +1969,7 @@ class AppLocalizationsFa extends AppLocalizations {
       count,
       locale: localeName,
       other: '$countString یادداشت · ۳۰ روز نگه داشته می‌شود',
-      zero: 'خالی',
+      zero: 'یادداشت حذف‌شده‌ای نیست',
     );
     return '$_temp0';
   }

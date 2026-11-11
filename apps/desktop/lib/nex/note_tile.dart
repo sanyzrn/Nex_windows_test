@@ -71,7 +71,16 @@ class NexNoteTile extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(14),
-        side: BorderSide(color: scheme.outlineVariant.withValues(alpha: .6)),
+        // outlineVariant is the divider tone — on the classic dark theme it
+        // is pure black, so the hairline here was a seam darker than both
+        // the card and the page (1.09:1) and the tile leaned on its fill
+        // step alone. The acting boundary token draws a quiet, visible
+        // edge in both modes.
+        side: BorderSide(
+          color: scheme.outline.withValues(
+            alpha: scheme.brightness == Brightness.dark ? .38 : .42,
+          ),
+        ),
       ),
       child: InkWell(
         key: ValueKey('workspace-note-${note.id}'),

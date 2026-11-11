@@ -187,7 +187,9 @@ class _PanelHeader extends StatelessWidget {
                     l.applicationName,
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      fontSize: 10,
+                      // 11, not 10: with the window's 0.92 density a 10px
+                      // label rendered at 9.2px, under the readable floor.
+                      fontSize: 11,
                     ),
                   ),
                   const SizedBox(height: 3),

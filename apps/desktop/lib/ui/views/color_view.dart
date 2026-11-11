@@ -96,7 +96,7 @@ class _ColorViewState extends State<ColorView> {
               child: Container(
                 width: 64,
                 height: 64,
-                margin: const EdgeInsets.only(right: 10),
+                margin: const EdgeInsetsDirectional.only(end: 10),
                 decoration: BoxDecoration(
                   color: color,
                   borderRadius: BorderRadius.circular(14),

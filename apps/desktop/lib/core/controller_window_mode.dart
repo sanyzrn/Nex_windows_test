@@ -35,10 +35,16 @@ mixin PanelWindowTransitions on PanelStateBase {
         try {
           screens = await native.screens();
           S.monitor = displayIndex(screens, S.monitorName, S.monitor);
-        } catch (_) {}
+        } catch (_) {
+          // Monitor enumeration is best-effort; the saved monitor index
+          // still applies and applyPlacement re-checks the real display.
+        }
         final p = await native.applyPlacement(S.edge, S.monitor);
         if (p != null) placement = Placement.fromMap(p);
-      } catch (_) {}
+      } catch (_) {
+        // Native rejection of the restyle leaves the current surface
+        // usable; the transition reports through windowModeChanging.
+      }
     } else {
       windowTool.value = null;
       windowSection.value = 'capture';
@@ -50,7 +56,10 @@ mixin PanelWindowTransitions on PanelStateBase {
           compact: !S.windowRemember,
           show: true,
         );
-      } catch (_) {}
+      } catch (_) {
+        // Best-effort restyle: the Flutter shell is already in window
+        // mode, so only the native frame would be left stale.
+      }
     }
     if (_disposed) return;
     S.windowMode = mode;
@@ -103,6 +112,9 @@ mixin PanelWindowTransitions on PanelStateBase {
         S.windowBounds = frame;
         S.windowMaximized = frame['maximized'] == true;
       }
-    } catch (_) {}
+    } catch (_) {
+      // Geometry probe only — keeping the previous remembered bounds is
+      // the correct fallback.
+    }
   }
 }

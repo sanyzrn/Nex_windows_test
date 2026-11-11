@@ -47,6 +47,11 @@ class _NexNoteDetailState extends State<NexNoteDetail> {
   late final editor = TextEditingController(text: note.content ?? '');
   final tag = TextEditingController(), thread = TextEditingController();
 
+  /// The note's checklist parsed once per build. The reader rows used to
+  /// call [parseChecklist] four times per row — O(rows²) work on every
+  /// rebuild of a long list.
+  List<ChecklistItem> get _checklist => parseChecklist(note.content ?? '');
+
   List<NoteThread> memberships = [], availableThreads = [];
   AudioPlayer? _player;
   // Windows has no mobile audio-session activation; let its media backend own
@@ -393,22 +398,39 @@ class _NexNoteDetailState extends State<NexNoteDetail> {
                                   ),
                             )
                           else
-                            for (
-                              var i = 0;
-                              i < parseChecklist(note.content ?? '').length;
-                              i++
-                            )
-                              DesktopFocusRing(
-                                child: CheckboxListTile(
-                                  value: parseChecklist(
-                                    note.content ?? '',
-                                  )[i].done,
-                                  title: Text(
-                                    parseChecklist(note.content ?? '')[i].text,
+                            // Parse once per build: the previous loop
+                            // re-parsed the same content four times per row
+                            // (value, title, length and again for title).
+                            ...[
+                              for (
+                                var i = 0;
+                                i < _checklist.length;
+                                i++
+                              )
+                                DesktopFocusRing(
+                                  child: CheckboxListTile(
+                                    value: _checklist[i].done,
+                                    // Leading like every other checklist in
+                                    // the app: the platform default parks
+                                    // the box at the trailing edge, which in
+                                    // Persian put the box on the visual
+                                    // left, away from its text.
+                                    controlAffinity:
+                                        ListTileControlAffinity.leading,
+                                    title: Text(
+                                      _checklist[i].text,
+                                      // A mixed-language item decides its
+                                      // own direction; null keeps the
+                                      // ambient one.
+                                      textDirection: nexDirectionOf(
+                                        _checklist[i].text,
+                                      ),
+                                    ),
+                                    onChanged:
+                                        (_) => run('check', {'index': i}),
                                   ),
-                                  onChanged: (_) => run('check', {'index': i}),
                                 ),
-                              ),
+                            ],
                         ],
                         if (note.type == NoteType.voice &&
                             note.mediaUri != null)

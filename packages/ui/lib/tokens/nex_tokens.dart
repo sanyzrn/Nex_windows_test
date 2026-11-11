@@ -862,7 +862,10 @@ ThemeData _theme({
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(NexRadius.md),
-        borderSide: BorderSide(color: borderSoft),
+        // The acting boundary token, not borderSoft: borderSoft is the
+        // divider colour, and on the filled field it measured 1.2:1 (light)
+        // and 1.6:1 (dark) — under the 3:1 a component boundary is held to.
+        borderSide: BorderSide(color: border),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(NexRadius.md),

@@ -279,7 +279,13 @@ void main(List<String> arguments) async {
     }
     return;
   }
-  unawaited(reminders.start());
+  // Reminder sync runs best-effort: an unguarded throw here would surface
+  // as an unhandled zone error and take the whole isolate down with it.
+  // The coordinator re-syncs on the next mutation or timer refresh, so a
+  // failure at startup costs nothing later.
+  unawaited(
+    reminders.start().catchError((Object error, StackTrace stack) {}),
+  );
   if (Platform.isWindows) {
     final updates = features.updates = DesktopUpdates(
       currentVersion: kAppShortVersion,
@@ -302,9 +308,13 @@ void main(List<String> arguments) async {
   // A manual launch must immediately present a usable, focused capture
   // surface. Startup launches opt into the unobtrusive background mode;
   // the edge panel stays hidden and the window waits in the tray.
-  if (arguments.length == 2 && arguments.first == '--open-note') {
-    unawaited(activateNote(arguments[1], controller, features));
-  } else if (!arguments.contains('--background')) {
+  //
+  // A note-URI launch never reaches this branch: `actionLaunch` above
+  // handled it before runApp and quit. A malformed URI that failed
+  // ReminderActivation.parse falls through here as a plain launch, which
+  // is the honest behaviour — the old second `activateNote` re-parsed the
+  // same URI a third time only to no-op.
+  if (!arguments.contains('--background')) {
     controller.onTray('capture');
   }
 }
@@ -429,10 +439,18 @@ class _NativeLocaleLabelsState extends State<NativeLocaleLabels>
 
 class _SharedTextScaler extends TextScaler {
   const _SharedTextScaler(this.system, this.multiplier);
+
   final TextScaler system;
   final double multiplier;
+
   @override
-  double scale(double fontSize) => system.scale(fontSize) * multiplier;
+  double scale(double fontSize) =>
+      // The composed multiplier is floored at .85: the panel's own minimum
+      // (settings_display_appearance's 0.5 slider stop) composed with the
+      // window's 0.92 density could otherwise carry labelSmall down to
+      // ~5.5px — under the readable floor the type ramp promises.
+      system.scale(fontSize) * (multiplier < .85 ? .85 : multiplier);
+
   @override
   double get textScaleFactor => scale(14) / 14;
 }

@@ -441,6 +441,15 @@ class _BoardBody extends StatelessWidget {
                                                 note.checklistItems[i].text,
                                                 maxLines: 1,
                                                 overflow: TextOverflow.ellipsis,
+                                                // Same first-strong rule as
+                                                // the title and body above:
+                                                // an English or mixed item
+                                                // inside a Persian card kept
+                                                // the card's RTL base and
+                                                // reordered its neutrals.
+                                                textDirection: nexDirectionOf(
+                                                  note.checklistItems[i].text,
+                                                ),
                                                 style: theme
                                                     .textTheme
                                                     .bodyMedium
@@ -537,7 +546,17 @@ class _BoardBody extends StatelessWidget {
                       ),
                     if (note.tags.length > 2)
                       Text(
-                        '+${note.tags.length - 2}',
+                        // Persian digits for a Persian interface, and a
+                        // pinned LTR direction: in an RTL paragraph the
+                        // neutral '+' drifts to the other side and the
+                        // overflow reads "1+".
+                        nexDigits(
+                          '+${note.tags.length - 2}',
+                          persian: Localizations.localeOf(
+                            context,
+                          ).languageCode == 'fa',
+                        ),
+                        textDirection: TextDirection.ltr,
                         style: theme.textTheme.labelSmall,
                       ),
                   ],
@@ -1088,7 +1107,13 @@ class _ChecklistLine extends StatelessWidget {
           if (trailing != null) ...[
             const SizedBox(width: NexSpacing.sm),
             Text(
-              trailing!,
+              // Persian digits in a Persian interface, pinned LTR so the
+              // leading '+' stays in front of the count in RTL rows.
+              nexDigits(
+                trailing!,
+                persian: Localizations.localeOf(context).languageCode == 'fa',
+              ),
+              textDirection: TextDirection.ltr,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: scheme.onSurfaceVariant,
               ),

@@ -207,7 +207,7 @@ class _GenerateViewState extends State<GenerateView> {
                   plain: true,
                   onTap: () => c.deliver(GenerateView.gens[e.key]!()),
                   trailing: Padding(
-                    padding: const EdgeInsets.only(left: 8),
+                    padding: const EdgeInsetsDirectional.only(start: 8),
                     child: Text(
                       _clip(values[e.key] ?? '', 24),
                       style: TextStyle(

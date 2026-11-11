@@ -48,9 +48,14 @@ const double kWindowTypeDensity = .92;
 /// The surface behind the content card: the surface tone washed with the
 /// accent, so every theme gets a window of its own colour rather than a
 /// neutral grey.
+///
+/// The light wash needs more ink than the dark one: on a white base an 8%
+/// accent tint landed within two luma points of the content card and the
+/// page boundary disappeared — the window read as one flat sheet with a
+/// floating rounded rectangle inside it.
 Color nexWindowTint(ColorScheme scheme) => Color.alphaBlend(
   scheme.primary.withValues(
-    alpha: scheme.brightness == Brightness.light ? .08 : .12,
+    alpha: scheme.brightness == Brightness.light ? .16 : .12,
   ),
   scheme.surfaceContainerLow,
 );
@@ -141,8 +146,13 @@ class _NexWindowShellState extends State<NexWindowShell> {
                       clipBehavior: Clip.antiAlias,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(NexRadius.md + 4),
+                        // A real boundary: outlineVariant at half strength
+                        // vanished against both the tint and the card —
+                        // light classic measured a 1.01:1 border.
                         side: BorderSide(
-                          color: scheme.outlineVariant.withValues(alpha: .5),
+                          color: scheme.brightness == Brightness.light
+                              ? scheme.outline.withValues(alpha: .55)
+                              : scheme.outlineVariant.withValues(alpha: .8),
                         ),
                       ),
                       child: Column(
@@ -167,12 +177,15 @@ class _NexWindowShellState extends State<NexWindowShell> {
         ],
       );
       // The selected palette owns its motif on every platform. The desktop
-      // uses a quieter strength behind its dense working content.
+      // uses a quieter strength behind its dense working content — but not
+      // quieter than invisible: 0.018 sat under the backdrop's own quiet
+      // floor (0.10 light / 0.13 dark) and none of the 13 non-classic
+      // motifs could be seen on the window at all.
       if (MediaQuery.highContrastOf(context)) return surface;
       return NexTextureBackdrop(
         texture: nexThemeTexture(c.S.preset),
         extent: 0.4,
-        alpha: 0.018,
+        alpha: 0.06,
         child: surface,
       );
     }

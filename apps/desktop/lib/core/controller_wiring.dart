@@ -17,7 +17,10 @@ mixin PanelWiring on PanelStateBase {
           save();
           try {
             screens = await native.screens();
-          } catch (_) {}
+          } catch (_) {
+            // Enumeration is informational here; placement already came
+            // from the native callback payload.
+          }
           if (!_disposed) notifyListeners();
         },
         onClipText: clip,

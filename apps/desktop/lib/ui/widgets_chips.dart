@@ -69,7 +69,7 @@ class Head extends StatelessWidget {
         children: [
           if (onBack != null)
             Padding(
-              padding: const EdgeInsets.only(right: 4),
+              padding: const EdgeInsetsDirectional.only(end: 4),
               child: PanelBackButton(onTap: onBack!),
             ),
           if (title != null)

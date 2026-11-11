@@ -297,7 +297,11 @@ abstract class PanelStateBase extends ChangeNotifier implements PanelHoldable {
     final scheme = base.colorScheme;
     final outline = OutlineInputBorder(
       borderRadius: BorderRadius.circular(12),
-      borderSide: BorderSide(color: scheme.onSurface.withValues(alpha: .16)),
+      // The acting boundary token, held to 3:1 against the field's fill in
+      // both modes. The old onSurface@16% measured 1.6:1 (dark) and 1.4:1
+      // (light) — under WCAG 1.4.11's component-boundary floor, which left
+      // the enabled field edge barely distinguishable from its fill.
+      borderSide: BorderSide(color: scheme.outline),
     );
     final buttonShape = WidgetStatePropertyAll<OutlinedBorder>(
       RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),

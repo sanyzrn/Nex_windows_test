@@ -253,6 +253,35 @@ ThemeData nexApplyThemePreset(ThemeData base, String id, Color? accent) {
       onPrimaryContainer: tint.onPrimaryContainer,
     );
   }
+  // Derive the container steps from the palette's own page instead of
+  // leaving whatever `fromSeed` guessed. The `surface:` above is forced to
+  // the palette's page, but the seed's container tones know nothing about
+  // it: on Circuit (dark) the card landed at the same luma as the page —
+  // 1.00:1, an invisible fill — and on Saffron (light) the card came out
+  // *darker* than the page, inverting the layering. Classic's own ramp is
+  // the model: in light the page sits one quiet step below a near-white
+  // card, and filled containers darken; in dark every step lightens.
+  final presetDark = base.brightness == Brightness.dark;
+  final page = presetDark ? p.dark : p.light;
+  if (page != null) {
+    Color wash(double alpha) => Color.alphaBlend(
+      presetDark
+          ? Colors.white.withValues(alpha: alpha)
+          : Colors.black.withValues(alpha: alpha),
+      page,
+    );
+    colors = colors.copyWith(
+      // Light raises the card above the page by deepening the page itself
+      // (the way classic does), because several palette pages are so close
+      // to white that no lighter card could clear the 1.08 presence floor.
+      surface: presetDark ? page : wash(.04),
+      surfaceContainerLowest: presetDark ? wash(.03) : Colors.white,
+      surfaceContainerLow: presetDark ? wash(.055) : Colors.white,
+      surfaceContainer: wash(.13),
+      surfaceContainerHigh: wash(.13),
+      surfaceContainerHighest: wash(.17),
+    );
+  }
   final visual = base.extension<NexVisualStyle>();
   return base.copyWith(
     colorScheme: colors,

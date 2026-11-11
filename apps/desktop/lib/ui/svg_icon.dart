@@ -345,7 +345,10 @@ class SvgIcon extends StatelessWidget {
         color ??
         IconTheme.of(context).color ??
         DefaultTextStyle.of(context).style.color ??
-        Colors.white;
+        // onSurface, not white: a fallback exists for the rare call site
+        // with no IconTheme and no coloured DefaultTextStyle above it, and
+        // white vanishes on the light themes' white cards.
+        Theme.of(context).colorScheme.onSurface;
     return CustomPaint(
       size: Size.square(size),
       painter: _SvgIconPainter(parseSvgBody(body), c, strokeWidth, filled),

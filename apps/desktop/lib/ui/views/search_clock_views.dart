@@ -214,7 +214,12 @@ class _ZoneRow extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
       child: Container(
-        padding: const EdgeInsets.only(left: 12, right: 8, top: 8, bottom: 8),
+        padding: const EdgeInsetsDirectional.only(
+          start: 12,
+          end: 8,
+          top: 8,
+          bottom: 8,
+        ),
         decoration: BoxDecoration(
           color: p.soft,
           borderRadius: BorderRadius.circular(12),

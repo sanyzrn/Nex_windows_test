@@ -237,7 +237,10 @@ class _PanelShellState extends State<PanelShell>
     c.grow.t = c.panel != null ? 1 : 0;
     c.grow.step(dt);
     if (c.panel != null && c.flyH > 0) {
-      final h = MediaQuery.of(context).size.height;
+      // sizeOf, not MediaQuery.of: the per-frame ticker only needs the
+      // height, and the full-of lookup subscribed this rebuild to every
+      // MediaQuery change (text scale included).
+      final h = MediaQuery.sizeOf(context).height;
       final half = math.min(c.flyH / 2, math.max(0, (h - 20) / 2));
       c.fy.t = c.anchorY.clamp(half + 10, math.max(half + 10, h - half - 10));
     }

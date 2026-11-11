@@ -1,6 +1,6 @@
 # Nex Windows application
 
-Declared version: **0.26.0+20**. [Product guide](../../README.md) ·
+Declared version: **0.40.1+34**. [Product guide](../../README.md) ·
 [Current progress](../../docs/agent-reports/SUMMARY.md) ·
 [Shortcuts](../../docs/shortcuts.md) · [Release process](../../docs/RELEASING.md).
 
