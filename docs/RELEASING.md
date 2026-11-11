@@ -1,6 +1,6 @@
 # Windows CI and releases
 
-Current application: **0.40.1+34**, release tag **v0.40.1** (after green CI). `main` contains
+Current application: **0.40.2+35**, release tag **v0.40.2** (after green CI). `main` contains
 one current source tree at the repository root. Build caches and installer
 EXEs are excluded from Git; installers belong in Releases.
 
@@ -15,7 +15,7 @@ drift; dimensions and other screenshots remain exact.
 
 ## Build and publish
 
-During 0.40.1 test-version UI work, the desktop CI temporarily excludes the
+During the current UI refinement cycle, the desktop CI temporarily excludes the
 `golden` and `review` tags so stale screenshots do not block installers. The
 flaky bulk-pin GUI fixture is separately tagged `quarantined` after run
 40885950193 exhausted the job deadline; pin domain tests still run.

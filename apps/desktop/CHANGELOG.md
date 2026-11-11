@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.40.2 — 2026-11-11
+
+- Fix Persian and English checklist direction, checkbox placement, localized overflow counts and timestamp alignment.
+- Improve light/dark theme contrast across window cards, fields, switches, icons and surface layers in all palettes.
+- Keep text readable at compact UI scales, and align directional spacing in desktop tools.
+- Parse long checklists once per render and guard reminder initialization so a startup error cannot terminate the app.
+- Add regression coverage for theme surfaces, RTL checklist rows and localized overflow counters.
+
 ## 0.40.1 — 2026-10-29
 
 - Fix Persian word selection, line-end caret placement and typed line breaks in note previews and reading views.

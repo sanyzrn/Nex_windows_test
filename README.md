@@ -6,7 +6,7 @@
 
 A local-first notebook and desktop toolkit for Windows, with English and Persian interfaces. Work in a full desktop window or a compact panel at either screen edge.
 
-**Current app version: `0.40.1+34` · Windows 10/11 · x64**
+**Current app version: `0.40.2+35` · Windows 10/11 · x64**
 
 [Download the latest installer](https://github.com/sanyzrn/Nex_windows_test/releases/latest) · [What's new](apps/desktop/CHANGELOG.md) · [Report a bug](https://github.com/sanyzrn/Nex_windows_test/issues/new/choose) · [فارسی](#راهنمای-فارسی)
 
@@ -111,7 +111,7 @@ The Intelligence workspace supports five cloud providers, conversation history, 
 
 ## راهنمای فارسی
 
-نکس ویندوز یک دفتر یادداشت محلی با ابزارهای کاربردی ویندوز است. نسخهٔ فعلی کد **۰٫۴۰٫۱، بیلد ۳۴** است و دو حالت پنجره و پنل کناری دارد.
+نکس ویندوز یک دفتر یادداشت محلی با ابزارهای کاربردی ویندوز است. نسخهٔ فعلی کد **۰٫۴۰٫۲، بیلد ۳۵** است و دو حالت پنجره و پنل کناری دارد.
 
 - [آخرین نصاب و فایل بررسی SHA-256](https://github.com/sanyzrn/Nex_windows_test/releases/latest) را از بخش Releases دریافت کنید؛ لینک دانلود داخل گزارش‌های قدیمی، نسخهٔ جاری محسوب نمی‌شود.
 - قبل از ارتقا، برنامهٔ باز را از منوی کنار ساعت ببندید. یادداشت‌ها، رسانه‌ها و تنظیمات در مسیر جدا از فایل‌های نصب نگه‌داری می‌شوند.
